@@ -15,6 +15,6 @@ for (const type of registry.record_types) {
 }
 const generated = standaloneCode(ajv, exports);
 const output = new URL('../generated/validators.mjs', import.meta.url);
-await build({ stdin: { contents: generated, resolveDir: fileURLToPath(new URL('..', import.meta.url)), sourcefile: 'compiled-schemas.mjs' }, bundle: true, format: 'esm', platform: 'browser', target: 'es2022', outfile: fileURLToPath(output), legalComments: 'inline' });
+await build({ absWorkingDir: fileURLToPath(new URL('..', import.meta.url)), stdin: { contents: generated, resolveDir: fileURLToPath(new URL('..', import.meta.url)), sourcefile: 'compiled-schemas.mjs' }, bundle: true, format: 'esm', platform: 'browser', target: 'es2022', outfile: fileURLToPath(output), legalComments: 'inline' });
 writeFileSync(new URL('../generated/validators.d.mts', import.meta.url), registry.record_types.map(type => `export function ${type}(value: unknown): boolean;`).join('\n') + '\n');
 console.log('Compiled ' + registry.record_types.length + ' local schema validators without browser eval or remote imports');

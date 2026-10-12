@@ -7,9 +7,9 @@ var __commonJS = (cb, mod) => function __require() {
   }
 };
 
-// web-local-search-client/node_modules/ajv/dist/runtime/ucs2length.js
+// node_modules/ajv/dist/runtime/ucs2length.js
 var require_ucs2length = __commonJS({
-  "web-local-search-client/node_modules/ajv/dist/runtime/ucs2length.js"(exports) {
+  "node_modules/ajv/dist/runtime/ucs2length.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function ucs2length(str) {
@@ -33,7 +33,7 @@ var require_ucs2length = __commonJS({
   }
 });
 
-// web-local-search-client/compiled-schemas.mjs
+// compiled-schemas.mjs
 var direct_observation = validate20;
 var schema31 = { "type": "object", "properties": { "protocol": { "const": "Onion Service Discovery" }, "protocol_version": { "const": 1 }, "record_type": { "const": "direct_observation" }, "node_identity_public_key": { "type": "string", "minLength": 51, "maxLength": 51, "pattern": "^ed25519:[A-Za-z0-9_-]{43}$" }, "onion": { "type": "string", "minLength": 62, "maxLength": 62, "pattern": "^[a-z2-7]{56}\\.onion$" }, "service_identity_public_key": { "type": "string", "minLength": 51, "maxLength": 51, "pattern": "^ed25519:[A-Za-z0-9_-]{43}$" }, "revision": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }, "manifest_hash": { "type": "string", "minLength": 71, "maxLength": 71, "pattern": "^sha256:[0-9a-f]{64}$" }, "result": { "enum": ["SUCCESS_CURRENT", "SUCCESS_UNCHANGED", "SUCCESS_NEW_REVISION", "SUCCESS_VALID_ROTATION", "SUCCESS_VALID_MIGRATION"] }, "observed_at": { "type": "string", "minLength": 20, "maxLength": 20, "pattern": "^[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" }, "signature": { "type": "string", "minLength": 97, "maxLength": 97, "pattern": "^ed25519sig:[A-Za-z0-9_-]{86}$" } }, "required": ["protocol", "protocol_version", "record_type", "node_identity_public_key", "onion", "service_identity_public_key", "revision", "manifest_hash", "result", "observed_at", "signature"], "additionalProperties": false, "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/schemas/draft-v1/direct_observation.json", "title": "Onion Service Discovery direct_observation", "$comment": "Implementation draft; protocol freeze and human crypto approval are outstanding." };
 var func1 = Object.prototype.hasOwnProperty;
