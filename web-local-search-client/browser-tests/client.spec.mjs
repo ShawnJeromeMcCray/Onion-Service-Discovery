@@ -57,5 +57,5 @@ test('blocked profile storage keeps session verification and pins usable',async(
   await expect(page.locator('#synthetic-notice')).toBeVisible();await expect(page.locator('.visit')).toHaveCount(0);
   await page.locator('#query').fill('library');await expect(page.locator('.result-card')).toHaveCount(1);await page.getByRole('button',{name:'Pin this identity',exact:true}).click();await expect(page.locator('.pin-card')).toHaveCount(1);
   await page.locator('#remember-pins').check();await expect(page.locator('#storage-status')).toContainText('Profile storage unavailable');await expect(page.locator('.pin-card')).toHaveCount(1);
-  await page.screenshot({path:'/workspace/browser-preview.png',fullPage:true});
+  await page.screenshot({path:test.info().outputPath('browser-preview.png'),fullPage:true});
 });

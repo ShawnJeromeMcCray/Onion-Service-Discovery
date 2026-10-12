@@ -86,3 +86,18 @@ jobs:
         run: |
           npm run build
           npm run test:browser
+
+  offline-release-verifier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install hash-locked mature TUF verifier
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r release-tools/requirements.lock
+      - name: Verify synthetic threshold, freshness and rollback scenarios
+        run: .venv/bin/python release-tools/test_release_verifier.py
