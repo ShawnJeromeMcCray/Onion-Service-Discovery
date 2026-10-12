@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+vendor/
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+runtime/
+secrets/
+*.key
+*.pem
+*.sqlite
+*.sqlite-*
+coverage/
+dist/
