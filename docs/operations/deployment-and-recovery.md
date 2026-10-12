@@ -141,3 +141,11 @@ until the operator separately chooses their disposition. Publish a signed
 withdrawal before removing discovery if desired; removal alone is downtime and
 cannot erase copies held by independent Nodes. Do not delete or rotate keys
 blindly during an incident. Preserve bounded evidence and error codes first.
+
+Actual disk-full development evidence: `node-php/tests/storage-disk-full.php`
+runs only on an explicitly provisioned tiny `/fault` tmpfs, never a normal host
+path. It forces kernel ENOSPC on both backends, checks typed CLI errors without
+raw warnings, verifies prior records/cursors after reopening, and admits records
+after releasing the synthetic padding. SQLite may automatically roll back on
+FULL/IOERR; the adapter avoids issuing another rollback when no transaction is
+active. This does not replace deployed disk/controller/power-loss drills.

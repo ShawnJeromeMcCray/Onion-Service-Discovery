@@ -43,9 +43,11 @@
       "evidence": [
         "node-php/tests/storage-crash.php",
         "node-php/tests/storage-backup.php",
-        "docs/operations/deployment-and-recovery.md"
+        "docs/operations/deployment-and-recovery.md",
+        "node-php/tests/storage-disk-full.php",
+        "docs/conformance/storage-disk-full-report.json"
       ],
-      "remaining": "Physical power-loss/disk-full and actual deployed restore drills"
+      "remaining": "Physical power-loss, deployed filesystem/disk-full and authenticated restore drills; isolated tmpfs ENOSPC is development evidence only"
     },
     {
       "id": "CONTROLLED_TRANSPORT_SYNC",

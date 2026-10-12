@@ -1,0 +1,50 @@
+{
+  "status": "PASS_DEVELOPMENT",
+  "scope": "Real kernel ENOSPC in disposable 2 MiB tmpfs; both stores preserve prior record/cursor, normalize CLI errors and resume after space restoration",
+  "results": [
+    {
+      "status": "PASS",
+      "scope": "Actual ENOSPC on isolated 2 MiB tmpfs; not physical power-loss or deployed disk evidence",
+      "checks": [
+        {
+          "backend": "filesystem",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "prior_record_and_cursor_preserved": true,
+          "admission_after_space_restored": true
+        },
+        {
+          "backend": "sqlite",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "prior_record_and_cursor_preserved": true,
+          "admission_after_space_restored": true
+        }
+      ],
+      "php_minor": "84"
+    },
+    {
+      "status": "PASS",
+      "scope": "Actual ENOSPC on isolated 2 MiB tmpfs; not physical power-loss or deployed disk evidence",
+      "checks": [
+        {
+          "backend": "filesystem",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "prior_record_and_cursor_preserved": true,
+          "admission_after_space_restored": true
+        },
+        {
+          "backend": "sqlite",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "prior_record_and_cursor_preserved": true,
+          "admission_after_space_restored": true
+        }
+      ],
+      "php_minor": "85"
+    }
+  ],
+  "physical_power_loss_verified": false,
+  "production_approved": false
+}

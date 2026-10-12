@@ -23,6 +23,8 @@ required decisions/reviews remain unresolved.
 - The shared unit/integration harness has 33 passing checks on digest-pinned
   PHP 8.5.11 and PHP 8.4.26, including PHPStan level 8, both storage backends,
   read-only diagnostics, staged private backup, quotas and eight process exits.
+  Separate actual ENOSPC checks pass on isolated 2 MiB tmpfs on both PHP minors
+  and both backends, preserving record/cursor and resuming after space restoration.
 - The seeded differential malformed-input run rejects 1,024 inputs per language
   with matching error classifications. This is smoke fuzzing, not exhaustive
   or coverage-guided assurance.

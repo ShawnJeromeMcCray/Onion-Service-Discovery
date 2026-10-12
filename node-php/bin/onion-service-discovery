@@ -2,6 +2,10 @@
 <?php
 declare(strict_types=1);
 
+// Operational failures return typed JSON; PHP warnings must not expose paths.
+ini_set('display_errors', '0');
+ini_set('log_errors', '0');
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use OnionServiceDiscovery\Crypto\CanonicalJson;
