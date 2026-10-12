@@ -1,52 +1,93 @@
-# Implementation status
+# Implementation and release status
 
-Baseline: `ee9be0d` contained only a one-line README. Branch: `implementation/repository-foundation`.
+The baseline repository contained only a one-line README. The implementation is
+on `implementation/repository-foundation`, draft PR #1. The project now contains
+an executable development Node, offline Service signer, separate Client Host,
+locally verifying/searching browser client and mature offline release verifier.
+There is no approved production release.
 
-## Available evidence
+All 50 current nonarchived Google Drive sources were read and imported with
+observed links, source modification times and SHA-256 hashes. REVIEWED means
+implementation-agent review, not human approval. Later specifications require
+FilesystemStore alongside optional SQLite, separate executable hosting roles,
+offline Service signing and established release trust-root verification.
+D-001 CC0-1.0 is approved under the owner's unrestricted-use instruction; other
+required decisions/reviews remain unresolved.
 
-The source manifest contains 50 current non-archived documents retrieved on 2026-10-12, each with a SHA-256 digest and observed source URL/modification time. The 50 sources have now been read; entries are `REVIEWED`. This is implementation-agent review, not human approval.
+## Executed development evidence
 
-D-001 is APPROVED: CC0-1.0 under the owner’s explicit unrestricted-use instruction on 2026-10-12. Other decisions remain unresolved; no technical approval or audit has been inferred.
+- 134 independent black-box cases pass per PHP/TypeScript/Python, no failures or
+  skips, including exact signed bytes, absent optional metadata, strict Ed25519
+  edge cases and identity conflict/rotation/migration sequences.
+- The shared unit/integration harness has 33 passing checks on digest-pinned
+  PHP 8.5.11 and PHP 8.4.26, including PHPStan level 8, both storage backends,
+  read-only diagnostics, staged private backup, quotas and eight process exits.
+- The seeded differential malformed-input run rejects 1,024 inputs per language
+  with matching error classifications. This is smoke fuzzing, not exhaustive
+  or coverage-guided assurance.
+- Three controlled Chromium browser tests verify signed three-source import,
+  query isolation, text-only hostile metadata, withdrawal, local pin handling,
+  blocked profile storage and continued local search after a failed refresh.
+  They are not Tor Browser desktop/Android evidence.
+- The finite TLA+ safety model passes both network outcomes and rejects a
+  deliberate rollback mutation. Human model review and unbounded/liveness
+  claims remain outside this evidence.
+- Fourteen synthetic TUF tests exercise artifact/threshold/expiry/rollback,
+  root rotation, bootstrap/clock and path boundaries. No production keys/root
+  or human release authorization is inferred.
+- S1000 measurements use 1,000 fictional Services, two revisions and five Node
+  claims each (7,005 records). Both backends, signed snapshots, indexed service
+  lookup and browser verification/search algorithms are measured. This is not
+  a live five-Node Tor or mobile benchmark. See the capacity limitations.
+- npm, Composer and pip-audit currently report no known advisories in the
+  inspected locks. Gitleaks finds no secrets in the inspected committed history.
+  Advisory scans and secret detection do not replace independent security review.
 
-## Requirement precedence discovered
+Reports and exact scope are linked in [release-gates.json](release-gates.json).
+GitHub run [38302098291](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38302098291)
+passed all four then-current jobs for commit `5ad0006`. Later expanded CI adds a
+PHP minor matrix, dependency scans and reproducible unsigned candidate packaging;
+its exact commit/run evidence must be recorded after execution.
 
-- Documents 41/46 supersede mandatory-SQLite architecture: FilesystemStore is required and SQLite is an additional backend.
-- Documents 42/46 add separate executable Client Host/data Node roles and multi-source integrity. Combined same-origin mode is weaker.
-- Document 43 requires signer-provider separation and offline Service signing by default.
-- Document 44 requires release trust-root rollback/freeze protection.
-- Document 45 restricts protocol version 1 to Tor v3 and fixed cryptographic formats.
+## Available implementation
 
-## Remaining work
+Strict bounded parsing/canonicalization, six signed-record schemas and mature
+crypto feed immutable verified records and deterministic identity graphs. The
+required FilesystemStore and SQLiteStore share transaction, archive/backup and
+fault tests. Role-restricted encrypted signing, zero-renewal revision preparation,
+withdrawal, countersigned rotation, migration and atomic manifest installation
+are executable. Tor-only transport, periodic candidates, local direct checks,
+resumable peer snapshots, remote provenance retention and signed public exports
+preserve local-vs-remote authority. Never-published identities are excluded from
+public exports; trusted private backups retain their owner-controlled state.
 
-| Gate | Status | Missing evidence |
-| --- | --- | --- |
-| Specification review | PARTIAL | Sources read and precedence resolved; 318 candidate requirement blocks extracted; full manual traceability/standards gate still open |
-| Foundation | PARTIAL | Reviewed PHP/TypeScript toolchains, CI/runtime scans |
-| Protocol/cryptography | PARTIAL | Six signed-record schemas, exact canonical bytes, mature signature verification and identity graph pass 123 black-box cases per language; freeze/human review and broader conformance remain open |
-| Formal assurance | PARTIAL | Finite TLA+ model passes both network outcomes and rejects rollback mutation; human review/unbounded proof remain open |
-| Storage/signing | PARTIAL | Both backends, eight process-exit fault points, portable public-evidence archive and encrypted role-restricted signer implemented; physical power-loss and complete operational backup evidence remain open |
-| Tor transport/Node | PARTIAL | Strict roles/config, bounded Tor-only adapter, controlled direct checks, signed snapshots and read-only API implemented; bounded resumable peer sync passes controlled omission/rollback/equivocation tests; efficient indexed lookup and live Tor evidence remain open |
-| Browser client | PARTIAL | Bundled worker-based local search, explicit source allowlist, generic Client Host relay, local pins and controlled Chromium tests implemented; actual Tor Browser/Android and human UX review remain open |
-| Operations/release | BLOCKED | Install/restore/rollback, chaos/performance, provenance/trust root |
-| Human approvals | BLOCKED | Required decision and release reviews |
-| External audit | NOT PERFORMED | Independent reviewer evidence |
+The browser bundles all code/dependencies locally, supports a generic Client Host
+proxy or explicitly configured direct CORS profile, keeps queries local, preserves
+pin/conflict high-water marks and warns about potentially confusing Unicode.
+No silent server search, account, analytics or third-party assets are enabled.
+CLI diagnostics do not repair state or decrypt keys; explicit recovery,
+maintenance, export pruning and staged restore have separate commands. Staging
+systemd/nginx/FPM templates and operator runbooks are included.
 
-No gate passes solely because documents exist. The foundation branch was pushed successfully. The owner subsequently enabled workflow permission; .github/workflows/foundation.yml is now active and checks the shared input subset, typechecking, dependency audit and source integrity. No production release has been made. The owner explicitly authorized use of the supplied GitHub credential. It must stay outside project files and Git URLs.
+Reproducible unsigned source/browser candidates include a dependency inventory,
+file manifest, checksums and explicitly unattested source/hash provenance. The
+established TUF verifier never executes artifacts. Production root/key custody,
+authenticated CI provenance and stable signing are still open.
 
-## Experimental input-core evidence
+## Remaining release gates
 
-23 shared address vectors and 43 strict JSON vectors pass in PHP, TypeScript and independent Python. The harness report is docs/conformance/input-subset-report.json. TypeScript strict typechecking passes, and npm audit reports zero current advisories for the locked dependency graph. PHP uses the digest-pinned official 8.5 CLI test image.
+Required independent protocol/crypto/model/security and human UX review; actual
+Tor Browser desktop/Android and live Tor tests; deployed privilege separation,
+physical power-loss/disk-full and authenticated restore/incident drills;
+operational-heavy multi-peer soak, broader capacity/profile evidence; independent
+build reproduction/authenticated provenance, license review and production trust
+root/threshold ceremony. No verified production seed infrastructure is invented.
 
-This offline prototype does not freeze crypto bytes or mutate identity state. Browser hash-provider selection, full specification review, schema validation, signatures, runtime approval and all application/release gates remain open.
-
-## Remote CI evidence
-
-Workflow commit: `439d0346c4b35e0edc72fa308c162ef893447dab`. [GitHub Actions run 38256162045](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38256162045) completed all job steps successfully, including three-language input conformance and dependency audit. This proves the draft input subset in CI; it does not close the remaining application or production gates.
-
-## Draft core milestone
-
-Six signed-record schemas are generated from the limits registry. PHP uses libsodium and Opis JSON Schema; TypeScript uses compiled Ajv validators, WebCrypto Ed25519 and locally bundled noble SHA3; Python is independent and uses cryptography/jsonschema. Exact message/hash bytes, 28 signed-record cases, 8 canonicalization cases and 21 identity sequences supplement the initial 66 input cases.
-
-External process conformance: 123 PASS per implementation, 0 FAIL, 0 SKIP. Reports: docs/conformance/core-report.json and core-unit-report.json. Rotations are not committed without their first valid new-key manifest. Competing transition proofs are conflict evidence even before successor manifests arrive. Missing predecessor history remains pending.
-
-New dependencies are locked, Python distributions hash-locked, and generated validators contain no runtime eval. Draft decisions and protocol fields remain pending human review; no Protocol Stable or Production Stable claim is made.
+The 318 extracted candidate requirements now have partial evidence pointers for
+283 blocks. These pointers are review starting points, not exhaustive MUST-level
+coverage or acceptance of the whole source section. Detailed traceability and
+standards/freeze review remain open. See the [draft public handbook](protocol/handbook.md),
+[operator runbook](operations/deployment-and-recovery.md), [CLI contract](operations/cli.md)
+and [well-known registration preparation](standards/well-known-registration-draft.md).
+IANA submission, RFC publication, external audit, stable tags and production
+approval have not occurred. Documentation alone does not close a gate.

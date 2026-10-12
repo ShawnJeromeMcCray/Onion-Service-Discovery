@@ -9,15 +9,21 @@ permissions:
 
 jobs:
   source-integrity:
+    strategy:
+      fail-fast: false
+      matrix:
+        php_image:
+          - php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3
+          - php@sha256:1d2cf2b7d715b5b3aa959f0150ccbcc7b71e0181b637e443abf40a7fb56bf79a
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Check out source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, resolved 2026-10-12
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, resolved 2026-10-12
         with:
           persist-credentials: false
       - name: Set up Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24.19.0
       - name: Install locked development dependencies
@@ -39,11 +45,13 @@ jobs:
           npm --prefix web-local-search-client run schemas:build
           git diff --exit-code -- protocol/schemas protocol/test-vectors web-local-search-client/generated web-local-search-client/public/demo.json
       - name: Pull pinned PHP test image
-        run: docker pull php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3
+        run: docker pull "${{ matrix.php_image }}"
       - name: Run three-language input conformance
-        run: .venv/bin/python tools/run_input_conformance.py --php-container
+        run: .venv/bin/python tools/run_input_conformance.py --php-container --php-image "${{ matrix.php_image }}"
       - name: Run independent black-box conformance
-        run: .venv/bin/python protocol-conformance/runner.py --php-container
+        run: .venv/bin/python protocol-conformance/runner.py --php-container --php-image "${{ matrix.php_image }}"
+      - name: Seeded three-language malformed-input smoke fuzzing
+        run: .venv/bin/python tools/fuzz_protocol_inputs.py
       - name: Audit locked dependencies
         working-directory: web-local-search-client
         run: npm audit
@@ -58,7 +66,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Check out source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           persist-credentials: false
       - name: Check finite safety models and rollback mutation
@@ -68,11 +76,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           persist-credentials: false
       - name: Set up Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version: 24.19.0
       - name: Install locked dependencies
@@ -92,7 +100,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Check out source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           persist-credentials: false
       - name: Install hash-locked mature TUF verifier
@@ -101,3 +109,60 @@ jobs:
           .venv/bin/python -m pip install --require-hashes -r release-tools/requirements.lock
       - name: Verify synthetic threshold, freshness and rollback scenarios
         run: .venv/bin/python release-tools/test_release_verifier.py
+
+  reproducible-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - name: Set up pinned browser build runtime
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: 24.19.0
+      - name: Install locked build dependencies
+        working-directory: web-local-search-client
+        run: npm ci --ignore-scripts --no-fund
+      - name: Compare two unsigned development candidates
+        run: |
+          python3 tools/build_release_candidate.py --output .tools/candidate-a
+          python3 tools/build_release_candidate.py --output .tools/candidate-b
+          cmp .tools/candidate-a/onion-service-discovery-source-browser.tar.gz .tools/candidate-b/onion-service-discovery-source-browser.tar.gz
+      - name: Preserve candidate and unsigned evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: unsigned-development-candidate
+          path: .tools/candidate-a/
+          retention-days: 14
+
+  dependency-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - name: Install hash-locked audit tooling
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r tools/audit-requirements.lock
+      - name: Audit Python runtime and audit-tool locks
+        run: .venv/bin/pip-audit --disable-pip --progress-spinner off -r validator-python/requirements.lock -r release-tools/requirements.lock -r tools/audit-requirements.lock
+      - name: Audit PHP lock without package scripts
+        run: |
+          docker run --rm --mount "type=bind,src=$GITHUB_WORKSPACE/node-php,dst=/app,readonly" -e COMPOSER_HOME=/tmp/composer --workdir /app composer@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac composer audit --locked
+
+  secret-history:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out complete history
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Scan Git history with pinned mature detector and redaction
+        run: docker run --rm --user "$(id -u):$(id -g)" --network none --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/repo,readonly" zricethezav/gitleaks@sha256:cdbb7c955abce02001a9f6c9f602fb195b7fadc1e812065883f695d1eeaba854 git /repo --redact --no-banner

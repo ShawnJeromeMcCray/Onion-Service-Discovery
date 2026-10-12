@@ -9,11 +9,23 @@ final class RecordArchive
     /**
      * @return array<array-key, mixed>
      */
-    public static function export(StorageBackend $store, string $path): array
+    public static function export(StorageBackend $store, string $path, ?RecordVerifier $verifier = null): array
     {
-        if (str_contains($path, '://')) { throw new StorageException('ARCHIVE_PATH_INVALID'); }
+        if (in_array(basename($path), ['hs_ed25519_secret_key', 'private_key'], true) || str_contains($path, '://')) { throw new StorageException('ARCHIVE_PATH_INVALID'); }
         $snapshot = $store->snapshot();
-        $records = $snapshot['records'];
+        $verifier ??= new RecordVerifier(dirname(__DIR__, 3) . '/protocol/schemas');
+        $validated = [];
+        foreach (array_chunk(array_keys($snapshot['records']), 256) as $batch) {
+            foreach ($store->readRecords($batch) as $hash => $wire) {
+                $record = $verifier->verifyWire($wire);
+                if ($record->contentHash !== $hash) { throw new StorageException('STORAGE_CORRUPT'); }
+                $validated[] = $record;
+            }
+        }
+        if (count($validated) !== count($snapshot['records'])) { throw new StorageException('STORAGE_CORRUPT'); }
+        $public = \OnionServiceDiscovery\Node\PublicEvidencePolicy::select($validated);
+        foreach ($validated as $record) { if ($record->type === 'snapshot_descriptor') { $public[$record->contentHash] = true; } }
+        $records = array_intersect_key($snapshot['records'], $public);
         uasort($records, static fn (array $a, array $b): int => $a['sequence'] <=> $b['sequence']);
         $mask = umask(0077);
         try { $stream = @fopen($path, 'x+b'); } finally { umask($mask); }
@@ -44,7 +56,7 @@ final class RecordArchive
      */
     public static function import(StorageBackend $destination, string $path, RecordVerifier $verifier, int $maxRecords = 10000, int $maxBytes = 268435456): array
     {
-        if ($maxRecords < 1 || $maxRecords > 1000000 || $maxBytes < 1 || $maxBytes > 1099511627776 || str_contains($path, '://') || is_link($path) || !is_file($path)) { throw new StorageException('ARCHIVE_PATH_INVALID'); }
+        if ($maxRecords < 1 || $maxRecords > 1000000 || $maxBytes < 1 || $maxBytes > 1099511627776 || in_array(basename($path), ['hs_ed25519_secret_key', 'private_key'], true) || str_contains($path, '://') || is_link($path) || !is_file($path)) { throw new StorageException('ARCHIVE_PATH_INVALID'); }
         $initial = $destination->snapshot();
         if ($initial['generation'] !== 0 || $initial['records'] !== []) { throw new StorageException('IMPORT_REQUIRES_EMPTY_STAGING_STORE'); }
         $stream = fopen($path, 'rb');

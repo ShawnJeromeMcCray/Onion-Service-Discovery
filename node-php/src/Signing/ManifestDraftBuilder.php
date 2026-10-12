@@ -24,7 +24,7 @@ final readonly class ManifestDraftBuilder
     {
         $record=$this->manifest($current); $this->metadata($metadata); $changed=false;
         foreach(['service','links','discovery'] as $field) {
-            if(isset($metadata->{$field})&&CanonicalJson::encode($metadata->{$field})!==CanonicalJson::encode($record->{$field})) { $record->{$field}=$metadata->{$field}; $changed=true; }
+            if(isset($metadata->{$field})&&CanonicalJson::encode($metadata->{$field})!==CanonicalJson::encode($record->{$field} ?? null)) { $record->{$field}=$metadata->{$field}; $changed=true; }
         }
         if(!$changed) { return $current->document(); }
         $this->successor($record,$current,$now); return $this->draft($record);

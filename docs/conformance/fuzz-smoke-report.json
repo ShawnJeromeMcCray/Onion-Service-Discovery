@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "seed": 20261012,
+  "cases_per_language": 1024,
+  "corpus_sha256": "f2ebc20bd7e79b6caff602898a33d5409ce6d39d888bddfe2a334a527b474286",
+  "seconds": {
+    "PHP": 24.55594099299924,
+    "TypeScript": 1.7824014839970914,
+    "Python": 1.1778685499994026
+  },
+  "scope": "semantic signed-payload mutations and duplicate/escaped-equivalent object keys; no exhaustive or coverage-guided fuzz claim"
+}

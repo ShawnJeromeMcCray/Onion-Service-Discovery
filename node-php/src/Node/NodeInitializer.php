@@ -23,8 +23,7 @@ final class NodeInitializer
             if ($previous->node_identity_public_key !== $signer->publicKey() || $previous->node_onion !== $config->nodeOnion) { throw new ProtocolException('NODE_IDENTITY_CHANGE_REQUIRES_MIGRATION'); }
         }
         $capabilities = [];
-        if ($config->features['mirror_directory']) { $capabilities[] = 'directory.snapshot-v1'; }
-        if ($config->features['sync_with_peers']) { $capabilities[] = 'sync.delta-v1'; }
+        if ($config->features['mirror_directory']) { $capabilities = ['index.core.v1', 'sync.changes.v1', 'sync.snapshots.v1']; }
         sort($capabilities, SORT_STRING);
         if ($previous !== null && $previous->capabilities === $capabilities) { return ['status' => 'UNCHANGED', 'descriptor_hash' => $pointer['hash']]; }
         $descriptor = $verifier->verify($signer->signRecord((object) [

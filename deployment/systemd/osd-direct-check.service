@@ -1,0 +1,25 @@
+[Unit]
+Description=Onion Service Discovery one bounded direct verification job
+After=tor.service
+
+[Service]
+Type=oneshot
+User=osd-worker
+Group=osd
+WorkingDirectory=/opt/onion-service-discovery
+LoadCredential=node-passphrase:/etc/onion-service-discovery/node-passphrase
+ExecStart=/usr/bin/php node-php/bin/onion-service-discovery node:work-one /etc/onion-service-discovery/node.json --passphrase-file %d/node-passphrase
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/onion-service-discovery
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressDeny=any
+IPAddressAllow=localhost
+MemoryMax=256M
+TasksMax=16
+TimeoutStartSec=90
+StandardOutput=null
+StandardError=null

@@ -56,7 +56,7 @@ that an authorized release is free of vulnerabilities.
 5. Confirm PASS, target, hash, profile and sequence before the operator separately
    deploys the artifact. The verifier never installs or runs it.
 
-Run `python release-tools/test_release_verifier.py`. Thirteen synthetic tests
+Run `python release-tools/test_release_verifier.py`. Fourteen synthetic tests
 cover successful verification, artifact substitution, insufficient thresholds,
 expiration, metadata and software rollback, same-version replacement, root
 rotation, changed bootstrap, clock rollback and filesystem/path boundaries.

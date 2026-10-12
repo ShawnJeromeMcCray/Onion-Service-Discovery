@@ -26,6 +26,7 @@ final readonly class NodeConfig
         self::shape($v->storage, ['backend','path']); self::shape($v->node, ['onion','key_path']); self::shape($v->transport, ['proxy_host','proxy_port','timeout_ms']);
         self::shape($v->features, ['publish_service','mirror_directory','discover_services','sync_with_peers','server_search']);
         foreach (get_object_vars($v->features) as $flag) { if (!is_bool($flag)) { throw new ProtocolException('CONFIGURATION_INVALID'); } }
+        if ($v->features->server_search) { throw new ProtocolException('SERVER_SEARCH_UNSUPPORTED'); }
         if (!in_array($v->storage->backend, ['filesystem','sqlite'], true)) { throw new ProtocolException('STORAGE_BACKEND_INVALID'); }
         self::path($v->storage->path); self::path($v->export_path);
         if (!is_array($v->sources) || !array_is_list($v->sources) || count($v->sources) > 16 || count(array_unique($v->sources, SORT_REGULAR)) !== count($v->sources)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
@@ -45,11 +46,11 @@ final readonly class NodeConfig
         // Reject placing persistent or signing material under the application public root.
         $public = realpath(dirname(__DIR__, 2) . '/public');
         foreach ([$v->storage->path, $v->export_path, $v->node->key_path] as $privatePath) {
-            if ($privatePath !== null && $public !== false && ($privatePath === $public || str_starts_with($privatePath, $public . '/'))) { throw new ProtocolException('PRIVATE_PATH_IN_WEBROOT'); }
+            if ($privatePath !== null && $public !== false && (self::resolvedPath($privatePath) === $public || str_starts_with(self::resolvedPath($privatePath), $public . '/'))) { throw new ProtocolException('PRIVATE_PATH_IN_WEBROOT'); }
         }
         return new self($v->role, $v->storage->backend, $v->storage->path, $v->export_path, $v->node->onion, $v->node->key_path, get_object_vars($v->features), $v->sources, $v->allowed_client_origins, $v->transport->proxy_host, $v->transport->proxy_port, $v->transport->timeout_ms);
     }
-    public function store(bool $create = false): StorageBackend { return $this->backend === 'filesystem' ? new FilesystemStore($this->storagePath, create: $create) : new SQLiteStore($this->storagePath, create: $create); }
+    public function store(bool $create = false, bool $readOnly = false): StorageBackend { return $this->backend === 'filesystem' ? new FilesystemStore($this->storagePath, create: $create, readOnly: $readOnly) : new SQLiteStore($this->storagePath, create: $create, readOnly: $readOnly); }
     public function transport(): TorTransport { return new TorTransport($this->proxyHost, $this->proxyPort, $this->timeout); }
     /**
      * @param array<array-key, mixed> $keys
@@ -57,6 +58,16 @@ final readonly class NodeConfig
     private static function shape(mixed $value, array $keys): void
     {
         if (!$value instanceof \stdClass || count(get_object_vars($value)) !== count($keys) || array_diff(array_keys(get_object_vars($value)), $keys) !== []) { throw new ProtocolException('CONFIGURATION_INVALID'); }
+    }
+    private static function resolvedPath(string $path): string
+    {
+        $remaining = []; $ancestor = $path;
+        while (!file_exists($ancestor) && !is_link($ancestor) && $ancestor !== '/') {
+            array_unshift($remaining, basename($ancestor)); $ancestor = dirname($ancestor);
+        }
+        $resolved = realpath($ancestor);
+        if ($resolved === false) { throw new ProtocolException('CONFIGURATION_PATH_INVALID'); }
+        return $remaining === [] ? $resolved : rtrim($resolved, '/') . '/' . implode('/', $remaining);
     }
     private static function path(mixed $value): void
     {

@@ -1,0 +1,135 @@
+{
+  "format_version": 1,
+  "scope": "development implementation; no production approval",
+  "production_approved": false,
+  "gates": [
+    {
+      "id": "SOURCE_BASELINE",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/specification-manifest.json"
+      ],
+      "remaining": "Human precedence/freeze review"
+    },
+    {
+      "id": "CORE_CONFORMANCE",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/conformance/core-report.json",
+        "docs/conformance/core-unit-report.json",
+        "docs/conformance/php84-unit-report.json"
+      ],
+      "remaining": "Independent human protocol/crypto review and stable profile freeze"
+    },
+    {
+      "id": "FINITE_FORMAL_MODEL",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/conformance/formal-report.json"
+      ],
+      "remaining": "Human model review; finite safety is not an unbounded/liveness proof"
+    },
+    {
+      "id": "MALFORMED_INPUTS",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/conformance/fuzz-smoke-report.json"
+      ],
+      "remaining": "Coverage-guided fuzzing and independent adversarial review"
+    },
+    {
+      "id": "STORAGE_RECOVERY",
+      "status": "PARTIAL",
+      "evidence": [
+        "node-php/tests/storage-crash.php",
+        "node-php/tests/storage-backup.php",
+        "docs/operations/deployment-and-recovery.md"
+      ],
+      "remaining": "Physical power-loss/disk-full and actual deployed restore drills"
+    },
+    {
+      "id": "CONTROLLED_TRANSPORT_SYNC",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "node-php/tests/tor-transport.php",
+        "node-php/tests/peer-sync.php"
+      ],
+      "remaining": "Live Tor transport and long-running multiple independent Nodes"
+    },
+    {
+      "id": "BROWSER_PRIVACY",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/conformance/browser-report.json",
+        "web-local-search-client/browser-tests/client.spec.mjs"
+      ],
+      "remaining": "Actual supported Tor Browser desktop/Android profiles, accessibility and human UX review"
+    },
+    {
+      "id": "CAPACITY",
+      "status": "PARTIAL",
+      "evidence": [
+        "docs/performance/s1000-storage-report.json",
+        "docs/performance/s1000-client-algorithms-report.json"
+      ],
+      "remaining": "Operational-heavy peer cluster, MAX-VALID/history models, higher tiers, independent hosts/mobile/Tor"
+    },
+    {
+      "id": "DEPENDENCY_ADVISORIES",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/conformance/npm-audit-report.json",
+        "docs/conformance/composer-audit-report.json",
+        "docs/conformance/python-audit-report.json"
+      ],
+      "remaining": "Refresh at release and review all distribution licenses; advisory absence is not an audit"
+    },
+    {
+      "id": "REPRODUCIBLE_CANDIDATE",
+      "status": "IMPLEMENTED_NOT_YET_VERIFIED",
+      "evidence": [
+        "tools/build_release_candidate.py",
+        "docs/operations/release-candidate.md"
+      ],
+      "remaining": "Double-build evidence, independent builder reproduction, authenticated production provenance"
+    },
+    {
+      "id": "RELEASE_VERIFIER",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "release-tools/test_release_verifier.py",
+        "release-tools/README.md"
+      ],
+      "remaining": "Approved production threshold policy, independent review, offline root/targets key ceremony and recovery drill"
+    },
+    {
+      "id": "HUMAN_DECISIONS",
+      "status": "OPEN_EXTERNAL",
+      "evidence": [
+        "docs/governance/decision-register.md"
+      ],
+      "remaining": "Only D-001 license approved; required human decisions/reviews remain unresolved"
+    },
+    {
+      "id": "INDEPENDENT_SECURITY_AUDIT",
+      "status": "OPEN_EXTERNAL",
+      "evidence": [],
+      "remaining": "External reviewers, findings and remediation/retest evidence"
+    },
+    {
+      "id": "FULL_REQUIREMENT_TRACE",
+      "status": "PARTIAL",
+      "evidence": [
+        "docs/requirements.json",
+        "docs/protocol/handbook.md"
+      ],
+      "remaining": "283/318 candidate blocks have related evidence pointers; complete detailed MUST-level acceptance is still open."
+    },
+    {
+      "id": "PRODUCTION_RELEASE",
+      "status": "BLOCKED",
+      "evidence": [],
+      "remaining": "Complete all required gates, authenticated provenance/signing and immutable approved tag; no production release exists"
+    }
+  ]
+}

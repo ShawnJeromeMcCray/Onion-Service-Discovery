@@ -57,28 +57,55 @@ function localPassphrase(string $path): string
 
 $arguments = array_slice($argv, 1);
 $command = array_shift($arguments) ?? 'help';
-$arguments = array_values(array_filter($arguments, static fn (string $value): bool => $value !== '--json'));
+$arguments = array_values(array_filter($arguments, static fn (string $value): bool => !in_array($value, ['--json', '--no-interaction'], true)));
+$command = ['status'=>'node:status', 'peer:list'=>'peers:list', 'peer:add'=>'peers:add', 'peer:disable'=>'peers:disable', 'backup:create'=>'storage:backup', 'db:verify'=>'storage:check', 'restore:verify'=>'storage:check', 'manifest:show'=>'protocol:inspect'][$command] ?? $command;
+$exitCode = 0;
 $root = dirname(__DIR__, 2);
 $verifier = new RecordVerifier($root . '/protocol/schemas');
 
 try {
     if ($command === 'help') {
-        $output = ['status' => 'DEVELOPMENT', 'commands' => ['manifest:verify <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>', 'storage:init <filesystem|sqlite> <path>', 'storage:check <backend> <path>', 'storage:admit <backend> <path> <signed-record>', 'storage:export <backend> <path> <archive>', 'storage:import <backend> <new-staging-path> <archive>', 'manifest:install <signed-manifest> <public-hostname-file> <webroot> [--rotation <proof>] [--migration <proof>]', 'manifest:init <onion> <service-public-key> <metadata-file>', 'manifest:revise <signed-manifest> <metadata-file>', 'manifest:withdraw <signed-manifest>', 'manifest:rotate <signed-manifest> <new-public-key>', 'manifest:migrate <signed-manifest> <new-onion>', 'peers:add <config> <onion> --expected-node-key <public-key>', 'peers:list <config>', 'peers:disable <config> <onion>', 'peers:retry <config> <onion> --acknowledge-quarantine', 'sync:peer-step <config> <onion>', 'client:init <config>', 'config:validate <config>', 'doctor <config>', 'candidate:add <config> <onion>', 'node:init <config> --passphrase-file <file>', 'node:snapshot <config> --passphrase-file <file>', 'node:work-one <config> --passphrase-file <file>', 'key:create <service|node> <key-path> --passphrase-file <private-file>', 'record:sign <role> <key-path> <record> --passphrase-file <private-file> [--rotation-confirmation]' ], 'network_side_effects' => false];
+        $output = ['status' => 'DEVELOPMENT', 'commands' => ['manifest:verify <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>', 'storage:init <filesystem|sqlite> <path>', 'storage:check <backend> <path>', 'storage:admit <backend> <path> <signed-record>', 'storage:backup <backend> <path> <private-backup>', 'storage:restore <backend> <new-staging-path> <private-backup> --trusted-private-backup', 'storage:export <backend> <path> <archive>', 'storage:import <backend> <new-staging-path> <archive>', 'manifest:install <signed-manifest> <public-hostname-file> <webroot> [--rotation <proof>] [--migration <proof>]', 'manifest:init <onion> <service-public-key> <metadata-file>', 'manifest:revise <signed-manifest> <metadata-file>', 'manifest:withdraw <signed-manifest>', 'manifest:rotate <signed-manifest> <new-public-key>', 'manifest:migrate <signed-manifest> <new-onion>', 'peers:add <config> <onion> --expected-node-key <public-key>', 'peers:list <config>', 'peers:disable <config> <onion>', 'peers:retry <config> <onion> --acknowledge-quarantine', 'sync:peer-step <config> <onion>', 'client:init <config>', 'config:validate <config>', 'doctor <config>', 'security:check <config>', 'release:info', 'backup:verify <private-backup>', 'db:migrate <backend> <path>', 'candidate:list <config>', 'quarantine:list <config>', 'sync:status <config>', 'node:status <config>', 'node:maintain <config>', 'exports:prune <config> --workers-stopped', 'candidate:add <config> <onion>', 'node:init <config> --passphrase-file <file>', 'node:snapshot <config> --passphrase-file <file>', 'node:work-one <config> --passphrase-file <file>', 'key:create <service|node> <key-path> --passphrase-file <private-file>', 'record:sign <role> <key-path> <record> --passphrase-file <private-file> [--rotation-confirmation]' ], 'network_side_effects' => false];
+    } elseif ($command === 'backup:verify') {
+        if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
+        $output = ['status' => 'PASS', 'backup' => \OnionServiceDiscovery\Storage\PrivateBackup::verify($arguments[0], $verifier)];
+    } elseif ($command === 'db:migrate') {
+        if (count($arguments) !== 2) { throw new ProtocolException('USAGE_ERROR'); }
+        $store = match ($arguments[0]) {
+            'filesystem' => new \OnionServiceDiscovery\Storage\FilesystemStore($arguments[1], readOnly: true),
+            'sqlite' => new \OnionServiceDiscovery\Storage\SQLiteStore($arguments[1], readOnly: true),
+            default => throw new ProtocolException('STORAGE_BACKEND_INVALID'),
+        };
+        $output = ['status' => 'PASS', 'storage_schema' => $store->snapshot()['storage_schema'], 'migration_performed' => false, 'message' => 'Schema 1 is current; unknown schemas are refused.'];
+    } elseif ($command === 'release:info') {
+        if ($arguments !== []) { throw new ProtocolException('USAGE_ERROR'); }
+        $output = ['status' => 'DEVELOPMENT', 'software_version' => '0.1.0-dev', 'protocol_versions' => [1], 'storage_schema' => 1, 'production_approved' => false, 'gates' => json_decode(boundedFile($root . '/docs/release-gates.json', 65536), true, 16, JSON_THROW_ON_ERROR)];
+    } elseif (in_array($command, ['candidate:list', 'quarantine:list', 'sync:status'], true)) {
+        if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
+        $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
+        if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        $state = $config->store(readOnly: true)->snapshot();
+        $table = $command === 'sync:status' ? 'sync' : 'candidates'; $rows = []; $eligible = 0;
+        foreach ($state['tables'][$table] as $key => $row) {
+            if ($command === 'quarantine:list' && ($row['state'] ?? null) !== 'QUARANTINED') { continue; }
+            ++$eligible;
+            if (count($rows) >= 256) { continue; }
+            $rows[] = ['onion' => substr($key, 4), 'state' => $row['state'] ?? null, 'error' => $row['error'] ?? null, 'next_attempt' => $row['next_attempt'] ?? null, 'generation' => $row['generation'] ?? null, 'cursor' => $row['cursor'] ?? null];
+        }
+        $output = ['status' => 'PASS', 'rows' => $rows, 'limit' => 256, 'partial' => $eligible > count($rows), 'network_side_effects' => false];
     } elseif ($command === 'client:init') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         if (!in_array($config->role, ['client-host', 'combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         new \OnionServiceDiscovery\Storage\PublicBlobStore($config->exportPath, true);
         $output = ['status' => 'INITIALIZED', 'role' => $config->role, 'source_count' => count($config->sources), 'signing_keys_required' => false];
-    } elseif ($command === 'config:validate' || $command === 'doctor') {
+    } elseif ($command === 'config:validate' || $command === 'doctor' || $command === 'security:check') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         $output = ['status' => 'PASS', 'role' => $config->role, 'storage_backend' => $config->backend, 'features' => $config->features, 'source_count' => count($config->sources), 'network_side_effects' => false];
-        if ($command === 'doctor') {
-            $output['extensions'] = array_fill_keys(['json','sodium','iconv','curl'], true);
-            foreach (array_keys($output['extensions']) as $extension) { $output['extensions'][$extension] = extension_loaded($extension); }
-            $output['sqlite_driver'] = class_exists(PDO::class) && in_array('sqlite', PDO::getAvailableDrivers(), true);
-            $output['production_approval'] = 'OPEN';
+        if ($command !== 'config:validate') {
+            $output = \OnionServiceDiscovery\Configuration\Diagnostics::inspect($config, $verifier);
+            $exitCode = $output['status'] === 'FAIL' ? 4 : ($output['status'] === 'WARN' ? 6 : 0);
         }
     } elseif (in_array($command, ['peers:add','peers:list','peers:disable','peers:retry','sync:peer-step'], true)) {
         $expectedCount = $command === 'peers:add' ? 4 : ($command === 'peers:list' ? 1 : ($command === 'peers:retry' ? 3 : 2));
@@ -93,7 +120,7 @@ try {
             if ($command === 'peers:add') { $output = ['status' => 'PASS', 'inserted' => \OnionServiceDiscovery\Node\PeerRegistry::add($store,$onion,$arguments[3])]; }
             elseif ($command === 'sync:peer-step') {
                 if (!$config->features['sync_with_peers']) { throw new ProtocolException('SYNC_DISABLED'); }
-                $output = (new \OnionServiceDiscovery\Node\PeerSync($store,$verifier,$config->transport()))->step($onion,time());
+                $output = (new \OnionServiceDiscovery\Node\PeerSync($store,$verifier,$config->transport(),$config->features['discover_services']))->step($onion,time());
             } else {
                 $store->transaction(static function (\OnionServiceDiscovery\Storage\StorageTransaction $tx) use ($onion,$command): void {
                     $row=$tx->get('peers',$onion->hostname); if($row===null) { throw new ProtocolException('PEER_NOT_CONFIGURED'); }
@@ -126,6 +153,36 @@ try {
                 'manifest:migrate'=>$builder->migrate($current,OnionAddress::parse($arguments[1])),
             };
         }
+    } elseif ($command === 'exports:prune') {
+        if (count($arguments) !== 2 || $arguments[1] !== '--workers-stopped') { throw new ProtocolException('USAGE_ERROR'); }
+        $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
+        if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        $state = $config->store()->snapshot();
+        $published = $state['tables']['node']['key:published-snapshot'] ?? null;
+        if ($published === null) { throw new ProtocolException('SNAPSHOT_UNAVAILABLE'); }
+        $blobs = new \OnionServiceDiscovery\Storage\PublicBlobStore($config->exportPath);
+        $wire = $config->store()->readRecord($published['hash']);
+        if ($wire === null) { throw new ProtocolException('STORAGE_CORRUPT'); }
+        $checkpoint = $verifier->verifyWire($wire); $keep = [$checkpoint->contentHash];
+        foreach ($checkpoint->document()->chunks as $chunk) {
+            $body = $blobs->get($chunk->hash);
+            if ($body === null || strlen($body) !== $chunk->bytes || \OnionServiceDiscovery\Protocol\SnapshotFormat::chunkHash($body) !== $chunk->hash) { throw new ProtocolException('EXPORT_CORRUPT'); }
+            $keep[] = $chunk->hash;
+        }
+        foreach ($state['tables']['node'] as $key => $row) { if (str_starts_with($key, 'key:service-index-')) { $keep[] = $row['hash']; } }
+        $output = ['status' => 'PASS', 'prune' => $blobs->pruneUnreferenced(array_values(array_unique($keep))), 'network_side_effects' => false];
+    } elseif ($command === 'node:status' || $command === 'node:maintain') {
+        if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
+        $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
+        if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        $store = $config->store(readOnly: $command === 'node:status');
+        if ($command === 'node:maintain') {
+            $checkpoint = $store instanceof \OnionServiceDiscovery\Storage\SQLiteStore ? $store->checkpoint() : null;
+            $output = ['status' => 'PASS', 'sqlite_checkpoint' => $checkpoint, 'maintenance' => (new \OnionServiceDiscovery\Node\LocalMaintenance($store))->run(time()), 'network_side_effects' => false];
+        } else {
+            $state = $store->snapshot(); $counts = array_map('count', $state['tables']);
+            $output = ['status' => 'PASS', 'backend' => $store->backendName(), 'storage_generation' => $state['generation'], 'signed_records' => count($state['records']), 'operational_counts' => $counts, 'network_side_effects' => false, 'aggregate_only' => true];
+        }
     } elseif ($command === 'candidate:add') {
         if (count($arguments) !== 2) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
@@ -141,6 +198,14 @@ try {
         $passphrase = localPassphrase($arguments[2]);
         try { $signer = \OnionServiceDiscovery\Signing\ProtectedFileSigner::open($config->nodeKeyPath, 'node', $passphrase, $verifier); }
         finally { sodium_memzero($passphrase); }
+        if ($command !== 'node:init') {
+            $identityStore = $config->store(readOnly: true); $own = $identityStore->snapshot()['tables']['node']['key:descriptor'] ?? null;
+            if ($own === null) { throw new ProtocolException('NODE_NOT_INITIALIZED'); }
+            $identityWire = $identityStore->readRecord($own['hash']);
+            if ($identityWire === null) { throw new ProtocolException('STORAGE_CORRUPT'); }
+            $identity = $verifier->verifyWire($identityWire)->document();
+            if ($identity->node_identity_public_key !== $signer->publicKey() || $identity->node_onion !== $config->nodeOnion) { throw new ProtocolException('NODE_IDENTITY_CHANGED'); }
+        }
         if ($command === 'node:init') {
             $output = \OnionServiceDiscovery\Node\NodeInitializer::initialize($config, $signer, $verifier);
         } elseif ($command === 'node:snapshot') {
@@ -149,6 +214,13 @@ try {
             $output = (new \OnionServiceDiscovery\Node\DirectVerifier($config->store(), $verifier, $config->transport(), $signer))->runOne(time());
         }
         unset($signer);
+    } elseif ($command === 'storage:backup' || $command === 'storage:restore') {
+        $restore = $command === 'storage:restore';
+        if (count($arguments) !== ($restore ? 4 : 3) || ($restore && $arguments[3] !== '--trusted-private-backup')) { throw new ProtocolException('USAGE_ERROR'); }
+        $store = selectedStore($arguments[0], $arguments[1], $restore);
+        $output = ['status' => 'PASS', 'backup' => $restore
+            ? \OnionServiceDiscovery\Storage\PrivateBackup::restore($store, $arguments[2], $verifier)
+            : \OnionServiceDiscovery\Storage\PrivateBackup::export($store, $arguments[2])];
     } elseif (in_array($command, ['storage:init', 'storage:check', 'storage:admit', 'storage:export', 'storage:import'], true)) {
         $required = in_array($command, ['storage:init', 'storage:check'], true) ? 2 : 3;
         if (count($arguments) !== $required) { throw new ProtocolException('USAGE_ERROR'); }
@@ -229,6 +301,7 @@ try {
         throw new ProtocolException('USAGE_ERROR');
     }
     echo json_encode($output, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), PHP_EOL;
+    exit($exitCode);
 } catch (\OnionServiceDiscovery\Storage\StorageException | \OnionServiceDiscovery\Signing\SignerException $error) {
     echo json_encode(['status' => 'FAIL', 'error' => $error->getMessage()], JSON_THROW_ON_ERROR), PHP_EOL;
     exit(4);

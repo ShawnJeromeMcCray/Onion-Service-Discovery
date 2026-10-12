@@ -90,13 +90,24 @@ final readonly class DataApi
             }
             if (preg_match('~\A/onion-service-discovery/v1/services/([a-z2-7]{56}\.onion)\z~D', $path, $match) === 1 && $query === '') {
                 $onion = OnionAddress::parse($match[1]); $records = [];
-                if (count($publicHashes) > 256) { throw new ProtocolException('RESPONSE_TOO_LARGE'); }
-                foreach (array_chunk(array_keys(array_intersect_key($state['records'],$publicHashes)), 256) as $batch) {
-                    foreach ($this->store->readRecords($batch) as $wire) {
-                        $record = $this->verifier->verifyWire($wire); $document = $record->document();
-                        if (($document->onion ?? null) === $onion->hostname || ($document->from_onion ?? null) === $onion->hostname || ($document->to_onion ?? null) === $onion->hostname) { $records[] = $document; if (count($records) > 256) { throw new ProtocolException('RESPONSE_TOO_LARGE'); } }
-                    }
+                if (($published['service_index_version'] ?? 0) !== 1) { return $this->response(503, ['error' => 'SERVICE_INDEX_NOT_READY'], $headers, $method); }
+                $prefix = substr(hash('sha256', $onion->hostname), 0, 2);
+                $index = $state['tables']['node']['key:service-index-' . $prefix] ?? null;
+                $hashes = [];
+                if ($index !== null) {
+                    $wire = $this->blobs->get($index['hash']);
+                    if ($wire === null || 'sha256:' . hash('sha256', "Onion Service Discovery/service-lookup/v1\0" . $wire) !== $index['hash']) { throw new ProtocolException('STORAGE_CORRUPT'); }
+                    $entries = \OnionServiceDiscovery\Storage\StorageJson::decode($wire, 524288);
+                    $hashes = $entries[$onion->hostname] ?? [];
+                    if (($hashes['too_large'] ?? false) || count($hashes) > 256) { throw new ProtocolException('RESPONSE_TOO_LARGE'); }
                 }
+                foreach ($this->store->readRecords($hashes) as $hash => $wire) {
+                    if (!isset($publicHashes[$hash])) { throw new ProtocolException('STORAGE_CORRUPT'); }
+                    $record = $this->verifier->verifyWire($wire);
+                    if ($record->contentHash !== $hash) { throw new ProtocolException('STORAGE_CORRUPT'); }
+                    $records[] = $record->document();
+                }
+                if (count($records) !== count($hashes)) { throw new ProtocolException('STORAGE_CORRUPT'); }
                 return $this->response(200, ['protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'records' => $records], $headers, $method, 32768);
             }
             return $this->response(404, ['error' => 'NOT_FOUND'], $headers);

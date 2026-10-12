@@ -22,7 +22,7 @@ Genesis is revision 1 with explicit null predecessor. Successors require exact p
 
 ## Alternatives
 
-A general JCS dependency handles floats but adds unneeded runtime surface for integer-only records. Default serializers alone have incompatible object ordering. Custom signature/hash primitives are prohibited; use libsodium, WebCrypto and Python cryptography.
+A general JCS dependency handles floats but adds unneeded runtime surface for integer-only records. Default serializers alone have incompatible object ordering. Custom signature/hash primitives are prohibited; use libsodium, locally bundled Noble, and Python cryptography with independent PyNaCl point checks. See ADR-003 for the later strict point/provider decision.
 
 ## Security and privacy impact
 

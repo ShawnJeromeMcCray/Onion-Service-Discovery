@@ -100,7 +100,7 @@ def main() -> int:
             print(f"FAIL: {error}", file=sys.stderr)
         return 1
     print("PASS: 50 source documents match their manifest; no configured credential pattern found.")
-    print("Scope: repository foundation only; production gates remain open.")
+    print("Scope: source hashes and supplemental credential patterns only; full release/security gates remain open.")
     return 0
 
 

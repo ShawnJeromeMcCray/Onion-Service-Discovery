@@ -1,4 +1,4 @@
-import { localSearch, type ClientView, type LocalPin, type ServiceRow } from './view-model.ts';
+import { localSearch, metadataWarnings, type ClientView, type LocalPin, type ServiceRow } from './view-model.ts';
 import { parseStrictJson } from '../protocol/strict-json.ts';
 import { serializePins } from './pins.ts';
 import type { SourceSelection } from './source-loader.ts';
@@ -24,6 +24,7 @@ function renderResults():void {
   el('result-summary').textContent=rows.length+' matching identities'+(view.pendingCount>0?' · '+view.pendingCount+' manifests need more history':'')+'. Search terms stay on this device.';
   for(const row of rows.slice(0,100)) {
     const card=text('article','', 'result-card'); card.append(text('p','Service-declared metadata','muted')); card.append(text('h3',row.name),text('p',row.description));
+    for(const warning of metadataWarnings(row.name,row.description)) card.append(text('p',warning,'metadata-warning'));
     if(row.onion!==null) card.append(text('p',row.onion,'onion-address'));
     const tags=text('div','','tags'); for(const tag of [...row.categories,...row.languages]) tags.append(text('span',tag,'tag')); card.append(tags);
     card.append(text('p',row.status==='FORKED'?'No current manifest selected':'Service-key signature validated · revision '+row.revision,'evidence-label'));

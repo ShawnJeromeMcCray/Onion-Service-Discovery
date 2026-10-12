@@ -27,8 +27,8 @@ preserves the evidence index and sequence high-water mark.
 SQLiteStore uses normalized evidence/operational tables, indexed Service/onion
 fields, WAL, synchronous FULL, foreign keys and bounded lock waiting. Evidence,
 state and cursor share one SQL transaction. Never copy a live database file
-without its WAL or use it as a backup. Native operational backup/restore tooling
-remains an implementation obligation.
+without its WAL or use it as a backup. PrivateBackup provides staged complete application-state restore; authenticated
+backup custody and actual deployed restore drills remain gates.
 
 Default budgets: 10,000 records, 30,000 total operational rows, 256 new records
 and 1,024 operational mutations per transaction, 256 MiB logical stored bytes,
@@ -53,3 +53,13 @@ explicit migration; signed record bytes are unchanged.
 Evidence: shared backend contract tests, concurrent-reader checks, quota
 rollback, archive migration and eight abrupt-process-exit fault points. These
 tests do not establish physical power-loss behavior or human review approval.
+
+
+The private backup differs from public interchange: it restores owner-trusted
+local observations, quarantine, source cursors/high-water marks and operational
+rows. Public interchange excludes never-published Service identities, can rebuild
+local admission sequences and restores no operational authority. Empty staging,
+whole-archive signature/hash/shape checks and explicit trust are mandatory.
+Read-only backend mode rejects transactions, creates no database and performs no
+filesystem journal repair. HTTP and doctor use it; explicit storage:check can
+recover a pending journal. Filesystem HEAD remains the atomic commit point.

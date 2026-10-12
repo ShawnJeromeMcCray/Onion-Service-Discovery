@@ -4,10 +4,18 @@ import { ed25519 } from '@noble/curves/ed25519.js';
 import type { CryptoProviders } from './record-verifier.ts';
 
 export function browserCryptoProviders(): CryptoProviders {
+  // Cache only exact public point encodings that passed strict subgroup checks.
+  // Message signatures are still verified on every call; this is not a trust cache.
+  const validPoints = new Set<string>();
   const validateEd25519Point = (bytes: Uint8Array): boolean => {
+    if (bytes.length !== 32) return false;
+    const encoding = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+    if (validPoints.has(encoding)) return true;
     try {
       const point = ed25519.Point.fromBytes(bytes, false);
-      return !point.isSmallOrder() && point.isTorsionFree();
+      if (point.isSmallOrder() || !point.isTorsionFree()) return false;
+      if (validPoints.size >= 10000) validPoints.delete(validPoints.values().next().value!);
+      validPoints.add(encoding); return true;
     } catch { return false; }
   };
   return {

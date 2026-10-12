@@ -1,0 +1,36 @@
+{
+  "profile": "S1000-typical-5-node-claims",
+  "execution": "Node.js runs browser crypto/view code; no DOM, Tor or network",
+  "node": "v24.19.0",
+  "record_count": 7005,
+  "verification_total_ms": 18991.360598,
+  "verification": {
+    "samples": 7005,
+    "p50_ms": 2.4005050000014307,
+    "p95_ms": 3.828845000000001,
+    "p99_ms": 5.751299999999901
+  },
+  "derive": {
+    "samples": 10,
+    "p50_ms": 229.6910629999984,
+    "p95_ms": 265.1610589999982,
+    "p99_ms": 265.1610589999982
+  },
+  "local_search": {
+    "samples": 100,
+    "p50_ms": 1.0579130000005534,
+    "p95_ms": 1.7894750000014028,
+    "p99_ms": 3.6785690000033355
+  },
+  "memory_bytes": {
+    "rss": 375918592,
+    "heapTotal": 302379008,
+    "heapUsed": 173833968,
+    "external": 9057969,
+    "arrayBuffers": 335355
+  },
+  "cpu_microseconds": {
+    "user": 21414848,
+    "system": 383123
+  }
+}

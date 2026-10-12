@@ -47,7 +47,7 @@ export function buildView(records: readonly VerifiedRecord[], pins: readonly Loc
     const onion = current === null ? historical === undefined ? null : requiredString(historical.onion) : requiredString(current.onion);
     if (onion !== null) { if(!owners.has(onion)) owners.set(onion,new Set()); owners.get(onion)!.add(identity.genesis_key); }
     const service = current === null ? null : requiredObject(current.service);
-    rows.push({ genesisKey: identity.genesis_key, name: service === null ? 'Conflicting identity history' : requiredString(service.name), description: service === null ? 'Multiple signed branches exist. No current manifest is selected.' : requiredString(service.description), onion, revision: identity.highest_revision, status: identity.identity_state==='FORKED'?'FORKED':identity.discoverability==='PUBLISHED'?'PUBLISHED':'WITHDRAWN', addressConflict:false, languages:service===null?[]:strings(service.languages), categories:service===null?[]:strings(service.categories), observationClaims:identity.current_hash===null?0:observations.get(identity.current_hash)?.size??0, rotationCount:identity.rotation_hashes.length, migrationCount:identity.migration_hashes.length, currentHash:identity.current_hash });
+    rows.push({ genesisKey: identity.genesis_key, name: service === null ? 'Conflicting identity history' : requiredString(service.name), description: service === null ? 'Multiple signed branches exist. No current manifest is selected.' : requiredString(service.description ?? ''), onion, revision: identity.highest_revision, status: identity.identity_state==='FORKED'?'FORKED':identity.discoverability==='PUBLISHED'?'PUBLISHED':'WITHDRAWN', addressConflict:false, languages:service===null?[]:strings(service.languages), categories:service===null?[]:strings(service.categories), observationClaims:identity.current_hash===null?0:observations.get(identity.current_hash)?.size??0, rotationCount:identity.rotation_hashes.length, migrationCount:identity.migration_hashes.length, currentHash:identity.current_hash });
   }
   for(const row of rows) row.addressConflict=row.onion!==null&&(owners.get(row.onion)?.size??0)>1;
   const roots=new Map(identities.identities.map(identity=>[identity.genesis_key,identity]));
@@ -82,4 +82,12 @@ export function pinIdentity(identity:ServiceRow,label=identity.name):LocalPin {
 export function localSearch(services:readonly ServiceRow[],query:string,language=''):ServiceRow[] {
   const terms=query.slice(0,256).normalize('NFKC').toLowerCase().split(/\s+/u).filter(Boolean).slice(0,16);
   return services.filter(row=>{if(row.status==='WITHDRAWN'||(language!==''&&!row.languages.includes(language)))return false;const haystack=[row.name,row.description,row.onion??'',row.genesisKey,...row.categories,...row.languages].join(' ').normalize('NFKC').toLowerCase();return terms.every(term=>haystack.includes(term));}).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:a.genesisKey<b.genesisKey?-1:1);
+}
+
+/** Presentation hints only: signed Unicode remains unchanged and identity never depends on these. */
+export function metadataWarnings(name:string,description:string):string[] {
+  const warnings:string[]=[];
+  if (/[\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(name+description)) warnings.push('Metadata contains direction-changing characters. Compare the full Onion and identity key.');
+  if (/\p{Script=Latin}/u.test(name) && /[\p{Script=Cyrillic}\p{Script=Greek}]/u.test(name)) warnings.push('The name mixes visually similar writing systems. Names are self-declared; compare the full Onion and identity key.');
+  return warnings;
 }

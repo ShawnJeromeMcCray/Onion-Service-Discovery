@@ -1,0 +1,10 @@
+[Unit]
+Description=Schedule sync for explicitly configured Onion Service Discovery peer %i
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=1m
+RandomizedDelaySec=15s
+
+[Install]
+WantedBy=timers.target
