@@ -2,7 +2,7 @@
 
 Opt-in decentralized discovery for public Tor Onion Services, with self-published metadata and local browser search.
 
-**Status: experimental offline protocol core. No runnable Node or browser client yet. Not a production release.**
+**Status: runnable development Node and browser client. Production release reviews, live Tor/Android evidence and independent audit remain open.**
 
 Technical identity evidence must not be presented as an assurance about content or operator honesty. Tor itself is not modified and its private keys must never be accessed.
 
@@ -13,19 +13,23 @@ Technical identity evidence must not be presented as an assurance about content 
 - [Implementation status](docs/implementation-status.md) distinguishing requirements from verified behavior.
 - Strict Onion v3, bounded JSON, canonical bytes, signed-record schemas and Ed25519 verification in PHP, TypeScript and independent Python.
 - Deterministic evidence graphs for forks, exact revision chains, countersigned rotation and signed migration.
-- [123 black-box core cases per language](docs/conformance/core-report.json), with zero failures/skips in the current offline draft suite.
-- Dependency-free foundation integrity and credential checks.
+- [133 black-box core cases per language](docs/conformance/core-report.json), with zero failures/skips in the current offline draft suite.
+- Required FilesystemStore plus SQLiteStore, shared transaction/restore tests and eight process-exit fault points.
+- Encrypted offline Service signing, role-separated Node signing, manifest revision/withdrawal/rotation/migration and atomic public installation.
+- Bounded Tor-only transport, direct verification, resumable peer snapshots and read-only protocol API.
+- Bundled local-search client, query-independent Client Host relay, explicit source allowlist and origin-local pins.
+- Finite TLA+ models, PHPStan Level 8 and controlled browser/privacy tests.
 
-Run with Python 3.11 or newer:
+After installing the hash-locked validator dependencies in a virtual environment:
 
 ```sh
 python tools/check_repository.py
-python -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
 For the PHP/TypeScript/Python input subset, see [reproduction instructions](docs/conformance/input-subset.md). These checks do not establish full protocol or browser conformance.
 
-## Planned components
+## Components
 
 - `protocol/`: versioned schemas, limits, exact-byte vectors and independent conformance.
 - `node-php/`: PHP reference Node, offline signing, bounded Tor transport, verification, CLI and read-only API.
@@ -34,6 +38,16 @@ For the PHP/TypeScript/Python input subset, see [reproduction instructions](docs
 - Formal models, synthetic corpus, chaos lab, operational runbooks and release evidence.
 
 See the [source manifest](docs/specification-manifest.json). Later precise requirements supersede earlier generic descriptions; contradictions need recorded resolution.
+
+## Running the development build
+
+```sh
+cd web-local-search-client
+npm ci --ignore-scripts
+npm run build
+```
+
+The default static client has a clearly synthetic offline demonstration and no production seed Nodes. The PHP Client Host uses a strict configuration and a Tor-only generic relay; it requires no signing keys. See the [browser contract](docs/browser/client-contract.md), [Node/transport contract](docs/transport/contract.md), [offline signing workflow](docs/signing/offline.md) and [storage contract](docs/storage/contract.md). Start with `node-php/bin/onion-service-discovery help`. Serve only `node-php/public` and keep data, configuration and keys outside it. Deployment/operations packaging is still being completed.
 
 ## Release conditions
 

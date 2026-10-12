@@ -1,10 +1,15 @@
 {
   "profile": "DRAFT_CORE_UNIT_SUITES",
   "status": "PASS",
-  "generated_at": "2026-10-12T14:42:06.990059+00:00",
-  "shared_fixture_count": 123,
+  "generated_at": "2026-10-12T19:44:01.604769+00:00",
+  "shared_fixture_count": 133,
   "php_container": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3",
   "checks": [
+    {
+      "check": "browser-client-build",
+      "status": "PASS",
+      "exit_code": 0
+    },
     {
       "check": "repository-integrity",
       "status": "PASS",
@@ -31,6 +36,106 @@
       "exit_code": 0
     },
     {
+      "check": "php-public-request-budget",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-node-initializer",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-client-relay-controlled",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-client-host",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-public-evidence",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-configuration",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-snapshot-chunks",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-snapshot-producer",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-data-api",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-static-analysis",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-candidate-queue",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-direct-verification-controlled",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-storage-contract",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-storage-archive",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-storage-crash-recovery",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-tor-transport-controlled",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-manifest-installer",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-manifest-drafts",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-peer-sync-controlled",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-protected-signer",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
       "check": "php-identity-sequences",
       "status": "PASS",
       "exit_code": 0
@@ -49,7 +154,7 @@
   "limitations": [
     "Not CORE-V1 conformance",
     "Not browser compatibility evidence",
-    "Transport, storage and browser compatibility not tested",
+    "Tor transport and browser compatibility not tested; storage power-loss behavior not established",
     "No production release approval"
   ]
 }

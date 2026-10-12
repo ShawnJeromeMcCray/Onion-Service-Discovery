@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import test from 'node:test';
+import { canonicalJson } from '../src/protocol/canonical-json.ts';
+import { browserCryptoProviders } from '../src/protocol/crypto-providers.ts';
+import { recordHash } from '../src/protocol/record-format.ts';
+import { assertVerifiedRecord, verifyWire } from '../src/protocol/record-verifier.ts';
+import { verifySnapshotChunk } from '../src/protocol/snapshot-verifier.ts';
+import { deriveIdentities } from '../src/protocol/identity-deriver.ts';
+const fixtures = JSON.parse(readFileSync(new URL('../../protocol/test-vectors/signed-records.json', import.meta.url), 'utf8'));
+const crypto = browserCryptoProviders();
+test('independent Python-generated chunk bytes verify and tampering fails', async () => {
+  const fixture = fixtures.cases.find(item => item.id === 'snapshot-with-chunk');
+  const checkpoint = await verifyWire(new Uint8Array(Buffer.from(fixture.input_base64, 'base64')), crypto);
+  const records = [fixtures.stories.genesis, fixtures.stories.successor];
+  const hashes = await Promise.all(records.map(record => recordHash(record, crypto.subtle)));
+  records.sort((a, b) => hashes[[fixtures.stories.genesis, fixtures.stories.successor].indexOf(a)].localeCompare(hashes[[fixtures.stories.genesis, fixtures.stories.successor].indexOf(b)]));
+  const bytes = new TextEncoder().encode(canonicalJson(records));
+  const result = await verifySnapshotChunk(bytes, checkpoint, 0, crypto);
+  assert.equal(result.records.length, 2);
+  assert.equal(deriveIdentities(result.records).identities[0].highest_revision, 2);
+  const damaged = bytes.slice(); damaged[damaged.length - 2] ^= 1;
+  await assert.rejects(verifySnapshotChunk(damaged, checkpoint, 0, crypto), { message: 'SNAPSHOT_CHUNK_HASH_INVALID' });
+});
+test('unverified and copied records cannot enter identity derivation', async () => {
+  const fixture = fixtures.cases.find(item => item.id === 'genesis');
+  const verified = await verifyWire(new Uint8Array(Buffer.from(fixture.input_base64, 'base64')), crypto);
+  assertVerifiedRecord(verified);
+  assert.throws(() => deriveIdentities([{ ...verified }]), { message: 'UNVERIFIED_RECORD' });
+  assert.throws(() => assertVerifiedRecord(JSON.parse(JSON.stringify(verified))), { message: 'UNVERIFIED_RECORD' });
+});

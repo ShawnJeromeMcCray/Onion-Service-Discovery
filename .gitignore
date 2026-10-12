@@ -14,3 +14,8 @@ secrets/
 *.sqlite-*
 coverage/
 dist/
+
+.tools/
+
+test-results/
+playwright-report/

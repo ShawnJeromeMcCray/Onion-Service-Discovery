@@ -6,7 +6,10 @@ namespace OnionServiceDiscovery\Protocol;
 /** Deterministic evidence graph. Observations, timestamps and source counts never choose identity. */
 final class IdentityDeriver
 {
-    /** @param list<ValidatedRecord> $records */
+    /**
+     * @param list<mixed> $records
+     * @return array<array-key, mixed>
+     */
     public static function derive(array $records, int $maxRecords = 100000): array
     {
         if ($maxRecords < 1 || $maxRecords > 1000000 || count($records) > $maxRecords) {
@@ -43,6 +46,7 @@ final class IdentityDeriver
         ksort($manifests, SORT_STRING);
         $queue = [];
         $ownership = [];
+        /** @var array<string, array{genesis_key:string,highest_revision:int,revisions:array<int,array<string,true>>,rotation_hashes:list<string>,migration_hashes:list<string>,conflicts:list<array{revision:int,hashes:list<string>}>,transition_conflicts:array<string,array{type:string,previous_hash:string,record_hashes:list<string>}>}> $states */
         $states = [];
         foreach ($manifests as $hash => $manifest) {
             if ($manifest->revision !== 1) {
@@ -63,8 +67,10 @@ final class IdentityDeriver
             $seen[$hash] = true;
             $current = $manifests[$hash];
             $identity = $ownership[$hash];
-            $states[$identity]['revisions'][$current->revision][$hash] = true;
-            $states[$identity]['highest_revision'] = max($states[$identity]['highest_revision'], $current->revision);
+            if (!isset($states[$identity])) { throw new \LogicException('Missing genesis state'); }
+            $identityState = $states[$identity];
+            $identityState['revisions'][$current->revision][$hash] = true;
+            $identityState['highest_revision'] = max($identityState['highest_revision'], $current->revision);
             if ($current->revision < 9007199254740991) {
                 $context = self::transitionKey($hash, $current->revision + 1, $current->onion, $current->service_identity_public_key, '');
                 foreach (['KEY_ROTATION_CONFLICT' => $rotationTargets[$context] ?? [], 'MIGRATION_CONFLICT' => $migrationTargets[$context] ?? []] as $kind => $targets) {
@@ -74,7 +80,7 @@ final class IdentityDeriver
                             $proofs = array_merge($proofs, array_keys($hashes));
                         }
                         sort($proofs, SORT_STRING);
-                        $states[$identity]['transition_conflicts'][$kind . '|' . $hash] = ['type' => $kind, 'previous_hash' => $hash, 'record_hashes' => $proofs];
+                        $identityState['transition_conflicts'][$kind . '|' . $hash] = ['type' => $kind, 'previous_hash' => $hash, 'record_hashes' => $proofs];
                     }
                 }
             }
@@ -104,11 +110,12 @@ final class IdentityDeriver
                         continue;
                     }
                 }
-                $states[$identity]['rotation_hashes'] = array_merge($states[$identity]['rotation_hashes'], $rotation);
-                $states[$identity]['migration_hashes'] = array_merge($states[$identity]['migration_hashes'], $migration);
+                $identityState['rotation_hashes'] = array_merge($identityState['rotation_hashes'], $rotation);
+                $identityState['migration_hashes'] = array_merge($identityState['migration_hashes'], $migration);
                 $ownership[$nextHash] = $identity;
                 $queue[] = $nextHash;
             }
+            $states[$identity] = $identityState;
         }
         $results = [];
         ksort($states, SORT_STRING);

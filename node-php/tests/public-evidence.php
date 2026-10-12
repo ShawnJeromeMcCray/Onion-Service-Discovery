@@ -1,0 +1,17 @@
+<?php
+declare(strict_types=1);
+require __DIR__.'/../vendor/autoload.php';
+use OnionServiceDiscovery\Protocol\RecordVerifier;
+use OnionServiceDiscovery\Signing\ProtectedFileSigner;
+use OnionServiceDiscovery\Node\SnapshotProducer;
+use OnionServiceDiscovery\Http\DataApi;
+use OnionServiceDiscovery\Storage\FilesystemStore;
+use OnionServiceDiscovery\Storage\PublicBlobStore;
+use OnionServiceDiscovery\Storage\StorageTransaction;
+$project=dirname(__DIR__,2);$verifier=new RecordVerifier($project.'/protocol/schemas');$f=json_decode(file_get_contents($project.'/protocol/test-vectors/signed-records.json'),false,64,JSON_THROW_ON_ERROR);
+$root=sys_get_temp_dir().'/osd-public-'.bin2hex(random_bytes(12));mkdir($root,0700);$service=ProtectedFileSigner::create($root.'/service.key','service','TEST ONLY private publication passphrase',$verifier);$node=ProtectedFileSigner::create($root.'/node.key','node','TEST ONLY public evidence passphrase',$verifier);
+$private=clone $f->stories->genesis;$private->service_identity_public_key=$service->publicKey();$private->discovery->publish_service=false;$private->service->name='UNPUBLISHED_METADATA_MARKER';$private=$verifier->verify($service->signRecord($private));
+$store=new FilesystemStore($root.'/data',create:true);$store->transaction(static fn(StorageTransaction $tx)=>$tx->putRecord($private));$blobs=new PublicBlobStore($root.'/exports',true);$producer=new SnapshotProducer($store,$blobs,$verifier,$node);$result=$producer->publish(1700000000);if($result['record_count']!==0)throw new RuntimeException('never-published metadata exported');
+$api=new DataApi($store,$blobs,$verifier,true);$changes=$api->handle('GET','/onion-service-discovery/v1/changes?after=0');if(str_contains($changes['body'],'UNPUBLISHED_METADATA_MARKER'))throw new RuntimeException('private delta leak');$lookup=$api->handle('GET','/onion-service-discovery/v1/services/'.$private->document()->onion);if(str_contains($lookup['body'],'UNPUBLISHED_METADATA_MARKER'))throw new RuntimeException('private lookup leak');
+$refreshed=$producer->publish(1700100000);if($refreshed['status']!=='PUBLISHED')throw new RuntimeException('checkpoint freshness renewal');$checkpoint=$verifier->verifyWire($store->readRecord($refreshed['checkpoint_hash']))->document();if($checkpoint->generation!==2||$checkpoint->previous_checkpoint_hash!==$result['checkpoint_hash'])throw new RuntimeException('renewal breaks chain');
+$it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST);foreach($it as $file){$file->isDir()?rmdir($file->getPathname()):unlink($file->getPathname());}rmdir($root);echo "PASS: never-published exclusion, endpoint consistency and signed checkpoint freshness\n";

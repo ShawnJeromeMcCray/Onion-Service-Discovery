@@ -1,0 +1,357 @@
+{
+  "fixture_version": 1,
+  "warning": "SYNTHETIC TEST ONLY. All private seeds are publicly derivable. Not production seeds or live services.",
+  "sources": [
+    {
+      "onion": "yb5qzev3psors5mw4tb52y3ubs7yxnhhjj62ojywntzk6ovghwn7s2qd.onion",
+      "node_descriptor": {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "node_descriptor",
+        "node_identity_public_key": "ed25519:d5AFdtLPqvtACsEy9cFPo4v4BRZmMp9UMF1ngNpJ6W0",
+        "node_onion": "yb5qzev3psors5mw4tb52y3ubs7yxnhhjj62ojywntzk6ovghwn7s2qd.onion",
+        "descriptor_revision": 1,
+        "previous_descriptor_hash": null,
+        "supported_protocol_versions": [
+          1
+        ],
+        "capabilities": [
+          "index.core.v1"
+        ],
+        "software": {
+          "name": "Onion Service Discovery",
+          "version": "0.1.0-test"
+        },
+        "signature": "ed25519sig:VLvS6UNypL4CIOkQL-QnsdjhMfBsU3OjYNCoWsSp-cxzMq-T2rEL-eBhSl4jRCiALZ4vJPMA6B_nOzj6uieuBQ"
+      },
+      "checkpoint": {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "snapshot_descriptor",
+        "node_identity_public_key": "ed25519:d5AFdtLPqvtACsEy9cFPo4v4BRZmMp9UMF1ngNpJ6W0",
+        "generation": 1,
+        "previous_checkpoint_hash": null,
+        "created_at": "2026-10-12T00:00:00Z",
+        "root_hash": "sha256:b0a0a86ea1b01e33fe3c66db9b2768292e70cb9b089e6f16c113b7eb9e425e74",
+        "record_count": 7,
+        "cursor": "fixture1",
+        "chunks": [
+          {
+            "hash": "sha256:734ba36712ed29427af5173711d2dc817085f9b39990802ae61f6729a765dfe5",
+            "bytes": 5260,
+            "record_count": 7
+          }
+        ],
+        "signature": "ed25519sig:Of0uTBVVoKRHeejgz7v5CzXVttWiYgfucXHi1NZgfwzCLc8Hf1fWEmp_oPxIlTXWN5hbSHEdNV9GY3tVOhUKBw"
+      },
+      "state": {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "node_identity_public_key": "ed25519:d5AFdtLPqvtACsEy9cFPo4v4BRZmMp9UMF1ngNpJ6W0",
+        "checkpoint_hash": "sha256:d1a342250eaf289ba185743618f22ae9cfb390b7a3af8f7c0baaea6219663ecb",
+        "generation": 1,
+        "cursor": "fixture1"
+      },
+      "chunk_base64": "W3siZGlzY292ZXJ5Ijp7ImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsInB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sImxpbmtzIjp7ImNsZWFybmV0IjpbXSwicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W119LCJvbmlvbiI6InQzcDRpaTZ4aGJja2tjM2FndHNuc2xjYW1kaGxrdTdybnBhb2gzenpoeTR6YnJmeTNyd3k1aWlkLm9uaW9uIiwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6bnVsbCwicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0IiwicmV2aXNpb24iOjEsInNlcnZpY2UiOnsiY2F0ZWdvcmllcyI6WyJ0ZXN0aW5nIl0sImRlc2NyaXB0aW9uIjoiPHNjcmlwdD5hbGVydChcImZpeHR1cmVcIik8L3NjcmlwdD4g4oCUIHRleHQgb25seS4iLCJsYW5ndWFnZXMiOlsiZW4iXSwibmFtZSI6IjxpbWcgc3JjPXggb25lcnJvcj1hbGVydCgxKT4ifSwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTpsaWNpSlZSM3NkV296bjhuN256c2xlaVpKT04tZVpiX0pKNE5pZUpiRHpJIiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzo1VzE3U3Mxb2tLUkJ2X1ZqcDY4dEt6TnZfUzdmcEtsdnZQbGFNVVFWRzZia1hGNkxTUlVVbHZrZnpETWxOSmQ2NFpMQ2FncXlJckdjTnlYbkpzYklCdyJ9LHsiZGlzY292ZXJ5Ijp7ImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsInB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sImxpbmtzIjp7ImNsZWFybmV0IjpbXSwicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W119LCJvbmlvbiI6Ind4N3RvamY1dDdwcG81M2hpd2kzZjJheDd5aTRlZGtwZHk1YW80bDJrZHU3NmVyYWZiYjJhZmlkLm9uaW9uIiwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6bnVsbCwicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0IiwicmV2aXNpb24iOjEsInNlcnZpY2UiOnsiY2F0ZWdvcmllcyI6WyJ0ZXN0aW5nIl0sImRlc2NyaXB0aW9uIjoiRmljdGlvbmFsIHNlcnZpY2Ugd2l0aGRyYXdhbCBleGFtcGxlLiIsImxhbmd1YWdlcyI6WyJkZSJdLCJuYW1lIjoiU3ludGhldGljIFdpdGhkcmF3biBTZXJ2aWNlIn0sInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6V3huX1hUd3VvRGxyRHpqRkZLUkYtZjRJMlVjMzlIVE9uY1VNekJ1ZFAxOCIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6YlJoZmdwbGU2R24zOTRMeXhud3lSX1VSVU40ZkktV0ZBaWpqNS0teU92Z2V1TkdENUpGUjF1NU5QcGJpeF9EUkpJR2RseXlPY1IwdWdBdnhTT212Q2cifSx7ImRpc2NvdmVyeSI6eyJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJwdWJsaXNoX3NlcnZpY2UiOnRydWUsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJsaW5rcyI6eyJjbGVhcm5ldCI6W10sInJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdfSwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsInByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsInJldmlzaW9uIjoyLCJzZXJ2aWNlIjp7ImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl0sImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sIm5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSJ9LCJzZXJ2aWNlX2lkZW50aXR5X3B1YmxpY19rZXkiOiJlZDI1NTE5OnlBd0FhNDFpTUdLaWdRX2FTN2VkaHFndC0tMWRnR1VSODlOVkN2bFMyWVUiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOnoxekQ4Ny1hckV1QU44Tk5zazdqeGJ2RVJJV016UFBpVm9MOE1icndORW83ZnhzbGVSVnc1WnMwa0F3dDdMZjU0U3Z1MHRtWFB6VWxzd2pnRFIzWENRIn0seyJkaXNjb3ZlcnkiOnsiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwibGlua3MiOnsiY2xlYXJuZXQiOltdLCJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXX0sIm9uaW9uIjoieXdhYXR6NndwbWRvNTdmeDRpZ2Npdm9yczd2N2U3enp6Z3BpcnNhcDdtZHppNnBma281dTJoaWQub25pb24iLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJyZXZpc2lvbiI6MSwic2VydmljZSI6eyJjYXRlZ29yaWVzIjpbImJvb2tzIiwiZG9jdW1lbnRhdGlvbiJdLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwibmFtZSI6IlN5bnRoZXRpYyBMaWJyYXJ5In0sInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7ImRpc2NvdmVyeSI6eyJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJwdWJsaXNoX3NlcnZpY2UiOnRydWUsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJsaW5rcyI6eyJjbGVhcm5ldCI6W10sInJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdfSwib25pb24iOiJhNjRnd2tlZHNwM2NwbHV2aWhhMnI3eTJqY2RtYjV2NjZpbjRyb3ZoYnp2Z2RkZWxzem5xbm1pZC5vbmlvbiIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOm51bGwsInByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsInJldmlzaW9uIjoxLCJzZXJ2aWNlIjp7ImNhdGVnb3JpZXMiOlsicmVzZWFyY2giXSwiZGVzY3JpcHRpb24iOiJGaWN0aW9uYWwgY2xpbWF0ZSByZXNlYXJjaCBhbmQgcHVibGljIGRhdGEuIiwibGFuZ3VhZ2VzIjpbImVuIl0sIm5hbWUiOiJTeW50aGV0aWMgQ2xpbWF0ZSBBcmNoaXZlIn0sInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6c2hKSTlXMVVWTFI4YlJXV01YYXozZS1CWjJ0LWdFRXhuQkZfMmY5by1WOCIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6MndpdU9QSUNZS1JDOW1XcE1ESXpUemZhYTM5d3BHampyZ0l0T3RVd1g2OFNiWVNmNXhIUFRTU0ZFMml1U2p1NmdHZUxsejZJUDh1UTJyQlZuMXJJQ3cifSx7ImNhcGFiaWxpdGllcyI6WyJpbmRleC5jb3JlLnYxIl0sImRlc2NyaXB0b3JfcmV2aXNpb24iOjEsIm5vZGVfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6ZDVBRmR0TFBxdnRBQ3NFeTljRlBvNHY0QlJabU1wOVVNRjFuZ05wSjZXMCIsIm5vZGVfb25pb24iOiJ5YjVxemV2M3Bzb3JzNW13NHRiNTJ5M3Viczd5eG5oaGpqNjJvanl3bnR6azZvdmdod243czJxZC5vbmlvbiIsInByZXZpb3VzX2Rlc2NyaXB0b3JfaGFzaCI6bnVsbCwicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInJlY29yZF90eXBlIjoibm9kZV9kZXNjcmlwdG9yIiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzpWTHZTNlVOeXBMNENJT2tRTC1RbnNkamhNZkJzVTNPallOQ29Xc1NwLWN4ek1xLVQyckVMLWVCaFNsNGpSQ2lBTFo0dkpQTUE2Ql9uT3pqNnVpZXVCUSIsInNvZnR3YXJlIjp7Im5hbWUiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInZlcnNpb24iOiIwLjEuMC10ZXN0In0sInN1cHBvcnRlZF9wcm90b2NvbF92ZXJzaW9ucyI6WzFdfSx7ImRpc2NvdmVyeSI6eyJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJwdWJsaXNoX3NlcnZpY2UiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwibGlua3MiOnsiY2xlYXJuZXQiOltdLCJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXX0sIm9uaW9uIjoid3g3dG9qZjV0N3BwbzUzaGl3aTNmMmF4N3lpNGVka3BkeTVhbzRsMmtkdTc2ZXJhZmJiMmFmaWQub25pb24iLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjoic2hhMjU2Ojc5OTRjYjY1ZWQwZGM3Mjk0NmYxNTc2MGRiZTFkOWQzOGU3ZjIzY2UwMjFhMTA5NDRkM2EzMDRmYTQ2YzEyOWUiLCJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJyZXZpc2lvbiI6Miwic2VydmljZSI6eyJjYXRlZ29yaWVzIjpbInRlc3RpbmciXSwiZGVzY3JpcHRpb24iOiJGaWN0aW9uYWwgc2VydmljZSB3aXRoZHJhd2FsIGV4YW1wbGUuIiwibGFuZ3VhZ2VzIjpbImRlIl0sIm5hbWUiOiJTeW50aGV0aWMgV2l0aGRyYXduIFNlcnZpY2UifSwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTpXeG5fWFR3dW9EbHJEempGRktSRi1mNEkyVWMzOUhUT25jVU16QnVkUDE4Iiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzplVWZPbXdpbXVka1hhX1NtR0IxYnRvNFZ3cWhyV2NUS3ZpZUFqSlpsNThtOEhSVnowbDVoZ1FuZU1RY0NvYkp5OTA1YU1GUjBwdWowY2p0QWg1UnlCQSJ9XQ=="
+    },
+    {
+      "onion": "6dbhk5ifmrbtv4whwf2kv7hlfbhm6qzy2pyoltpou72boq5bif5m6oqd.onion",
+      "node_descriptor": {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "node_descriptor",
+        "node_identity_public_key": "ed25519:1ucgJGkAyu35i45cT0876Zhxk82--g45wD1QJlMrUzs",
+        "node_onion": "6dbhk5ifmrbtv4whwf2kv7hlfbhm6qzy2pyoltpou72boq5bif5m6oqd.onion",
+        "descriptor_revision": 1,
+        "previous_descriptor_hash": null,
+        "supported_protocol_versions": [
+          1
+        ],
+        "capabilities": [
+          "index.core.v1"
+        ],
+        "software": {
+          "name": "Onion Service Discovery",
+          "version": "0.1.0-test"
+        },
+        "signature": "ed25519sig:uQec5dVdLGm4uJAIekV35bdYddmSzYTRTp6pComCGp5YBpeNlFd96IgbiVF39Sp0NnLJ2frgfVESjhH-iTl8Cg"
+      },
+      "checkpoint": {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "snapshot_descriptor",
+        "node_identity_public_key": "ed25519:1ucgJGkAyu35i45cT0876Zhxk82--g45wD1QJlMrUzs",
+        "generation": 1,
+        "previous_checkpoint_hash": null,
+        "created_at": "2026-10-12T00:00:00Z",
+        "root_hash": "sha256:24f75e3a5faf07bb423a047bc0ed5d209b84abffb3fc5197a0d0b765c66f3ec5",
+        "record_count": 7,
+        "cursor": "fixture1",
+        "chunks": [
+          {
+            "hash": "sha256:768a3e524191a416003e9a04f6006bb103bde1a4d8eb8d63f84ac2fb76cd81e0",
+            "bytes": 5260,
+            "record_count": 7
+          }
+        ],
+        "signature": "ed25519sig:MiZRhpzxEhZNL6FJLxe4GzHQc2WWCaNmYzUQ0ITKPcHg3Q8LuLBWiqc89V0YprwDzP3YYb6Cubk1g_utUjnFAg"
+      },
+      "state": {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "node_identity_public_key": "ed25519:1ucgJGkAyu35i45cT0876Zhxk82--g45wD1QJlMrUzs",
+        "checkpoint_hash": "sha256:6f254b9c3524732155f9e1633d245a10406177f4b41324ce5709f853aab87cd7",
+        "generation": 1,
+        "cursor": "fixture1"
+      },
+      "chunk_base64": "W3siZGlzY292ZXJ5Ijp7ImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsInB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sImxpbmtzIjp7ImNsZWFybmV0IjpbXSwicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W119LCJvbmlvbiI6InQzcDRpaTZ4aGJja2tjM2FndHNuc2xjYW1kaGxrdTdybnBhb2gzenpoeTR6YnJmeTNyd3k1aWlkLm9uaW9uIiwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6bnVsbCwicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0IiwicmV2aXNpb24iOjEsInNlcnZpY2UiOnsiY2F0ZWdvcmllcyI6WyJ0ZXN0aW5nIl0sImRlc2NyaXB0aW9uIjoiPHNjcmlwdD5hbGVydChcImZpeHR1cmVcIik8L3NjcmlwdD4g4oCUIHRleHQgb25seS4iLCJsYW5ndWFnZXMiOlsiZW4iXSwibmFtZSI6IjxpbWcgc3JjPXggb25lcnJvcj1hbGVydCgxKT4ifSwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTpsaWNpSlZSM3NkV296bjhuN256c2xlaVpKT04tZVpiX0pKNE5pZUpiRHpJIiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzo1VzE3U3Mxb2tLUkJ2X1ZqcDY4dEt6TnZfUzdmcEtsdnZQbGFNVVFWRzZia1hGNkxTUlVVbHZrZnpETWxOSmQ2NFpMQ2FncXlJckdjTnlYbkpzYklCdyJ9LHsiZGlzY292ZXJ5Ijp7ImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsInB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sImxpbmtzIjp7ImNsZWFybmV0IjpbXSwicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W119LCJvbmlvbiI6Ind4N3RvamY1dDdwcG81M2hpd2kzZjJheDd5aTRlZGtwZHk1YW80bDJrZHU3NmVyYWZiYjJhZmlkLm9uaW9uIiwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6bnVsbCwicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0IiwicmV2aXNpb24iOjEsInNlcnZpY2UiOnsiY2F0ZWdvcmllcyI6WyJ0ZXN0aW5nIl0sImRlc2NyaXB0aW9uIjoiRmljdGlvbmFsIHNlcnZpY2Ugd2l0aGRyYXdhbCBleGFtcGxlLiIsImxhbmd1YWdlcyI6WyJkZSJdLCJuYW1lIjoiU3ludGhldGljIFdpdGhkcmF3biBTZXJ2aWNlIn0sInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6V3huX1hUd3VvRGxyRHpqRkZLUkYtZjRJMlVjMzlIVE9uY1VNekJ1ZFAxOCIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6YlJoZmdwbGU2R24zOTRMeXhud3lSX1VSVU40ZkktV0ZBaWpqNS0teU92Z2V1TkdENUpGUjF1NU5QcGJpeF9EUkpJR2RseXlPY1IwdWdBdnhTT212Q2cifSx7ImNhcGFiaWxpdGllcyI6WyJpbmRleC5jb3JlLnYxIl0sImRlc2NyaXB0b3JfcmV2aXNpb24iOjEsIm5vZGVfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6MXVjZ0pHa0F5dTM1aTQ1Y1QwODc2Wmh4azgyLS1nNDV3RDFRSmxNclV6cyIsIm5vZGVfb25pb24iOiI2ZGJoazVpZm1yYnR2NHdod2Yya3Y3aGxmYmhtNnF6eTJweW9sdHBvdTcyYm9xNWJpZjVtNm9xZC5vbmlvbiIsInByZXZpb3VzX2Rlc2NyaXB0b3JfaGFzaCI6bnVsbCwicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInJlY29yZF90eXBlIjoibm9kZV9kZXNjcmlwdG9yIiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzp1UWVjNWRWZExHbTR1SkFJZWtWMzViZFlkZG1TellUUlRwNnBDb21DR3A1WUJwZU5sRmQ5NklnYmlWRjM5U3AwTm5MSjJmcmdmVkVTamhILWlUbDhDZyIsInNvZnR3YXJlIjp7Im5hbWUiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInZlcnNpb24iOiIwLjEuMC10ZXN0In0sInN1cHBvcnRlZF9wcm90b2NvbF92ZXJzaW9ucyI6WzFdfSx7ImRpc2NvdmVyeSI6eyJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJwdWJsaXNoX3NlcnZpY2UiOnRydWUsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJsaW5rcyI6eyJjbGVhcm5ldCI6W10sInJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdfSwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsInByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsInJldmlzaW9uIjoyLCJzZXJ2aWNlIjp7ImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl0sImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sIm5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSJ9LCJzZXJ2aWNlX2lkZW50aXR5X3B1YmxpY19rZXkiOiJlZDI1NTE5OnlBd0FhNDFpTUdLaWdRX2FTN2VkaHFndC0tMWRnR1VSODlOVkN2bFMyWVUiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOnoxekQ4Ny1hckV1QU44Tk5zazdqeGJ2RVJJV016UFBpVm9MOE1icndORW83ZnhzbGVSVnc1WnMwa0F3dDdMZjU0U3Z1MHRtWFB6VWxzd2pnRFIzWENRIn0seyJkaXNjb3ZlcnkiOnsiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwibGlua3MiOnsiY2xlYXJuZXQiOltdLCJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXX0sIm9uaW9uIjoieXdhYXR6NndwbWRvNTdmeDRpZ2Npdm9yczd2N2U3enp6Z3BpcnNhcDdtZHppNnBma281dTJoaWQub25pb24iLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJyZXZpc2lvbiI6MSwic2VydmljZSI6eyJjYXRlZ29yaWVzIjpbImJvb2tzIiwiZG9jdW1lbnRhdGlvbiJdLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwibmFtZSI6IlN5bnRoZXRpYyBMaWJyYXJ5In0sInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7ImRpc2NvdmVyeSI6eyJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJwdWJsaXNoX3NlcnZpY2UiOnRydWUsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJsaW5rcyI6eyJjbGVhcm5ldCI6W10sInJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdfSwib25pb24iOiJhNjRnd2tlZHNwM2NwbHV2aWhhMnI3eTJqY2RtYjV2NjZpbjRyb3ZoYnp2Z2RkZWxzem5xbm1pZC5vbmlvbiIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOm51bGwsInByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsInJldmlzaW9uIjoxLCJzZXJ2aWNlIjp7ImNhdGVnb3JpZXMiOlsicmVzZWFyY2giXSwiZGVzY3JpcHRpb24iOiJGaWN0aW9uYWwgY2xpbWF0ZSByZXNlYXJjaCBhbmQgcHVibGljIGRhdGEuIiwibGFuZ3VhZ2VzIjpbImVuIl0sIm5hbWUiOiJTeW50aGV0aWMgQ2xpbWF0ZSBBcmNoaXZlIn0sInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6c2hKSTlXMVVWTFI4YlJXV01YYXozZS1CWjJ0LWdFRXhuQkZfMmY5by1WOCIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6MndpdU9QSUNZS1JDOW1XcE1ESXpUemZhYTM5d3BHampyZ0l0T3RVd1g2OFNiWVNmNXhIUFRTU0ZFMml1U2p1NmdHZUxsejZJUDh1UTJyQlZuMXJJQ3cifSx7ImRpc2NvdmVyeSI6eyJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJwdWJsaXNoX3NlcnZpY2UiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwibGlua3MiOnsiY2xlYXJuZXQiOltdLCJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXX0sIm9uaW9uIjoid3g3dG9qZjV0N3BwbzUzaGl3aTNmMmF4N3lpNGVka3BkeTVhbzRsMmtkdTc2ZXJhZmJiMmFmaWQub25pb24iLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjoic2hhMjU2Ojc5OTRjYjY1ZWQwZGM3Mjk0NmYxNTc2MGRiZTFkOWQzOGU3ZjIzY2UwMjFhMTA5NDRkM2EzMDRmYTQ2YzEyOWUiLCJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJyZXZpc2lvbiI6Miwic2VydmljZSI6eyJjYXRlZ29yaWVzIjpbInRlc3RpbmciXSwiZGVzY3JpcHRpb24iOiJGaWN0aW9uYWwgc2VydmljZSB3aXRoZHJhd2FsIGV4YW1wbGUuIiwibGFuZ3VhZ2VzIjpbImRlIl0sIm5hbWUiOiJTeW50aGV0aWMgV2l0aGRyYXduIFNlcnZpY2UifSwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTpXeG5fWFR3dW9EbHJEempGRktSRi1mNEkyVWMzOUhUT25jVU16QnVkUDE4Iiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzplVWZPbXdpbXVka1hhX1NtR0IxYnRvNFZ3cWhyV2NUS3ZpZUFqSlpsNThtOEhSVnowbDVoZ1FuZU1RY0NvYkp5OTA1YU1GUjBwdWowY2p0QWg1UnlCQSJ9XQ=="
+    },
+    {
+      "onion": "bd2lgeq2leh2bi3cm3v4jvqqblqlwe7kugcsx4kcjhqkxlww74asndqd.onion",
+      "node_descriptor": {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "node_descriptor",
+        "node_identity_public_key": "ed25519:SEnx65yKeLuO2kHCPHh9sOCyas44RUlCmiLYTHpNewA",
+        "node_onion": "bd2lgeq2leh2bi3cm3v4jvqqblqlwe7kugcsx4kcjhqkxlww74asndqd.onion",
+        "descriptor_revision": 1,
+        "previous_descriptor_hash": null,
+        "supported_protocol_versions": [
+          1
+        ],
+        "capabilities": [
+          "index.core.v1"
+        ],
+        "software": {
+          "name": "Onion Service Discovery",
+          "version": "0.1.0-test"
+        },
+        "signature": "ed25519sig:22mAMgDV4VMKGv8cpkdL9oqKB8n8iBwBYqC7ZAI2kwPst66Gds2U4Seeh-Kb1DvsdU8NljeMuiMdNx8mQtiWBQ"
+      },
+      "checkpoint": {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "snapshot_descriptor",
+        "node_identity_public_key": "ed25519:SEnx65yKeLuO2kHCPHh9sOCyas44RUlCmiLYTHpNewA",
+        "generation": 1,
+        "previous_checkpoint_hash": null,
+        "created_at": "2026-10-12T00:00:00Z",
+        "root_hash": "sha256:4ee22ad4ec708c45e92f2c1312a4c1f5f8180d198708091d856662ce8a85b431",
+        "record_count": 7,
+        "cursor": "fixture1",
+        "chunks": [
+          {
+            "hash": "sha256:63f1abb2b47670217d592d31254d372713e51b9cacd60331b2fab4a8481361fb",
+            "bytes": 5260,
+            "record_count": 7
+          }
+        ],
+        "signature": "ed25519sig:WgTo-d9JoVar3EcYnv0A68ZsZZR6yyjQ9D2GqUgtaSnuRsS8ElaG0ZACIKWrYgiQMbjCGm2yXtAHYSwS39hQBg"
+      },
+      "state": {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "node_identity_public_key": "ed25519:SEnx65yKeLuO2kHCPHh9sOCyas44RUlCmiLYTHpNewA",
+        "checkpoint_hash": "sha256:61666662031db52055793c8c546bab60ef05b488301e75bfce3a80639600eada",
+        "generation": 1,
+        "cursor": "fixture1"
+      },
+      "chunk_base64": "W3siY2FwYWJpbGl0aWVzIjpbImluZGV4LmNvcmUudjEiXSwiZGVzY3JpcHRvcl9yZXZpc2lvbiI6MSwibm9kZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTpTRW54NjV5S2VMdU8ya0hDUEhoOXNPQ3lhczQ0UlVsQ21pTFlUSHBOZXdBIiwibm9kZV9vbmlvbiI6ImJkMmxnZXEybGVoMmJpM2NtM3Y0anZxcWJscWx3ZTdrdWdjc3g0a2NqaHFreGx3dzc0YXNuZHFkLm9uaW9uIiwicHJldmlvdXNfZGVzY3JpcHRvcl9oYXNoIjpudWxsLCJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJub2RlX2Rlc2NyaXB0b3IiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOjIybUFNZ0RWNFZNS0d2OGNwa2RMOW9xS0I4bjhpQndCWXFDN1pBSTJrd1BzdDY2R2RzMlU0U2VlaC1LYjFEdnNkVThObGplTXVpTWROeDhtUXRpV0JRIiwic29mdHdhcmUiOnsibmFtZSI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwidmVyc2lvbiI6IjAuMS4wLXRlc3QifSwic3VwcG9ydGVkX3Byb3RvY29sX3ZlcnNpb25zIjpbMV19LHsiZGlzY292ZXJ5Ijp7ImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsInB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sImxpbmtzIjp7ImNsZWFybmV0IjpbXSwicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W119LCJvbmlvbiI6InQzcDRpaTZ4aGJja2tjM2FndHNuc2xjYW1kaGxrdTdybnBhb2gzenpoeTR6YnJmeTNyd3k1aWlkLm9uaW9uIiwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6bnVsbCwicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0IiwicmV2aXNpb24iOjEsInNlcnZpY2UiOnsiY2F0ZWdvcmllcyI6WyJ0ZXN0aW5nIl0sImRlc2NyaXB0aW9uIjoiPHNjcmlwdD5hbGVydChcImZpeHR1cmVcIik8L3NjcmlwdD4g4oCUIHRleHQgb25seS4iLCJsYW5ndWFnZXMiOlsiZW4iXSwibmFtZSI6IjxpbWcgc3JjPXggb25lcnJvcj1hbGVydCgxKT4ifSwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTpsaWNpSlZSM3NkV296bjhuN256c2xlaVpKT04tZVpiX0pKNE5pZUpiRHpJIiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzo1VzE3U3Mxb2tLUkJ2X1ZqcDY4dEt6TnZfUzdmcEtsdnZQbGFNVVFWRzZia1hGNkxTUlVVbHZrZnpETWxOSmQ2NFpMQ2FncXlJckdjTnlYbkpzYklCdyJ9LHsiZGlzY292ZXJ5Ijp7ImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsInB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sImxpbmtzIjp7ImNsZWFybmV0IjpbXSwicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W119LCJvbmlvbiI6Ind4N3RvamY1dDdwcG81M2hpd2kzZjJheDd5aTRlZGtwZHk1YW80bDJrZHU3NmVyYWZiYjJhZmlkLm9uaW9uIiwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6bnVsbCwicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0IiwicmV2aXNpb24iOjEsInNlcnZpY2UiOnsiY2F0ZWdvcmllcyI6WyJ0ZXN0aW5nIl0sImRlc2NyaXB0aW9uIjoiRmljdGlvbmFsIHNlcnZpY2Ugd2l0aGRyYXdhbCBleGFtcGxlLiIsImxhbmd1YWdlcyI6WyJkZSJdLCJuYW1lIjoiU3ludGhldGljIFdpdGhkcmF3biBTZXJ2aWNlIn0sInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6V3huX1hUd3VvRGxyRHpqRkZLUkYtZjRJMlVjMzlIVE9uY1VNekJ1ZFAxOCIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6YlJoZmdwbGU2R24zOTRMeXhud3lSX1VSVU40ZkktV0ZBaWpqNS0teU92Z2V1TkdENUpGUjF1NU5QcGJpeF9EUkpJR2RseXlPY1IwdWdBdnhTT212Q2cifSx7ImRpc2NvdmVyeSI6eyJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJwdWJsaXNoX3NlcnZpY2UiOnRydWUsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJsaW5rcyI6eyJjbGVhcm5ldCI6W10sInJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdfSwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsInByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsInJldmlzaW9uIjoyLCJzZXJ2aWNlIjp7ImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl0sImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sIm5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSJ9LCJzZXJ2aWNlX2lkZW50aXR5X3B1YmxpY19rZXkiOiJlZDI1NTE5OnlBd0FhNDFpTUdLaWdRX2FTN2VkaHFndC0tMWRnR1VSODlOVkN2bFMyWVUiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOnoxekQ4Ny1hckV1QU44Tk5zazdqeGJ2RVJJV016UFBpVm9MOE1icndORW83ZnhzbGVSVnc1WnMwa0F3dDdMZjU0U3Z1MHRtWFB6VWxzd2pnRFIzWENRIn0seyJkaXNjb3ZlcnkiOnsiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwibGlua3MiOnsiY2xlYXJuZXQiOltdLCJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXX0sIm9uaW9uIjoieXdhYXR6NndwbWRvNTdmeDRpZ2Npdm9yczd2N2U3enp6Z3BpcnNhcDdtZHppNnBma281dTJoaWQub25pb24iLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJyZXZpc2lvbiI6MSwic2VydmljZSI6eyJjYXRlZ29yaWVzIjpbImJvb2tzIiwiZG9jdW1lbnRhdGlvbiJdLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwibmFtZSI6IlN5bnRoZXRpYyBMaWJyYXJ5In0sInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7ImRpc2NvdmVyeSI6eyJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJwdWJsaXNoX3NlcnZpY2UiOnRydWUsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJsaW5rcyI6eyJjbGVhcm5ldCI6W10sInJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdfSwib25pb24iOiJhNjRnd2tlZHNwM2NwbHV2aWhhMnI3eTJqY2RtYjV2NjZpbjRyb3ZoYnp2Z2RkZWxzem5xbm1pZC5vbmlvbiIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOm51bGwsInByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsInJldmlzaW9uIjoxLCJzZXJ2aWNlIjp7ImNhdGVnb3JpZXMiOlsicmVzZWFyY2giXSwiZGVzY3JpcHRpb24iOiJGaWN0aW9uYWwgY2xpbWF0ZSByZXNlYXJjaCBhbmQgcHVibGljIGRhdGEuIiwibGFuZ3VhZ2VzIjpbImVuIl0sIm5hbWUiOiJTeW50aGV0aWMgQ2xpbWF0ZSBBcmNoaXZlIn0sInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6c2hKSTlXMVVWTFI4YlJXV01YYXozZS1CWjJ0LWdFRXhuQkZfMmY5by1WOCIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6MndpdU9QSUNZS1JDOW1XcE1ESXpUemZhYTM5d3BHampyZ0l0T3RVd1g2OFNiWVNmNXhIUFRTU0ZFMml1U2p1NmdHZUxsejZJUDh1UTJyQlZuMXJJQ3cifSx7ImRpc2NvdmVyeSI6eyJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJwdWJsaXNoX3NlcnZpY2UiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwibGlua3MiOnsiY2xlYXJuZXQiOltdLCJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXX0sIm9uaW9uIjoid3g3dG9qZjV0N3BwbzUzaGl3aTNmMmF4N3lpNGVka3BkeTVhbzRsMmtkdTc2ZXJhZmJiMmFmaWQub25pb24iLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjoic2hhMjU2Ojc5OTRjYjY1ZWQwZGM3Mjk0NmYxNTc2MGRiZTFkOWQzOGU3ZjIzY2UwMjFhMTA5NDRkM2EzMDRmYTQ2YzEyOWUiLCJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJyZXZpc2lvbiI6Miwic2VydmljZSI6eyJjYXRlZ29yaWVzIjpbInRlc3RpbmciXSwiZGVzY3JpcHRpb24iOiJGaWN0aW9uYWwgc2VydmljZSB3aXRoZHJhd2FsIGV4YW1wbGUuIiwibGFuZ3VhZ2VzIjpbImRlIl0sIm5hbWUiOiJTeW50aGV0aWMgV2l0aGRyYXduIFNlcnZpY2UifSwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTpXeG5fWFR3dW9EbHJEempGRktSRi1mNEkyVWMzOUhUT25jVU16QnVkUDE4Iiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzplVWZPbXdpbXVka1hhX1NtR0IxYnRvNFZ3cWhyV2NUS3ZpZUFqSlpsNThtOEhSVnowbDVoZ1FuZU1RY0NvYkp5OTA1YU1GUjBwdWowY2p0QWg1UnlCQSJ9XQ=="
+    }
+  ],
+  "bundle": {
+    "bundle_version": 1,
+    "records": [
+      {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "service_manifest",
+        "onion": "t3p4ii6xhbckkc3agtsnslcamdhlku7rnpaoh3zzhy4zbrfy3rwy5iid.onion",
+        "service_identity_public_key": "ed25519:liciJVR3sdWozn8n7nzsleiZJON-eZb_JJ4NieJbDzI",
+        "revision": 1,
+        "previous_manifest_hash": null,
+        "discovery": {
+          "publish_service": true,
+          "mirror_directory": false,
+          "discover_services": false,
+          "sync_with_peers": false
+        },
+        "service": {
+          "name": "<img src=x onerror=alert(1)>",
+          "description": "<script>alert(\"fixture\")</script> — text only.",
+          "languages": [
+            "en"
+          ],
+          "categories": [
+            "testing"
+          ]
+        },
+        "links": {
+          "related_onion_services": [],
+          "clearnet": []
+        },
+        "published_at": "2026-10-12T00:00:00Z",
+        "signature": "ed25519sig:5W17Ss1okKRBv_Vjp68tKzNv_S7fpKlvvPlaMUQVG6bkXF6LSRUUlvkfzDMlNJd64ZLCagqyIrGcNyXnJsbIBw"
+      },
+      {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "service_manifest",
+        "onion": "wx7tojf5t7ppo53hiwi3f2ax7yi4edkpdy5ao4l2kdu76erafbb2afid.onion",
+        "service_identity_public_key": "ed25519:Wxn_XTwuoDlrDzjFFKRF-f4I2Uc39HTOncUMzBudP18",
+        "revision": 1,
+        "previous_manifest_hash": null,
+        "discovery": {
+          "publish_service": true,
+          "mirror_directory": false,
+          "discover_services": false,
+          "sync_with_peers": false
+        },
+        "service": {
+          "name": "Synthetic Withdrawn Service",
+          "description": "Fictional service withdrawal example.",
+          "languages": [
+            "de"
+          ],
+          "categories": [
+            "testing"
+          ]
+        },
+        "links": {
+          "related_onion_services": [],
+          "clearnet": []
+        },
+        "published_at": "2026-10-12T00:00:00Z",
+        "signature": "ed25519sig:bRhfgple6Gn394LyxnwyR_URUN4fI-WFAijj5--yOvgeuNGD5JFR1u5NPpbix_DRJIGdlyyOcR0ugAvxSOmvCg"
+      },
+      {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "service_manifest",
+        "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+        "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+        "revision": 2,
+        "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+        "discovery": {
+          "publish_service": true,
+          "mirror_directory": false,
+          "discover_services": false,
+          "sync_with_peers": false
+        },
+        "service": {
+          "name": "Synthetic Library",
+          "description": "A revised fictional collection.",
+          "languages": [
+            "de",
+            "en"
+          ],
+          "categories": [
+            "books",
+            "documentation"
+          ]
+        },
+        "links": {
+          "related_onion_services": [],
+          "clearnet": []
+        },
+        "published_at": "2026-10-12T00:00:00Z",
+        "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+      },
+      {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "service_manifest",
+        "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+        "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+        "revision": 1,
+        "previous_manifest_hash": null,
+        "discovery": {
+          "publish_service": true,
+          "mirror_directory": false,
+          "discover_services": false,
+          "sync_with_peers": false
+        },
+        "service": {
+          "name": "Synthetic Library",
+          "description": "Fictional books and multilingual documentation.",
+          "languages": [
+            "de",
+            "en"
+          ],
+          "categories": [
+            "books",
+            "documentation"
+          ]
+        },
+        "links": {
+          "related_onion_services": [],
+          "clearnet": []
+        },
+        "published_at": "2026-10-12T00:00:00Z",
+        "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+      },
+      {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "service_manifest",
+        "onion": "a64gwkedsp3cpluviha2r7y2jcdmb5v66in4rovhbzvgddelsznqnmid.onion",
+        "service_identity_public_key": "ed25519:shJI9W1UVLR8bRWWMXaz3e-BZ2t-gEExnBF_2f9o-V8",
+        "revision": 1,
+        "previous_manifest_hash": null,
+        "discovery": {
+          "publish_service": true,
+          "mirror_directory": false,
+          "discover_services": false,
+          "sync_with_peers": false
+        },
+        "service": {
+          "name": "Synthetic Climate Archive",
+          "description": "Fictional climate research and public data.",
+          "languages": [
+            "en"
+          ],
+          "categories": [
+            "research"
+          ]
+        },
+        "links": {
+          "related_onion_services": [],
+          "clearnet": []
+        },
+        "published_at": "2026-10-12T00:00:00Z",
+        "signature": "ed25519sig:2wiuOPICYKRC9mWpMDIzTzfaa39wpGjjrgItOtUwX68SbYSf5xHPTSSFE2iuSju6gGeLlz6IP8uQ2rBVn1rICw"
+      },
+      {
+        "protocol": "Onion Service Discovery",
+        "protocol_version": 1,
+        "record_type": "service_manifest",
+        "onion": "wx7tojf5t7ppo53hiwi3f2ax7yi4edkpdy5ao4l2kdu76erafbb2afid.onion",
+        "service_identity_public_key": "ed25519:Wxn_XTwuoDlrDzjFFKRF-f4I2Uc39HTOncUMzBudP18",
+        "revision": 2,
+        "previous_manifest_hash": "sha256:7994cb65ed0dc72946f15760dbe1d9d38e7f23ce021a10944d3a304fa46c129e",
+        "discovery": {
+          "publish_service": false,
+          "mirror_directory": false,
+          "discover_services": false,
+          "sync_with_peers": false
+        },
+        "service": {
+          "name": "Synthetic Withdrawn Service",
+          "description": "Fictional service withdrawal example.",
+          "languages": [
+            "de"
+          ],
+          "categories": [
+            "testing"
+          ]
+        },
+        "links": {
+          "related_onion_services": [],
+          "clearnet": []
+        },
+        "published_at": "2026-10-12T00:00:00Z",
+        "signature": "ed25519sig:eUfOmwimudkXa_SmGB1bto4VwqhrWcTKvieAjJZl58m8HRVz0l5hgQneMQcCobJy905aMFR0puj0cjtAh5RyBA"
+      }
+    ]
+  }
+}

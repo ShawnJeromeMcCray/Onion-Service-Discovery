@@ -1,0 +1,195 @@
+{
+  "bundle_version": 1,
+  "records": [
+    {
+      "protocol": "Onion Service Discovery",
+      "protocol_version": 1,
+      "record_type": "service_manifest",
+      "onion": "t3p4ii6xhbckkc3agtsnslcamdhlku7rnpaoh3zzhy4zbrfy3rwy5iid.onion",
+      "service_identity_public_key": "ed25519:liciJVR3sdWozn8n7nzsleiZJON-eZb_JJ4NieJbDzI",
+      "revision": 1,
+      "previous_manifest_hash": null,
+      "discovery": {
+        "publish_service": true,
+        "mirror_directory": false,
+        "discover_services": false,
+        "sync_with_peers": false
+      },
+      "service": {
+        "name": "<img src=x onerror=alert(1)>",
+        "description": "<script>alert(\"fixture\")</script> — text only.",
+        "languages": [
+          "en"
+        ],
+        "categories": [
+          "testing"
+        ]
+      },
+      "links": {
+        "related_onion_services": [],
+        "clearnet": []
+      },
+      "published_at": "2026-10-12T00:00:00Z",
+      "signature": "ed25519sig:5W17Ss1okKRBv_Vjp68tKzNv_S7fpKlvvPlaMUQVG6bkXF6LSRUUlvkfzDMlNJd64ZLCagqyIrGcNyXnJsbIBw"
+    },
+    {
+      "protocol": "Onion Service Discovery",
+      "protocol_version": 1,
+      "record_type": "service_manifest",
+      "onion": "wx7tojf5t7ppo53hiwi3f2ax7yi4edkpdy5ao4l2kdu76erafbb2afid.onion",
+      "service_identity_public_key": "ed25519:Wxn_XTwuoDlrDzjFFKRF-f4I2Uc39HTOncUMzBudP18",
+      "revision": 1,
+      "previous_manifest_hash": null,
+      "discovery": {
+        "publish_service": true,
+        "mirror_directory": false,
+        "discover_services": false,
+        "sync_with_peers": false
+      },
+      "service": {
+        "name": "Synthetic Withdrawn Service",
+        "description": "Fictional service withdrawal example.",
+        "languages": [
+          "de"
+        ],
+        "categories": [
+          "testing"
+        ]
+      },
+      "links": {
+        "related_onion_services": [],
+        "clearnet": []
+      },
+      "published_at": "2026-10-12T00:00:00Z",
+      "signature": "ed25519sig:bRhfgple6Gn394LyxnwyR_URUN4fI-WFAijj5--yOvgeuNGD5JFR1u5NPpbix_DRJIGdlyyOcR0ugAvxSOmvCg"
+    },
+    {
+      "protocol": "Onion Service Discovery",
+      "protocol_version": 1,
+      "record_type": "service_manifest",
+      "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+      "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+      "revision": 2,
+      "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+      "discovery": {
+        "publish_service": true,
+        "mirror_directory": false,
+        "discover_services": false,
+        "sync_with_peers": false
+      },
+      "service": {
+        "name": "Synthetic Library",
+        "description": "A revised fictional collection.",
+        "languages": [
+          "de",
+          "en"
+        ],
+        "categories": [
+          "books",
+          "documentation"
+        ]
+      },
+      "links": {
+        "related_onion_services": [],
+        "clearnet": []
+      },
+      "published_at": "2026-10-12T00:00:00Z",
+      "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+    },
+    {
+      "protocol": "Onion Service Discovery",
+      "protocol_version": 1,
+      "record_type": "service_manifest",
+      "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+      "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+      "revision": 1,
+      "previous_manifest_hash": null,
+      "discovery": {
+        "publish_service": true,
+        "mirror_directory": false,
+        "discover_services": false,
+        "sync_with_peers": false
+      },
+      "service": {
+        "name": "Synthetic Library",
+        "description": "Fictional books and multilingual documentation.",
+        "languages": [
+          "de",
+          "en"
+        ],
+        "categories": [
+          "books",
+          "documentation"
+        ]
+      },
+      "links": {
+        "related_onion_services": [],
+        "clearnet": []
+      },
+      "published_at": "2026-10-12T00:00:00Z",
+      "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+    },
+    {
+      "protocol": "Onion Service Discovery",
+      "protocol_version": 1,
+      "record_type": "service_manifest",
+      "onion": "a64gwkedsp3cpluviha2r7y2jcdmb5v66in4rovhbzvgddelsznqnmid.onion",
+      "service_identity_public_key": "ed25519:shJI9W1UVLR8bRWWMXaz3e-BZ2t-gEExnBF_2f9o-V8",
+      "revision": 1,
+      "previous_manifest_hash": null,
+      "discovery": {
+        "publish_service": true,
+        "mirror_directory": false,
+        "discover_services": false,
+        "sync_with_peers": false
+      },
+      "service": {
+        "name": "Synthetic Climate Archive",
+        "description": "Fictional climate research and public data.",
+        "languages": [
+          "en"
+        ],
+        "categories": [
+          "research"
+        ]
+      },
+      "links": {
+        "related_onion_services": [],
+        "clearnet": []
+      },
+      "published_at": "2026-10-12T00:00:00Z",
+      "signature": "ed25519sig:2wiuOPICYKRC9mWpMDIzTzfaa39wpGjjrgItOtUwX68SbYSf5xHPTSSFE2iuSju6gGeLlz6IP8uQ2rBVn1rICw"
+    },
+    {
+      "protocol": "Onion Service Discovery",
+      "protocol_version": 1,
+      "record_type": "service_manifest",
+      "onion": "wx7tojf5t7ppo53hiwi3f2ax7yi4edkpdy5ao4l2kdu76erafbb2afid.onion",
+      "service_identity_public_key": "ed25519:Wxn_XTwuoDlrDzjFFKRF-f4I2Uc39HTOncUMzBudP18",
+      "revision": 2,
+      "previous_manifest_hash": "sha256:7994cb65ed0dc72946f15760dbe1d9d38e7f23ce021a10944d3a304fa46c129e",
+      "discovery": {
+        "publish_service": false,
+        "mirror_directory": false,
+        "discover_services": false,
+        "sync_with_peers": false
+      },
+      "service": {
+        "name": "Synthetic Withdrawn Service",
+        "description": "Fictional service withdrawal example.",
+        "languages": [
+          "de"
+        ],
+        "categories": [
+          "testing"
+        ]
+      },
+      "links": {
+        "related_onion_services": [],
+        "clearnet": []
+      },
+      "published_at": "2026-10-12T00:00:00Z",
+      "signature": "ed25519sig:eUfOmwimudkXa_SmGB1bto4VwqhrWcTKvieAjJZl58m8HRVz0l5hgQneMQcCobJy905aMFR0puj0cjtAh5RyBA"
+    }
+  ]
+}

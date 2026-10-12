@@ -12,11 +12,15 @@ final class Encoding
         return $prefix . rtrim(strtr(base64_encode($bytes), '+/', '-_'), '=');
     }
 
+    /** @return non-empty-string */
     public static function publicKey(string $encoded): string
     {
-        return self::decode($encoded, 'ed25519:', 32, 'PUBLIC_KEY_INVALID');
+        $bytes = self::decode($encoded, 'ed25519:', 32, 'PUBLIC_KEY_INVALID');
+        try { sodium_crypto_sign_ed25519_pk_to_curve25519($bytes); } catch (\SodiumException) { throw new ProtocolException('PUBLIC_KEY_INVALID'); }
+        return $bytes;
     }
 
+    /** @return non-empty-string */
     public static function signature(string $encoded): string
     {
         return self::decode($encoded, 'ed25519sig:', 64, 'SIGNATURE_INVALID');
@@ -30,6 +34,7 @@ final class Encoding
         return $encoded;
     }
 
+    /** @return non-empty-string */
     private static function decode(string $encoded, string $prefix, int $length, string $error): string
     {
         $expected = (int) ceil($length * 8 / 6);
@@ -44,6 +49,7 @@ final class Encoding
         if ($decoded === false || strlen($decoded) !== $length || self::encode($decoded, $prefix) !== $encoded) {
             throw new ProtocolException($error);
         }
+        if ($decoded === '') { throw new ProtocolException($error); }
         return $decoded;
     }
 }

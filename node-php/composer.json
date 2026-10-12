@@ -8,7 +8,8 @@
     "ext-json": "*",
     "ext-sodium": "*",
     "ext-iconv": "*",
-    "opis/json-schema": "^2.6"
+    "opis/json-schema": "^2.6",
+    "ext-curl": "*"
   },
   "autoload": {
     "psr-4": {
@@ -18,5 +19,8 @@
   "config": {
     "allow-plugins": false,
     "sort-packages": true
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^2.1"
   }
 }

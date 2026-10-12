@@ -1,0 +1,27 @@
+{
+  "configuration_version": 1,
+  "role": "client-host",
+  "storage": {
+    "backend": "filesystem",
+    "path": "/var/lib/onion-service-discovery/data"
+  },
+  "export_path": "/var/lib/onion-service-discovery/exports",
+  "node": {
+    "onion": null,
+    "key_path": null
+  },
+  "features": {
+    "publish_service": false,
+    "mirror_directory": false,
+    "discover_services": false,
+    "sync_with_peers": false,
+    "server_search": false
+  },
+  "transport": {
+    "proxy_host": "127.0.0.1",
+    "proxy_port": 9050,
+    "timeout_ms": 30000
+  },
+  "sources": [],
+  "allowed_client_origins": []
+}

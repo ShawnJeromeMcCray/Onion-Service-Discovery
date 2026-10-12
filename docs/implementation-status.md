@@ -23,10 +23,10 @@ D-001 is APPROVED: CC0-1.0 under the owner’s explicit unrestricted-use instruc
 | Specification review | PARTIAL | Sources read and precedence resolved; 318 candidate requirement blocks extracted; full manual traceability/standards gate still open |
 | Foundation | PARTIAL | Reviewed PHP/TypeScript toolchains, CI/runtime scans |
 | Protocol/cryptography | PARTIAL | Six signed-record schemas, exact canonical bytes, mature signature verification and identity graph pass 123 black-box cases per language; freeze/human review and broader conformance remain open |
-| Formal assurance | NOT IMPLEMENTED | Model and reproducible checks |
-| Storage/signing | NOT IMPLEMENTED | Backends, crash/recovery conformance, offline signer |
-| Tor transport/Node | NOT IMPLEMENTED | CLI/API, direct verification, sync, bounded transport |
-| Browser client | NOT IMPLEMENTED | Search, multi-source integrity, browser/privacy/accessibility evidence |
+| Formal assurance | PARTIAL | Finite TLA+ model passes both network outcomes and rejects rollback mutation; human review/unbounded proof remain open |
+| Storage/signing | PARTIAL | Both backends, eight process-exit fault points, portable public-evidence archive and encrypted role-restricted signer implemented; physical power-loss and complete operational backup evidence remain open |
+| Tor transport/Node | PARTIAL | Strict roles/config, bounded Tor-only adapter, controlled direct checks, signed snapshots and read-only API implemented; bounded resumable peer sync passes controlled omission/rollback/equivocation tests; efficient indexed lookup and live Tor evidence remain open |
+| Browser client | PARTIAL | Bundled worker-based local search, explicit source allowlist, generic Client Host relay, local pins and controlled Chromium tests implemented; actual Tor Browser/Android and human UX review remain open |
 | Operations/release | BLOCKED | Install/restore/rollback, chaos/performance, provenance/trust root |
 | Human approvals | BLOCKED | Required decision and release reviews |
 | External audit | NOT PERFORMED | Independent reviewer evidence |

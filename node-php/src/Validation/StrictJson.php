@@ -12,6 +12,14 @@ final class StrictJson
 
     public static function parse(string $bytes, int $maxBytes = 16384): \stdClass
     {
+        $result = self::parseValue($bytes, $maxBytes);
+        if (!$result instanceof \stdClass) { self::fail('SCHEMA_INVALID'); }
+        return $result;
+    }
+
+    /** Bounded generic JSON for canonical snapshot array documents. */
+    public static function parseValue(string $bytes, int $maxBytes = 16384): mixed
+    {
         if ($maxBytes < 1 || $maxBytes > 1048576 || strlen($bytes) > $maxBytes) {
             throw new \InvalidArgumentException('DOCUMENT_TOO_LARGE');
         }
@@ -23,9 +31,6 @@ final class StrictJson
         $parser->whitespace();
         if ($parser->cursor !== strlen($bytes)) {
             self::fail();
-        }
-        if (!$result instanceof \stdClass) {
-            self::fail('SCHEMA_INVALID');
         }
         return $result;
     }
