@@ -1,0 +1,122 @@
+{
+  "format_version": 1,
+  "status": "DRAFT_ADDRESS_SUBSET_ONLY",
+  "source": "https://spec.torproject.org/rend-spec/encoding-onion-addresses.html",
+  "cases": [
+    {
+      "id": "synthetic-rfc8032-public-key",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion",
+      "valid": true
+    },
+    {
+      "id": "tor-spec-example-1",
+      "input": "pg6mmjiyjmcrsslvykfwnntlaru7p5svn6y2ymmju6nubxndf4pscryd.onion",
+      "valid": true
+    },
+    {
+      "id": "tor-spec-example-2",
+      "input": "sp3k262uwy4r2k3ycr5awluarykdpag6a7y33jxop4cs2lu5uz5sseqd.onion",
+      "valid": true
+    },
+    {
+      "id": "tor-spec-example-3",
+      "input": "xa4r2iadxm55fbnqgwwi5mymqdcofiu3w6rpbtqn7b2dyn7mgwj64jyd.onion",
+      "valid": true
+    },
+    {
+      "id": "checksum-corrupt",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl7sid.onion",
+      "valid": false
+    },
+    {
+      "id": "unknown-version-with-valid-checksum",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenj73qe.onion",
+      "valid": false
+    },
+    {
+      "id": "v2-length",
+      "input": "abcdefghijklmnop.onion",
+      "valid": false
+    },
+    {
+      "id": "uppercase",
+      "input": "25NJQAMCWEFLPVKL73J4SZAHHIHOC4XT3KTCGJNPAINGR5YHKENL5SID.ONION",
+      "valid": false
+    },
+    {
+      "id": "leading-space",
+      "input": " 25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion",
+      "valid": false
+    },
+    {
+      "id": "trailing-space",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion ",
+      "valid": false
+    },
+    {
+      "id": "trailing-newline",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion\n",
+      "valid": false
+    },
+    {
+      "id": "scheme",
+      "input": "http://25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion",
+      "valid": false
+    },
+    {
+      "id": "port",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion:80",
+      "valid": false
+    },
+    {
+      "id": "path",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion/",
+      "valid": false
+    },
+    {
+      "id": "userinfo",
+      "input": "user@25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion",
+      "valid": false
+    },
+    {
+      "id": "query",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion?q=x",
+      "valid": false
+    },
+    {
+      "id": "fragment",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion#x",
+      "valid": false
+    },
+    {
+      "id": "null-byte",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion\u0000",
+      "valid": false
+    },
+    {
+      "id": "invalid-alphabet",
+      "input": "05njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion",
+      "valid": false
+    },
+    {
+      "id": "suffix-spoof",
+      "input": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion.example",
+      "valid": false
+    },
+    {
+      "id": "clearnet",
+      "input": "example.com",
+      "valid": false
+    },
+    {
+      "id": "loopback",
+      "input": "127.0.0.1",
+      "valid": false
+    },
+    {
+      "id": "empty",
+      "input": "",
+      "valid": false
+    }
+  ]
+}

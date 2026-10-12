@@ -1,0 +1,1520 @@
+{
+  "profile": "DRAFT_CORE",
+  "status": "PASS",
+  "generated_at": "2026-10-12T14:42:11.418370+00:00",
+  "fixture_count_per_implementation": 123,
+  "fixture_hashes": {
+    "canonical-json.json": "2a4b9d19cdd0f6557bd1a27b7ce6442370be53fed777a4e769db71b4bd723f22",
+    "identity-sequences.json": "f4dc1aa4c4cd3450ac85fcefb569305bff04aee82d046c57544691a646d3f507",
+    "onion-addresses.json": "6bc903a317b7532cf18fec7d88e662004667a2700cb7c6805b397e0dd46db3ef",
+    "signed-records.json": "9139fb667746d6c4b334ce2195cb2c29c5ec55e7b0009463e1867f000872100a",
+    "strict-json.json": "39bb19e02002ac9f23e138e8ff93612d1ba502456f649f77db6f3e03e57fc583"
+  },
+  "results": [
+    {
+      "implementation": "PHP",
+      "pass": 123,
+      "fail": 0,
+      "skip": 0,
+      "checks": [
+        {
+          "id": "synthetic-rfc8032-public-key",
+          "status": "PASS"
+        },
+        {
+          "id": "tor-spec-example-1",
+          "status": "PASS"
+        },
+        {
+          "id": "tor-spec-example-2",
+          "status": "PASS"
+        },
+        {
+          "id": "tor-spec-example-3",
+          "status": "PASS"
+        },
+        {
+          "id": "checksum-corrupt",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-version-with-valid-checksum",
+          "status": "PASS"
+        },
+        {
+          "id": "v2-length",
+          "status": "PASS"
+        },
+        {
+          "id": "uppercase",
+          "status": "PASS"
+        },
+        {
+          "id": "leading-space",
+          "status": "PASS"
+        },
+        {
+          "id": "trailing-space",
+          "status": "PASS"
+        },
+        {
+          "id": "trailing-newline",
+          "status": "PASS"
+        },
+        {
+          "id": "scheme",
+          "status": "PASS"
+        },
+        {
+          "id": "port",
+          "status": "PASS"
+        },
+        {
+          "id": "path",
+          "status": "PASS"
+        },
+        {
+          "id": "userinfo",
+          "status": "PASS"
+        },
+        {
+          "id": "query",
+          "status": "PASS"
+        },
+        {
+          "id": "fragment",
+          "status": "PASS"
+        },
+        {
+          "id": "null-byte",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-alphabet",
+          "status": "PASS"
+        },
+        {
+          "id": "suffix-spoof",
+          "status": "PASS"
+        },
+        {
+          "id": "clearnet",
+          "status": "PASS"
+        },
+        {
+          "id": "loopback",
+          "status": "PASS"
+        },
+        {
+          "id": "empty",
+          "status": "PASS"
+        },
+        {
+          "id": "empty-object",
+          "status": "PASS"
+        },
+        {
+          "id": "scalar-types",
+          "status": "PASS"
+        },
+        {
+          "id": "escaped-key-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "nested-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "same-key-different-objects",
+          "status": "PASS"
+        },
+        {
+          "id": "numeric-key-distinction",
+          "status": "PASS"
+        },
+        {
+          "id": "prototype-looking-key",
+          "status": "PASS"
+        },
+        {
+          "id": "nul-property-key",
+          "status": "PASS"
+        },
+        {
+          "id": "nul-middle-property-key",
+          "status": "PASS"
+        },
+        {
+          "id": "unicode-scalar",
+          "status": "PASS"
+        },
+        {
+          "id": "lone-high-surrogate",
+          "status": "PASS"
+        },
+        {
+          "id": "lone-low-surrogate",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-utf8",
+          "status": "PASS"
+        },
+        {
+          "id": "utf8-bom",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-escape",
+          "status": "PASS"
+        },
+        {
+          "id": "literal-control",
+          "status": "PASS"
+        },
+        {
+          "id": "trailing-comma",
+          "status": "PASS"
+        },
+        {
+          "id": "truncated",
+          "status": "PASS"
+        },
+        {
+          "id": "two-top-level-objects",
+          "status": "PASS"
+        },
+        {
+          "id": "nonobject-root",
+          "status": "PASS"
+        },
+        {
+          "id": "root-null",
+          "status": "PASS"
+        },
+        {
+          "id": "negative-zero",
+          "status": "PASS"
+        },
+        {
+          "id": "fractional",
+          "status": "PASS"
+        },
+        {
+          "id": "scientific-notation",
+          "status": "PASS"
+        },
+        {
+          "id": "nan",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-max",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-min",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-underflow",
+          "status": "PASS"
+        },
+        {
+          "id": "leading-zero",
+          "status": "PASS"
+        },
+        {
+          "id": "max-depth",
+          "status": "PASS"
+        },
+        {
+          "id": "depth-exceeded",
+          "status": "PASS"
+        },
+        {
+          "id": "hostile-depth",
+          "status": "PASS"
+        },
+        {
+          "id": "braces-in-string",
+          "status": "PASS"
+        },
+        {
+          "id": "max-object-members",
+          "status": "PASS"
+        },
+        {
+          "id": "object-members-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "max-array-elements",
+          "status": "PASS"
+        },
+        {
+          "id": "array-elements-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "max-string-scalars",
+          "status": "PASS"
+        },
+        {
+          "id": "string-scalars-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "bytes-exact-cap",
+          "status": "PASS"
+        },
+        {
+          "id": "bytes-over-cap",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-work-budget",
+          "status": "PASS"
+        },
+        {
+          "id": "genesis",
+          "status": "PASS"
+        },
+        {
+          "id": "revision-2",
+          "status": "PASS"
+        },
+        {
+          "id": "rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "rotated-manifest",
+          "status": "PASS"
+        },
+        {
+          "id": "migration",
+          "status": "PASS"
+        },
+        {
+          "id": "migrated-manifest",
+          "status": "PASS"
+        },
+        {
+          "id": "node-descriptor",
+          "status": "PASS"
+        },
+        {
+          "id": "direct-observation",
+          "status": "PASS"
+        },
+        {
+          "id": "snapshot-descriptor",
+          "status": "PASS"
+        },
+        {
+          "id": "correct-host-binding",
+          "status": "PASS"
+        },
+        {
+          "id": "incorrect-host-binding",
+          "status": "PASS"
+        },
+        {
+          "id": "metadata-mutation",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-top-level",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-nested",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-protocol",
+          "status": "PASS"
+        },
+        {
+          "id": "genesis-not-null",
+          "status": "PASS"
+        },
+        {
+          "id": "successor-null",
+          "status": "PASS"
+        },
+        {
+          "id": "unsorted-languages",
+          "status": "PASS"
+        },
+        {
+          "id": "duplicate-languages",
+          "status": "PASS"
+        },
+        {
+          "id": "impossible-date",
+          "status": "PASS"
+        },
+        {
+          "id": "wrong-onion-checksum",
+          "status": "PASS"
+        },
+        {
+          "id": "noncanonical-public-key",
+          "status": "PASS"
+        },
+        {
+          "id": "bad-rotation-countersignature",
+          "status": "PASS"
+        },
+        {
+          "id": "same-address-migration",
+          "status": "PASS"
+        },
+        {
+          "id": "wrong-signature-domain",
+          "status": "PASS"
+        },
+        {
+          "id": "node-cannot-sign-service",
+          "status": "PASS"
+        },
+        {
+          "id": "raw-wire-limit",
+          "status": "PASS"
+        },
+        {
+          "id": "reordered-wire",
+          "status": "PASS"
+        },
+        {
+          "id": "ordering",
+          "status": "PASS"
+        },
+        {
+          "id": "integer-key-order",
+          "status": "PASS"
+        },
+        {
+          "id": "nested-order",
+          "status": "PASS"
+        },
+        {
+          "id": "line-separators",
+          "status": "PASS"
+        },
+        {
+          "id": "unicode-sort",
+          "status": "PASS"
+        },
+        {
+          "id": "escapes",
+          "status": "PASS"
+        },
+        {
+          "id": "no-unicode-normalization",
+          "status": "PASS"
+        },
+        {
+          "id": "literals",
+          "status": "PASS"
+        },
+        {
+          "id": "genesis",
+          "status": "PASS"
+        },
+        {
+          "id": "valid-successor",
+          "status": "PASS"
+        },
+        {
+          "id": "stale-replay-and-duplicates",
+          "status": "PASS"
+        },
+        {
+          "id": "fork-same-revision",
+          "status": "PASS"
+        },
+        {
+          "id": "later-revision-does-not-clear-fork",
+          "status": "PASS"
+        },
+        {
+          "id": "rotation-not-committed-before-new-manifest",
+          "status": "PASS"
+        },
+        {
+          "id": "new-key-needs-rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "valid-rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "new-onion-needs-migration",
+          "status": "PASS"
+        },
+        {
+          "id": "valid-migration",
+          "status": "PASS"
+        },
+        {
+          "id": "combined-transition-atomic",
+          "status": "PASS"
+        },
+        {
+          "id": "partial-combined-transition-is-not-rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "competing-rotations-without-new-manifests",
+          "status": "PASS"
+        },
+        {
+          "id": "competing-migrations-without-new-manifests",
+          "status": "PASS"
+        },
+        {
+          "id": "withdrawal-retains-history",
+          "status": "PASS"
+        },
+        {
+          "id": "orphan-is-not-continuity",
+          "status": "PASS"
+        },
+        {
+          "id": "reverse-chain-order",
+          "status": "PASS"
+        },
+        {
+          "id": "revision-gap-is-rejected",
+          "status": "PASS"
+        },
+        {
+          "id": "same-onion-distinct-identities-remain-separate",
+          "status": "PASS"
+        },
+        {
+          "id": "imported-observation-does-not-change-identity",
+          "status": "PASS"
+        },
+        {
+          "id": "work-limit-is-finite",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "implementation": "TypeScript",
+      "pass": 123,
+      "fail": 0,
+      "skip": 0,
+      "checks": [
+        {
+          "id": "synthetic-rfc8032-public-key",
+          "status": "PASS"
+        },
+        {
+          "id": "tor-spec-example-1",
+          "status": "PASS"
+        },
+        {
+          "id": "tor-spec-example-2",
+          "status": "PASS"
+        },
+        {
+          "id": "tor-spec-example-3",
+          "status": "PASS"
+        },
+        {
+          "id": "checksum-corrupt",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-version-with-valid-checksum",
+          "status": "PASS"
+        },
+        {
+          "id": "v2-length",
+          "status": "PASS"
+        },
+        {
+          "id": "uppercase",
+          "status": "PASS"
+        },
+        {
+          "id": "leading-space",
+          "status": "PASS"
+        },
+        {
+          "id": "trailing-space",
+          "status": "PASS"
+        },
+        {
+          "id": "trailing-newline",
+          "status": "PASS"
+        },
+        {
+          "id": "scheme",
+          "status": "PASS"
+        },
+        {
+          "id": "port",
+          "status": "PASS"
+        },
+        {
+          "id": "path",
+          "status": "PASS"
+        },
+        {
+          "id": "userinfo",
+          "status": "PASS"
+        },
+        {
+          "id": "query",
+          "status": "PASS"
+        },
+        {
+          "id": "fragment",
+          "status": "PASS"
+        },
+        {
+          "id": "null-byte",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-alphabet",
+          "status": "PASS"
+        },
+        {
+          "id": "suffix-spoof",
+          "status": "PASS"
+        },
+        {
+          "id": "clearnet",
+          "status": "PASS"
+        },
+        {
+          "id": "loopback",
+          "status": "PASS"
+        },
+        {
+          "id": "empty",
+          "status": "PASS"
+        },
+        {
+          "id": "empty-object",
+          "status": "PASS"
+        },
+        {
+          "id": "scalar-types",
+          "status": "PASS"
+        },
+        {
+          "id": "escaped-key-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "nested-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "same-key-different-objects",
+          "status": "PASS"
+        },
+        {
+          "id": "numeric-key-distinction",
+          "status": "PASS"
+        },
+        {
+          "id": "prototype-looking-key",
+          "status": "PASS"
+        },
+        {
+          "id": "nul-property-key",
+          "status": "PASS"
+        },
+        {
+          "id": "nul-middle-property-key",
+          "status": "PASS"
+        },
+        {
+          "id": "unicode-scalar",
+          "status": "PASS"
+        },
+        {
+          "id": "lone-high-surrogate",
+          "status": "PASS"
+        },
+        {
+          "id": "lone-low-surrogate",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-utf8",
+          "status": "PASS"
+        },
+        {
+          "id": "utf8-bom",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-escape",
+          "status": "PASS"
+        },
+        {
+          "id": "literal-control",
+          "status": "PASS"
+        },
+        {
+          "id": "trailing-comma",
+          "status": "PASS"
+        },
+        {
+          "id": "truncated",
+          "status": "PASS"
+        },
+        {
+          "id": "two-top-level-objects",
+          "status": "PASS"
+        },
+        {
+          "id": "nonobject-root",
+          "status": "PASS"
+        },
+        {
+          "id": "root-null",
+          "status": "PASS"
+        },
+        {
+          "id": "negative-zero",
+          "status": "PASS"
+        },
+        {
+          "id": "fractional",
+          "status": "PASS"
+        },
+        {
+          "id": "scientific-notation",
+          "status": "PASS"
+        },
+        {
+          "id": "nan",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-max",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-min",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-underflow",
+          "status": "PASS"
+        },
+        {
+          "id": "leading-zero",
+          "status": "PASS"
+        },
+        {
+          "id": "max-depth",
+          "status": "PASS"
+        },
+        {
+          "id": "depth-exceeded",
+          "status": "PASS"
+        },
+        {
+          "id": "hostile-depth",
+          "status": "PASS"
+        },
+        {
+          "id": "braces-in-string",
+          "status": "PASS"
+        },
+        {
+          "id": "max-object-members",
+          "status": "PASS"
+        },
+        {
+          "id": "object-members-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "max-array-elements",
+          "status": "PASS"
+        },
+        {
+          "id": "array-elements-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "max-string-scalars",
+          "status": "PASS"
+        },
+        {
+          "id": "string-scalars-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "bytes-exact-cap",
+          "status": "PASS"
+        },
+        {
+          "id": "bytes-over-cap",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-work-budget",
+          "status": "PASS"
+        },
+        {
+          "id": "genesis",
+          "status": "PASS"
+        },
+        {
+          "id": "revision-2",
+          "status": "PASS"
+        },
+        {
+          "id": "rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "rotated-manifest",
+          "status": "PASS"
+        },
+        {
+          "id": "migration",
+          "status": "PASS"
+        },
+        {
+          "id": "migrated-manifest",
+          "status": "PASS"
+        },
+        {
+          "id": "node-descriptor",
+          "status": "PASS"
+        },
+        {
+          "id": "direct-observation",
+          "status": "PASS"
+        },
+        {
+          "id": "snapshot-descriptor",
+          "status": "PASS"
+        },
+        {
+          "id": "correct-host-binding",
+          "status": "PASS"
+        },
+        {
+          "id": "incorrect-host-binding",
+          "status": "PASS"
+        },
+        {
+          "id": "metadata-mutation",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-top-level",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-nested",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-protocol",
+          "status": "PASS"
+        },
+        {
+          "id": "genesis-not-null",
+          "status": "PASS"
+        },
+        {
+          "id": "successor-null",
+          "status": "PASS"
+        },
+        {
+          "id": "unsorted-languages",
+          "status": "PASS"
+        },
+        {
+          "id": "duplicate-languages",
+          "status": "PASS"
+        },
+        {
+          "id": "impossible-date",
+          "status": "PASS"
+        },
+        {
+          "id": "wrong-onion-checksum",
+          "status": "PASS"
+        },
+        {
+          "id": "noncanonical-public-key",
+          "status": "PASS"
+        },
+        {
+          "id": "bad-rotation-countersignature",
+          "status": "PASS"
+        },
+        {
+          "id": "same-address-migration",
+          "status": "PASS"
+        },
+        {
+          "id": "wrong-signature-domain",
+          "status": "PASS"
+        },
+        {
+          "id": "node-cannot-sign-service",
+          "status": "PASS"
+        },
+        {
+          "id": "raw-wire-limit",
+          "status": "PASS"
+        },
+        {
+          "id": "reordered-wire",
+          "status": "PASS"
+        },
+        {
+          "id": "ordering",
+          "status": "PASS"
+        },
+        {
+          "id": "integer-key-order",
+          "status": "PASS"
+        },
+        {
+          "id": "nested-order",
+          "status": "PASS"
+        },
+        {
+          "id": "line-separators",
+          "status": "PASS"
+        },
+        {
+          "id": "unicode-sort",
+          "status": "PASS"
+        },
+        {
+          "id": "escapes",
+          "status": "PASS"
+        },
+        {
+          "id": "no-unicode-normalization",
+          "status": "PASS"
+        },
+        {
+          "id": "literals",
+          "status": "PASS"
+        },
+        {
+          "id": "genesis",
+          "status": "PASS"
+        },
+        {
+          "id": "valid-successor",
+          "status": "PASS"
+        },
+        {
+          "id": "stale-replay-and-duplicates",
+          "status": "PASS"
+        },
+        {
+          "id": "fork-same-revision",
+          "status": "PASS"
+        },
+        {
+          "id": "later-revision-does-not-clear-fork",
+          "status": "PASS"
+        },
+        {
+          "id": "rotation-not-committed-before-new-manifest",
+          "status": "PASS"
+        },
+        {
+          "id": "new-key-needs-rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "valid-rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "new-onion-needs-migration",
+          "status": "PASS"
+        },
+        {
+          "id": "valid-migration",
+          "status": "PASS"
+        },
+        {
+          "id": "combined-transition-atomic",
+          "status": "PASS"
+        },
+        {
+          "id": "partial-combined-transition-is-not-rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "competing-rotations-without-new-manifests",
+          "status": "PASS"
+        },
+        {
+          "id": "competing-migrations-without-new-manifests",
+          "status": "PASS"
+        },
+        {
+          "id": "withdrawal-retains-history",
+          "status": "PASS"
+        },
+        {
+          "id": "orphan-is-not-continuity",
+          "status": "PASS"
+        },
+        {
+          "id": "reverse-chain-order",
+          "status": "PASS"
+        },
+        {
+          "id": "revision-gap-is-rejected",
+          "status": "PASS"
+        },
+        {
+          "id": "same-onion-distinct-identities-remain-separate",
+          "status": "PASS"
+        },
+        {
+          "id": "imported-observation-does-not-change-identity",
+          "status": "PASS"
+        },
+        {
+          "id": "work-limit-is-finite",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "implementation": "Python",
+      "pass": 123,
+      "fail": 0,
+      "skip": 0,
+      "checks": [
+        {
+          "id": "synthetic-rfc8032-public-key",
+          "status": "PASS"
+        },
+        {
+          "id": "tor-spec-example-1",
+          "status": "PASS"
+        },
+        {
+          "id": "tor-spec-example-2",
+          "status": "PASS"
+        },
+        {
+          "id": "tor-spec-example-3",
+          "status": "PASS"
+        },
+        {
+          "id": "checksum-corrupt",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-version-with-valid-checksum",
+          "status": "PASS"
+        },
+        {
+          "id": "v2-length",
+          "status": "PASS"
+        },
+        {
+          "id": "uppercase",
+          "status": "PASS"
+        },
+        {
+          "id": "leading-space",
+          "status": "PASS"
+        },
+        {
+          "id": "trailing-space",
+          "status": "PASS"
+        },
+        {
+          "id": "trailing-newline",
+          "status": "PASS"
+        },
+        {
+          "id": "scheme",
+          "status": "PASS"
+        },
+        {
+          "id": "port",
+          "status": "PASS"
+        },
+        {
+          "id": "path",
+          "status": "PASS"
+        },
+        {
+          "id": "userinfo",
+          "status": "PASS"
+        },
+        {
+          "id": "query",
+          "status": "PASS"
+        },
+        {
+          "id": "fragment",
+          "status": "PASS"
+        },
+        {
+          "id": "null-byte",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-alphabet",
+          "status": "PASS"
+        },
+        {
+          "id": "suffix-spoof",
+          "status": "PASS"
+        },
+        {
+          "id": "clearnet",
+          "status": "PASS"
+        },
+        {
+          "id": "loopback",
+          "status": "PASS"
+        },
+        {
+          "id": "empty",
+          "status": "PASS"
+        },
+        {
+          "id": "empty-object",
+          "status": "PASS"
+        },
+        {
+          "id": "scalar-types",
+          "status": "PASS"
+        },
+        {
+          "id": "escaped-key-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "nested-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "same-key-different-objects",
+          "status": "PASS"
+        },
+        {
+          "id": "numeric-key-distinction",
+          "status": "PASS"
+        },
+        {
+          "id": "prototype-looking-key",
+          "status": "PASS"
+        },
+        {
+          "id": "nul-property-key",
+          "status": "PASS"
+        },
+        {
+          "id": "nul-middle-property-key",
+          "status": "PASS"
+        },
+        {
+          "id": "unicode-scalar",
+          "status": "PASS"
+        },
+        {
+          "id": "lone-high-surrogate",
+          "status": "PASS"
+        },
+        {
+          "id": "lone-low-surrogate",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-utf8",
+          "status": "PASS"
+        },
+        {
+          "id": "utf8-bom",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-escape",
+          "status": "PASS"
+        },
+        {
+          "id": "literal-control",
+          "status": "PASS"
+        },
+        {
+          "id": "trailing-comma",
+          "status": "PASS"
+        },
+        {
+          "id": "truncated",
+          "status": "PASS"
+        },
+        {
+          "id": "two-top-level-objects",
+          "status": "PASS"
+        },
+        {
+          "id": "nonobject-root",
+          "status": "PASS"
+        },
+        {
+          "id": "root-null",
+          "status": "PASS"
+        },
+        {
+          "id": "negative-zero",
+          "status": "PASS"
+        },
+        {
+          "id": "fractional",
+          "status": "PASS"
+        },
+        {
+          "id": "scientific-notation",
+          "status": "PASS"
+        },
+        {
+          "id": "nan",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-max",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-min",
+          "status": "PASS"
+        },
+        {
+          "id": "safe-integer-underflow",
+          "status": "PASS"
+        },
+        {
+          "id": "leading-zero",
+          "status": "PASS"
+        },
+        {
+          "id": "max-depth",
+          "status": "PASS"
+        },
+        {
+          "id": "depth-exceeded",
+          "status": "PASS"
+        },
+        {
+          "id": "hostile-depth",
+          "status": "PASS"
+        },
+        {
+          "id": "braces-in-string",
+          "status": "PASS"
+        },
+        {
+          "id": "max-object-members",
+          "status": "PASS"
+        },
+        {
+          "id": "object-members-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "max-array-elements",
+          "status": "PASS"
+        },
+        {
+          "id": "array-elements-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "max-string-scalars",
+          "status": "PASS"
+        },
+        {
+          "id": "string-scalars-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "bytes-exact-cap",
+          "status": "PASS"
+        },
+        {
+          "id": "bytes-over-cap",
+          "status": "PASS"
+        },
+        {
+          "id": "invalid-work-budget",
+          "status": "PASS"
+        },
+        {
+          "id": "genesis",
+          "status": "PASS"
+        },
+        {
+          "id": "revision-2",
+          "status": "PASS"
+        },
+        {
+          "id": "rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "rotated-manifest",
+          "status": "PASS"
+        },
+        {
+          "id": "migration",
+          "status": "PASS"
+        },
+        {
+          "id": "migrated-manifest",
+          "status": "PASS"
+        },
+        {
+          "id": "node-descriptor",
+          "status": "PASS"
+        },
+        {
+          "id": "direct-observation",
+          "status": "PASS"
+        },
+        {
+          "id": "snapshot-descriptor",
+          "status": "PASS"
+        },
+        {
+          "id": "correct-host-binding",
+          "status": "PASS"
+        },
+        {
+          "id": "incorrect-host-binding",
+          "status": "PASS"
+        },
+        {
+          "id": "metadata-mutation",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-top-level",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-nested",
+          "status": "PASS"
+        },
+        {
+          "id": "unknown-protocol",
+          "status": "PASS"
+        },
+        {
+          "id": "genesis-not-null",
+          "status": "PASS"
+        },
+        {
+          "id": "successor-null",
+          "status": "PASS"
+        },
+        {
+          "id": "unsorted-languages",
+          "status": "PASS"
+        },
+        {
+          "id": "duplicate-languages",
+          "status": "PASS"
+        },
+        {
+          "id": "impossible-date",
+          "status": "PASS"
+        },
+        {
+          "id": "wrong-onion-checksum",
+          "status": "PASS"
+        },
+        {
+          "id": "noncanonical-public-key",
+          "status": "PASS"
+        },
+        {
+          "id": "bad-rotation-countersignature",
+          "status": "PASS"
+        },
+        {
+          "id": "same-address-migration",
+          "status": "PASS"
+        },
+        {
+          "id": "wrong-signature-domain",
+          "status": "PASS"
+        },
+        {
+          "id": "node-cannot-sign-service",
+          "status": "PASS"
+        },
+        {
+          "id": "raw-wire-limit",
+          "status": "PASS"
+        },
+        {
+          "id": "reordered-wire",
+          "status": "PASS"
+        },
+        {
+          "id": "ordering",
+          "status": "PASS"
+        },
+        {
+          "id": "integer-key-order",
+          "status": "PASS"
+        },
+        {
+          "id": "nested-order",
+          "status": "PASS"
+        },
+        {
+          "id": "line-separators",
+          "status": "PASS"
+        },
+        {
+          "id": "unicode-sort",
+          "status": "PASS"
+        },
+        {
+          "id": "escapes",
+          "status": "PASS"
+        },
+        {
+          "id": "no-unicode-normalization",
+          "status": "PASS"
+        },
+        {
+          "id": "literals",
+          "status": "PASS"
+        },
+        {
+          "id": "genesis",
+          "status": "PASS"
+        },
+        {
+          "id": "valid-successor",
+          "status": "PASS"
+        },
+        {
+          "id": "stale-replay-and-duplicates",
+          "status": "PASS"
+        },
+        {
+          "id": "fork-same-revision",
+          "status": "PASS"
+        },
+        {
+          "id": "later-revision-does-not-clear-fork",
+          "status": "PASS"
+        },
+        {
+          "id": "rotation-not-committed-before-new-manifest",
+          "status": "PASS"
+        },
+        {
+          "id": "new-key-needs-rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "valid-rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "new-onion-needs-migration",
+          "status": "PASS"
+        },
+        {
+          "id": "valid-migration",
+          "status": "PASS"
+        },
+        {
+          "id": "combined-transition-atomic",
+          "status": "PASS"
+        },
+        {
+          "id": "partial-combined-transition-is-not-rotation",
+          "status": "PASS"
+        },
+        {
+          "id": "competing-rotations-without-new-manifests",
+          "status": "PASS"
+        },
+        {
+          "id": "competing-migrations-without-new-manifests",
+          "status": "PASS"
+        },
+        {
+          "id": "withdrawal-retains-history",
+          "status": "PASS"
+        },
+        {
+          "id": "orphan-is-not-continuity",
+          "status": "PASS"
+        },
+        {
+          "id": "reverse-chain-order",
+          "status": "PASS"
+        },
+        {
+          "id": "revision-gap-is-rejected",
+          "status": "PASS"
+        },
+        {
+          "id": "same-onion-distinct-identities-remain-separate",
+          "status": "PASS"
+        },
+        {
+          "id": "imported-observation-does-not-change-identity",
+          "status": "PASS"
+        },
+        {
+          "id": "work-limit-is-finite",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Not Protocol Stable",
+    "No NODE/CLIENT network profile",
+    "Human crypto approval remains open"
+  ]
+}

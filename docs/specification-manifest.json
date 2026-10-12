@@ -1,0 +1,409 @@
+{
+  "format_version": 1,
+  "imported_at": "2026-10-12",
+  "documents": [
+    {
+      "title": "00 - MASTER EXECUTION BRIEF - Onion Service Discovery",
+      "path": "docs/specification-source/00---MASTER-EXECUTION-BRIEF---Onion-Service-Discovery.md",
+      "url": "https://docs.google.com/document/d/1iavEaLZX4iFR0taaQ4jp_O-5mXLeTDPmof4x1prVrkA/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-12T12:31:56.427Z",
+      "sha256": "246d1424058c8741ccd06a32f1e1dc056b0e401d68bd3b76eae6f15ba4fa66d5",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "00 - Workspace Index and Required Reading Order",
+      "path": "docs/specification-source/00---Workspace-Index-and-Required-Reading-Order.md",
+      "url": "https://docs.google.com/document/d/1jEGUdIe17knsWwzHhIRo5LyBwnVj8Czfy5zkFxs-SSw/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-12T12:31:45.611Z",
+      "sha256": "e4681c2f48d71b53bd56cac1cad3f9340c5533d78a5c4a3c28c33b08852c0e67",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "01 - Definition of Done and Production Readiness Gates",
+      "path": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "url": "https://docs.google.com/document/d/1TBZrr-vBQMdKnz43x06yyx38PoSU1ocKaG5OqxrVWfg/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-12T12:31:48.166Z",
+      "sha256": "783898298122aeac21eeca8b02bf7cce8a997cb62a4c19b1b51927a713271afc",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "01 - Product Requirements and System Architecture",
+      "path": "docs/specification-source/01---Product-Requirements-and-System-Architecture.md",
+      "url": "https://docs.google.com/document/d/1A8nFe3xFiF4w3eYQsAkLoXhFovKb07tXo5rzTfP7YFY/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:37:42.696Z",
+      "sha256": "fdac0859b43d8d576478449e52450d5e66933ea7740603b111a04cb5dc26a9cb",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "02 - Protocol Version 1 Specification",
+      "path": "docs/specification-source/02---Protocol-Version-1-Specification.md",
+      "url": "https://docs.google.com/document/d/1jrJyPDRXFChFXSPe9SgOldeVYOcZ-GTmUzH4WmZW64o/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T04:26:04.579Z",
+      "sha256": "63c1bffea09e1f86fdf6aae495310a64dd0f2b0db537c4cb027fbee7af6891b1",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "03 - Identity Anti-Fraud and Trust UX Requirements",
+      "path": "docs/specification-source/03---Identity-Anti-Fraud-and-Trust-UX-Requirements.md",
+      "url": "https://docs.google.com/document/d/1vfn7j1WMWNBm3DA1KIsRhU8zyGtm_FdeyCtybmI1mCQ/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T04:32:24.953Z",
+      "sha256": "56e5a78582e4cc5f96d56f36755f2d288b38d80ba3565cfa4ee933ff7a30082c",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "03 - Threat Model and Security Architecture",
+      "path": "docs/specification-source/03---Threat-Model-and-Security-Architecture.md",
+      "url": "https://docs.google.com/document/d/12wZrysCvp9G7pzYsHw8w8rHQ_bxLxGEpQ-58SjaitDo/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:37:51.943Z",
+      "sha256": "0f4db443287282ceaf277f58f2a13cdeded2c463f2eb12f0308a546fc4dbebd9",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "04 - PHP Reference Node Implementation Specification",
+      "path": "docs/specification-source/04---PHP-Reference-Node-Implementation-Specification.md",
+      "url": "https://docs.google.com/document/d/1R3I1SbEphWuKyJK4XGx5acf_6Tid3yPpxfqtPDATXBQ/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:37:45.748Z",
+      "sha256": "67f4c2cf0992ff3323aa5082bf90901199a9941a4873383eb4e930313406c483",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "05 - Web Local Search Client Specification",
+      "path": "docs/specification-source/05---Web-Local-Search-Client-Specification.md",
+      "url": "https://docs.google.com/document/d/1UH4HobtYVGVG10nTY8De4C7X-uFIGha1-Cc4XgMigtw/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:37:48.531Z",
+      "sha256": "d63d55d7c5a68617d073d99e999435baaa0260c75fb11076fb508423a28a6620",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "06 - Test Strategy Conformance and Verification Matrix",
+      "path": "docs/specification-source/06---Test-Strategy-Conformance-and-Verification-Matrix.md",
+      "url": "https://docs.google.com/document/d/13ceVELv_g4BJHeAldwPbPQ6MJPo_NJCGrqUNg2qkMeU/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T04:29:06.971Z",
+      "sha256": "ff7034c5cbdad8ee07e0488ebf16e5c6022d15f17931fdd7a9a984cfa4c43573",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "07 - Production Operations Release and Incident Runbook",
+      "path": "docs/specification-source/07---Production-Operations-Release-and-Incident-Runbook.md",
+      "url": "https://docs.google.com/document/d/1t4pj8ohdbf9nAi9JwFuFxkVQK6IsSHCcjIC7VVTcFsg/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:14:39.366Z",
+      "sha256": "fdc4dadfc541c67a2345dc698ae9ab85350785cc6695807092133fc1c7566ea9",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "08 - Autonomous AI Coding Agent Master Work Order",
+      "path": "docs/specification-source/08---Autonomous-AI-Coding-Agent-Master-Work-Order.md",
+      "url": "https://docs.google.com/document/d/1cULvv2DZXskb5Gg_D2al7biY1xNFUf4OvyWrIQ5DAX0/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-12T12:31:50.778Z",
+      "sha256": "06d747708bab21ddd48d0a431df1f005fd2b447365a226f2bc4dde690de4b58a",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "09 - Implementation Backlog and Milestone Checklist",
+      "path": "docs/specification-source/09---Implementation-Backlog-and-Milestone-Checklist.md",
+      "url": "https://docs.google.com/document/d/1Hwzdbl4RUEkUJkTDqkc61nHu-Jjnux5vMJYvGoNhVR0/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-12T12:31:53.593Z",
+      "sha256": "e639de1d7a8438c6894e6cbaae4ce9fa4b3492cef408f896f2323b1c831d7fcf",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "10 - Required Engineering Review and Release Templates",
+      "path": "docs/specification-source/10---Required-Engineering-Review-and-Release-Templates.md",
+      "url": "https://docs.google.com/document/d/1gQrpvdulg1TMiiAHo6TPGQvhNdH5Qw99ByS-SA-3sLg/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:17:08.415Z",
+      "sha256": "d32776b0ccd53f53b2efa58fa89be308dc439f0b4e265788398f3a78ae0a1fbb",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "11 - Current Standards Baseline and External References",
+      "path": "docs/specification-source/11---Current-Standards-Baseline-and-External-References.md",
+      "url": "https://docs.google.com/document/d/1UEeaBpx6Wnnjujk5dzELF3rxYgDc0Ci2eLomxzc6_10/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:12:50.162Z",
+      "sha256": "0fa2ada9273ad589e10c761638a250686c3931e56c18acc5ffc5808ede7292a0",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "12 - Protocol Limits Encoding Registry and State Machines",
+      "path": "docs/specification-source/12---Protocol-Limits-Encoding-Registry-and-State-Machines.md",
+      "url": "https://docs.google.com/document/d/1-IqYDKd5RLl3bVUA5BjKoe94bUohVXpGBKtFQIn_Rec/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T04:38:51.083Z",
+      "sha256": "eab8fcc27d6f30df89bf143d04e7b8e002868fdf0e9bf64a3a04db43ecb83499",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "13 - Cryptographic Construction Key Lifecycle and Domain Separation",
+      "path": "docs/specification-source/13---Cryptographic-Construction-Key-Lifecycle-and-Domain-Separation.md",
+      "url": "https://docs.google.com/document/d/1YlAsPNdAwUmY6EjJDSRSEuo0pmuYSol84gwxezAmqlI/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T04:39:37.426Z",
+      "sha256": "3c5bfc9c684e540ecf26fa23cdfb0b838c0107eb9b869f241fc1b0b28c1a94e1",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "14 - Node API Sync Contract and Interoperability Specification",
+      "path": "docs/specification-source/14---Node-API-Sync-Contract-and-Interoperability-Specification.md",
+      "url": "https://docs.google.com/document/d/1vcK0HW3newL3tgIDHdrI8oieSANKXRvB42tvosn3HoY/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:15:37.867Z",
+      "sha256": "c732cc3183159e19479e7faef7c46c43c19a41a0a2929d17585802acdf2fbd5c",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "15 - Abuse Resistance Sybil Spam and Resource Exhaustion Model",
+      "path": "docs/specification-source/15---Abuse-Resistance-Sybil-Spam-and-Resource-Exhaustion-Model.md",
+      "url": "https://docs.google.com/document/d/1Kg3MOLH7urZ3i6UHTa0Hte3AnZOC8BwgvFBOJHhj7P8/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:14:33.885Z",
+      "sha256": "ba6d0d08d08f2442a10785592b61f069e6ab07850bfd0aa2c3f902cb1baa63de",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "16 - Privacy Data Classification Retention and Logging Specification",
+      "path": "docs/specification-source/16---Privacy-Data-Classification-Retention-and-Logging-Specification.md",
+      "url": "https://docs.google.com/document/d/1afBIjZ14dkuQdu857tUjSvX-aANQmxJa7GjyzSBhFAI/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:11:50.685Z",
+      "sha256": "770f5d371d772eb8881061d4b58352bdd3332db22bb3d9eb2178ed65d9e283f2",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "17 - Canonical Data Model Storage Invariants and Retention Schema",
+      "path": "docs/specification-source/17---Canonical-Data-Model-Storage-Invariants-and-Retention-Schema.md",
+      "url": "https://docs.google.com/document/d/1ACK4gDp3EB-f8wROvB5tspAzdlEyk4mwF6HcuNHX5dQ/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:38:54.325Z",
+      "sha256": "ac07440a9bb06810e629d3d6cce05091782b2d4700fbf4c13598677cd17e34ed",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "18 - PHP Node Deployment Hardening and Secure Configuration Matrix",
+      "path": "docs/specification-source/18---PHP-Node-Deployment-Hardening-and-Secure-Configuration-Matrix.md",
+      "url": "https://docs.google.com/document/d/1p07E8Y31GQY-_LQQon8f1mmXthZVVkmYDDsWji13CLA/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:38:56.735Z",
+      "sha256": "abb01e167240978843a983213267293ec606d12f3a91fbec085bd18a8e62ead9",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "19 - Web Search Client Security Privacy and No-JavaScript Fallback Review",
+      "path": "docs/specification-source/19---Web-Search-Client-Security-Privacy-and-No-JavaScript-Fallback-Review.md",
+      "url": "https://docs.google.com/document/d/1_1LTqsSS_402Jyb0IUvZo4y8ZG5geePELgeaJdDwx2I/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:10:12.022Z",
+      "sha256": "8cb81258825870055aea93bc8e7c1ca2a827917827ae3f86e4acefe70f98ae3c",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "20 - Project Governance Protocol Change and Security Decision Policy",
+      "path": "docs/specification-source/20---Project-Governance-Protocol-Change-and-Security-Decision-Policy.md",
+      "url": "https://docs.google.com/document/d/1e9oZYaeJIP8SzlMrXk7f5G6YVvmFSQucQd3lvZx3aj8/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T04:45:14.543Z",
+      "sha256": "35052a569913bed12c43046748d7b518c77575e5cf142fb01d696331ee7574d9",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "21 - Software Supply Chain Reproducible Build and Release Provenance Standard",
+      "path": "docs/specification-source/21---Software-Supply-Chain-Reproducible-Build-and-Release-Provenance-Standard.md",
+      "url": "https://docs.google.com/document/d/1xG4VpHZZhoW_pbdNipxqTXT4OUb9oJ20P7OqPeFyoj8/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:12:00.377Z",
+      "sha256": "5385bab37b0d037d09b2be44ea25cfea66c08f1195792f85fa83191a96eb4f76",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "22 - Independent Security Audit Readiness and Verification Plan",
+      "path": "docs/specification-source/22---Independent-Security-Audit-Readiness-and-Verification-Plan.md",
+      "url": "https://docs.google.com/document/d/1_ZF_9UOwtv3FpkVypW5dnXzIYkmJnQz5Kx7Jpn5MKXg/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:13:11.154Z",
+      "sha256": "cb16deb4fd36fbb9a562280fa8f77e3bf83c49132db09fa13b7a7d4b72792ac3",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "23 - Adversarial Red Team Review and Final Challenge Checklist",
+      "path": "docs/specification-source/23---Adversarial-Red-Team-Review-and-Final-Challenge-Checklist.md",
+      "url": "https://docs.google.com/document/d/17A6V9fEYKNRMeS7beT7a7yMt6wbpBsjIDWzWhZzAMjE/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:13:13.126Z",
+      "sha256": "1b3ec82eb36fea94639199dff141cddddd2d3a4b0b87ab23ea9b6517ec8f4f14",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "24 - Pre-Freeze Decision Register and Human Approval Gates",
+      "path": "docs/specification-source/24---Pre-Freeze-Decision-Register-and-Human-Approval-Gates.md",
+      "url": "https://docs.google.com/document/d/1_B5uqXfbpNJ73JY1qY7ysIUfQjB5Hy66k7TqkY_f61o/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:17:05.918Z",
+      "sha256": "782cc3d56aa5b517d22955274400f407717c151dec7e2899b37a29723dd9442e",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "25 - Normative Glossary Terminology and Security Semantics",
+      "path": "docs/specification-source/25---Normative-Glossary-Terminology-and-Security-Semantics.md",
+      "url": "https://docs.google.com/document/d/19HdzJKytmIt44-HrWAsnmMLtblsuBJjWpiRk08qxxvU/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T04:51:25.705Z",
+      "sha256": "05e6e5fcf5bb1251a8d5e3b9093818325d60e84d95d1aae4a4bfaaca8a24acea",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "26 - Known Limitations Non-Claims and Future Research Boundary",
+      "path": "docs/specification-source/26---Known-Limitations-Non-Claims-and-Future-Research-Boundary.md",
+      "url": "https://docs.google.com/document/d/1CJo71y488nBv81WM-6GVfQ5rf_K9F7hn4llcDy9VBfY/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:39:02.176Z",
+      "sha256": "ae3d71dc44ba99ca94e196771ef26fd7deb1615a00ded38d606f3928590b701a",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "27 - Formal Protocol Model and Model-Checking Verification Plan",
+      "path": "docs/specification-source/27---Formal-Protocol-Model-and-Model-Checking-Verification-Plan.md",
+      "url": "https://docs.google.com/document/d/1ZexdGAgo746df46SRwJOttMmpXq94QydK2I-LsFIUzs/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T06:16:26.935Z",
+      "sha256": "68eeb4bebf657cf5750530e663413e7cc25fcd034f55145a30c353e4f5e3ab81",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "28 - Independent Conformance Suite and Certification Harness",
+      "path": "docs/specification-source/28---Independent-Conformance-Suite-and-Certification-Harness.md",
+      "url": "https://docs.google.com/document/d/1fasTLWHCM9T2D2EiwUBf8iyzYUxGoT84pjI0Ed6lnHA/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:13:16.631Z",
+      "sha256": "ab4f27763796a13828831b88ecca1c645d5394537b47bd887257ce88a3d6af1b",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "29 - Reproducible Test Network Chaos Lab and Failure Injection Specification",
+      "path": "docs/specification-source/29---Reproducible-Test-Network-Chaos-Lab-and-Failure-Injection-Specification.md",
+      "url": "https://docs.google.com/document/d/19eXxSqAUNN3zU523KW8deC8O1pJfyTCYy-chRgZ_8FQ/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:14:32.328Z",
+      "sha256": "7d0f4b0086bc3b58873ec64ec643da3d1bb5689259d43bb81a69b082ededcc67",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "30 - Internet Standards IANA Registration and RFC Publication Plan",
+      "path": "docs/specification-source/30---Internet-Standards-IANA-Registration-and-RFC-Publication-Plan.md",
+      "url": "https://docs.google.com/document/d/1BtOUvrmldMUcytfqO29GIx6AnCkKaw9ooS9qWgFeNm0/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:14:35.713Z",
+      "sha256": "e1f7a1005b28f51f3e70eea0c89a9e05332e4c2c19fa6ccbacec2adb42b598bc",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "31 - Accessibility Security UX and Human-Factors Validation Standard",
+      "path": "docs/specification-source/31---Accessibility-Security-UX-and-Human-Factors-Validation-Standard.md",
+      "url": "https://docs.google.com/document/d/1p4czVA3MQXFxkOjSCejdA6xam_U7S78NmkDu41b3Smw/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:14:37.812Z",
+      "sha256": "8ad6388b3a86b9c3b46a7c1e5ece7d4228275c4b8170853ad8638ec581ed6eb6",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "32 - Operator Developer Experience and Diagnostic Command Standard",
+      "path": "docs/specification-source/32---Operator-Developer-Experience-and-Diagnostic-Command-Standard.md",
+      "url": "https://docs.google.com/document/d/1rkfhjdiLlpoHDKmhtJCaq_pbxuXSflGZPkdFARNsTqI/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T06:19:38.568Z",
+      "sha256": "c70172f9b30190d6fd2973a6362c0cd9ac4e6bc4d9f7cd7b70725e3e982c09b1",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "33 - Capacity Performance Scalability and Benchmarking Model",
+      "path": "docs/specification-source/33---Capacity-Performance-Scalability-and-Benchmarking-Model.md",
+      "url": "https://docs.google.com/document/d/1uOqAkyTQTtpcw_UFK2tgD9uwAnsx7U-ANiYoYLHEgFw/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:14:30.281Z",
+      "sha256": "fa2cdc98d94ba05697586718d3d41323d81eb7953ddf2f136dbde10c2b69d8e6",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "34 - Synthetic Reference Dataset Fixtures and Golden Corpus Standard",
+      "path": "docs/specification-source/34---Synthetic-Reference-Dataset-Fixtures-and-Golden-Corpus-Standard.md",
+      "url": "https://docs.google.com/document/d/1bma0eBbVdyjw1uvGD7mnN0GEKZngTRS9npaNaxQOx8c/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T06:20:42.034Z",
+      "sha256": "c0a85dbd445e8b81345179b7fadef5c29aadff0407a82d054899aa0bfd21fc70",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "35 - Record Lifecycle Matrix and Protocol Archaeology Standard",
+      "path": "docs/specification-source/35---Record-Lifecycle-Matrix-and-Protocol-Archaeology-Standard.md",
+      "url": "https://docs.google.com/document/d/1i5kPoX4xFZ2eGyoGGmNl6GGy_jCaB8VS1KiR4pvEH8A/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T06:21:16.273Z",
+      "sha256": "a9fde0b93597416929a312f80e6535644e207bca5f0b19f844d80f54ee995a35",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "36 - Design Rationale Alternatives and Rejected Architectures",
+      "path": "docs/specification-source/36---Design-Rationale-Alternatives-and-Rejected-Architectures.md",
+      "url": "https://docs.google.com/document/d/11YY3OH0OnJtRHf3JkTgidTDigN2GgdSybtmBFjTx7Gs/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:38:59.963Z",
+      "sha256": "d08c7e28d4ded39d6f88965a6ef45a9c9116477fc4be1821f0cd33c099f2aef8",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "37 - Independent Minimal Validator SDK and Multi-Language Adoption Strategy",
+      "path": "docs/specification-source/37---Independent-Minimal-Validator-SDK-and-Multi-Language-Adoption-Strategy.md",
+      "url": "https://docs.google.com/document/d/1OilZe0tPQL3vjsIWgW-5ZNYhXJkmLeUAk6zWsf88eeM/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:14:28.323Z",
+      "sha256": "e431b02edbffe1203ffa96a5859ec32ee1931b14801c3818c4e1a04ed3b64fea",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "38 - Ecosystem Adoption Integration and Long-Term Evolution Strategy",
+      "path": "docs/specification-source/38---Ecosystem-Adoption-Integration-and-Long-Term-Evolution-Strategy.md",
+      "url": "https://docs.google.com/document/d/1NbPjqAkr5s0MiM5lCU98zgFDwaa30PoUlpiM5OodmiE/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:13:14.985Z",
+      "sha256": "624765b01a1a26c0e881b4d4bd6b500143942118caee3ab1f038c12ee216f23a",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "39 - Public Protocol Handbook RFC-Style Publication Blueprint",
+      "path": "docs/specification-source/39---Public-Protocol-Handbook-RFC-Style-Publication-Blueprint.md",
+      "url": "https://docs.google.com/document/d/1ko-SYPTrgJCA-HfyHzYl_ibNK5HSQwZPa1aInXD_MKI/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:14:26.636Z",
+      "sha256": "eedb913c9b48f79871f9e2f50bdfd5daed7cdd4dae8163fa05cef5235cc1b36f",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "40 - Five-Minute Onion Service Operator Contract and Consequence Summary",
+      "path": "docs/specification-source/40---Five-Minute-Onion-Service-Operator-Contract-and-Consequence-Summary.md",
+      "url": "https://docs.google.com/document/d/1ZiRFTgUwz0zlacA_HU3LVqFIqxIpH39JWTkVqeK935k/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T06:24:07.405Z",
+      "sha256": "4da0a1765191dc8c36fb955a1c20b12f477e47355f569d816dd46cb87a00d270",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "41 - Pluggable Storage Backends and SQL-Free Persistence Standard",
+      "path": "docs/specification-source/41---Pluggable-Storage-Backends-and-SQL-Free-Persistence-Standard.md",
+      "url": "https://docs.google.com/document/d/1tOvXkoRp3bXi95xOi2PqLGIXatdhLXVmDDRN2jThIXY/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:36:28.762Z",
+      "sha256": "575b42e7b582aefc01e4e6683e2cddf4ebc9d76573cf56954356da303a8b2d77",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "42 - Malicious Node Isolation Client Host and Multi-Source Integrity Architecture",
+      "path": "docs/specification-source/42---Malicious-Node-Isolation-Client-Host-and-Multi-Source-Integrity-Architecture.md",
+      "url": "https://docs.google.com/document/d/1FtNkCQMShutKcLzRwVA-LBUS7XuCa_GFCPqgRDty4PY/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-11T07:36:31.223Z",
+      "sha256": "88c070f26b27a9b5b4f1c0a3be6537cb4e4f0427e760aa7adbc63f92626f1a37",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "43 - High-Assurance Key Custody Offline Signing and Signer Provider Standard",
+      "path": "docs/specification-source/43---High-Assurance-Key-Custody-Offline-Signing-and-Signer-Provider-Standard.md",
+      "url": "https://docs.google.com/document/d/1jZ238Q7f5v2aFBnvR4HN-005fcW4e_ZhCtdZ7XvXpgU/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-12T12:30:35.466Z",
+      "sha256": "90a6d0514d2bf36d866bcbfdb4e50a4e6b66dc38fe225b05044cfc7907f2a7a3",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "44 - Secure Release Trust Root Update Rollback and Compromise Recovery Standard",
+      "path": "docs/specification-source/44---Secure-Release-Trust-Root-Update-Rollback-and-Compromise-Recovery-Standard.md",
+      "url": "https://docs.google.com/document/d/19x6FUX2YoWs7IFA2cbKDVt7gNf7wB3FAklcYmz7hlII/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-12T12:30:40.493Z",
+      "sha256": "70689363314a07f5c15f57e8437e9891fd582903f8fe3cdf1d16c5c9efd9e277",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "45 - Tor Compatibility Crypto Agility and Protocol Migration Policy",
+      "path": "docs/specification-source/45---Tor-Compatibility-Crypto-Agility-and-Protocol-Migration-Policy.md",
+      "url": "https://docs.google.com/document/d/17rs4a64M6yk-wcGqooM9k71ACj77NdBJQnsWDWtvGTQ/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-12T12:30:46.103Z",
+      "sha256": "c6e2cfefded9347fb8d069d5df39bf07662864c5346f563c96abf1fdd6cb03b4",
+      "review_status": "REVIEWED"
+    },
+    {
+      "title": "46 - Final Pre-Implementation Closure Audit and Specification Freeze",
+      "path": "docs/specification-source/46---Final-Pre-Implementation-Closure-Audit-and-Specification-Freeze.md",
+      "url": "https://docs.google.com/document/d/1qjIhv8nJyBeQbhKJpSxoxpuC-T7QE_4uLYU4UNjvjXc/edit?usp=drivesdk",
+      "source_modified_at": "2026-10-12T12:30:51.198Z",
+      "sha256": "a3064c5b552e580d12cc0dbdf7cf6a4ce10937fa855219324a297d8f83814c87",
+      "review_status": "REVIEWED"
+    }
+  ],
+  "normalization": "UTF-8; leading BOM removed; LF line endings; trailing line whitespace removed; final newline",
+  "reviewed_at": "2026-10-12",
+  "review_notes": "Read across this work session and preceding turns; inherited superseded passages resolved in ADR-001. Review does not constitute human protocol or production approval."
+}

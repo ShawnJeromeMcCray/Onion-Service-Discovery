@@ -1,0 +1,45 @@
+{
+  "profile": "DRAFT_ADDRESS_JSON_INPUT_SUBSET",
+  "status": "PASS",
+  "generated_at": "2026-10-12T13:25:21.619372+00:00",
+  "shared_fixture_count": 66,
+  "php_container": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3",
+  "checks": [
+    {
+      "check": "repository-integrity",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "python-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-address-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-json-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "typescript-typecheck",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "typescript-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "limitations": [
+    "Not CORE-V1 conformance",
+    "Not browser compatibility evidence",
+    "No signatures, identity state, transport or storage tested",
+    "No production release approval"
+  ]
+}

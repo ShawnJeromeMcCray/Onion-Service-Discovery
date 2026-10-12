@@ -1,0 +1,55 @@
+{
+  "profile": "DRAFT_CORE_UNIT_SUITES",
+  "status": "PASS",
+  "generated_at": "2026-10-12T14:42:06.990059+00:00",
+  "shared_fixture_count": 123,
+  "php_container": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3",
+  "checks": [
+    {
+      "check": "repository-integrity",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "python-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-address-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-json-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-record-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-identity-sequences",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "typescript-typecheck",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "typescript-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "limitations": [
+    "Not CORE-V1 conformance",
+    "Not browser compatibility evidence",
+    "Transport, storage and browser compatibility not tested",
+    "No production release approval"
+  ]
+}
