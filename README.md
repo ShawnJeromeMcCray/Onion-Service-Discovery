@@ -2,7 +2,7 @@
 
 Opt-in decentralized discovery for public Tor Onion Services, with self-published metadata and local browser search.
 
-**Status: repository foundation. No runnable Node or browser client yet. Not a production release.**
+**Status: experimental offline protocol core. No runnable Node or browser client yet. Not a production release.**
 
 Technical identity evidence must not be presented as an assurance about content or operator honesty. Tor itself is not modified and its private keys must never be accessed.
 
@@ -11,6 +11,8 @@ Technical identity evidence must not be presented as an assurance about content 
 - Import of 50 current specification documents with observed source links, modification times and integrity hashes.
 - [Decision register](docs/governance/decision-register.md) preserving all 50 owner/reviewer decisions without inferred approvals.
 - [Implementation status](docs/implementation-status.md) distinguishing requirements from verified behavior.
+- Strict Onion v3 and bounded JSON parsing in PHP, TypeScript and independent Python.
+- [66 shared input vectors](docs/conformance/input-subset.md) and a reproducible three-language conformance subset.
 - Dependency-free foundation integrity and credential checks.
 
 Run with Python 3.11 or newer:
@@ -19,6 +21,8 @@ Run with Python 3.11 or newer:
 python tools/check_repository.py
 python -m unittest discover -s tests -v
 ```
+
+For the PHP/TypeScript/Python input subset, see [reproduction instructions](docs/conformance/input-subset.md). These checks do not establish full protocol or browser conformance.
 
 ## Planned components
 

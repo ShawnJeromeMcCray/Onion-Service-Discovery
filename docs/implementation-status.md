@@ -22,7 +22,7 @@ D-001 is APPROVED: CC0-1.0 under the owner’s explicit unrestricted-use instruc
 | --- | --- | --- |
 | Specification review | PARTIAL | Full reading, traceability, conflict resolution, standards refresh |
 | Foundation | PARTIAL | Reviewed PHP/TypeScript toolchains, CI/runtime scans |
-| Protocol/cryptography | NOT IMPLEMENTED | Schemas, exact vectors, independent implementations, review |
+| Protocol/cryptography | PARTIAL | Offline address/JSON input subset passes PHP/TypeScript/Python; schemas, signatures and lifecycle remain open |
 | Formal assurance | NOT IMPLEMENTED | Model and reproducible checks |
 | Storage/signing | NOT IMPLEMENTED | Backends, crash/recovery conformance, offline signer |
 | Tor transport/Node | NOT IMPLEMENTED | CLI/API, direct verification, sync, bounded transport |
@@ -31,4 +31,10 @@ D-001 is APPROVED: CC0-1.0 under the owner’s explicit unrestricted-use instruc
 | Human approvals | BLOCKED | Required decision and release reviews |
 | External audit | NOT PERFORMED | Independent reviewer evidence |
 
-No gate passes solely because documents exist. The first push was rejected for missing workflow permission. The workflow remains a non-active template under tools/ci; no production release has been made. The owner explicitly authorized use of the supplied GitHub credential. It must stay outside project files and Git URLs.
+No gate passes solely because documents exist. The foundation branch was pushed successfully after moving the unsupported GitHub Actions workflow to a non-active template under tools/ci. No production release has been made. The owner explicitly authorized use of the supplied GitHub credential. It must stay outside project files and Git URLs.
+
+## Experimental input-core evidence
+
+23 shared address vectors and 43 strict JSON vectors pass in PHP, TypeScript and independent Python. The harness report is docs/conformance/input-subset-report.json. TypeScript strict typechecking passes, and npm audit reports zero current advisories for the locked dependency graph. PHP uses the digest-pinned official 8.5 CLI test image.
+
+This offline prototype does not freeze crypto bytes or mutate identity state. Browser hash-provider selection, full specification review, schema validation, signatures, runtime approval and all application/release gates remain open.

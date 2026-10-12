@@ -1,0 +1,44 @@
+{
+  "status": "DRAFT_NOT_PROTOCOL_FREEZE",
+  "source_document": 12,
+  "max_safe_integer": 9007199254740991,
+  "json": {
+    "depth": 16,
+    "object_members": 128,
+    "array_elements": 256,
+    "string_scalars": 4096
+  },
+  "document_bytes": {
+    "service_manifest": 16384,
+    "key_rotation": 8192,
+    "onion_migration": 8192,
+    "node_descriptor": 16384,
+    "direct_observation": 8192,
+    "peer_assertion": 16384,
+    "moderation_signal": 16384,
+    "state": 16384,
+    "peers": 262144,
+    "service_response": 32768,
+    "changes": 1048576,
+    "snapshot_descriptor": 65536,
+    "chunk": 524288
+  },
+  "fields": {
+    "service_name_scalars": 128,
+    "description_scalars": 2048,
+    "languages": 16,
+    "language_tag_ascii": 35,
+    "categories": 32,
+    "category_ascii": 64,
+    "related_onions": 32,
+    "clearnet_links": 8,
+    "clearnet_url_bytes": 2048,
+    "capabilities": 32,
+    "capability_ascii": 64,
+    "exported_peers": 256
+  },
+  "identity_verification": {
+    "max_redirects": 0,
+    "manifest_path": "/.well-known/onion-service-discovery.json"
+  }
+}
