@@ -1,7 +1,8 @@
 # Implementation and release status
 
 The baseline repository contained only a one-line README. The implementation is
-on `implementation/repository-foundation`, [draft PR #3](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/pull/3). The project now contains
+on `implementation/repository-foundation`; incremental PRs #1–#3 have been merged
+by the repository owner. Subsequent development continues on that branch. The project now contains
 an executable development Node, offline Service signer, separate Client Host,
 locally verifying/searching browser client and mature offline release verifier.
 There is no approved production release.
@@ -44,10 +45,11 @@ required decisions/reviews remain unresolved.
   Advisory scans and secret detection do not replace independent security review.
 
 Reports and exact scope are linked in [release-gates.json](release-gates.json).
-GitHub run [38302098291](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38302098291)
-passed all four then-current jobs for commit `5ad0006`. Later expanded CI adds a
-PHP minor matrix, dependency scans and reproducible unsigned candidate packaging;
-its exact commit/run evidence must be recorded after execution.
+GitHub run [38323991393](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38323991393)
+passed all eight expanded jobs for commit `bb681c6`, including both PHP minors,
+dependency scans, Git-history secret detection and candidate packaging. The later
+packaged runtime smoke and exact-identity attestation verification also passed
+in their CI job at commit `9ca5834`; the complete run must be checked separately.
 
 ## Available implementation
 

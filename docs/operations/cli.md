@@ -29,7 +29,10 @@ fixtures and review.
 
 Aliases: status=node:status, peer:list=peers:list, peer:add=peers:add,
 peer:disable=peers:disable, manifest:show=protocol:inspect,
-backup:create=storage:backup, db:verify/restore:verify=storage:check.
+backup:create=storage:backup, db:verify/restore:verify=storage:check,
+manifest:generate=manifest:init and sync:run=sync:peer-step.
+The key:service:generate/key:node:generate commands select the corresponding
+key:create role; they require the same private passphrase-file flag.
 The alias retains the underlying command's argument contract. `release:info`
 reports development status and the machine-readable gate matrix, not a stable
 release assertion. Release verification is the separate mature Python TUF tool.
@@ -52,7 +55,8 @@ at most 256 unreferenced derived blobs, not signed identity/fork records.
 No command executes a downloaded software artifact.
 
 Exit codes: 0 successful command; 2 usage; 3 input/config/protocol validation;
-4 storage/signing failure or failed diagnostic; 6 diagnostic WARN/degraded;
+4 storage/signing failure or failed diagnostic; 5 direct transport failure;
+6 diagnostic WARN/degraded;
 8 normalized internal error. Transport workers can return structured BACKOFF,
 QUARANTINED or PROGRESS states with a successful command exit: monitoring must
 inspect the JSON status, not interpret exit 0 as a healthy current source.
@@ -62,3 +66,10 @@ Full operator walkthrough, supported deployed runtime matrix, live Tor checks,
 privilege separation, automatic authenticated backup custody and incident drills
 remain release gates. The reference systemd/nginx/FPM files are staging templates;
 no installer silently enables them or modifies the operator's Tor service.
+
+`service:verify CONFIG ONION` makes one bounded fixed-path request through the
+configured Tor SOCKS transport and checks the manifest signature and exact Onion
+binding. It neither opens/mutates the store nor loads a signing key. Its explicit
+`NOT_DERIVED` identity state means it does not establish continuity or replace a
+pin. `SIGNATURE_AND_BINDING_VALID` is not a safety/content or lasting uptime claim.
+Use the normal candidate worker for stored continuity checks and observations.
