@@ -71,8 +71,11 @@ systemd/nginx/FPM templates and operator runbooks are included.
 
 Reproducible unsigned source/browser candidates include a dependency inventory,
 file manifest, checksums and explicitly unattested source/hash provenance. The
-established TUF verifier never executes artifacts. Production root/key custody,
-authenticated CI provenance and stable signing are still open.
+established TUF verifier never executes artifacts. Authenticated GitHub provenance and SBOM bundles were locally verified against
+the exact workflow, commit and development ref, including wrong-ref/commit
+rejection. The local build hash matches the distinct GitHub-hosted builder; see
+[the scoped report](conformance/ci-attestation-report.json). Production root/key
+custody, hardened release-builder policy and stable signing are still open.
 
 ## Remaining release gates
 
@@ -80,7 +83,7 @@ Required independent protocol/crypto/model/security and human UX review; actual
 Tor Browser desktop/Android and live Tor tests; deployed privilege separation,
 physical power-loss/disk-full and authenticated restore/incident drills;
 operational-heavy multi-peer soak, broader capacity/profile evidence; independent
-build reproduction/authenticated provenance, license review and production trust
+release-builder review, production provenance acceptance policy, license review and production trust
 root/threshold ceremony. No verified production seed infrastructure is invented.
 
 The 318 extracted candidate requirements now have partial evidence pointers for

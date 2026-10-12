@@ -90,9 +90,12 @@
       "evidence": [
         "tools/build_release_candidate.py",
         "docs/operations/release-candidate.md",
-        "docs/conformance/reproducible-candidate-report.json"
+        "docs/conformance/reproducible-candidate-report.json",
+        "docs/conformance/ci-attestation-report.json",
+        "docs/conformance/ci-attestation-bundles.jsonl",
+        "docs/conformance/candidate-smoke-report.json"
       ],
-      "remaining": "Independent builder reproduction, authenticated production provenance and signing"
+      "remaining": "Production hardened-builder/provenance acceptance, independent release review and approved TUF authority; development branch is not release authorization"
     },
     {
       "id": "RELEASE_VERIFIER",

@@ -1,0 +1,58 @@
+{
+  "status": "PASS_DEVELOPMENT",
+  "source_commit": "01569a630c95c9f0cffb9455b8121a15214692f6",
+  "artifact_sha256": "4b269c8cbb831b0e6e286b15951ffa328d6f9de84bfa604a89f5278b5a1531cb",
+  "verifier": "GitHub CLI 2.102.0",
+  "verifier_distribution_sha256": "bb766f710eef8ede859c18578c72c327597cd4c8a85b06001b1f3843c6019386",
+  "repository": "ShawnJeromeMcCray/Onion-Service-Discovery",
+  "required_workflow": ".github/workflows/foundation.yml",
+  "required_ref": "refs/heads/implementation/repository-foundation",
+  "deny_self_hosted_runners": true,
+  "provenance_predicate": "https://slsa.dev/provenance/v1",
+  "sbom_predicate": "https://cyclonedx.org/bom",
+  "verified_certificate": {
+    "certificateIssuer": "CN=sigstore-intermediate,O=sigstore.dev",
+    "subjectAlternativeName": "https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/.github/workflows/foundation.yml@refs/heads/implementation/repository-foundation",
+    "issuer": "https://token.actions.githubusercontent.com",
+    "githubWorkflowTrigger": "push",
+    "githubWorkflowSHA": "01569a630c95c9f0cffb9455b8121a15214692f6",
+    "githubWorkflowName": "Protocol core and conformance",
+    "githubWorkflowRepository": "ShawnJeromeMcCray/Onion-Service-Discovery",
+    "githubWorkflowRef": "refs/heads/implementation/repository-foundation",
+    "buildSignerURI": "https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/.github/workflows/foundation.yml@refs/heads/implementation/repository-foundation",
+    "buildSignerDigest": "01569a630c95c9f0cffb9455b8121a15214692f6",
+    "runnerEnvironment": "github-hosted",
+    "sourceRepositoryURI": "https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery",
+    "sourceRepositoryDigest": "01569a630c95c9f0cffb9455b8121a15214692f6",
+    "sourceRepositoryRef": "refs/heads/implementation/repository-foundation",
+    "sourceRepositoryIdentifier": "1413900827",
+    "sourceRepositoryOwnerURI": "https://github.com/ShawnJeromeMcCray",
+    "sourceRepositoryOwnerIdentifier": "216204150",
+    "buildConfigURI": "https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/.github/workflows/foundation.yml@refs/heads/implementation/repository-foundation",
+    "buildConfigDigest": "01569a630c95c9f0cffb9455b8121a15214692f6",
+    "buildTrigger": "push",
+    "runInvocationURI": "https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38324081276/attempts/1",
+    "sourceRepositoryVisibilityAtSigning": "public"
+  },
+  "verified_timestamps": [
+    {
+      "type": "Tlog",
+      "uri": "https://rekor.sigstore.dev",
+      "timestamp": "2026-10-12T23:49:17Z"
+    }
+  ],
+  "negative_policy_checks": [
+    {
+      "check": "wrong-source",
+      "status": "REJECTED",
+      "exit_code": 1
+    },
+    {
+      "check": "wrong-ref",
+      "status": "REJECTED",
+      "exit_code": 1
+    }
+  ],
+  "reproduction": "Local clean-source build hash equals subject authenticated for distinct GitHub-hosted build. Not independent organizational review or a hardened reusable builder.",
+  "production_approved": false
+}
