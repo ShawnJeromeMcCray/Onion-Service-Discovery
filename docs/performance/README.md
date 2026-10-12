@@ -42,3 +42,12 @@ At this five-claim/two-revision profile that caps active Services far below
 TIER-M; the reference implementation does not advertise those higher tiers.
 Bounded service lookup can return 413 for long/large histories; signed snapshot
 sync remains the complete bounded evidence path.
+
+
+An additional adversarial index report uses 1,000 synthetic valid Onion addresses
+whose lookup SHA-256 prefixes all equal `00`. This concentrates all 7,005 signed
+records into one derived lookup bucket. Both backends still publish the complete
+signed snapshot; an over-budget individual bucket yields 413 and directs callers
+to generic snapshots. The derived shortcut cannot block valid snapshot publication.
+Generate it with `--lookup-prefix 00`. It is a controlled address-distribution
+stress case, not a live malicious-node or Tor load result.

@@ -51,7 +51,7 @@ jobs:
       - name: Run independent black-box conformance
         run: .venv/bin/python protocol-conformance/runner.py --php-container --php-image "${{ matrix.php_image }}"
       - name: Seeded three-language malformed-input smoke fuzzing
-        run: .venv/bin/python tools/fuzz_protocol_inputs.py
+        run: .venv/bin/python tools/fuzz_protocol_inputs.py --php-image "${{ matrix.php_image }}"
       - name: Audit locked dependencies
         working-directory: web-local-search-client
         run: npm audit
@@ -111,6 +111,10 @@ jobs:
         run: .venv/bin/python release-tools/test_release_verifier.py
 
   reproducible-candidate:
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -125,11 +129,30 @@ jobs:
       - name: Install locked build dependencies
         working-directory: web-local-search-client
         run: npm ci --ignore-scripts --no-fund
+      - name: Install hash-locked artifact validation dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r validator-python/requirements.lock -r tools/audit-requirements.lock
       - name: Compare two unsigned development candidates
         run: |
           python3 tools/build_release_candidate.py --output .tools/candidate-a
           python3 tools/build_release_candidate.py --output .tools/candidate-b
           cmp .tools/candidate-a/onion-service-discovery-source-browser.tar.gz .tools/candidate-b/onion-service-discovery-source-browser.tar.gz
+          .venv/bin/python release-tools/test_candidate_structure.py
+          .venv/bin/python tools/verify_candidate.py .tools/candidate-a/onion-service-discovery-source-browser.tar.gz
+      - name: Authenticate development build provenance on trusted pushes
+        if: github.event_name == 'push'
+        id: provenance
+        uses: actions/attest-build-provenance@43d14bc2b83dec42d39ecae14e916627a18bb661 # v3
+        with:
+          subject-path: .tools/candidate-a/onion-service-discovery-source-browser.tar.gz
+      - name: Authenticate development dependency inventory on trusted pushes
+        if: github.event_name == 'push'
+        id: sbom
+        uses: actions/attest-sbom@51e74621a501c89df81fc1391c5a8f4cfc9fab2f # v3
+        with:
+          subject-path: .tools/candidate-a/onion-service-discovery-source-browser.tar.gz
+          sbom-path: .tools/candidate-a/SBOM.cdx.json
       - name: Preserve candidate and unsigned evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

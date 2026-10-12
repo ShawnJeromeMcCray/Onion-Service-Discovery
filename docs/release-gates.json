@@ -86,12 +86,13 @@
     },
     {
       "id": "REPRODUCIBLE_CANDIDATE",
-      "status": "IMPLEMENTED_NOT_YET_VERIFIED",
+      "status": "PASS_DEVELOPMENT",
       "evidence": [
         "tools/build_release_candidate.py",
-        "docs/operations/release-candidate.md"
+        "docs/operations/release-candidate.md",
+        "docs/conformance/reproducible-candidate-report.json"
       ],
-      "remaining": "Double-build evidence, independent builder reproduction, authenticated production provenance"
+      "remaining": "Independent builder reproduction, authenticated production provenance and signing"
     },
     {
       "id": "RELEASE_VERIFIER",

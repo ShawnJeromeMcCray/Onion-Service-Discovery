@@ -73,6 +73,7 @@ final readonly class SnapshotProducer
                 if (count($references) > 256) { $entries[$onion] = ['too_large' => true]; }
             }
             $wire = \OnionServiceDiscovery\Storage\StorageJson::encode($entries);
+            if (strlen($wire) > 524288) { $wire = \OnionServiceDiscovery\Storage\StorageJson::encode(['too_large' => true]); }
             $hash = 'sha256:' . hash('sha256', "Onion Service Discovery/service-lookup/v1\0" . $wire);
             $this->blobs->put($hash, $wire); $serviceIndexes[(string)$prefix] = $hash;
         }

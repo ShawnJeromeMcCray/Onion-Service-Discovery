@@ -20,8 +20,8 @@ def corpus():
   items.append(('strict-json',duplicate.encode()))
  return items
 if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('--report',type=Path);a=p.parse_args();data=corpus();digest=hashlib.sha256(b''.join(operation.encode()+b'\0'+raw for operation,raw in data)).hexdigest()
- php=['docker','run','--rm','-i','--network','none','--mount',f'type=bind,src={ROOT},dst=/app,readonly','--workdir','/app','php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3','php','node-php/bin/conformance-adapter.php']
+ p=argparse.ArgumentParser();p.add_argument('--php-image',choices=['php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3','php@sha256:1d2cf2b7d715b5b3aa959f0150ccbcc7b71e0181b637e443abf40a7fb56bf79a'],default='php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3');p.add_argument('--report',type=Path);a=p.parse_args();data=corpus();digest=hashlib.sha256(b''.join(operation.encode()+b'\0'+raw for operation,raw in data)).hexdigest()
+ php=['docker','run','--rm','-i','--network','none','--mount',f'type=bind,src={ROOT},dst=/app,readonly','--workdir','/app',a.php_image,'php','node-php/bin/conformance-adapter.php']
  commands={'PHP':php,'TypeScript':['node','web-local-search-client/tools/conformance-adapter.mjs'],'Python':[sys.executable,'validator-python/conformance_adapter.py']};outputs={};timings={}
  for language,command in commands.items():
   results=[];start=time.monotonic()

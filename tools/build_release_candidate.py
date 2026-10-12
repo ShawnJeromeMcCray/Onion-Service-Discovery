@@ -52,6 +52,7 @@ def build(destination):
  with artifact.open('wb') as raw,gzip.GzipFile(filename='',mode='wb',fileobj=raw,mtime=0,compresslevel=9) as compressed,tarfile.open(fileobj=compressed,mode='w',format=tarfile.USTAR_FORMAT) as archive:
   for name,body in sorted(files.items()):
    entry=tarfile.TarInfo('onion-service-discovery/'+name);entry.size=len(body);entry.mtime=epoch;entry.mode=0o755 if name=='node-php/bin/onion-service-discovery' else 0o644;entry.uid=entry.gid=0;entry.uname=entry.gname='';archive.addfile(entry,io.BytesIO(body))
+ (destination/'SBOM.cdx.json').write_bytes(files['release/SBOM.cdx.json'])
  digest=hashlib.sha256(artifact.read_bytes()).hexdigest();(destination/'SHA256SUMS').write_text(digest+'  '+artifact.name+'\n')
  (destination/'candidate-provenance.json').write_bytes(encoded({'_type':'https://in-toto.io/Statement/v1','subject':[{'name':artifact.name,'digest':{'sha256':digest}}],'predicateType':'https://slsa.dev/provenance/v1','predicate':{'buildDefinition':{'buildType':'https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/source-browser-candidate/v1','externalParameters':{'commit':commit},'resolvedDependencies':[{'uri':'git+https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery','digest':{'gitCommit':commit}}]},'runDetails':{'builder':{'id':'urn:onion-service-discovery:local-unattested-development-builder'}}}}))
  return {'artifact':str(artifact),'sha256':digest,'source_commit':commit,'production_approved':False}

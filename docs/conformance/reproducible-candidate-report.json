@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "source_commit": "98e930e6be6f252e0d0b8b61ac3a84437e9344a6",
+  "artifact_profile": "source-browser-v1",
+  "artifact_sha256": "7fa7b87b2be888c8bdede795ded6623d9421077bae3d1c26211eb9339349e288",
+  "bytes": 693114,
+  "builds": 2,
+  "comparison": "byte-identical separate output directories on the same host",
+  "independent_builder": false,
+  "sbom_format": "CycloneDX 1.6",
+  "sbom_components": 101,
+  "sbom_strict_validation": "PASS using cyclonedx-python-lib 9.1.0",
+  "provenance_authenticated": false,
+  "production_approved": false
+}

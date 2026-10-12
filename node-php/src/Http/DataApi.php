@@ -98,6 +98,7 @@ final readonly class DataApi
                     $wire = $this->blobs->get($index['hash']);
                     if ($wire === null || 'sha256:' . hash('sha256', "Onion Service Discovery/service-lookup/v1\0" . $wire) !== $index['hash']) { throw new ProtocolException('STORAGE_CORRUPT'); }
                     $entries = \OnionServiceDiscovery\Storage\StorageJson::decode($wire, 524288);
+                    if (($entries['too_large'] ?? false) === true) { throw new ProtocolException('RESPONSE_TOO_LARGE'); }
                     $hashes = $entries[$onion->hostname] ?? [];
                     if (($hashes['too_large'] ?? false) || count($hashes) > 256) { throw new ProtocolException('RESPONSE_TOO_LARGE'); }
                 }

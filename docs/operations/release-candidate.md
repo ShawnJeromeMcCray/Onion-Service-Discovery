@@ -30,3 +30,23 @@ authenticated builder provenance, dependency vulnerability/license review;
 immutable version/tag and signed TUF target metadata. Do not invent missing
 reviewers or use ephemeral test signers as a production authority. This tool
 never signs, tags, deploys or publishes an artifact automatically.
+
+
+Trusted push builds additionally request GitHub's established keyless provenance
+and SBOM attestations through digest-pinned actions. Pull-request builds do not
+sign attestations. The local candidate statement remains unsigned; authenticated
+CI evidence is separate and must actually succeed before claiming availability.
+These attestations identify a development build, not production approval or TUF
+release authorization. Verify the artifact with `gh attestation verify ARTIFACT
+--repo ShawnJeromeMcCray/Onion-Service-Discovery`, checking the expected workflow,
+source commit/ref and invocation against the intended reviewed release. The
+production acceptance policy must reject an unreviewed development ref even if
+it has a valid GitHub build attestation. An offline/verifiable Sigstore bundle and
+approved trust/policy are required when verification happens without connectivity;
+do not treat an unsigned local sidecar as such a bundle.
+
+For structural checks install the hash-locked Python validator and audit-tool
+requirements, then run `python tools/verify_candidate.py ARTIFACT`. It checks
+bounded archive entries without extraction, file-manifest hashes and the strict
+CycloneDX 1.6 schema. It never executes the package and explicitly reports that
+artifact authentication was not performed. TUF/signature verification is separate.

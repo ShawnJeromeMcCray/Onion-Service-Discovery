@@ -8,7 +8,14 @@ from record_format import message,content_hash,encode_bytes
 
 def key(label):return Ed25519PrivateKey.from_private_bytes(hashlib.sha256(('OSD BENCHMARK PUBLIC TEST ONLY '+label).encode()).digest())
 def public(k):return encode_bytes(k.public_key().public_bytes_raw(),'ed25519:')
+lookup_prefix=None
 def onion(label):
+ if lookup_prefix is not None and label.startswith('service-'):
+  for attempt in range(65536):
+   k=key('tor-'+label+'-attempt-'+str(attempt)).public_key().public_bytes_raw();v=b'\x03'
+   address=base64.b32encode(k+hashlib.sha3_256(b'.onion checksum'+k+v).digest()[:2]+v).decode().lower()+'.onion'
+   if hashlib.sha256(address.encode()).hexdigest().startswith(lookup_prefix):return address
+  raise ValueError('Bounded synthetic address-grind budget exhausted')
  k=key('tor-'+label).public_key().public_bytes_raw();v=b'\x03'
  return base64.b32encode(k+hashlib.sha3_256(b'.onion checksum'+k+v).digest()[:2]+v).decode().lower()+'.onion'
 def base(kind):return {'protocol':'Onion Service Discovery','protocol_version':1,'record_type':kind}
@@ -22,6 +29,10 @@ def generate(services,nodes):
   for n in nodekeys:records.append(sign({**base('direct_observation'),'node_identity_public_key':public(n),'onion':successor['onion'],'service_identity_public_key':public(k),'revision':2,'manifest_hash':content_hash(successor),'result':'SUCCESS_CURRENT','observed_at':'2026-10-12T00:00:00Z'},n))
  return records
 if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('output',type=Path);p.add_argument('--services',type=int,default=1000);p.add_argument('--nodes',type=int,default=5);a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('output',type=Path);p.add_argument('--services',type=int,default=1000);p.add_argument('--nodes',type=int,default=5);p.add_argument('--lookup-prefix');a=p.parse_args()
  if not 1<=a.services<=1000000 or not 1<=a.nodes<=100:raise SystemExit('Workload bounds invalid')
+ if a.lookup_prefix is not None:
+  import re
+  if re.fullmatch('[0-9a-f]{2}',a.lookup_prefix)is None:raise SystemExit('Exactly two hexadecimal prefix characters required')
+  lookup_prefix=a.lookup_prefix
  a.output.write_text('['+','.join(canonical_json(record) for record in generate(a.services,a.nodes))+']'+'\n');print(json.dumps({'services':a.services,'nodes':a.nodes,'bytes':a.output.stat().st_size}))
