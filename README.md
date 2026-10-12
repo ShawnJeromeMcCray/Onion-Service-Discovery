@@ -11,8 +11,9 @@ Technical identity evidence must not be presented as an assurance about content 
 - Import of 50 current specification documents with observed source links, modification times and integrity hashes.
 - [Decision register](docs/governance/decision-register.md) preserving all 50 owner/reviewer decisions without inferred approvals.
 - [Implementation status](docs/implementation-status.md) distinguishing requirements from verified behavior.
-- Strict Onion v3 and bounded JSON parsing in PHP, TypeScript and independent Python.
-- [66 shared input vectors](docs/conformance/input-subset.md) and a reproducible three-language conformance subset.
+- Strict Onion v3, bounded JSON, canonical bytes, signed-record schemas and Ed25519 verification in PHP, TypeScript and independent Python.
+- Deterministic evidence graphs for forks, exact revision chains, countersigned rotation and signed migration.
+- [123 black-box core cases per language](docs/conformance/core-report.json), with zero failures/skips in the current offline draft suite.
 - Dependency-free foundation integrity and credential checks.
 
 Run with Python 3.11 or newer:
@@ -41,3 +42,11 @@ No stable protocol or production claim is authorized by the current repository. 
 ## License
 
 Dedicated to the public domain under [CC0-1.0](LICENSE), as authorized by the project owner on 2026-10-12. Use, modification and redistribution are unrestricted to the extent permitted by applicable law. No warranty is provided. Third-party dependencies retain their own licenses.
+
+For the expanded draft core after installing locked dependencies:
+
+```sh
+.venv/bin/python protocol-conformance/runner.py --php-container
+```
+
+The runner imports no reference implementation code. It compares separate-process outputs with exact shared vectors. See docs/adr/002-integer-json-and-signed-byte-construction.md for the explicit draft byte rules and pending review.

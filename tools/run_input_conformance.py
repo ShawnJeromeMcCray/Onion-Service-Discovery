@@ -29,6 +29,8 @@ def main() -> int:
         ('python-vectors', [sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-v'], ROOT),
         ('php-address-vectors', php + ['node-php/tests/onion-address.php'], ROOT),
         ('php-json-vectors', php + ['node-php/tests/strict-json.php'], ROOT),
+        ('php-record-vectors', php + ['node-php/tests/protocol-core.php'], ROOT),
+        ('php-identity-sequences', php + ['node-php/tests/identity-sequences.php'], ROOT),
         ('typescript-typecheck', ['npm', 'run', 'check'], ROOT / 'web-local-search-client'),
         ('typescript-vectors', ['npm', 'test'], ROOT / 'web-local-search-client'),
     ]
@@ -51,7 +53,7 @@ def main() -> int:
             print(f'FAIL: {name}: execution failed or timed out')
     passed = all(result['status'] == 'PASS' for result in results)
     report = {
-        'profile': 'DRAFT_ADDRESS_JSON_INPUT_SUBSET',
+        'profile': 'DRAFT_CORE_UNIT_SUITES',
         'status': 'PASS' if passed else 'FAIL',
         'generated_at': datetime.now(timezone.utc).isoformat(),
         'shared_fixture_count': sum(len(json.loads(path.read_text())['cases']) for path in
@@ -59,7 +61,7 @@ def main() -> int:
         'php_container': PHP_IMAGE if args.php_container else None,
         'checks': results,
         'limitations': ['Not CORE-V1 conformance', 'Not browser compatibility evidence',
-                        'No signatures, identity state, transport or storage tested',
+                        'Transport, storage and browser compatibility not tested',
                         'No production release approval'],
     }
     if args.report:

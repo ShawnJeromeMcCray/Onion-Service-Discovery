@@ -1,0 +1,72 @@
+{
+  "type": "object",
+  "properties": {
+    "protocol": {
+      "const": "Onion Service Discovery"
+    },
+    "protocol_version": {
+      "const": 1
+    },
+    "record_type": {
+      "const": "service_identity_key_rotation"
+    },
+    "onion": {
+      "type": "string",
+      "minLength": 62,
+      "maxLength": 62,
+      "pattern": "^[a-z2-7]{56}\\.onion$"
+    },
+    "old_public_key": {
+      "type": "string",
+      "minLength": 51,
+      "maxLength": 51,
+      "pattern": "^ed25519:[A-Za-z0-9_-]{43}$"
+    },
+    "new_public_key": {
+      "type": "string",
+      "minLength": 51,
+      "maxLength": 51,
+      "pattern": "^ed25519:[A-Za-z0-9_-]{43}$"
+    },
+    "effective_revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "previous_state_hash": {
+      "type": "string",
+      "minLength": 71,
+      "maxLength": 71,
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "new_key_confirmation": {
+      "type": "string",
+      "minLength": 97,
+      "maxLength": 97,
+      "pattern": "^ed25519sig:[A-Za-z0-9_-]{86}$"
+    },
+    "old_key_signature": {
+      "type": "string",
+      "minLength": 97,
+      "maxLength": 97,
+      "pattern": "^ed25519sig:[A-Za-z0-9_-]{86}$"
+    }
+  },
+  "required": [
+    "protocol",
+    "protocol_version",
+    "record_type",
+    "onion",
+    "old_public_key",
+    "new_public_key",
+    "effective_revision",
+    "previous_state_hash",
+    "new_key_confirmation",
+    "old_key_signature"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/schemas/draft-v1/service_identity_key_rotation.json",
+  "title": "Onion Service Discovery service_identity_key_rotation",
+  "$comment": "Implementation draft; protocol freeze and human crypto approval are outstanding."
+}

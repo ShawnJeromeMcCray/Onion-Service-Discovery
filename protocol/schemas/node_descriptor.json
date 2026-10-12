@@ -1,0 +1,143 @@
+{
+  "type": "object",
+  "properties": {
+    "protocol": {
+      "const": "Onion Service Discovery"
+    },
+    "protocol_version": {
+      "const": 1
+    },
+    "record_type": {
+      "const": "node_descriptor"
+    },
+    "node_identity_public_key": {
+      "type": "string",
+      "minLength": 51,
+      "maxLength": 51,
+      "pattern": "^ed25519:[A-Za-z0-9_-]{43}$"
+    },
+    "node_onion": {
+      "type": "string",
+      "minLength": 62,
+      "maxLength": 62,
+      "pattern": "^[a-z2-7]{56}\\.onion$"
+    },
+    "descriptor_revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "previous_descriptor_hash": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 71,
+          "maxLength": 71,
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "supported_protocol_versions": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "contains": {
+        "const": 1
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64,
+        "pattern": "^[a-z0-9][a-z0-9.-]*$"
+      },
+      "maxItems": 32,
+      "uniqueItems": true
+    },
+    "software": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[^\u0000-\u001f\u007f-\u009f]*$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[^\u0000-\u001f\u007f-\u009f]*$"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "signature": {
+      "type": "string",
+      "minLength": 97,
+      "maxLength": 97,
+      "pattern": "^ed25519sig:[A-Za-z0-9_-]{86}$"
+    }
+  },
+  "required": [
+    "protocol",
+    "protocol_version",
+    "record_type",
+    "node_identity_public_key",
+    "node_onion",
+    "descriptor_revision",
+    "previous_descriptor_hash",
+    "supported_protocol_versions",
+    "capabilities",
+    "software",
+    "signature"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/schemas/draft-v1/node_descriptor.json",
+  "title": "Onion Service Discovery node_descriptor",
+  "$comment": "Implementation draft; protocol freeze and human crypto approval are outstanding.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "descriptor_revision": {
+            "const": 1
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "previous_descriptor_hash": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "previous_descriptor_hash": {
+            "type": "string",
+            "minLength": 71,
+            "maxLength": 71,
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        }
+      }
+    }
+  ]
+}

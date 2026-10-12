@@ -1,4 +1,4 @@
-name: Foundation and input conformance
+name: Protocol core and conformance
 
 on:
   push:
@@ -23,16 +23,32 @@ jobs:
       - name: Install locked development dependencies
         working-directory: web-local-search-client
         run: npm ci --ignore-scripts --no-fund
+      - name: Install hash-locked Python validator dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r validator-python/requirements.lock
+      - name: Install locked PHP dependencies
+        run: |
+          docker pull composer@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac
+          docker run --rm --user "$(id -u):$(id -g)" -e COMPOSER_HOME=/tmp/composer --mount "type=bind,src=$GITHUB_WORKSPACE/node-php,dst=/app" --workdir /app composer@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac composer install --no-plugins --no-scripts --no-interaction --prefer-dist
+      - name: Verify reproducible schemas and vectors
+        run: |
+          .venv/bin/python tools/generate_schemas.py
+          .venv/bin/python tools/generate_protocol_vectors.py
+          npm --prefix web-local-search-client run schemas:build
+          git diff --exit-code -- protocol/schemas protocol/test-vectors web-local-search-client/generated
       - name: Pull pinned PHP test image
         run: docker pull php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3
       - name: Run three-language input conformance
-        run: python3 tools/run_input_conformance.py --php-container
+        run: .venv/bin/python tools/run_input_conformance.py --php-container
+      - name: Run independent black-box conformance
+        run: .venv/bin/python protocol-conformance/runner.py --php-container
       - name: Audit locked dependencies
         working-directory: web-local-search-client
         run: npm audit
       - name: Check source corpus and credential patterns
         run: python3 tools/check_repository.py
       - name: Test tamper and duplicate rejection
-        run: python3 -m unittest discover -s tests -v
+        run: .venv/bin/python -m unittest discover -s tests -v
       - name: Check whitespace
         run: git diff --check

@@ -1,0 +1,22 @@
+{
+  "name": "onion-service-discovery/reference-node",
+  "description": "Onion Service Discovery reference Node and offline protocol core",
+  "type": "project",
+  "license": "CC0-1.0",
+  "require": {
+    "php": "^8.4",
+    "ext-json": "*",
+    "ext-sodium": "*",
+    "ext-iconv": "*",
+    "opis/json-schema": "^2.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "OnionServiceDiscovery\\": "src/"
+    }
+  },
+  "config": {
+    "allow-plugins": false,
+    "sort-packages": true
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "status": "DRAFT",
+  "dialect": "https://json-schema.org/draft/2020-12/schema",
+  "record_types": [
+    "direct_observation",
+    "node_descriptor",
+    "onion_service_migration",
+    "service_identity_key_rotation",
+    "service_manifest",
+    "snapshot_descriptor"
+  ]
+}

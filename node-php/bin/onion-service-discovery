@@ -1,0 +1,98 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+require dirname(__DIR__) . '/vendor/autoload.php';
+
+use OnionServiceDiscovery\Crypto\CanonicalJson;
+use OnionServiceDiscovery\Domain\OnionAddress;
+use OnionServiceDiscovery\Protocol\IdentityDeriver;
+use OnionServiceDiscovery\Protocol\ProtocolException;
+use OnionServiceDiscovery\Protocol\RecordVerifier;
+use OnionServiceDiscovery\Validation\StrictJson;
+
+function boundedFile(string $path, int $maxBytes): string
+{
+    if (str_contains($path, '://') || !is_file($path) || !is_readable($path)) {
+        throw new ProtocolException('INPUT_FILE_UNAVAILABLE');
+    }
+    $stream = fopen($path, 'rb');
+    if ($stream === false) {
+        throw new ProtocolException('INPUT_FILE_UNAVAILABLE');
+    }
+    try {
+        $bytes = stream_get_contents($stream, $maxBytes + 1);
+    } finally {
+        fclose($stream);
+    }
+    if ($bytes === false) {
+        throw new ProtocolException('INPUT_FILE_UNAVAILABLE');
+    }
+    if (strlen($bytes) > $maxBytes) {
+        throw new ProtocolException('DOCUMENT_TOO_LARGE');
+    }
+    return $bytes;
+}
+
+$arguments = array_slice($argv, 1);
+$command = array_shift($arguments) ?? 'help';
+$arguments = array_values(array_filter($arguments, static fn (string $value): bool => $value !== '--json'));
+$root = dirname(__DIR__, 2);
+$verifier = new RecordVerifier($root . '/protocol/schemas');
+
+try {
+    if ($command === 'help') {
+        $output = ['status' => 'DEVELOPMENT', 'commands' => ['manifest:verify <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>'], 'network_side_effects' => false];
+    } elseif (in_array($command, ['manifest:verify', 'validate-manifest', 'protocol:inspect', 'protocol:hash'], true)) {
+        $path = array_shift($arguments);
+        if ($path === null) {
+            throw new ProtocolException('USAGE_ERROR');
+        }
+        $binding = null;
+        if ($arguments !== []) {
+            if (count($arguments) !== 2 || $arguments[0] !== '--expected-onion') {
+                throw new ProtocolException('USAGE_ERROR');
+            }
+            $binding = OnionAddress::parse($arguments[1]);
+        }
+        $record = $verifier->verifyWire(boundedFile($path, 65536), $binding);
+        if (in_array($command, ['manifest:verify', 'validate-manifest'], true) && $record->type !== 'service_manifest') {
+            throw new ProtocolException('SCHEMA_INVALID');
+        }
+        $output = ['status' => 'PASS', 'record_type' => $record->type, 'content_hash' => $record->contentHash, 'signature_valid' => true, 'directly_observed' => false];
+    } elseif (in_array($command, ['protocol:canonicalize', 'canonicalize'], true)) {
+        if (count($arguments) !== 1) {
+            throw new ProtocolException('USAGE_ERROR');
+        }
+        $bytes = CanonicalJson::encode(StrictJson::parse(boundedFile($arguments[0], 65536), 65536));
+        $output = ['status' => 'PASS', 'canonical_hex' => bin2hex($bytes)];
+    } elseif (in_array($command, ['protocol:apply-sequence', 'apply-sequence'], true)) {
+        if (count($arguments) !== 1) {
+            throw new ProtocolException('USAGE_ERROR');
+        }
+        $sequence = StrictJson::parse(boundedFile($arguments[0], 1048576), 1048576);
+        if (!isset($sequence->records) || !is_array($sequence->records) || count($sequence->records) > 256) {
+            throw new ProtocolException('SCHEMA_INVALID');
+        }
+        $records = array_map(static function (mixed $record) use ($verifier) {
+            if (!$record instanceof stdClass) {
+                throw new ProtocolException('SCHEMA_INVALID');
+            }
+            return $verifier->verify($record);
+        }, $sequence->records);
+        $max = $sequence->max_records ?? 100000;
+        if (!is_int($max)) {
+            throw new ProtocolException('SCHEMA_INVALID');
+        }
+        $output = ['status' => 'PASS', 'state' => IdentityDeriver::derive($records, $max)];
+    } else {
+        throw new ProtocolException('USAGE_ERROR');
+    }
+    echo json_encode($output, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), PHP_EOL;
+} catch (InvalidArgumentException $error) {
+    echo json_encode(['status' => 'FAIL', 'error' => $error->getMessage()], JSON_THROW_ON_ERROR), PHP_EOL;
+    exit($error->getMessage() === 'USAGE_ERROR' ? 2 : 3);
+} catch (Throwable) {
+    echo '{"status":"FAIL","error":"INTERNAL_ERROR"}', PHP_EOL;
+    exit(8);
+}

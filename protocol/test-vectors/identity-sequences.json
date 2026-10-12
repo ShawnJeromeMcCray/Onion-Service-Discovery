@@ -1,0 +1,2750 @@
+{
+  "format_version": 1,
+  "status": "DRAFT_IDENTITY_GRAPH",
+  "cases": [
+    {
+      "id": "genesis",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 1,
+            "identity_state": "VALID",
+            "current_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": null,
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 1,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "Fictional books and multilingual documentation.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "valid-successor",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 2,
+            "identity_state": "VALID",
+            "current_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 2,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "A revised fictional collection.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "stale-replay-and-duplicates",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 2,
+            "identity_state": "VALID",
+            "current_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 2,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "A revised fictional collection.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "fork-same-revision",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Conflicting second revision",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:u0WXgI1GPkfO_5Qjz_DgtqFRVoOaqgbPCiKr_lOH6uZk6cbFHDWK6PCJJ3_YzXzNl-VxQhv_gPx7cRjnTNy6CQ"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 2,
+            "identity_state": "FORKED",
+            "current_hash": null,
+            "current_manifest": null,
+            "discoverability": "UNKNOWN",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "sha256:1929f7d21d0c50ef5425c6087e18499d1119d52fef829129f8e4475c317a421f",
+              "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [
+              {
+                "revision": 2,
+                "hashes": [
+                  "sha256:1929f7d21d0c50ef5425c6087e18499d1119d52fef829129f8e4475c317a421f",
+                  "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583"
+                ]
+              }
+            ],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "later-revision-does-not-clear-fork",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 3,
+          "previous_manifest_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Third revision",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:KWo10EM5eGNfHVXa8hhqK_H_YjKDMV4zxUnDFvP4uPgCaDh_DozE32cxocqTkc0FmRfdyv2mmsoFZ4XYMRIsDQ"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Conflicting second revision",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:u0WXgI1GPkfO_5Qjz_DgtqFRVoOaqgbPCiKr_lOH6uZk6cbFHDWK6PCJJ3_YzXzNl-VxQhv_gPx7cRjnTNy6CQ"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 3,
+            "identity_state": "FORKED",
+            "current_hash": null,
+            "current_manifest": null,
+            "discoverability": "UNKNOWN",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "sha256:1929f7d21d0c50ef5425c6087e18499d1119d52fef829129f8e4475c317a421f",
+              "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+              "sha256:4672a6b8f7f6b396211eb8e8e3fa3108a9edace12c9c914f0b2aa51903a92e67"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [
+              {
+                "revision": 2,
+                "hashes": [
+                  "sha256:1929f7d21d0c50ef5425c6087e18499d1119d52fef829129f8e4475c317a421f",
+                  "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583"
+                ]
+              }
+            ],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "rotation-not-committed-before-new-manifest",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_identity_key_rotation",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "old_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "new_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "effective_revision": 2,
+          "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "old_key_signature": "ed25519sig:XkLZpCc15yL2aahXWzo174YdQu0RouWxJNDb6HDc--FIQ0Zaen5OLubxNbwoS0pc_S2MK-OAKbCjM6h1JeJDBA",
+          "new_key_confirmation": "ed25519sig:RS7yU_cDM_aPg4vXHgHYJ7JOljBqH0uwEuxk5rdg9BbRRbMRyIc2MF06qIgDJDTxE9VxRSnIICIv-b0hz2kVBw"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 1,
+            "identity_state": "VALID",
+            "current_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": null,
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 1,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "Fictional books and multilingual documentation.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "new-key-needs-rotation",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:K4xDV7DMqh2KenLW4KYIuFrsCE89Rn4sRVssYOLFP9cV6ywcGpqR8R4d5oQFBCyAorDJRRXALU55nRiawd_VCQ"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 1,
+            "identity_state": "VALID",
+            "current_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": null,
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 1,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "Fictional books and multilingual documentation.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {
+          "sha256:834b1bac0622e52e3304cc2b0d6aa6b1e8157b873aa8fa5be029a6d3cac02ad5": "KEY_ROTATION_INVALID"
+        }
+      }
+    },
+    {
+      "id": "valid-rotation",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_identity_key_rotation",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "old_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "new_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "effective_revision": 2,
+          "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "old_key_signature": "ed25519sig:XkLZpCc15yL2aahXWzo174YdQu0RouWxJNDb6HDc--FIQ0Zaen5OLubxNbwoS0pc_S2MK-OAKbCjM6h1JeJDBA",
+          "new_key_confirmation": "ed25519sig:RS7yU_cDM_aPg4vXHgHYJ7JOljBqH0uwEuxk5rdg9BbRRbMRyIc2MF06qIgDJDTxE9VxRSnIICIv-b0hz2kVBw"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:K4xDV7DMqh2KenLW4KYIuFrsCE89Rn4sRVssYOLFP9cV6ywcGpqR8R4d5oQFBCyAorDJRRXALU55nRiawd_VCQ"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 2,
+            "identity_state": "VALID",
+            "current_hash": "sha256:834b1bac0622e52e3304cc2b0d6aa6b1e8157b873aa8fa5be029a6d3cac02ad5",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 2,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "A revised fictional collection.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+              "signature": "ed25519sig:K4xDV7DMqh2KenLW4KYIuFrsCE89Rn4sRVssYOLFP9cV6ywcGpqR8R4d5oQFBCyAorDJRRXALU55nRiawd_VCQ"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "sha256:834b1bac0622e52e3304cc2b0d6aa6b1e8157b873aa8fa5be029a6d3cac02ad5"
+            ],
+            "rotation_hashes": [
+              "sha256:e6f970571068f8362b327312a59ea23718a1c4bb6260b7b65fc4859f38598966"
+            ],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "new-onion-needs-migration",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:XjT-dTWsf4FrsaX79LKzog1jg54an-VlfWAF-1c_A1NB18qOYi_fQEO41Qy2bAPjvuLtQPLLwRKzKbwgLnosAQ"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 1,
+            "identity_state": "VALID",
+            "current_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": null,
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 1,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "Fictional books and multilingual documentation.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {
+          "sha256:710cd85aa6702c2dafad16b5a0c389683b0e299ff28763f3b9263ae8efb6cc88": "MIGRATION_INVALID"
+        }
+      }
+    },
+    {
+      "id": "valid-migration",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "onion_service_migration",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "from_onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "to_onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "effective_revision": 2,
+          "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "service_identity_signature": "ed25519sig:tGwyXVavILFgMg3Gjg_T6CK-5v8KxC4nSGj2irMetreMwflfx9szKOiwDDVooHvXAVN5pc2Tib9_MZhkTcTNDw"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:XjT-dTWsf4FrsaX79LKzog1jg54an-VlfWAF-1c_A1NB18qOYi_fQEO41Qy2bAPjvuLtQPLLwRKzKbwgLnosAQ"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 2,
+            "identity_state": "VALID",
+            "current_hash": "sha256:710cd85aa6702c2dafad16b5a0c389683b0e299ff28763f3b9263ae8efb6cc88",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+              "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 2,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "A revised fictional collection.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:XjT-dTWsf4FrsaX79LKzog1jg54an-VlfWAF-1c_A1NB18qOYi_fQEO41Qy2bAPjvuLtQPLLwRKzKbwgLnosAQ"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "sha256:710cd85aa6702c2dafad16b5a0c389683b0e299ff28763f3b9263ae8efb6cc88"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [
+              "sha256:febcd01f54383a02bfb9bfa8b3519c76fa3ff95b45b99e410ce6d13f13eac03c"
+            ],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "combined-transition-atomic",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_identity_key_rotation",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "old_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "new_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "effective_revision": 2,
+          "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "old_key_signature": "ed25519sig:XkLZpCc15yL2aahXWzo174YdQu0RouWxJNDb6HDc--FIQ0Zaen5OLubxNbwoS0pc_S2MK-OAKbCjM6h1JeJDBA",
+          "new_key_confirmation": "ed25519sig:RS7yU_cDM_aPg4vXHgHYJ7JOljBqH0uwEuxk5rdg9BbRRbMRyIc2MF06qIgDJDTxE9VxRSnIICIv-b0hz2kVBw"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "onion_service_migration",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "from_onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "to_onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "effective_revision": 2,
+          "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "service_identity_signature": "ed25519sig:tGwyXVavILFgMg3Gjg_T6CK-5v8KxC4nSGj2irMetreMwflfx9szKOiwDDVooHvXAVN5pc2Tib9_MZhkTcTNDw"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:ZPCAYMP_Cg-t_fREDPDETd4Ij80SOslkjZDnXulVxaITwnMGTng3vODJLkanQ6H9Nbue6udtJSJAjzT6fyBuDg"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 2,
+            "identity_state": "VALID",
+            "current_hash": "sha256:d13b391736ee1d813e3045e93d5760e0bcf902e4e7c8684569e50636abfff9a0",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+              "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 2,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "A revised fictional collection.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+              "signature": "ed25519sig:ZPCAYMP_Cg-t_fREDPDETd4Ij80SOslkjZDnXulVxaITwnMGTng3vODJLkanQ6H9Nbue6udtJSJAjzT6fyBuDg"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "sha256:d13b391736ee1d813e3045e93d5760e0bcf902e4e7c8684569e50636abfff9a0"
+            ],
+            "rotation_hashes": [
+              "sha256:e6f970571068f8362b327312a59ea23718a1c4bb6260b7b65fc4859f38598966"
+            ],
+            "migration_hashes": [
+              "sha256:febcd01f54383a02bfb9bfa8b3519c76fa3ff95b45b99e410ce6d13f13eac03c"
+            ],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "partial-combined-transition-is-not-rotation",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_identity_key_rotation",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "old_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "new_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "effective_revision": 2,
+          "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "old_key_signature": "ed25519sig:XkLZpCc15yL2aahXWzo174YdQu0RouWxJNDb6HDc--FIQ0Zaen5OLubxNbwoS0pc_S2MK-OAKbCjM6h1JeJDBA",
+          "new_key_confirmation": "ed25519sig:RS7yU_cDM_aPg4vXHgHYJ7JOljBqH0uwEuxk5rdg9BbRRbMRyIc2MF06qIgDJDTxE9VxRSnIICIv-b0hz2kVBw"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:ZPCAYMP_Cg-t_fREDPDETd4Ij80SOslkjZDnXulVxaITwnMGTng3vODJLkanQ6H9Nbue6udtJSJAjzT6fyBuDg"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 1,
+            "identity_state": "VALID",
+            "current_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": null,
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 1,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "Fictional books and multilingual documentation.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {
+          "sha256:d13b391736ee1d813e3045e93d5760e0bcf902e4e7c8684569e50636abfff9a0": "MIGRATION_INVALID"
+        }
+      }
+    },
+    {
+      "id": "competing-rotations-without-new-manifests",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_identity_key_rotation",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "old_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "new_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "effective_revision": 2,
+          "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "old_key_signature": "ed25519sig:XkLZpCc15yL2aahXWzo174YdQu0RouWxJNDb6HDc--FIQ0Zaen5OLubxNbwoS0pc_S2MK-OAKbCjM6h1JeJDBA",
+          "new_key_confirmation": "ed25519sig:RS7yU_cDM_aPg4vXHgHYJ7JOljBqH0uwEuxk5rdg9BbRRbMRyIc2MF06qIgDJDTxE9VxRSnIICIv-b0hz2kVBw"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_identity_key_rotation",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "old_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "new_public_key": "ed25519:q_kdDi-teuFe1i7AI9akMBkqsaKFViLxncj5sLDPxlM",
+          "effective_revision": 2,
+          "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "old_key_signature": "ed25519sig:O_FW7PU5pPXXyGthWJVhQOukyEAYPqu8Xcmj3GPb72p0z0udFSBk2b6FXk9sLSJdvzC25bEequ5H1rOUIeyRAw",
+          "new_key_confirmation": "ed25519sig:feujCt9wtvM2IlBYV6VJaRZ8Dk2KjHgyXS_Qf9pxJs5prsDQYmRTrG77Iq0x2OdQE4LOouhTKqPhpyvHWQjVAQ"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 1,
+            "identity_state": "FORKED",
+            "current_hash": null,
+            "current_manifest": null,
+            "discoverability": "UNKNOWN",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": [
+              {
+                "type": "KEY_ROTATION_CONFLICT",
+                "previous_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+                "record_hashes": [
+                  "sha256:766872ac5711b0f4d18fbe97459882a1b0553c6dc5bb76b1ae54e83f9df1b9e6",
+                  "sha256:e6f970571068f8362b327312a59ea23718a1c4bb6260b7b65fc4859f38598966"
+                ]
+              }
+            ]
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "competing-migrations-without-new-manifests",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "onion_service_migration",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "from_onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "to_onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "effective_revision": 2,
+          "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "service_identity_signature": "ed25519sig:tGwyXVavILFgMg3Gjg_T6CK-5v8KxC4nSGj2irMetreMwflfx9szKOiwDDVooHvXAVN5pc2Tib9_MZhkTcTNDw"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "onion_service_migration",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "from_onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "to_onion": "32o2tuiv2yycgn2o5qv5ff4tfsb7ytiats25pzx2i4gvrjl3tyop7mqd.onion",
+          "effective_revision": 2,
+          "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "service_identity_signature": "ed25519sig:E9W-12wzLe5h0pExYMvTmMKzBrtPOrhpRDUE_JV7iz_XaO94D86mtUKPkHI_89U9RkNmJHBKeLpBMN7sFXPCBA"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 1,
+            "identity_state": "FORKED",
+            "current_hash": null,
+            "current_manifest": null,
+            "discoverability": "UNKNOWN",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": [
+              {
+                "type": "MIGRATION_CONFLICT",
+                "previous_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+                "record_hashes": [
+                  "sha256:a7e102f95c48d86364ea4eff03bb7ec8702b397c0b729c045765a02f9134aec9",
+                  "sha256:febcd01f54383a02bfb9bfa8b3519c76fa3ff95b45b99e410ce6d13f13eac03c"
+                ]
+              }
+            ]
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "withdrawal-retains-history",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": false,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:sTR8sY-LTWErg0H_yA0oSAqfCKlA60KM_R-Qo00o5cGKODH7cjKjJPl4IoOD8rqzP6ECqElXu_49gzB2J75PCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 2,
+            "identity_state": "VALID",
+            "current_hash": "sha256:a4ede6c5bae8cebf605d61b75da74cf3c651879f4efedc3b5f2a854076b69346",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": false,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 2,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "A revised fictional collection.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:sTR8sY-LTWErg0H_yA0oSAqfCKlA60KM_R-Qo00o5cGKODH7cjKjJPl4IoOD8rqzP6ECqElXu_49gzB2J75PCA"
+            },
+            "discoverability": "WITHDRAWN",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "sha256:a4ede6c5bae8cebf605d61b75da74cf3c651879f4efedc3b5f2a854076b69346"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "orphan-is-not-continuity",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [],
+        "pending_hashes": [
+          "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583"
+        ],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "reverse-chain-order",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 3,
+          "previous_manifest_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Third revision",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:KWo10EM5eGNfHVXa8hhqK_H_YjKDMV4zxUnDFvP4uPgCaDh_DozE32cxocqTkc0FmRfdyv2mmsoFZ4XYMRIsDQ"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 3,
+            "identity_state": "VALID",
+            "current_hash": "sha256:4672a6b8f7f6b396211eb8e8e3fa3108a9edace12c9c914f0b2aa51903a92e67",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 3,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "A revised fictional collection.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Third revision"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:KWo10EM5eGNfHVXa8hhqK_H_YjKDMV4zxUnDFvP4uPgCaDh_DozE32cxocqTkc0FmRfdyv2mmsoFZ4XYMRIsDQ"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+              "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+              "sha256:4672a6b8f7f6b396211eb8e8e3fa3108a9edace12c9c914f0b2aa51903a92e67"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "revision-gap-is-rejected",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 3,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Third revision",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:cu5cfKtGTOpMCHyRT07n0GJYeoTphqLOmwhBcPUC6CYD5HCQ7sjC6cBnH9_H3jsjNq26WxzSQ0oIEHw1_BeLBA"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 1,
+            "identity_state": "VALID",
+            "current_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": null,
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 1,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "Fictional books and multilingual documentation.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {
+          "sha256:dd09eeb7b4eebe8f947038ff76c21a95875ee63ed59dc19a14068914ed43c427": "REVISION_CHAIN_BROKEN"
+        }
+      }
+    },
+    {
+      "id": "same-onion-distinct-identities-remain-separate",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:q_kdDi-teuFe1i7AI9akMBkqsaKFViLxncj5sLDPxlM",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:jAdrOiVmCsbwAulvPPxHhnRUN03iW-utQv-u0Xj2ClbwAC0iFXsMuvmnBM4GDhTI_FXbsDHs8OgH2mLXpxa9Dg"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:q_kdDi-teuFe1i7AI9akMBkqsaKFViLxncj5sLDPxlM",
+            "highest_revision": 1,
+            "identity_state": "VALID",
+            "current_hash": "sha256:449b5f962cbd984e07002e4e286ffe3388aba6df871eae3e06c13e496431a4cf",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": null,
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 1,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "Fictional books and multilingual documentation.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:q_kdDi-teuFe1i7AI9akMBkqsaKFViLxncj5sLDPxlM",
+              "signature": "ed25519sig:jAdrOiVmCsbwAulvPPxHhnRUN03iW-utQv-u0Xj2ClbwAC0iFXsMuvmnBM4GDhTI_FXbsDHs8OgH2mLXpxa9Dg"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:449b5f962cbd984e07002e4e286ffe3388aba6df871eae3e06c13e496431a4cf"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          },
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 1,
+            "identity_state": "VALID",
+            "current_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": null,
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 1,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "Fictional books and multilingual documentation.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "imported-observation-does-not-change-identity",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "direct_observation",
+          "node_identity_public_key": "ed25519:KRkwDM9pfYl3yAVDtTTgWLNVvZjHCYO37MkNH8EyiNY",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "result": "SUCCESS_CURRENT",
+          "observed_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:bnTnZ3rLIUe4P4yICttpDbB5IDMiGzH-kTHc9kt-O-e9fa4qQ9CR8l4IGo-02b3SPI5m9AosovM-Nzx-tSAfAg"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "expected": {
+        "identities": [
+          {
+            "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "highest_revision": 1,
+            "identity_state": "VALID",
+            "current_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "current_manifest": {
+              "discovery": {
+                "discover_services": false,
+                "mirror_directory": false,
+                "publish_service": true,
+                "sync_with_peers": false
+              },
+              "links": {
+                "clearnet": [],
+                "related_onion_services": []
+              },
+              "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+              "previous_manifest_hash": null,
+              "protocol": "Onion Service Discovery",
+              "protocol_version": 1,
+              "published_at": "2026-10-12T00:00:00Z",
+              "record_type": "service_manifest",
+              "revision": 1,
+              "service": {
+                "categories": [
+                  "books",
+                  "documentation"
+                ],
+                "description": "Fictional books and multilingual documentation.",
+                "languages": [
+                  "de",
+                  "en"
+                ],
+                "name": "Synthetic Library"
+              },
+              "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+              "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+            },
+            "discoverability": "PUBLISHED",
+            "history_hashes": [
+              "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+            ],
+            "rotation_hashes": [],
+            "migration_hashes": [],
+            "conflicts": [],
+            "transition_conflicts": []
+          }
+        ],
+        "pending_hashes": [],
+        "rejected": {}
+      }
+    },
+    {
+      "id": "work-limit-is-finite",
+      "records": [
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 1,
+          "previous_manifest_hash": null,
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "Fictional books and multilingual documentation.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+        },
+        {
+          "protocol": "Onion Service Discovery",
+          "protocol_version": 1,
+          "record_type": "service_manifest",
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "revision": 2,
+          "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "discovery": {
+            "publish_service": true,
+            "mirror_directory": false,
+            "discover_services": false,
+            "sync_with_peers": false
+          },
+          "service": {
+            "name": "Synthetic Library",
+            "description": "A revised fictional collection.",
+            "languages": [
+              "de",
+              "en"
+            ],
+            "categories": [
+              "books",
+              "documentation"
+            ]
+          },
+          "links": {
+            "related_onion_services": [],
+            "clearnet": []
+          },
+          "published_at": "2026-10-12T00:00:00Z",
+          "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+        }
+      ],
+      "requirements": [
+        "FORMAL-REV-001",
+        "FORMAL-REV-003",
+        "FORMAL-KEY-004",
+        "FORMAL-MIG-001"
+      ],
+      "max_records": 1,
+      "error": "WORK_BUDGET_EXHAUSTED"
+    }
+  ]
+}

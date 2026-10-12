@@ -1,0 +1,46 @@
+{
+  "format_version": 1,
+  "status": "INTEGER_SUBSET",
+  "cases": [
+    {
+      "id": "ordering",
+      "input": "{\"z\":0,\"a\":1}",
+      "expected_hex": "7b2261223a312c227a223a307d"
+    },
+    {
+      "id": "integer-key-order",
+      "input": "{\"2\":2,\"10\":10,\"1\":1}",
+      "expected_hex": "7b2231223a312c223130223a31302c2232223a327d"
+    },
+    {
+      "id": "nested-order",
+      "input": "{\"z\":[{\"b\":2,\"a\":1}],\"a\":{}}",
+      "expected_hex": "7b2261223a7b7d2c227a223a5b7b2261223a312c2262223a327d5d7d"
+    },
+    {
+      "id": "line-separators",
+      "input": "{\"s\": \"\u2028\u2029\"}",
+      "expected_hex": "7b2273223a22e280a8e280a9227d"
+    },
+    {
+      "id": "unicode-sort",
+      "input": "{\"\ufb33\": \"Hebrew\", \"\ud83d\ude00\": \"Emoji\", \"\u20ac\": \"Euro\", \"\u00f6\": \"Latin\", \"\u0080\": \"Control\", \"1\": \"One\", \"\\r\": \"Return\"}",
+      "expected_hex": "7b225c72223a2252657475726e222c2231223a224f6e65222c22c280223a22436f6e74726f6c222c22c3b6223a224c6174696e222c22e282ac223a224575726f222c22f09f9880223a22456d6f6a69222c22efacb3223a22486562726577227d"
+    },
+    {
+      "id": "escapes",
+      "input": "{\"s\":\"\\u000f\\b\\t\\n\\f\\r\\\"\\\\\\/\"}",
+      "expected_hex": "7b2273223a225c75303030665c625c745c6e5c665c725c225c5c2f227d"
+    },
+    {
+      "id": "no-unicode-normalization",
+      "input": "{\"s\":\"e\\u0301\"}",
+      "expected_hex": "7b2273223a2265cc81227d"
+    },
+    {
+      "id": "literals",
+      "input": "{\"z\":null,\"a\":[true,false,0,9007199254740991]}",
+      "expected_hex": "7b2261223a5b747275652c66616c73652c302c393030373139393235343734303939315d2c227a223a6e756c6c7d"
+    }
+  ]
+}
