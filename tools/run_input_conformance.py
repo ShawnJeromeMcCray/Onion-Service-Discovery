@@ -17,13 +17,14 @@ PHP_IMAGE = 'php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--php-image', choices=['php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3', 'php@sha256:1d2cf2b7d715b5b3aa959f0150ccbcc7b71e0181b637e443abf40a7fb56bf79a'], default=PHP_IMAGE)
     parser.add_argument('--php-container', action='store_true', help='Use the pinned PHP CLI test image; Docker is required')
     parser.add_argument('--report', type=Path)
     args = parser.parse_args()
     php = ['php']
     if args.php_container:
         php = ['docker', 'run', '--rm', '--network', 'none', '--mount',
-               f'type=bind,src={ROOT},dst=/app,readonly', '--workdir', '/app', PHP_IMAGE, 'php']
+               f'type=bind,src={ROOT},dst=/app,readonly', '--workdir', '/app', args.php_image, 'php']
     jobs = [
         ('browser-client-build', ['npm','run','build'], ROOT / 'web-local-search-client'),
         ('repository-integrity', [sys.executable, 'tools/check_repository.py'], ROOT),
@@ -35,7 +36,10 @@ def main() -> int:
         ('php-node-initializer', php + ['node-php/tests/node-initializer.php'], ROOT),
         ('php-client-relay-controlled', php + ['node-php/tests/client-relay.php'], ROOT),
         ('php-client-host', php + ['node-php/tests/client-host.php'], ROOT),
+        ('php-public-blobs', php + ['node-php/tests/public-blobs.php'], ROOT),
         ('php-public-evidence', php + ['node-php/tests/public-evidence.php'], ROOT),
+        ('php-operator-cli', php + ['node-php/tests/operator-cli.php'], ROOT),
+        ('php-read-only-diagnostics', php + ['node-php/tests/read-only-diagnostics.php'], ROOT),
         ('php-configuration', php + ['node-php/tests/configuration.php'], ROOT),
         ('php-snapshot-chunks', php + ['node-php/tests/snapshot-chunks.php'], ROOT),
         ('php-snapshot-producer', php + ['node-php/tests/snapshot-producer.php'], ROOT),
@@ -44,6 +48,7 @@ def main() -> int:
         ('php-candidate-queue', php + ['node-php/tests/candidate-queue.php'], ROOT),
         ('php-direct-verification-controlled', php + ['node-php/tests/direct-verifier.php'], ROOT),
         ('php-storage-contract', php + ['node-php/tests/storage-conformance.php'], ROOT),
+        ('php-storage-backup', php + ['node-php/tests/storage-backup.php'], ROOT),
         ('php-storage-archive', php + ['node-php/tests/storage-archive.php'], ROOT),
         ('php-storage-crash-recovery', php + ['node-php/tests/storage-crash.php'], ROOT),
         ('php-tor-transport-controlled', php + ['node-php/tests/tor-transport.php'], ROOT),
@@ -79,10 +84,10 @@ def main() -> int:
         'generated_at': datetime.now(timezone.utc).isoformat(),
         'shared_fixture_count': sum(len(json.loads(path.read_text()).get('cases',[])) for path in
                                     (ROOT / 'protocol/test-vectors').glob('*.json')),
-        'php_container': PHP_IMAGE if args.php_container else None,
+        'php_container': args.php_image if args.php_container else None,
         'checks': results,
         'limitations': ['Not CORE-V1 conformance', 'Not browser compatibility evidence',
-                        'Tor transport and browser compatibility not tested; storage power-loss behavior not established',
+                        'Tor transport tested only through controlled loopback SOCKS; not live Tor or actual Tor Browser/Android; physical power-loss not established',
                         'No production release approval'],
     }
     if args.report:

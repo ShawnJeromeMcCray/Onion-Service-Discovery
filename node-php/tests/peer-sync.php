@@ -50,6 +50,9 @@ $producer=new SnapshotProducer($source,$blobs,$verifier,$signer); $first=$produc
 $target=new SQLiteStore($root.'/target.sqlite',create:true); PeerRegistry::add($target,OnionAddress::parse($onion),$signer->publicKey());
 $result=runPeer($api,$root.'/target.sqlite',$onion,1700000000); if($result['status']!=='CURRENT'||$result['generation']!==1) { throw new RuntimeException('initial sync: '.json_encode($result)); }
 $identity=[]; foreach($target->snapshot()['records'] as $hash=>$metadata) { $identity[]=$verifier->verifyWire($target->readRecord($hash)); }
+$privateState=$target->snapshot();
+if(count($privateState['tables']['assertions'])<3||count($privateState['tables']['candidates'])!==1) { throw new RuntimeException('remote provenance/discovery queue missing'); }
+foreach($privateState['tables']['assertions'] as $assertion) { if($assertion['kind']!=='REMOTE_PROVENANCE'||$assertion['sources'][0]['expires_at']!==1700604800) { throw new RuntimeException('assertion retention/boundary'); } }
 if(IdentityDeriver::derive($identity)['identities'][0]['identity_state']!=='FORKED'||$target->snapshot()['tables']['local_observations']!==[]) { throw new RuntimeException('fork/local boundary'); }
 // A signed higher-generation empty source view must not erase global evidence.
 $base=$verifier->verifyWire($source->readRecord($first['checkpoint_hash']))->document(); $base->generation=2; $base->previous_checkpoint_hash=$first['checkpoint_hash']; $base->root_hash=SnapshotFormat::rootHash([]); $base->record_count=0; $base->chunks=[]; $base->cursor='empty-view';
@@ -71,6 +74,9 @@ $source->transaction(static function(StorageTransaction $tx) use($partial): void
 $staging=new SQLiteStore($root.'/partial.sqlite',create:true); PeerRegistry::add($staging,OnionAddress::parse($onion),$signer->publicKey());
 $result=runPeer($api,$root.'/partial.sqlite',$onion,1700040000); if($result['status']!=='PROGRESS'||$result['next_chunk']!==2||isset($staging->snapshot()['tables']['sync']['key:'.$onion]['generation'])) { throw new RuntimeException('partial snapshot activated'); }
 $result=runPeer($api,$root.'/partial.sqlite',$onion,1700040010,true); if($result['error']!=='SNAPSHOT_CHUNK_HASH_INVALID'||isset($staging->snapshot()['tables']['sync']['key:'.$onion]['generation'])) { throw new RuntimeException('broken final chunk activated'); }
+$beforeMaintenance=count($target->snapshot()['records']);
+$maintenance=(new \OnionServiceDiscovery\Node\LocalMaintenance($target))->run(1700700000);
+if($maintenance['assertions_removed']<3||$target->snapshot()['tables']['assertions']!==[]||count($target->snapshot()['records'])!==$beforeMaintenance) { throw new RuntimeException('assertion cleanup removed identity evidence or failed expiry'); }
 $target->integrityCheck(); $staging->integrityCheck(); unset($target,$staging,$source,$api,$producer,$blobs,$signer,$config);
 $it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST); foreach($it as $file) { $file->isDir()?rmdir($file->getPathname()):unlink($file->getPathname()); } rmdir($root);
 echo "PASS: controlled peer sync, fork union, omission, rollback, equivocation and partial-chunk cursor safety\n";

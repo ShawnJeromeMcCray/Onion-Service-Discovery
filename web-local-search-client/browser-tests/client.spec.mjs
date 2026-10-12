@@ -27,6 +27,7 @@ test.beforeAll(async()=>{
   });
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));origin='http://127.0.0.1:'+server.address().port;
 });
+test.beforeEach(async({page})=>{await page.clock.setFixedTime(new Date(Date.parse(fixtures.sources[0].checkpoint.created_at)+3600000));});
 test.afterAll(async()=>{await new Promise(resolve=>server.close(resolve));});
 
 test('local search, signed source union, text-only metadata and local pins',async({page})=>{
@@ -58,4 +59,20 @@ test('blocked profile storage keeps session verification and pins usable',async(
   await page.locator('#query').fill('library');await expect(page.locator('.result-card')).toHaveCount(1);await page.getByRole('button',{name:'Pin this identity',exact:true}).click();await expect(page.locator('.pin-card')).toHaveCount(1);
   await page.locator('#remember-pins').check();await expect(page.locator('#storage-status')).toContainText('Profile storage unavailable');await expect(page.locator('.pin-card')).toHaveCount(1);
   await page.screenshot({path:test.info().outputPath('browser-preview.png'),fullPage:true});
+});
+
+test('a failed refresh preserves the last verified local index and pins',async({page})=>{
+  await page.goto(origin+'/onion-service-discovery/');
+  await page.getByRole('button',{name:'Load directory',exact:true}).click();
+  await expect(page.locator('#coverage')).toContainText('3 distinct fresh signing keys');
+  await page.locator('#query').fill('library');await expect(page.locator('.result-card')).toHaveCount(1);
+  await page.getByRole('button',{name:'Pin this identity',exact:true}).click();
+  await page.route('**/relay/**',route=>route.abort());
+  await page.getByRole('button',{name:'Load directory',exact:true}).click();
+  await expect(page.locator('#coverage')).toContainText('0 distinct fresh signing keys');
+  await expect(page.locator('.result-card')).toHaveCount(1);
+  await expect(page.locator('.pin-status')).toContainText('Signed continuity matches');
+  const network=[];page.on('request',request=>network.push(request.url()));
+  await page.locator('#query').fill('climate');await expect(page.locator('.result-card')).toHaveCount(1);
+  expect(network).toEqual([]);
 });

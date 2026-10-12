@@ -23,6 +23,8 @@ $snapshotResponse = $api->handle('GET', '/onion-service-discovery/v1/snapshots/'
 $checkpoint = $verifier->verifyWire($snapshotResponse['body'])->document();
 $chunkTarget = '/onion-service-discovery/v1/chunks/' . substr($checkpoint->chunks[0]->hash, 7);
 if ($api->handle('GET', $chunkTarget)['status'] !== 200 || $api->handle('HEAD', $chunkTarget)['body'] !== '') { throw new RuntimeException('chunk/head failed'); }
+$serviceResponse=$api->handle('GET','/onion-service-discovery/v1/services/'.$records[0]->document()->onion);
+if($serviceResponse['status']!==200||count(json_decode($serviceResponse['body'])->records)!==3) { throw new RuntimeException('derived indexed service lookup failed'); }
 $changes = json_decode($api->handle('GET', '/onion-service-discovery/v1/changes?after=0')['body'], true);
 if (count($changes['records']) !== 4 || $changes['cursor'] !== 4 || $changes['has_more']) { throw new RuntimeException('delta failed'); }
 foreach (['POST','DELETE','PUT','PATCH'] as $method) { if ($api->handle($method, '/onion-service-discovery/v1/state')['status'] !== 405) { throw new RuntimeException('mutation surface'); } }

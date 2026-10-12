@@ -6,15 +6,15 @@ Opt-in decentralized discovery for public Tor Onion Services, with self-publishe
 
 Technical identity evidence must not be presented as an assurance about content or operator honesty. Tor itself is not modified and its private keys must never be accessed.
 
-## Current work
+## Current implementation
 
 - Import of 50 current specification documents with observed source links, modification times and integrity hashes.
 - [Decision register](docs/governance/decision-register.md) preserving all 50 owner/reviewer decisions without inferred approvals.
 - [Implementation status](docs/implementation-status.md) distinguishing requirements from verified behavior.
 - Strict Onion v3, bounded JSON, canonical bytes, signed-record schemas and Ed25519 verification in PHP, TypeScript and independent Python.
 - Deterministic evidence graphs for forks, exact revision chains, countersigned rotation and signed migration.
-- [133 black-box core cases per language](docs/conformance/core-report.json), with zero failures/skips in the current offline draft suite.
-- Required FilesystemStore plus SQLiteStore, shared transaction/restore tests and eight process-exit fault points.
+- [134 black-box core cases per language](docs/conformance/core-report.json), with zero failures/skips in the current offline draft suite.
+- Required FilesystemStore plus SQLiteStore, read-only diagnostics, trusted private staged backup/restore and eight process-exit fault points.
 - Encrypted offline Service signing, role-separated Node signing, manifest revision/withdrawal/rotation/migration and atomic public installation.
 - Bounded Tor-only transport, direct verification, resumable peer snapshots and read-only protocol API.
 - Bundled local-search client, query-independent Client Host relay, explicit source allowlist and origin-local pins.
@@ -64,3 +64,16 @@ For the expanded draft core after installing locked dependencies:
 ```
 
 The runner imports no reference implementation code. It compares separate-process outputs with exact shared vectors. See docs/adr/002-integer-json-and-signed-byte-construction.md for the explicit draft byte rules and pending review.
+
+## Operation and review
+
+[Deployment/recovery](docs/operations/deployment-and-recovery.md),
+[CLI](docs/operations/cli.md), [controlled developer lab](lab/README.md),
+[measured capacity](docs/performance/README.md),
+[offline TUF verification](release-tools/README.md), and
+[reproducible unsigned candidates](docs/operations/release-candidate.md)
+are available. The [draft protocol handbook](docs/protocol/handbook.md) and
+[machine-readable gates](docs/release-gates.json) describe the exact implemented
+scope and remaining external evidence. No approved production root, public seed
+infrastructure, independent audit or live Tor Browser/Android certification is
+invented. Public release requires those applicable gates to pass.

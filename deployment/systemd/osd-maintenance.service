@@ -1,0 +1,21 @@
+[Unit]
+Description=Onion Service Discovery bounded local housekeeping
+
+[Service]
+Type=oneshot
+User=osd-worker
+Group=osd
+WorkingDirectory=/opt/onion-service-discovery
+ExecStart=/usr/bin/php node-php/bin/onion-service-discovery node:maintain /etc/onion-service-discovery/node.json
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/onion-service-discovery
+RestrictAddressFamilies=AF_UNIX
+MemoryMax=256M
+TasksMax=16
+TimeoutStartSec=30
+StandardOutput=null
+StandardError=null

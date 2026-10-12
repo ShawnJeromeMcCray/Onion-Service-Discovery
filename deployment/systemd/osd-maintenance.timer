@@ -1,0 +1,11 @@
+[Unit]
+Description=Schedule bounded local Onion Service Discovery housekeeping
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=15m
+RandomizedDelaySec=1m
+Persistent=yes
+
+[Install]
+WantedBy=timers.target

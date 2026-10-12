@@ -28,6 +28,7 @@ final readonly class SnapshotProducer
                 $all[] = $record;
             }
         }
+        if (count($all) !== count($state['records'])) { throw new ProtocolException('STORAGE_CORRUPT'); }
         $selected = PublicEvidencePolicy::select($all); $hashes = array_keys($selected); sort($hashes, SORT_STRING);
         $byHash = []; foreach ($all as $record) { $byHash[$record->contentHash] = $record; }
         $publicCursor = 0; foreach ($hashes as $hash) { $publicCursor = max($publicCursor, $state['records'][$hash]['sequence']); }
@@ -43,10 +44,12 @@ final readonly class SnapshotProducer
         if ($previous !== null) {
             $previousWire = $this->store->readRecord($previous['hash']);
             if ($previousWire === null) { throw new ProtocolException('STORAGE_CORRUPT'); }
-            $previousCreated = strtotime($this->verifier->verifyWire($previousWire)->document()->created_at);
+            $previousDoc = $this->verifier->verifyWire($previousWire)->document();
+            if ($previousDoc->node_identity_public_key !== $this->signer->publicKey()) { throw new ProtocolException('SIGNER_BINDING_MISMATCH'); }
+            $previousCreated = strtotime($previousDoc->created_at);
             if ($previousCreated === false || $now < $previousCreated) { throw new ProtocolException('CLOCK_ROLLBACK'); }
         }
-        if ($previous !== null && $now - $previousCreated < 86400 && $previous['root_hash'] === SnapshotFormat::rootHash($chunks) && $previous['cursor'] === (string) $publicCursor) { return ['status' => 'UNCHANGED', 'checkpoint_hash' => $previous['hash']]; }
+        if ($previous !== null && ($previous['service_index_version'] ?? 0) === 1 && $now - $previousCreated < 86400 && $previous['root_hash'] === SnapshotFormat::rootHash($chunks) && $previous['cursor'] === (string) $publicCursor) { return ['status' => 'UNCHANGED', 'checkpoint_hash' => $previous['hash']]; }
         $generation = ($previous['generation'] ?? 0) + 1;
         $descriptor = $this->verifier->verify($this->signer->signRecord((object) [
             'protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'record_type' => 'snapshot_descriptor',
@@ -55,15 +58,35 @@ final readonly class SnapshotProducer
             'record_count' => $count, 'cursor' => (string) $publicCursor, 'chunks' => $chunks,
         ]));
         $this->blobs->put($descriptor->contentHash, $descriptor->canonicalWire);
-        $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor, $hashes): void {
+        $serviceBuckets = [];
+        foreach ($hashes as $hash) {
+            $doc = $byHash[$hash]->document();
+            foreach (array_unique(array_filter([$doc->onion ?? null, $doc->from_onion ?? null, $doc->to_onion ?? null])) as $onion) {
+                $prefix = substr(hash('sha256', $onion), 0, 2);
+                $serviceBuckets[$prefix][$onion][] = $hash;
+            }
+        }
+        $serviceIndexes = [];
+        foreach ($serviceBuckets as $prefix => $entries) {
+            foreach ($entries as $onion => $references) {
+                // Bounded individual responses; use signed snapshots for longer histories.
+                if (count($references) > 256) { $entries[$onion] = ['too_large' => true]; }
+            }
+            $wire = \OnionServiceDiscovery\Storage\StorageJson::encode($entries);
+            if (strlen($wire) > 524288) { $wire = \OnionServiceDiscovery\Storage\StorageJson::encode(['too_large' => true]); }
+            $hash = 'sha256:' . hash('sha256', "Onion Service Discovery/service-lookup/v1\0" . $wire);
+            $this->blobs->put($hash, $wire); $serviceIndexes[(string)$prefix] = $hash;
+        }
+        $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor, $hashes, $serviceIndexes): void {
             if ($tx->state()['generation'] !== $state['generation']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
             $tx->putRecord($descriptor);
-            foreach ($tx->state()['tables']['node'] as $key => $_) { if (str_starts_with($key, 'key:public-index-')) { $tx->deleteOperational('node', substr($key,4)); } }
+            foreach ($tx->state()['tables']['node'] as $key => $_) { if ((str_starts_with($key, 'key:public-index-') || str_starts_with($key, 'key:service-index-'))) { $tx->deleteOperational('node', substr($key,4)); } }
             $publicHashes = $hashes;
             foreach ($state['records'] as $hash => $metadata) { if ($metadata['record_type'] === 'snapshot_descriptor') { $publicHashes[] = $hash; } }
             $publicHashes[] = $descriptor->contentHash;
             foreach (array_chunk(array_values(array_unique($publicHashes)),64) as $index => $part) { $tx->set('node','public-index-' . $index,['hashes'=>$part]); }
-            $tx->set('node', 'published-snapshot', ['hash' => $descriptor->contentHash, 'root_hash' => SnapshotFormat::rootHash($chunks), 'generation' => $generation, 'cursor' => (string) $publicCursor]);
+            foreach ($serviceIndexes as $prefix => $hash) { $tx->set('node', 'service-index-' . $prefix, ['hash' => $hash]); }
+            $tx->set('node', 'published-snapshot', ['hash' => $descriptor->contentHash, 'root_hash' => SnapshotFormat::rootHash($chunks), 'generation' => $generation, 'cursor' => (string) $publicCursor, 'service_index_version' => 1]);
         });
         return ['status' => 'PUBLISHED', 'checkpoint_hash' => $descriptor->contentHash, 'record_count' => $count, 'chunks' => count($chunks)];
     }

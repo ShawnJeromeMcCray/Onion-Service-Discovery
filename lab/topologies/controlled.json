@@ -1,0 +1,20 @@
+{
+  "topology_version": 1,
+  "profile": "controlled-offline-development",
+  "source_nodes": 3,
+  "service_identities": 4,
+  "client_hosts": 1,
+  "storage_backends": ["filesystem", "sqlite"],
+  "network": "Mock loopback SOCKS/HTTP only; no live Tor or real services",
+  "synthetic_fixture": "protocol/test-vectors/browser-dataset.json",
+  "failure_schedule": [
+    "proxy bypass and redirect attempts",
+    "hash-invalid final chunk after valid partial transfer",
+    "source omission, checkpoint rollback and equivocation",
+    "competing Service revision/rotation/migration histories",
+    "eight process-exit storage fault points",
+    "concurrent export writers at aggregate quota",
+    "unavailable browser profile storage and failed source refresh",
+    "manipulated, expired and rollback TUF metadata"
+  ]
+}

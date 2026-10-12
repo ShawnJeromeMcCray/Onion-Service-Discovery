@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import {browserCryptoProviders} from '../src/protocol/crypto-providers.ts';
 import {verifyRecord,verifyWire} from '../src/protocol/record-verifier.ts';
-import {buildView,pinIdentity,localSearch} from '../src/client/view-model.ts';
+import {buildView,pinIdentity,localSearch,metadataWarnings} from '../src/client/view-model.ts';
 import {parsePinBackup,serializePins} from '../src/client/pins.ts';
 const crypto=browserCryptoProviders();const f=JSON.parse(readFileSync(new URL('../../protocol/test-vectors/signed-records.json',import.meta.url),'utf8'));const stories=f.stories;
 test('pins follow authorized rotation/migration and preserve a fork warning',async()=>{
@@ -26,4 +26,17 @@ test('local search excludes withdrawal without sending anything to a provider',a
 test('mature browser verifier works without native WebCrypto',async()=>{
   const descriptor=Object.getOwnPropertyDescriptor(globalThis,'crypto');
   try{Object.defineProperty(globalThis,'crypto',{configurable:true,value:undefined});const fallback=browserCryptoProviders();const fixture=f.cases.find(item=>item.id==='genesis');const result=await verifyWire(new Uint8Array(Buffer.from(fixture.input_base64,'base64')),fallback);assert.equal(result.contentHash,fixture.expected_hash);}finally{if(descriptor)Object.defineProperty(globalThis,'crypto',descriptor);}
+});
+
+test('valid minimal manifests remain searchable without optional description, links or timestamp',async()=>{
+  const fixture=f.cases.find(item=>item.id==='manifest-optional-fields-absent');
+  const record=await verifyWire(new Uint8Array(Buffer.from(fixture.input_base64,'base64')),crypto);
+  const view=buildView([record],[]);assert.equal(view.services[0].description,'');assert.equal(localSearch(view.services,'library').length,1);
+});
+
+test('Unicode presentation warnings do not normalize signed metadata',()=>{
+  assert.equal(metadataWarnings('Library','Plain description').length,0);
+  assert.equal(metadataWarnings('Librаry','').length,1); // Cyrillic a with Latin letters
+  assert.equal(metadataWarnings('Library','\u202eDirection changed').length,1);
+  assert.equal(metadataWarnings('Bibliothèque','Mehrsprachige Bücher').length,0);
 });

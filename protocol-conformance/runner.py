@@ -45,6 +45,7 @@ def cases():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--php-image', choices=['php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3', 'php@sha256:1d2cf2b7d715b5b3aa959f0150ccbcc7b71e0181b637e443abf40a7fb56bf79a'], default=PHP_IMAGE)
     parser.add_argument('--php-container', action='store_true')
     parser.add_argument('--report', type=Path)
     args = parser.parse_args()
@@ -54,7 +55,7 @@ def main():
         raise RuntimeError('Suite exceeds adapter budget; split into versioned batches')
     php = ['php', 'node-php/bin/conformance-adapter.php']
     if args.php_container:
-        php = ['docker', 'run', '--rm', '-i', '--network', 'none', '--mount', f'type=bind,src={ROOT},dst=/app,readonly', '--workdir', '/app', PHP_IMAGE, 'php', 'node-php/bin/conformance-adapter.php']
+        php = ['docker', 'run', '--rm', '-i', '--network', 'none', '--mount', f'type=bind,src={ROOT},dst=/app,readonly', '--workdir', '/app', args.php_image, 'php', 'node-php/bin/conformance-adapter.php']
     commands = {'PHP': php, 'TypeScript': ['node', 'web-local-search-client/tools/conformance-adapter.mjs'], 'Python': [sys.executable, 'validator-python/conformance_adapter.py']}
     results = []
     for implementation, command in commands.items():

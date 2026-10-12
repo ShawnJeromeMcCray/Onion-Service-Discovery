@@ -1,20 +1,20 @@
 {
   "profile": "DRAFT_CORE",
   "status": "PASS",
-  "generated_at": "2026-10-12T19:41:19.470928+00:00",
-  "fixture_count_per_implementation": 133,
+  "generated_at": "2026-10-12T20:36:53.042310+00:00",
+  "fixture_count_per_implementation": 134,
   "fixture_hashes": {
     "browser-dataset.json": "452c59c35b14d9dbc380ee2d1dd06ca054adf7e593e30d2fff2d9426cec36d3c",
     "canonical-json.json": "2a4b9d19cdd0f6557bd1a27b7ce6442370be53fed777a4e769db71b4bd723f22",
     "identity-sequences.json": "f4dc1aa4c4cd3450ac85fcefb569305bff04aee82d046c57544691a646d3f507",
     "onion-addresses.json": "6bc903a317b7532cf18fec7d88e662004667a2700cb7c6805b397e0dd46db3ef",
-    "signed-records.json": "b8412c60954d5d1aaf4a0f26968e10bfeaab4c9091ae7ea2368c05bdcc81ab6e",
+    "signed-records.json": "f8e7691358c7554eae3cd9d1ead6063a120bc55d2ba6e6ff081652d08ebe179b",
     "strict-json.json": "39bb19e02002ac9f23e138e8ff93612d1ba502456f649f77db6f3e03e57fc583"
   },
   "results": [
     {
       "implementation": "PHP",
-      "pass": 133,
+      "pass": 134,
       "fail": 0,
       "skip": 0,
       "checks": [
@@ -316,6 +316,10 @@
         },
         {
           "id": "snapshot-descriptor",
+          "status": "PASS"
+        },
+        {
+          "id": "manifest-optional-fields-absent",
           "status": "PASS"
         },
         {
@@ -554,7 +558,7 @@
     },
     {
       "implementation": "TypeScript",
-      "pass": 133,
+      "pass": 134,
       "fail": 0,
       "skip": 0,
       "checks": [
@@ -856,6 +860,10 @@
         },
         {
           "id": "snapshot-descriptor",
+          "status": "PASS"
+        },
+        {
+          "id": "manifest-optional-fields-absent",
           "status": "PASS"
         },
         {
@@ -1094,7 +1102,7 @@
     },
     {
       "implementation": "Python",
-      "pass": 133,
+      "pass": 134,
       "fail": 0,
       "skip": 0,
       "checks": [
@@ -1396,6 +1404,10 @@
         },
         {
           "id": "snapshot-descriptor",
+          "status": "PASS"
+        },
+        {
+          "id": "manifest-optional-fields-absent",
           "status": "PASS"
         },
         {

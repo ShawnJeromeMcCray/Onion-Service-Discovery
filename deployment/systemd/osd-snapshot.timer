@@ -1,0 +1,11 @@
+[Unit]
+Description=Schedule bounded public snapshot rebuilds
+
+[Timer]
+OnBootSec=3m
+OnUnitActiveSec=15m
+RandomizedDelaySec=1m
+Persistent=yes
+
+[Install]
+WantedBy=timers.target

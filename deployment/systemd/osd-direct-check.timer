@@ -1,0 +1,10 @@
+[Unit]
+Description=Schedule finite candidate checks without overlapping this service
+
+[Timer]
+OnBootSec=2m
+OnUnitActiveSec=15s
+RandomizedDelaySec=5s
+
+[Install]
+WantedBy=timers.target

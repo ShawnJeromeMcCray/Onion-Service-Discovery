@@ -57,6 +57,7 @@ def atomic_json(path:Path,value):
 def verify_release(artifact:Path,repository:Path,trusted_root:Path,state_dir:Path,target_path:str):
     if trusted_root.name in {'hs_ed25519_secret_key','private_key'} or trusted_root.is_symlink() or not trusted_root.is_file() or trusted_root.stat().st_size>512000:
         raise ReleaseVerificationError('TRUSTED_ROOT_UNAVAILABLE')
+    if artifact.name in {'hs_ed25519_secret_key','private_key'}:raise ReleaseVerificationError('TOR_KEY_ACCESS_FORBIDDEN')
     if artifact.is_symlink() or not artifact.is_file() or artifact.stat().st_size>134217728:
         raise ReleaseVerificationError('ARTIFACT_UNAVAILABLE')
     target=PurePosixPath(target_path)

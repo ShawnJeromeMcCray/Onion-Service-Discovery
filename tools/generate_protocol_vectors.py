@@ -38,6 +38,7 @@ def add(ident,rec,error=None,expected_onion=None,raw=None):
  if expected_onion is not None:entry['expected_onion']=expected_onion
  cases.append(entry)
 for ident,rec in [('genesis',genesis),('revision-2',revision),('rotation',rotation),('rotated-manifest',rotated),('migration',migration),('migrated-manifest',migrated),('node-descriptor',node_record),('direct-observation',observation),('snapshot-descriptor',snapshot)]:add(ident,rec)
+minimal=copy.deepcopy(genesis);del minimal['service']['description'];del minimal['links'];del minimal['published_at'];add('manifest-optional-fields-absent',signed(minimal,service))
 chunk_wire=canonical_json(sorted([genesis,revision],key=content_hash)).encode();chunk_metadata={'hash':chunk_hash(chunk_wire),'bytes':len(chunk_wire),'record_count':2}
 nonempty=copy.deepcopy(snapshot);nonempty.update(root_hash=root_hash([chunk_metadata]),record_count=2,chunks=[chunk_metadata]);nonempty=signed(nonempty,node);add('snapshot-with-chunk',nonempty)
 mut=copy.deepcopy(nonempty);mut['root_hash']='sha256:'+'0'*64;add('snapshot-root-mismatch',signed(mut,node),'SCHEMA_INVALID')

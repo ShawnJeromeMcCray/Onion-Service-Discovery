@@ -16,6 +16,12 @@ foreach (['filesystem' => ['after_objects', 'after_prepare', 'after_head', 'afte
         $stdout = stream_get_contents($pipes[1]); $stderr = stream_get_contents($pipes[2]);
         fclose($pipes[1]); fclose($pipes[2]);
         if (proc_close($process) !== 91) { throw new RuntimeException('fault not reached: ' . $backend . '/' . $point . $stdout . $stderr); }
+        if ($backend === 'filesystem' && in_array($point, ['after_prepare', 'after_head'], true)) {
+            $journalBefore = file_get_contents($path . '/journal.log');
+            try { (new FilesystemStore($path, readOnly: true))->integrityCheck(); throw new RuntimeException('read-only recovery silently accepted'); }
+            catch (\OnionServiceDiscovery\Storage\StorageException $error) { if ($error->getMessage() !== 'STORAGE_RECOVERY_REQUIRED') { throw $error; } }
+            if (file_get_contents($path . '/journal.log') !== $journalBefore) { throw new RuntimeException('read-only diagnostics repaired journal'); }
+        }
         $store = $backend === 'filesystem' ? new FilesystemStore($path) : new SQLiteStore($path);
         $state = $store->snapshot();
         $committed = in_array($point, ['after_head', 'after_commit'], true);

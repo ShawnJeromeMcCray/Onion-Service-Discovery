@@ -8,9 +8,10 @@ $original = json_decode(file_get_contents($root . '/node-php/config/example.json
 file_put_contents($path, json_encode($original, JSON_THROW_ON_ERROR));
 if (NodeConfig::load($path)->role !== 'client-host') { throw new RuntimeException('role'); }
 $checks = 1;
-foreach (['unknown', 'flag', 'role', 'path', 'proxy', 'source', 'version'] as $case) {
+foreach (['server-search', 'unknown', 'flag', 'role', 'path', 'proxy', 'source', 'version'] as $case) {
     $v = $original;
     match ($case) {
+        'server-search' => $v['features']['server_search'] = true,
         'unknown' => $v['extra'] = true,
         'flag' => $v['features']['discover_services'] = 'true',
         'role' => $v['features']['discover_services'] = true,
@@ -22,4 +23,9 @@ foreach (['unknown', 'flag', 'role', 'path', 'proxy', 'source', 'version'] as $c
     file_put_contents($path, json_encode($v, JSON_THROW_ON_ERROR));
     try { NodeConfig::load($path); throw new RuntimeException('accepted ' . $case); } catch (InvalidArgumentException) { ++$checks; }
 }
+$alias = sys_get_temp_dir() . '/osd-public-alias-' . bin2hex(random_bytes(12)); symlink($root . '/node-php/public', $alias);
+$v = $original; $v['storage']['path'] = $alias . '/would-be-private.sqlite'; file_put_contents($path, json_encode($v));
+try { NodeConfig::load($path); throw new RuntimeException('symlink parent exposed private storage'); }
+catch (InvalidArgumentException $error) { if ($error->getMessage() !== 'PRIVATE_PATH_IN_WEBROOT') { throw $error; } ++$checks; }
+unlink($alias);
 unlink($path); echo 'PASS: strict configuration ' . $checks . " checks\n";

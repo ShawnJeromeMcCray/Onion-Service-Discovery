@@ -1,8 +1,8 @@
 {
   "profile": "DRAFT_CORE_UNIT_SUITES",
   "status": "PASS",
-  "generated_at": "2026-10-12T19:44:01.604769+00:00",
-  "shared_fixture_count": 133,
+  "generated_at": "2026-10-12T20:57:20.819056+00:00",
+  "shared_fixture_count": 134,
   "php_container": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3",
   "checks": [
     {
@@ -56,7 +56,22 @@
       "exit_code": 0
     },
     {
+      "check": "php-public-blobs",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
       "check": "php-public-evidence",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-operator-cli",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-read-only-diagnostics",
       "status": "PASS",
       "exit_code": 0
     },
@@ -97,6 +112,11 @@
     },
     {
       "check": "php-storage-contract",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-storage-backup",
       "status": "PASS",
       "exit_code": 0
     },
@@ -154,7 +174,7 @@
   "limitations": [
     "Not CORE-V1 conformance",
     "Not browser compatibility evidence",
-    "Tor transport and browser compatibility not tested; storage power-loss behavior not established",
+    "Tor transport tested only through controlled loopback SOCKS; not live Tor or actual Tor Browser/Android; physical power-loss not established",
     "No production release approval"
   ]
 }

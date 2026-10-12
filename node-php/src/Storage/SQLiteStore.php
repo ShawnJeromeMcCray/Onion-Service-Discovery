@@ -11,15 +11,16 @@ final class SQLiteStore implements StorageBackend
     private readonly ?\Closure $faultHook;
     private readonly string $path;
 
-    public function __construct(string $path, ?StorageLimits $limits = null, bool $create = false, ?\Closure $faultHook = null)
+    public function __construct(string $path, ?StorageLimits $limits = null, bool $create = false, ?\Closure $faultHook = null, private readonly bool $readOnly = false)
     {
+        if ($create && $readOnly) { throw new StorageException('STORAGE_MODE_INVALID'); }
         $this->limits = $limits ?? new StorageLimits();
         $this->faultHook = $faultHook;
         $this->path = $path;
         if (!class_exists(\PDO::class) || !in_array('sqlite', \PDO::getAvailableDrivers(), true)) {
             throw new StorageException('SQLITE_DRIVER_UNAVAILABLE');
         }
-        if (str_contains($path, '://') || is_link($path) || (!is_file($path) && !$create)) {
+        if (in_array(basename($path), ['hs_ed25519_secret_key', 'private_key'], true) || str_contains($path, '://') || is_link($path) || (!is_file($path) && !$create)) {
             throw new StorageException('STORAGE_UNAVAILABLE');
         }
         if (!is_dir(dirname($path)) && (!$create || !mkdir(dirname($path), 0700, true))) {
@@ -36,11 +37,12 @@ final class SQLiteStore implements StorageBackend
             throw new StorageException('STORAGE_PERMISSIONS_UNSAFE');
         }
         try {
-            $this->database = new \PDO('sqlite:' . $path, null, null, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC]);
+            $this->database = new \PDO($readOnly ? 'sqlite:file:' . rawurlencode($path) . '?mode=ro' : 'sqlite:' . $path, null, null, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC]);
             $this->database->exec('PRAGMA foreign_keys=ON');
             $this->database->exec('PRAGMA synchronous=FULL');
             $this->database->exec('PRAGMA busy_timeout=' . $this->limits->lockWaitMilliseconds);
-            $this->database->exec('PRAGMA journal_mode=WAL');
+            if ($readOnly) { $this->database->exec('PRAGMA query_only=ON'); }
+            else { $this->database->exec('PRAGMA journal_mode=WAL'); }
             if (!$existing) {
                 chmod($path, 0600);
                 $this->initialize();
@@ -69,6 +71,19 @@ final class SQLiteStore implements StorageBackend
 
     public function backendName(): string { return 'sqlite'; }
 
+    /** Bound WAL cleanup without rewriting immutable history. Busy readers preserve the WAL.
+     * @return array<string,int>
+     */
+    public function checkpoint(): array
+    {
+        if ($this->readOnly) { throw new StorageException('STORAGE_READ_ONLY'); }
+        try {
+            $row = $this->query('PRAGMA wal_checkpoint(TRUNCATE)')->fetch(\PDO::FETCH_NUM);
+            if (!is_array($row) || count($row) !== 3) { throw new StorageException('STORAGE_ERROR'); }
+            return ['busy' => (int)$row[0], 'log_frames' => (int)$row[1], 'checkpointed_frames' => (int)$row[2]];
+        } catch (\PDOException) { throw new StorageException('STORAGE_BUSY'); }
+    }
+
     private function initialize(): void
     {
         $this->database->exec('BEGIN IMMEDIATE');
@@ -90,6 +105,7 @@ final class SQLiteStore implements StorageBackend
 
     public function transaction(callable $mutation): mixed
     {
+        if ($this->readOnly) { throw new StorageException('STORAGE_READ_ONLY'); }
         if ($this->diskUsage() >= $this->limits->maxBytes) {
             throw new StorageException('STORAGE_BUDGET_EXHAUSTED');
         }
@@ -124,6 +140,7 @@ final class SQLiteStore implements StorageBackend
                 if ($check->fetchColumn() !== $wire) {
                     throw new StorageException('STORAGE_CORRUPT');
                 }
+                $check->closeCursor();
             }
             $this->fault('after_objects');
             $insertRecord = $this->prepare('INSERT INTO records(content_hash,object_hash,record_type,sequence,service_key,onion,revision) VALUES (:hash,:object,:type,:sequence,:service_key,:onion,:revision)');

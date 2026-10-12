@@ -28,14 +28,14 @@ try {
         $wire=file_get_contents($path);if($wire===false)throw new RuntimeException('Public manifest unavailable');
         $verifier=new RecordVerifier(dirname(__DIR__,2).'/protocol/schemas');$record=$verifier->verifyWire($wire,OnionAddress::parse($config->nodeOnion));
         if($record->type!=='service_manifest')throw new RuntimeException('Public manifest invalid');
-        $store=$config->store();$descriptor=$store->snapshot()['tables']['node']['key:descriptor']??null;
+        $store=$config->store(readOnly: true);$descriptor=$store->snapshot()['tables']['node']['key:descriptor']??null;
         if($descriptor!==null){$nodeWire=$store->readRecord($descriptor['hash']);if($nodeWire===null)throw new RuntimeException('Node descriptor unavailable');$node=$verifier->verifyWire($nodeWire)->document();if($node->node_identity_public_key===$record->document()->service_identity_public_key)throw new RuntimeException('Node and Service keys must differ');}
         $response=['status'=>200,'headers'=>['Content-Length'=>(string)strlen($record->canonicalWire)],'body'=>$method==='HEAD'?'':$record->canonicalWire];
     }
     elseif ($config->role === 'client-host') { $response = ['status' => 404, 'headers' => [], 'body' => '{"error":"NOT_FOUND"}']; }
     elseif (!(new PublicRequestBudget($config->exportPath . '/.request-budget'))->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
     else {
-        $api = new DataApi($config->store(), new PublicBlobStore($config->exportPath), new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas'), $config->features['mirror_directory'], $config->allowedClientOrigins);
+        $api = new DataApi($config->store(readOnly: true), new PublicBlobStore($config->exportPath), new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas'), $config->features['mirror_directory'], $config->allowedClientOrigins);
         $response = $api->handle($method, $target, $_SERVER['HTTP_ORIGIN'] ?? null);
     }
 

@@ -1,0 +1,98 @@
+{
+    "profile": "S1000-typical-5-node-claims",
+    "dataset_sha256": "506294235072d9ac4eb702b17267ef6ca246db9ccff529dfb201ad70b7f31df3",
+    "dataset_bytes": 5310652,
+    "php": "8.5.11",
+    "platform": "Linux f6f9ca1a72b6 6.18.44 #1 SMP Sat Sep 26 20:02:31 UTC 2026 x86_64",
+    "record_count": 7005,
+    "verification": {
+        "samples": 7005,
+        "p50_ms": 0.404008,
+        "p95_ms": 0.608847,
+        "p99_ms": 0.745022
+    },
+    "verification_total_ms": 3213.369082,
+    "backends": {
+        "filesystem": {
+            "import_total_ms": 5605.690214,
+            "import_batch_256": {
+                "samples": 28,
+                "p50_ms": 201.484769,
+                "p95_ms": 224.767069,
+                "p99_ms": 246.358349
+            },
+            "read_all_ms": 816.968938,
+            "read_batch_256": {
+                "samples": 28,
+                "p50_ms": 28.139524,
+                "p95_ms": 29.829639,
+                "p99_ms": 29.863371
+            },
+            "derive_all": {
+                "samples": 10,
+                "p50_ms": 37.476265,
+                "p95_ms": 40.213295,
+                "p99_ms": 40.213295
+            },
+            "integrity_ms": 157.393993,
+            "backup_ms": 1255.22941,
+            "snapshot_publish_ms": 5484.996881,
+            "snapshot_record_count": 7005,
+            "service_api": {
+                "samples": 100,
+                "p50_ms": 44.752188,
+                "p95_ms": 54.859889,
+                "p99_ms": 58.433499
+            },
+            "service_api_last_status": 413,
+            "maintenance_ms": 0.002123,
+            "sqlite_checkpoint": null,
+            "disk_before_maintenance_bytes": 14070661,
+            "backend_disk_bytes": 14070661
+        },
+        "sqlite": {
+            "import_total_ms": 1191.460782,
+            "import_batch_256": {
+                "samples": 28,
+                "p50_ms": 39.492858,
+                "p95_ms": 72.461148,
+                "p99_ms": 86.122192
+            },
+            "read_all_ms": 111.619747,
+            "read_batch_256": {
+                "samples": 28,
+                "p50_ms": 3.61952,
+                "p95_ms": 3.97774,
+                "p99_ms": 4.032452
+            },
+            "derive_all": {
+                "samples": 10,
+                "p50_ms": 38.61751,
+                "p95_ms": 41.945751,
+                "p99_ms": 41.945751
+            },
+            "integrity_ms": 164.999402,
+            "backup_ms": 181.217594,
+            "snapshot_publish_ms": 4820.765053,
+            "snapshot_record_count": 7005,
+            "service_api": {
+                "samples": 100,
+                "p50_ms": 21.256419,
+                "p95_ms": 31.3514,
+                "p99_ms": 34.747184
+            },
+            "service_api_last_status": 413,
+            "maintenance_ms": 6.436652,
+            "sqlite_checkpoint": {
+                "busy": 0,
+                "log_frames": 0,
+                "checkpointed_frames": 0
+            },
+            "disk_before_maintenance_bytes": 32250826,
+            "backend_disk_bytes": 25163690
+        }
+    },
+    "peak_php_memory_bytes": 69206016,
+    "cpu_user_seconds": 24.906237,
+    "cpu_system_seconds": 2.400866
+}

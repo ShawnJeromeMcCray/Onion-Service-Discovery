@@ -10,8 +10,9 @@ final class FilesystemStore implements StorageBackend
     private readonly StorageLimits $limits;
     private readonly ?\Closure $faultHook;
 
-    public function __construct(string $directory, ?StorageLimits $limits = null, bool $create = false, ?\Closure $faultHook = null)
+    public function __construct(string $directory, ?StorageLimits $limits = null, bool $create = false, ?\Closure $faultHook = null, private readonly bool $readOnly = false)
     {
+        if ($create && $readOnly) { throw new StorageException('STORAGE_MODE_INVALID'); }
         $this->limits = $limits ?? new StorageLimits();
         $this->faultHook = $faultHook; // Test injection only; never populated from configuration.
         if (str_contains($directory, '://') || is_link($directory)) { throw new StorageException('STORAGE_PATH_UNSAFE'); }
@@ -48,7 +49,8 @@ final class FilesystemStore implements StorageBackend
             if ($this->readBounded($this->root . '/storage-version', 16) !== '1') {
                 throw new StorageException('STORAGE_VERSION_UNSUPPORTED');
             }
-            $this->recover();
+            if ($this->readOnly) { $this->loadCheckpoint($this->head()); }
+            else { $this->recover(); }
         });
     }
 
@@ -56,6 +58,7 @@ final class FilesystemStore implements StorageBackend
 
     public function transaction(callable $mutation): mixed
     {
+        if ($this->readOnly) { throw new StorageException('STORAGE_READ_ONLY'); }
         return $this->withLock(function () use ($mutation): mixed {
             $journal = $this->recover();
             $previousHead = $this->head();
@@ -146,7 +149,7 @@ final class FilesystemStore implements StorageBackend
     public function integrityCheck(): array
     {
         return $this->withLock(function (): array {
-            $this->recover();
+            $this->recover(!$this->readOnly);
             $state = $this->snapshot();
             foreach ($state['records'] as $metadata) {
                 $bytes = $this->readBounded($this->objectPath($metadata['object_hash']), 65536);
@@ -193,7 +196,7 @@ final class FilesystemStore implements StorageBackend
      * HEAD is the commit point. A complete PREPARE is rolled forward or aborted after a crash.
      * @return array<array-key, mixed>
      */
-    private function recover(): array
+    private function recover(bool $repair = true): array
     {
         $head = $this->head();
         $this->loadCheckpoint($head);
@@ -268,6 +271,7 @@ final class FilesystemStore implements StorageBackend
         } elseif (($expected !== null && $head !== $expected) || ($expected === null && $head['generation'] !== 0)) {
             throw new StorageException('STORAGE_CORRUPT');
         }
+        if (!$repair && ($partialOffset !== null || $pending !== null)) { throw new StorageException('STORAGE_RECOVERY_REQUIRED'); }
         if ($partialOffset !== null) {
             $stream = fopen($path, 'r+b');
             if ($stream === false || !ftruncate($stream, $partialOffset) || !fflush($stream) || !fsync($stream)) {
@@ -423,13 +427,13 @@ final class FilesystemStore implements StorageBackend
         if (is_link($path)) {
             throw new StorageException('STORAGE_CORRUPT');
         }
-        $lock = fopen($path, 'c+b');
+        $lock = fopen($path, $this->readOnly ? 'rb' : 'c+b');
         if ($lock === false) {
             throw new StorageException('STORAGE_UNAVAILABLE');
         }
-        chmod($path, 0600);
+        if (!$this->readOnly) { chmod($path, 0600); }
         $deadline = hrtime(true) + $this->limits->lockWaitMilliseconds * 1000000;
-        while (!flock($lock, LOCK_EX | LOCK_NB)) {
+        while (!flock($lock, ($this->readOnly ? LOCK_SH : LOCK_EX) | LOCK_NB)) {
             if (hrtime(true) >= $deadline) {
                 fclose($lock);
                 throw new StorageException('STORAGE_BUSY');

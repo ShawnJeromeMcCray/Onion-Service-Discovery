@@ -19,11 +19,11 @@ use OnionServiceDiscovery\Validation\StrictJson;
 final class PeerSync
 {
     private int $requests = 0;
-    public function __construct(private readonly StorageBackend $store, private readonly RecordVerifier $verifier, private readonly TorTransport $transport) {}
+    public function __construct(private readonly StorageBackend $store, private readonly RecordVerifier $verifier, private readonly TorTransport $transport, private readonly bool $discoverServices = false) {}
     /** @return array<string,mixed> */
     public function step(OnionAddress $onion, int $now): array
     {
-        if ($now < 0 || $now > 9007199254650991) { throw new ProtocolException('CLOCK_INVALID'); }
+        if ($now < 0 || $now > 9007199254146191) { throw new ProtocolException('CLOCK_INVALID'); }
         $claim = bin2hex(random_bytes(16));
         $peer = $this->store->transaction(static function (StorageTransaction $tx) use ($onion, $now, $claim): ?array {
             $peer = $tx->get('peers', $onion->hostname);
@@ -72,16 +72,28 @@ final class PeerSync
                 if ($parent->type !== 'snapshot_descriptor' || $parent->contentHash !== $sync['walk_hash'] || $p->node_identity_public_key !== $peer['node_identity_public_key'] || $p->generation !== $sync['walk_generation']) { throw new ProtocolException('SOURCE_CHECKPOINT_CHAIN_BROKEN'); }
                 $this->observe($onion, $claim, $parent); $sync['walk_hash'] = $p->previous_checkpoint_hash; --$sync['walk_generation']; $this->saveSync($onion, $claim, $sync);
             }
-            $checker = new SnapshotChunkVerifier($this->verifier); $processed = 0;
+            $checker = new SnapshotChunkVerifier($this->verifier); $processed = 0; $queued = 0;
             while ($sync['chunk_index'] < count($document->chunks) && $processed < 2 && $this->requests < 6) {
                 $chunk = $document->chunks[$sync['chunk_index']]; $bytes = $this->fetch($onion, ProtocolEndpoint::chunk($chunk->hash));
                 $verified = $checker->verify($bytes, $checkpoint, $sync['chunk_index'], $sync['last_record_hash']);
                 $sync['received'] += count($verified['records']); $sync['transfer_bytes'] += strlen($bytes); ++$sync['chunk_index']; $sync['last_record_hash'] = $verified['last_hash'];
                 if ($sync['received'] > $document->record_count || $sync['transfer_bytes'] > 33554432) { throw new ProtocolException('SOURCE_WORK_BUDGET_EXHAUSTED'); }
-                $this->store->transaction(function (StorageTransaction $tx) use ($onion, $claim, $verified, $sync): void {
+                $this->store->transaction(function (StorageTransaction $tx) use ($onion, $claim, $verified, $sync, $peer, $checkpoint, $now, &$queued): void {
                     $this->claimed($tx, $onion, $claim);
                     foreach ($verified['records'] as $record) {
                         $tx->putRecord($record);
+                        $assertion = $tx->get('assertions', $record->contentHash) ?? ['subject_hash' => $record->contentHash, 'kind' => 'REMOTE_PROVENANCE', 'sources' => []];
+                        $assertion['sources'] = array_values(array_filter($assertion['sources'], static fn (array $source): bool => $source['expires_at'] > $now && $source['source_onion'] !== $onion->hostname));
+                        if (count($assertion['sources']) < 8) {
+                            $assertion['sources'][] = ['source_onion' => $onion->hostname, 'source_node_key' => $peer['node_identity_public_key'], 'checkpoint_hash' => $checkpoint->contentHash, 'received_at' => $now, 'expires_at' => $now + 604800];
+                        }
+                        $tx->set('assertions', $record->contentHash, $assertion);
+                        if ($this->discoverServices && $queued < 32 && $record->type === 'service_manifest' && $record->document()->discovery->publish_service === true) {
+                            $candidateOnion = OnionAddress::parse($record->document()->onion);
+                            if ($tx->get('candidates', $candidateOnion->hostname) === null) {
+                                $tx->set('candidates', $candidateOnion->hostname, ['state' => 'QUEUED', 'attempts' => 0, 'next_attempt' => 0, 'lease_until' => 0, 'claim' => null, 'sources' => [$onion->hostname], 'error' => null]); ++$queued;
+                            }
+                        }
                         $sources = $tx->get('candidate_sources', $record->contentHash)['sources'] ?? [];
                         if (!in_array($onion->hostname, $sources, true) && count($sources) < 8) { $sources[] = $onion->hostname; sort($sources,SORT_STRING); $tx->set('candidate_sources', $record->contentHash, ['sources' => $sources]); }
                     }

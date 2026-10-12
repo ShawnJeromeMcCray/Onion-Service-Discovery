@@ -16,8 +16,8 @@ file_put_contents($root . '/config.json', json_encode($v, JSON_THROW_ON_ERROR));
 $first = NodeInitializer::initialize($config, $signer, $verifier); $second = NodeInitializer::initialize($config, $signer, $verifier);
 if ($first['status'] !== 'INITIALIZED' || $second['status'] !== 'UNCHANGED' || $first['descriptor_hash'] !== $second['descriptor_hash']) { throw new RuntimeException('initialization not idempotent'); }
 $store = $config->store(); $descriptor = $verifier->verifyWire($store->readRecord($first['descriptor_hash']));
-if ($descriptor->type !== 'node_descriptor' || $descriptor->document()->node_onion !== $onion) { throw new RuntimeException('descriptor binding'); }
-$v['features']['sync_with_peers'] = true; file_put_contents($root . '/config.json', json_encode($v, JSON_THROW_ON_ERROR));
+if ($descriptor->type !== 'node_descriptor' || $descriptor->document()->node_onion !== $onion || $descriptor->document()->capabilities !== ['index.core.v1', 'sync.changes.v1', 'sync.snapshots.v1']) { throw new RuntimeException('descriptor binding'); }
+$v['features']['mirror_directory'] = false; file_put_contents($root . '/config.json', json_encode($v, JSON_THROW_ON_ERROR));
 $next = NodeInitializer::initialize(NodeConfig::load($root . '/config.json'), $signer, $verifier);
 $d = $verifier->verifyWire($store->readRecord($next['descriptor_hash']))->document();
 if ($d->descriptor_revision !== 2 || $d->previous_descriptor_hash !== $first['descriptor_hash']) { throw new RuntimeException('descriptor chain'); }

@@ -53,8 +53,8 @@ in the serving stack. API cookies and credentials are unused. CORS defaults
 closed and permits only explicit `allowed_client_origins` Onion origins for
 public generic data; no wildcard or credentialed CORS.
 
-The service-history endpoint currently has a 256-record dataset work cap and
-32 KiB response cap; clients must use generic snapshots for larger datasets.
-Efficient indexed service lookup, live Tor tests, real browser tests,
-complete export retention/garbage collection and deployment hardening remain
-open. No production approval is implied by this draft runtime.
+The service-history endpoint uses a derived immutable lookup index, with a
+256-reference/32 KiB individual response cap. Larger histories use generic signed
+snapshots. Bounded reference-preserving export cleanup is operator-only while
+workers are stopped. Actual live Tor/desktop Android profiles, long-running
+retention and deployed hardening remain release gates. No production approval is implied by this draft runtime.

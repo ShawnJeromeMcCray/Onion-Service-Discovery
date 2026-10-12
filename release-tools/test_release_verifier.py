@@ -63,6 +63,10 @@ class ReleaseVerifierTests(unittest.TestCase):
     def test_root_rotation_with_insufficient_old_threshold_rejected(self):
         self.verify();root=Root.from_dict(self.root_metadata.signed.to_dict());root.version=2;rotated=Metadata(root);rotated.sign(self.signers['root'][0]);(self.repo/'metadata'/'2.root.json').write_bytes(rotated.to_bytes())
         with self.assertRaises(exceptions.UnsignedMetadataError):self.verify()
+    def test_tor_private_filename_is_never_an_artifact(self):
+        self.artifact=self.root/'hs_ed25519_secret_key';self.artifact.write_bytes(b'SYNTHETIC filename-boundary fixture, not a Tor key')
+        with self.assertRaisesRegex(module.ReleaseVerificationError,'TOR_KEY_ACCESS_FORBIDDEN'):self.verify()
+        self.assertFalse(self.state.exists())
     def test_target_path_traversal_rejected(self):
         self.target='../artifact.tar.gz'
         with self.assertRaisesRegex(module.ReleaseVerificationError,'TARGET_PATH_INVALID'):self.verify()
