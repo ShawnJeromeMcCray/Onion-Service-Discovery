@@ -1,10 +1,15 @@
 {
   "profile": "DRAFT_CORE_UNIT_SUITES",
   "status": "PASS",
-  "generated_at": "2026-10-12T15:55:55.286109+00:00",
-  "shared_fixture_count": 123,
+  "generated_at": "2026-10-12T19:44:01.604769+00:00",
+  "shared_fixture_count": 133,
   "php_container": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3",
   "checks": [
+    {
+      "check": "browser-client-build",
+      "status": "PASS",
+      "exit_code": 0
+    },
     {
       "check": "repository-integrity",
       "status": "PASS",
@@ -41,7 +46,27 @@
       "exit_code": 0
     },
     {
+      "check": "php-client-relay-controlled",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-client-host",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-public-evidence",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
       "check": "php-configuration",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-snapshot-chunks",
       "status": "PASS",
       "exit_code": 0
     },
@@ -87,6 +112,21 @@
     },
     {
       "check": "php-tor-transport-controlled",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-manifest-installer",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-manifest-drafts",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-peer-sync-controlled",
       "status": "PASS",
       "exit_code": 0
     },

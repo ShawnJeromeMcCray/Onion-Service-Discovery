@@ -35,8 +35,9 @@ jobs:
         run: |
           .venv/bin/python tools/generate_schemas.py
           .venv/bin/python tools/generate_protocol_vectors.py
+          .venv/bin/python tools/generate_browser_dataset.py
           npm --prefix web-local-search-client run schemas:build
-          git diff --exit-code -- protocol/schemas protocol/test-vectors web-local-search-client/generated
+          git diff --exit-code -- protocol/schemas protocol/test-vectors web-local-search-client/generated web-local-search-client/public/demo.json
       - name: Pull pinned PHP test image
         run: docker pull php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3
       - name: Run three-language input conformance
@@ -62,3 +63,26 @@ jobs:
           persist-credentials: false
       - name: Check finite safety models and rollback mutation
         run: python3 tools/check_formal_model.py
+  controlled-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.19.0
+      - name: Install locked dependencies
+        working-directory: web-local-search-client
+        run: npm ci --ignore-scripts --no-fund
+      - name: Install controlled browser
+        working-directory: web-local-search-client
+        run: npx playwright install --with-deps chromium
+      - name: Build and check local client behavior
+        working-directory: web-local-search-client
+        run: |
+          npm run build
+          npm run test:browser

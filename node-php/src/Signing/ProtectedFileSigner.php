@@ -19,6 +19,7 @@ final class ProtectedFileSigner implements SignerProvider
     public static function create(string $path, string $role, string $passphrase, RecordVerifier $verifier): self
     {
         self::checkRole($role);
+        self::keyPath($path);
         if (strlen($passphrase) < 12 || strlen($passphrase) > 1024) { throw new SignerException('PASSPHRASE_POLICY'); }
         $pair = sodium_crypto_sign_keypair();
         $secret = sodium_crypto_sign_secretkey($pair);
@@ -47,6 +48,7 @@ final class ProtectedFileSigner implements SignerProvider
     public static function open(string $path, string $expectedRole, string $passphrase, RecordVerifier $verifier): self
     {
         self::checkRole($expectedRole);
+        self::keyPath($path);
         if (strlen($passphrase) > 1024 || is_link($path) || !is_file($path) || (fileperms($path) & 0077) !== 0 || filesize($path) > 4096) { throw new SignerException('KEY_FILE_UNAVAILABLE'); }
         $bytes = file_get_contents($path);
         if ($bytes === false) { throw new SignerException('KEY_FILE_UNAVAILABLE'); }
@@ -61,7 +63,10 @@ final class ProtectedFileSigner implements SignerProvider
             $secret = sodium_crypto_aead_xchacha20poly1305_ietf_decrypt($ciphertext, StorageJson::encode($envelope), $nonce, $key);
             sodium_memzero($key);
             if ($secret === false || $secret === '') { throw new SignerException('KEY_UNLOCK_FAILED'); }
-            if (!hash_equals($public, sodium_crypto_sign_publickey_from_secretkey($secret))) { sodium_memzero($secret); throw new SignerException('KEY_ENVELOPE_INVALID'); }
+            $derivedPair = sodium_crypto_sign_seed_keypair(substr($secret, 0, 32));
+            $derivedPublic = sodium_crypto_sign_publickey($derivedPair);
+            sodium_memzero($derivedPair);
+            if (!hash_equals($public, $derivedPublic) || !hash_equals($public, sodium_crypto_sign_publickey_from_secretkey($secret))) { sodium_memzero($secret); throw new SignerException('KEY_ENVELOPE_INVALID'); }
             return new self($expectedRole, $envelope['public_key'], $secret, $verifier);
         } catch (SignerException $error) { throw $error; }
         catch (\Throwable) { throw new SignerException('KEY_ENVELOPE_INVALID'); }
@@ -85,6 +90,7 @@ final class ProtectedFileSigner implements SignerProvider
         $copy->{$field} = Encoding::encode(sodium_crypto_sign_detached(RecordFormat::message($copy), $this->secretKey), 'ed25519sig:');
         return $copy;
     }
+    private static function keyPath(string $path): void { if (str_contains($path, '://') || in_array(basename($path), ['hs_ed25519_secret_key', 'private_key'], true)) { throw new SignerException('TOR_KEY_ACCESS_FORBIDDEN'); } }
     private static function checkRole(string $role): void { if (!in_array($role, ['service', 'node'], true)) { throw new SignerException('SIGNER_ROLE_INVALID'); } }
     private static function base64(mixed $value, int $length): string
     {

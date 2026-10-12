@@ -20,24 +20,33 @@ final readonly class SnapshotProducer
     public function publish(int $now): array
     {
         if ($now < 0 || $now > 253402300799) { throw new ProtocolException('CLOCK_INVALID'); }
-        $state = $this->store->snapshot(); $hashes = []; $publicCursor = 0;
-        foreach ($state['records'] as $hash => $metadata) {
-            if ($metadata['record_type'] !== 'snapshot_descriptor') { $hashes[] = $hash; $publicCursor = max($publicCursor, $metadata['sequence']); }
-        }
-        sort($hashes, SORT_STRING); $chunks = []; $chunk = []; $bytes = 2; $count = 0;
-        foreach (array_chunk($hashes, 256) as $batch) {
-            $wires = $this->store->readRecords($batch);
-            foreach ($batch as $hash) {
-                if (!isset($wires[$hash])) { throw new ProtocolException('STORAGE_CORRUPT'); }
-                $record = $this->verifier->verifyWire($wires[$hash]);
+        $state = $this->store->snapshot(); $all = [];
+        foreach (array_chunk(array_keys($state['records']), 256) as $batch) {
+            foreach ($this->store->readRecords($batch) as $hash => $wire) {
+                $record = $this->verifier->verifyWire($wire);
                 if ($record->contentHash !== $hash) { throw new ProtocolException('STORAGE_CORRUPT'); }
-                if (count($chunk) === 256 || $bytes + strlen($record->canonicalWire) + (int) ($chunk !== []) > 524288) { $this->flush($chunk, $chunks); $bytes = 2; }
-                $bytes += strlen($record->canonicalWire) + (int) ($chunk !== []); $chunk[] = $record->document(); ++$count;
+                $all[] = $record;
             }
+        }
+        $selected = PublicEvidencePolicy::select($all); $hashes = array_keys($selected); sort($hashes, SORT_STRING);
+        $byHash = []; foreach ($all as $record) { $byHash[$record->contentHash] = $record; }
+        $publicCursor = 0; foreach ($hashes as $hash) { $publicCursor = max($publicCursor, $state['records'][$hash]['sequence']); }
+        $chunks = []; $chunk = []; $bytes = 2; $count = 0;
+        foreach ($hashes as $hash) {
+            $record = $byHash[$hash];
+            if (count($chunk) === 256 || $bytes + strlen($record->canonicalWire) + (int) ($chunk !== []) > 524288) { $this->flush($chunk, $chunks); $bytes = 2; }
+            $bytes += strlen($record->canonicalWire) + (int) ($chunk !== []); $chunk[] = $record->document(); ++$count;
         }
         $this->flush($chunk, $chunks); $bytes = 2;
         $previous = $state['tables']['node']['key:published-snapshot'] ?? null;
-        if ($previous !== null && $previous['root_hash'] === SnapshotFormat::rootHash($chunks) && $previous['cursor'] === (string) $publicCursor) { return ['status' => 'UNCHANGED', 'checkpoint_hash' => $previous['hash']]; }
+        $previousCreated = 0;
+        if ($previous !== null) {
+            $previousWire = $this->store->readRecord($previous['hash']);
+            if ($previousWire === null) { throw new ProtocolException('STORAGE_CORRUPT'); }
+            $previousCreated = strtotime($this->verifier->verifyWire($previousWire)->document()->created_at);
+            if ($previousCreated === false || $now < $previousCreated) { throw new ProtocolException('CLOCK_ROLLBACK'); }
+        }
+        if ($previous !== null && $now - $previousCreated < 86400 && $previous['root_hash'] === SnapshotFormat::rootHash($chunks) && $previous['cursor'] === (string) $publicCursor) { return ['status' => 'UNCHANGED', 'checkpoint_hash' => $previous['hash']]; }
         $generation = ($previous['generation'] ?? 0) + 1;
         $descriptor = $this->verifier->verify($this->signer->signRecord((object) [
             'protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'record_type' => 'snapshot_descriptor',
@@ -46,9 +55,14 @@ final readonly class SnapshotProducer
             'record_count' => $count, 'cursor' => (string) $publicCursor, 'chunks' => $chunks,
         ]));
         $this->blobs->put($descriptor->contentHash, $descriptor->canonicalWire);
-        $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor): void {
+        $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor, $hashes): void {
             if ($tx->state()['generation'] !== $state['generation']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
             $tx->putRecord($descriptor);
+            foreach ($tx->state()['tables']['node'] as $key => $_) { if (str_starts_with($key, 'key:public-index-')) { $tx->deleteOperational('node', substr($key,4)); } }
+            $publicHashes = $hashes;
+            foreach ($state['records'] as $hash => $metadata) { if ($metadata['record_type'] === 'snapshot_descriptor') { $publicHashes[] = $hash; } }
+            $publicHashes[] = $descriptor->contentHash;
+            foreach (array_chunk(array_values(array_unique($publicHashes)),64) as $index => $part) { $tx->set('node','public-index-' . $index,['hashes'=>$part]); }
             $tx->set('node', 'published-snapshot', ['hash' => $descriptor->contentHash, 'root_hash' => SnapshotFormat::rootHash($chunks), 'generation' => $generation, 'cursor' => (string) $publicCursor]);
         });
         return ['status' => 'PUBLISHED', 'checkpoint_hash' => $descriptor->contentHash, 'record_count' => $count, 'chunks' => count($chunks)];

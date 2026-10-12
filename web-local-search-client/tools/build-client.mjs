@@ -1,0 +1,26 @@
+import { build } from 'esbuild';
+import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
+import { validateOnionAddress } from '../src/protocol/onion-address.ts';
+import { sha3_256 } from '@noble/hashes/sha3.js';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const argument=process.argv.indexOf('--config');
+const config=JSON.parse(await readFile(argument<0?join(root,'public/config.json'):process.argv[argument+1],'utf8'));
+if(Object.keys(config).length!==5||config.client_config_version!==1||!['client-host','combined'].includes(config.mode)||config.minimum_distinct_keys!==3||!['client-host-proxy','direct-cross-origin'].includes(config.delivery_profile)||!Array.isArray(config.allowed_sources)||config.allowed_sources.length>16||new Set(config.allowed_sources).size!==config.allowed_sources.length)throw new Error('Invalid Client Host configuration');
+for(const source of config.allowed_sources)validateOnionAddress(source,sha3_256);
+const output=join(root,'dist');await mkdir(output,{recursive:true});
+await build({absWorkingDir:root,entryPoints:{client:'src/client/app.ts','verifier-worker':'src/client/verifier-worker.ts'},outdir:output,bundle:true,format:'esm',platform:'browser',target:'firefox128',minify:true,sourcemap:false,legalComments:'external',metafile:false});
+let html=await readFile(join(root,'public/index.html'),'utf8');
+const origins=(config.delivery_profile==='direct-cross-origin'?config.allowed_sources:[]).map(onion=>'http://'+onion).join(' ');
+html=html.replace("connect-src 'self';", "connect-src 'self'"+(origins===''?'':' '+origins)+';');
+await writeFile(join(output,'index.html'),html);
+await copyFile(join(root,'public/client.css'),join(output,'client.css'));
+await copyFile(join(root,'public/demo.json'),join(output,'demo.json'));
+await writeFile(join(output,'config.json'),JSON.stringify(config)+'\n');
+const files=['client.js','client.js.LEGAL.txt','verifier-worker.js','verifier-worker.js.LEGAL.txt','client.css','index.html','demo.json','config.json'];
+const manifest={artifact:'Onion Service Discovery development browser client',files:[]};
+for(const name of files){let bytes;try{bytes=await readFile(join(output,name));}catch(error){if(name.endsWith('.LEGAL.txt')&&error.code==='ENOENT')continue;throw error;}manifest.files.push({file:name,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});}
+await writeFile(join(output,'build-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+console.log('Built local browser client with '+config.allowed_sources.length+' explicit source origins');

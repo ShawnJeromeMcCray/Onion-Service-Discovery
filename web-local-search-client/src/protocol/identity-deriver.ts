@@ -1,3 +1,4 @@
+import { assertVerifiedRecord } from './record-verifier.ts';
 import { parseStrictJson, type JsonValue } from './strict-json.ts';
 import { requiredObject, requiredString, type VerifiedRecord } from './record-verifier.ts';
 import type { WireRecord } from './record-format.ts';
@@ -44,6 +45,7 @@ export function deriveIdentities(records: readonly VerifiedRecord[], maxRecords 
     map.get(key)!.add(hash);
   };
   for (const verified of records) {
+    assertVerifiedRecord(verified);
     const record = parseStrictJson(new TextEncoder().encode(verified.canonicalWire), 65536);
     const hash = verified.contentHash;
     if (verified.type === 'service_manifest') {

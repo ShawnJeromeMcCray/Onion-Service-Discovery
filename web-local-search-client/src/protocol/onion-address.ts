@@ -1,4 +1,4 @@
-/** SHA3-256 provider boundary. A browser provider is not selected or shipped yet. */
+/** SHA3-256 provider boundary. The browser adapter uses the pinned mature SHA3 implementation. */
 export type Sha3Provider = (input: Uint8Array) => Uint8Array;
 
 /** Strict canonical wire hostname validation; never normalizes signed input. */

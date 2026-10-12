@@ -15,7 +15,9 @@ final class Encoding
     /** @return non-empty-string */
     public static function publicKey(string $encoded): string
     {
-        return self::decode($encoded, 'ed25519:', 32, 'PUBLIC_KEY_INVALID');
+        $bytes = self::decode($encoded, 'ed25519:', 32, 'PUBLIC_KEY_INVALID');
+        try { sodium_crypto_sign_ed25519_pk_to_curve25519($bytes); } catch (\SodiumException) { throw new ProtocolException('PUBLIC_KEY_INVALID'); }
+        return $bytes;
     }
 
     /** @return non-empty-string */

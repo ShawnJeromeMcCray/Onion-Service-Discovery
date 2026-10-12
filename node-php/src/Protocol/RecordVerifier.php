@@ -44,10 +44,10 @@ final class RecordVerifier
         $message = RecordFormat::message($record);
         $key = RecordFormat::TYPES[$type]['key'];
         $signature = RecordFormat::TYPES[$type]['excluded'][0];
-        if (!sodium_crypto_sign_verify_detached(Encoding::signature($record->{$signature}), $message, Encoding::publicKey($record->{$key}))) {
+        if (!$this->signatureValid(Encoding::signature($record->{$signature}), $message, Encoding::publicKey($record->{$key}))) {
             throw new ProtocolException('SIGNATURE_INVALID');
         }
-        if ($type === 'service_identity_key_rotation' && !sodium_crypto_sign_verify_detached(
+        if ($type === 'service_identity_key_rotation' && !$this->signatureValid(
             Encoding::signature($record->new_key_confirmation), $message, Encoding::publicKey($record->new_public_key)
         )) {
             throw new ProtocolException('KEY_ROTATION_INVALID');
@@ -76,6 +76,16 @@ final class RecordVerifier
         if ($expectedOnion !== null && $type === 'service_manifest' && $record->onion !== $expectedOnion->hostname) {
             throw new ProtocolException('ONION_BINDING_MISMATCH');
         }
+    }
+
+    /** @param non-empty-string $signature
+     * @param non-empty-string $publicKey
+     */
+    private function signatureValid(string $signature, string $message, string $publicKey): bool
+    {
+        try { sodium_crypto_sign_ed25519_pk_to_curve25519(substr($signature, 0, 32)); }
+        catch (\SodiumException) { return false; }
+        return sodium_crypto_sign_verify_detached($signature, $message, $publicKey);
     }
 
     private function semantics(\stdClass $record): void
@@ -123,6 +133,14 @@ final class RecordVerifier
             if ($set !== $sorted || count(array_unique($set, SORT_REGULAR)) !== count($set)) {
                 throw new ProtocolException('SCHEMA_INVALID');
             }
+        }
+        if ($record->record_type === 'snapshot_descriptor') {
+            $count = 0; $seen = [];
+            foreach ($record->chunks as $chunk) {
+                if (isset($seen[$chunk->hash])) { throw new ProtocolException('SCHEMA_INVALID'); }
+                $seen[$chunk->hash] = true; $count += $chunk->record_count;
+            }
+            if ($count !== $record->record_count || SnapshotFormat::rootHash($record->chunks) !== $record->root_hash) { throw new ProtocolException('SCHEMA_INVALID'); }
         }
         if ($record->record_type === 'service_identity_key_rotation' && (
             $record->old_public_key === $record->new_public_key || $record->effective_revision < 2

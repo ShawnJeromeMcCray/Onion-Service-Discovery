@@ -13,6 +13,7 @@ use OnionServiceDiscovery\Validation\StrictJson;
 
 function boundedFile(string $path, int $maxBytes): string
 {
+    if (in_array(basename($path), ['hs_ed25519_secret_key', 'private_key'], true)) { throw new ProtocolException('TOR_KEY_ACCESS_FORBIDDEN'); }
     if (str_contains($path, '://') || !is_file($path) || !is_readable($path)) {
         throw new ProtocolException('INPUT_FILE_UNAVAILABLE');
     }
@@ -62,7 +63,13 @@ $verifier = new RecordVerifier($root . '/protocol/schemas');
 
 try {
     if ($command === 'help') {
-        $output = ['status' => 'DEVELOPMENT', 'commands' => ['manifest:verify <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>', 'storage:init <filesystem|sqlite> <path>', 'storage:check <backend> <path>', 'storage:admit <backend> <path> <signed-record>', 'storage:export <backend> <path> <archive>', 'storage:import <backend> <new-staging-path> <archive>', 'config:validate <config>', 'doctor <config>', 'candidate:add <config> <onion>', 'node:init <config> --passphrase-file <file>', 'node:snapshot <config> --passphrase-file <file>', 'node:work-one <config> --passphrase-file <file>', 'key:create <service|node> <key-path> --passphrase-file <private-file>', 'record:sign <role> <key-path> <record> --passphrase-file <private-file> [--rotation-confirmation]' ], 'network_side_effects' => false];
+        $output = ['status' => 'DEVELOPMENT', 'commands' => ['manifest:verify <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>', 'storage:init <filesystem|sqlite> <path>', 'storage:check <backend> <path>', 'storage:admit <backend> <path> <signed-record>', 'storage:export <backend> <path> <archive>', 'storage:import <backend> <new-staging-path> <archive>', 'manifest:install <signed-manifest> <public-hostname-file> <webroot> [--rotation <proof>] [--migration <proof>]', 'manifest:init <onion> <service-public-key> <metadata-file>', 'manifest:revise <signed-manifest> <metadata-file>', 'manifest:withdraw <signed-manifest>', 'manifest:rotate <signed-manifest> <new-public-key>', 'manifest:migrate <signed-manifest> <new-onion>', 'peers:add <config> <onion> --expected-node-key <public-key>', 'peers:list <config>', 'peers:disable <config> <onion>', 'peers:retry <config> <onion> --acknowledge-quarantine', 'sync:peer-step <config> <onion>', 'client:init <config>', 'config:validate <config>', 'doctor <config>', 'candidate:add <config> <onion>', 'node:init <config> --passphrase-file <file>', 'node:snapshot <config> --passphrase-file <file>', 'node:work-one <config> --passphrase-file <file>', 'key:create <service|node> <key-path> --passphrase-file <private-file>', 'record:sign <role> <key-path> <record> --passphrase-file <private-file> [--rotation-confirmation]' ], 'network_side_effects' => false];
+    } elseif ($command === 'client:init') {
+        if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
+        $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
+        if (!in_array($config->role, ['client-host', 'combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        new \OnionServiceDiscovery\Storage\PublicBlobStore($config->exportPath, true);
+        $output = ['status' => 'INITIALIZED', 'role' => $config->role, 'source_count' => count($config->sources), 'signing_keys_required' => false];
     } elseif ($command === 'config:validate' || $command === 'doctor') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
@@ -72,6 +79,52 @@ try {
             foreach (array_keys($output['extensions']) as $extension) { $output['extensions'][$extension] = extension_loaded($extension); }
             $output['sqlite_driver'] = class_exists(PDO::class) && in_array('sqlite', PDO::getAvailableDrivers(), true);
             $output['production_approval'] = 'OPEN';
+        }
+    } elseif (in_array($command, ['peers:add','peers:list','peers:disable','peers:retry','sync:peer-step'], true)) {
+        $expectedCount = $command === 'peers:add' ? 4 : ($command === 'peers:list' ? 1 : ($command === 'peers:retry' ? 3 : 2));
+        if (count($arguments) !== $expectedCount || ($command === 'peers:add' && $arguments[2] !== '--expected-node-key') || ($command === 'peers:retry' && $arguments[2] !== '--acknowledge-quarantine')) { throw new ProtocolException('USAGE_ERROR'); }
+        $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
+        if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        $store = $config->store();
+        if ($command === 'peers:list') {
+            $output = ['status' => 'PASS', 'peers' => $store->snapshot()['tables']['peers']];
+        } else {
+            $onion = OnionAddress::parse($arguments[1]);
+            if ($command === 'peers:add') { $output = ['status' => 'PASS', 'inserted' => \OnionServiceDiscovery\Node\PeerRegistry::add($store,$onion,$arguments[3])]; }
+            elseif ($command === 'sync:peer-step') {
+                if (!$config->features['sync_with_peers']) { throw new ProtocolException('SYNC_DISABLED'); }
+                $output = (new \OnionServiceDiscovery\Node\PeerSync($store,$verifier,$config->transport()))->step($onion,time());
+            } else {
+                $store->transaction(static function (\OnionServiceDiscovery\Storage\StorageTransaction $tx) use ($onion,$command): void {
+                    $row=$tx->get('peers',$onion->hostname); if($row===null) { throw new ProtocolException('PEER_NOT_CONFIGURED'); }
+                    $row['state']=$command==='peers:disable'?'DISABLED':'CANDIDATE'; $row['claim']=null; $row['lease_until']=0; $row['next_attempt']=0; $row['failures']=0; $tx->set('peers',$onion->hostname,$row);
+                });
+                $output=['status'=>'PASS','evidence_preserved'=>true];
+            }
+        }
+    } elseif ($command === 'manifest:install') {
+        if (count($arguments) < 3 || count($arguments) > 7 || (count($arguments)-3)%2!==0) { throw new ProtocolException('USAGE_ERROR'); }
+        $rotation=null; $migration=null;
+        for($index=3;$index<count($arguments);$index+=2){
+            $proof=$verifier->verifyWire(boundedFile($arguments[$index+1],65536));
+            if($arguments[$index]==='--rotation'&&$rotation===null)$rotation=$proof;
+            elseif($arguments[$index]==='--migration'&&$migration===null)$migration=$proof;
+            else throw new ProtocolException('USAGE_ERROR');
+        }
+        $output=(new \OnionServiceDiscovery\Signing\ManifestInstaller($verifier))->install($verifier->verifyWire(boundedFile($arguments[0],16384)),$arguments[1],$arguments[2],$rotation,$migration);
+    } elseif (in_array($command, ['manifest:init','manifest:revise','manifest:withdraw','manifest:rotate','manifest:migrate'], true)) {
+        $count=$command==='manifest:init'?3:($command==='manifest:withdraw'?1:2);
+        if(count($arguments)!==$count) { throw new ProtocolException('USAGE_ERROR'); }
+        $builder=new \OnionServiceDiscovery\Signing\ManifestDraftBuilder($verifier);
+        if($command==='manifest:init') { $output=$builder->genesis(OnionAddress::parse($arguments[0]),$arguments[1],StrictJson::parse(boundedFile($arguments[2],16384),16384)); }
+        else {
+            $current=$verifier->verifyWire(boundedFile($arguments[0],65536));
+            $output=match($command) {
+                'manifest:revise'=>$builder->revise($current,StrictJson::parse(boundedFile($arguments[1],16384),16384)),
+                'manifest:withdraw'=>$builder->withdraw($current),
+                'manifest:rotate'=>$builder->rotate($current,$arguments[1]),
+                'manifest:migrate'=>$builder->migrate($current,OnionAddress::parse($arguments[1])),
+            };
         }
     } elseif ($command === 'candidate:add') {
         if (count($arguments) !== 2) { throw new ProtocolException('USAGE_ERROR'); }

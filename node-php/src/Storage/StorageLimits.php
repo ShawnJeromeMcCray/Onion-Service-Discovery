@@ -7,7 +7,7 @@ final readonly class StorageLimits
 {
     public function __construct(
         public int $maxRecords = 10000,
-        public int $maxOperationalRows = 10000,
+        public int $maxOperationalRows = 30000,
         public int $maxAdmissionsPerTransaction = 256,
         public int $maxBytes = 268435456,
         public int $maxCheckpointBytes = 33554432,

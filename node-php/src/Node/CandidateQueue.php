@@ -44,9 +44,8 @@ final readonly class CandidateQueue
                 }
                 if (!in_array($row['state'], ['QUEUED', 'BACKOFF', 'VERIFIED'], true) || $row['next_attempt'] > $now) { continue; }
                 if ($row['state'] === 'VERIFIED') { $row['attempts'] = 0; }
-                if ($row['attempts'] >= 8) { $row['state'] = 'QUARANTINED'; $row['error'] = 'RETRY_BUDGET_EXHAUSTED'; $tx->set('candidates', $key, $row); continue; }
                 OnionAddress::parse($key);
-                $row['state'] = 'DIRECT_CHECK_PENDING'; ++$row['attempts']; $row['claim'] = bin2hex(random_bytes(16)); $row['lease_until'] = $now + 120;
+                $row['state'] = 'DIRECT_CHECK_PENDING'; $row['attempts'] = min(8, $row['attempts'] + 1); $row['claim'] = bin2hex(random_bytes(16)); $row['lease_until'] = $now + 120;
                 $tx->set('candidates', $key, $row); $tx->set('maintenance', 'candidate-scan', ['offset' => ($offset + 1) % $count]);
                 return ['onion' => $key, 'claim' => $row['claim'], 'attempt' => $row['attempts']];
             }
@@ -63,7 +62,7 @@ final readonly class CandidateQueue
         if (preg_match('/\A[A-Z_]{1,64}\z/D', $error) !== 1) { throw new ProtocolException('ERROR_CODE_INVALID'); }
         $this->store->transaction(static function (StorageTransaction $tx) use ($job, $now, $error, $quarantine): void {
             $row = self::claimedRow($tx, $job);
-            $row['state'] = $quarantine || $row['attempts'] >= 8 ? 'QUARANTINED' : 'BACKOFF';
+            $row['state'] = $quarantine ? 'QUARANTINED' : 'BACKOFF';
             $row['error'] = $error; $row['next_attempt'] = $now + min(86400, 60 * (2 ** min(10, $row['attempts'] - 1))) + random_int(0, 30);
             $row['lease_until'] = 0; $row['claim'] = null; $tx->set('candidates', $job['onion'], $row);
         });

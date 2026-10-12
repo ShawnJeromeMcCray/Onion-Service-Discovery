@@ -9,7 +9,7 @@ class ProtocolInputError(ValueError):
     pass
 
 
-def parse_strict_json(data: bytes, max_bytes: int = 16384) -> dict:
+def parse_strict_value(data: bytes, max_bytes: int = 16384):
     if type(max_bytes) is not int or not 1 <= max_bytes <= 1048576 or len(data) > max_bytes:
         raise ProtocolInputError('DOCUMENT_TOO_LARGE')
     if data.startswith(b'\xef\xbb\xbf'):
@@ -95,6 +95,11 @@ def parse_strict_json(data: bytes, max_bytes: int = 16384) -> dict:
                 raise ProtocolInputError('SCHEMA_INVALID')
 
     walk(result, 1)
+    return result
+
+
+def parse_strict_json(data: bytes, max_bytes: int = 16384) -> dict:
+    result = parse_strict_value(data, max_bytes)
     if not isinstance(result, dict):
         raise ProtocolInputError('SCHEMA_INVALID')
     return result

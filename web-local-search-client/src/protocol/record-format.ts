@@ -31,7 +31,7 @@ export function signedMessage(record: WireRecord): Uint8Array {
   return new TextEncoder().encode('Onion Service Discovery/' + format.domain + '/v1\0' + canonicalJson(signablePayload(record)));
 }
 
-export async function recordHash(record: WireRecord, subtle: SubtleCrypto): Promise<string> {
+export async function recordHash(record: WireRecord, subtle: Pick<SubtleCrypto, 'digest'>): Promise<string> {
   const type = recordType(record);
   const domain = type === 'service_manifest' ? 'service-manifest-hash' : recordFormats[type].domain + '-hash';
   const bytes = new TextEncoder().encode('Onion Service Discovery/' + domain + '/v1\0' + canonicalJson(signablePayload(record)));

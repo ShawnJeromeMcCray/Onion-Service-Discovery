@@ -30,7 +30,7 @@ state and cursor share one SQL transaction. Never copy a live database file
 without its WAL or use it as a backup. Native operational backup/restore tooling
 remains an implementation obligation.
 
-Default budgets: 10,000 records, 10,000 total operational rows, 256 new records
+Default budgets: 10,000 records, 30,000 total operational rows, 256 new records
 and 1,024 operational mutations per transaction, 256 MiB logical stored bytes,
 32 MiB state checkpoint, 16 MiB journal, 8 KiB operational value and two-second
 lock wait. Logical quotas exclude filesystem block overhead. Actual disk-full

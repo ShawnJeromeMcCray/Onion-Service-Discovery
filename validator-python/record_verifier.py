@@ -3,11 +3,13 @@ from datetime import datetime
 import json
 from pathlib import Path
 
+from nacl.bindings import crypto_core_ed25519_is_valid_point
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from jsonschema import Draft202012Validator
 
 from canonical_json import canonical_json
+from snapshot_format import root_hash
 from onion_address import validate_onion_address
 from strict_json import parse_strict_json
 from record_format import FORMATS, record_type, message, content_hash, decode_bytes
@@ -40,7 +42,8 @@ def verify_record(record, expected_onion=None):
             validate_onion_address(record[field])
     for field in ('service_identity_public_key', 'node_identity_public_key', 'old_public_key', 'new_public_key'):
         if field in record:
-            decode_bytes(record[field], 'ed25519:', 32, 'PUBLIC_KEY_INVALID')
+            if not crypto_core_ed25519_is_valid_point(decode_bytes(record[field], 'ed25519:', 32, 'PUBLIC_KEY_INVALID')):
+                raise ValueError('PUBLIC_KEY_INVALID')
     for field in FORMATS[kind][1]:
         decode_bytes(record[field], 'ed25519sig:', 64, 'SIGNATURE_INVALID')
     for field in ('published_at', 'observed_at', 'created_at'):
@@ -64,6 +67,10 @@ def verify_record(record, expected_onion=None):
             sets.append(record[field])
     if any(values != sorted(values) or len(values) != len(set(values)) for values in sets):
         raise ValueError('SCHEMA_INVALID')
+    if kind == 'snapshot_descriptor':
+        hashes = [chunk['hash'] for chunk in record['chunks']]
+        if len(set(hashes)) != len(hashes) or sum(chunk['record_count'] for chunk in record['chunks']) != record['record_count'] or root_hash(record['chunks']) != record['root_hash']:
+            raise ValueError('SCHEMA_INVALID')
     if kind == 'service_identity_key_rotation' and (record['old_public_key'] == record['new_public_key'] or record['effective_revision'] < 2):
         raise ValueError('KEY_ROTATION_INVALID')
     if kind == 'onion_service_migration' and (record['from_onion'] == record['to_onion'] or record['effective_revision'] < 2):
@@ -76,12 +83,16 @@ def verify_record(record, expected_onion=None):
     signature_field = FORMATS[kind][1][0]
     key = Ed25519PublicKey.from_public_bytes(decode_bytes(record[key_field], 'ed25519:', 32, 'PUBLIC_KEY_INVALID'))
     try:
+        if not crypto_core_ed25519_is_valid_point(decode_bytes(record[signature_field], 'ed25519sig:', 64, 'SIGNATURE_INVALID')[:32]):
+            raise InvalidSignature
         key.verify(decode_bytes(record[signature_field], 'ed25519sig:', 64, 'SIGNATURE_INVALID'), message(record))
     except InvalidSignature:
         raise ValueError('SIGNATURE_INVALID') from None
     if kind == 'service_identity_key_rotation':
         key = Ed25519PublicKey.from_public_bytes(decode_bytes(record['new_public_key'], 'ed25519:', 32, 'PUBLIC_KEY_INVALID'))
         try:
+            if not crypto_core_ed25519_is_valid_point(decode_bytes(record['new_key_confirmation'], 'ed25519sig:', 64, 'SIGNATURE_INVALID')[:32]):
+                raise InvalidSignature
             key.verify(decode_bytes(record['new_key_confirmation'], 'ed25519sig:', 64, 'SIGNATURE_INVALID'), message(record))
         except InvalidSignature:
             raise ValueError('KEY_ROTATION_INVALID') from None

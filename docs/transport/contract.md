@@ -40,6 +40,8 @@ The root hashes ASCII `Onion Service Discovery/snapshot-root/v1`, NUL and the
 canonical ordered chunk descriptors. These are draft byte choices requiring
 cross-language vectors and human protocol review.
 
+Peer sync is resumable with at most six generic requests and two chunks per step. It retains global evidence through source omissions and activates a source cursor only after complete chunk verification. Signed checkpoint equivocation is retained, rollback is rejected and one lease per source prevents concurrent jobs. Imported observations never become local checks. Public export excludes never-published Service identities while retaining needed public history and withdrawal evidence. Unchanged direct checks update local liveness without accumulating duplicate observation records; source checkpoints can refresh their signatures daily.
+
 The PHP public entrypoint requires `ONION_SERVICE_DISCOVERY_CONFIG` containing
 only the configuration path. Serve only `node-php/public` as the document root;
 keep config, dependencies, data, exports and all keys outside it. Its protocol
@@ -53,6 +55,6 @@ public generic data; no wildcard or credentialed CORS.
 
 The service-history endpoint currently has a 256-record dataset work cap and
 32 KiB response cap; clients must use generic snapshots for larger datasets.
-Efficient indexed service lookup, peer sync, live Tor tests, real browser tests,
+Efficient indexed service lookup, live Tor tests, real browser tests,
 complete export retention/garbage collection and deployment hardening remain
 open. No production approval is implied by this draft runtime.

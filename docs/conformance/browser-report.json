@@ -1,0 +1,22 @@
+{
+  "profile": "CONTROLLED_CHROMIUM_DEVELOPMENT",
+  "status": "PASS",
+  "tests": 2,
+  "browser": "Chromium 154.0.8037.57 built on Debian GNU/Linux 13 (trixie)",
+  "playwright": "1.64.0",
+  "fixture_sha256": "452c59c35b14d9dbc380ee2d1dd06ca054adf7e593e30d2fff2d9426cec36d3c",
+  "checks": [
+    "Three-source signed snapshot import",
+    "Local query causes no network requests",
+    "Hostile metadata is text only",
+    "Withdrawal absent from normal results",
+    "Pin persistence/restore and explicit forgetting",
+    "Unavailable profile storage retains memory mode"
+  ],
+  "limitations": [
+    "Not live Tor",
+    "Not Tor Browser Desktop or Android",
+    "Not independent accessibility/security UX review",
+    "No production approval"
+  ]
+}

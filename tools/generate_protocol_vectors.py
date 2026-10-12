@@ -3,8 +3,10 @@ from pathlib import Path
 import base64,copy,hashlib,json,sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'validator-python'))
+from nacl.bindings import crypto_core_ed25519_add
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from canonical_json import canonical_json
+from snapshot_format import root_hash, chunk_hash
 from record_format import encode_bytes,message,payload,content_hash
 
 def key(label):return Ed25519PrivateKey.from_private_bytes(hashlib.sha256(('Onion Service Discovery TEST ONLY '+label).encode()).digest())
@@ -26,7 +28,7 @@ migration=signed({**base('onion_service_migration'),'service_identity_public_key
 migrated=copy.deepcopy(revision);migrated['onion']=b;migrated=signed(migrated,service)
 node_record=signed({**base('node_descriptor'),'node_identity_public_key':public(node),'node_onion':onion('node'),'descriptor_revision':1,'previous_descriptor_hash':None,'supported_protocol_versions':[1],'capabilities':['index.core.v1','sync.changes.v1','sync.snapshots.v1'],'software':{'name':'Onion Service Discovery','version':'0.1.0-dev'}},node)
 observation=signed({**base('direct_observation'),'node_identity_public_key':public(node),'onion':a,'service_identity_public_key':public(service),'revision':1,'manifest_hash':content_hash(genesis),'result':'SUCCESS_CURRENT','observed_at':'2026-10-12T00:00:00Z'},node)
-snapshot=signed({**base('snapshot_descriptor'),'node_identity_public_key':public(node),'generation':1,'previous_checkpoint_hash':None,'created_at':'2026-10-12T00:00:00Z','root_hash':'sha256:'+hashlib.sha256(b'[]').hexdigest(),'record_count':0,'cursor':'Yzox','chunks':[]},node)
+snapshot=signed({**base('snapshot_descriptor'),'node_identity_public_key':public(node),'generation':1,'previous_checkpoint_hash':None,'created_at':'2026-10-12T00:00:00Z','root_hash':root_hash([]),'record_count':0,'cursor':'Yzox','chunks':[]},node)
 cases=[]
 def add(ident,rec,error=None,expected_onion=None,raw=None):
  body=canonical_json(rec).encode() if raw is None else raw
@@ -36,6 +38,11 @@ def add(ident,rec,error=None,expected_onion=None,raw=None):
  if expected_onion is not None:entry['expected_onion']=expected_onion
  cases.append(entry)
 for ident,rec in [('genesis',genesis),('revision-2',revision),('rotation',rotation),('rotated-manifest',rotated),('migration',migration),('migrated-manifest',migrated),('node-descriptor',node_record),('direct-observation',observation),('snapshot-descriptor',snapshot)]:add(ident,rec)
+chunk_wire=canonical_json(sorted([genesis,revision],key=content_hash)).encode();chunk_metadata={'hash':chunk_hash(chunk_wire),'bytes':len(chunk_wire),'record_count':2}
+nonempty=copy.deepcopy(snapshot);nonempty.update(root_hash=root_hash([chunk_metadata]),record_count=2,chunks=[chunk_metadata]);nonempty=signed(nonempty,node);add('snapshot-with-chunk',nonempty)
+mut=copy.deepcopy(nonempty);mut['root_hash']='sha256:'+'0'*64;add('snapshot-root-mismatch',signed(mut,node),'SCHEMA_INVALID')
+mut=copy.deepcopy(nonempty);mut['record_count']=3;add('snapshot-count-mismatch',signed(mut,node),'SCHEMA_INVALID')
+mut=copy.deepcopy(nonempty);mut['chunks']=[chunk_metadata,chunk_metadata];mut['record_count']=4;mut['root_hash']=root_hash(mut['chunks']);add('snapshot-duplicate-chunk',signed(mut,node),'SCHEMA_INVALID')
 add('correct-host-binding',genesis,expected_onion=a)
 add('incorrect-host-binding',genesis,'ONION_BINDING_MISMATCH',b)
 mut=copy.deepcopy(genesis);mut['service']['name']='Changed by a peer';add('metadata-mutation',mut,'SIGNATURE_INVALID')
@@ -53,6 +60,11 @@ mut=copy.deepcopy(rotation);mut['new_key_confirmation']=encode_bytes(bytes(64),'
 mut=copy.deepcopy(migration);mut['to_onion']=a;add('same-address-migration',mut,'MIGRATION_INVALID')
 mut=copy.deepcopy(genesis);mut['signature']=encode_bytes(service.sign(b'wrong domain'+message(genesis)),'ed25519sig:');add('wrong-signature-domain',mut,'SIGNATURE_INVALID')
 mut=copy.deepcopy(genesis);mut['signature']=encode_bytes(node.sign(message(genesis)),'ed25519sig:');add('node-cannot-sign-service',mut,'SIGNATURE_INVALID')
+for ident,weak in [('identity',b'\x01'+bytes(31)),('zero',bytes(32)),('noncanonical-y',b'\xed'+b'\xff'*30+b'\x7f'),('mixed-torsion',crypto_core_ed25519_add(service.public_key().public_bytes_raw(),b'\xec'+b'\xff'*30+b'\x7f'))]:
+ mut=copy.deepcopy(genesis);mut['service_identity_public_key']=encode_bytes(weak,'ed25519:');mut['signature']=encode_bytes(b'\x01'+bytes(63),'ed25519sig:');add('weak-public-key-'+ident,mut,'PUBLIC_KEY_INVALID')
+sig=base64.urlsafe_b64decode(genesis['signature'][11:]+'==');order=2**252+27742317777372353535851937790883648493
+mut=copy.deepcopy(genesis);mut['signature']=encode_bytes(sig[:32]+(int.from_bytes(sig[32:],'little')+order).to_bytes(32,'little'),'ed25519sig:');add('noncanonical-signature-s',mut,'SIGNATURE_INVALID')
+mut=copy.deepcopy(genesis);mut['signature']=encode_bytes(b'\x01'+bytes(63),'ed25519sig:');add('small-order-signature-r',mut,'SIGNATURE_INVALID')
 add('raw-wire-limit',genesis,'DOCUMENT_TOO_LARGE',raw=canonical_json(genesis).encode()+b' '*16384)
 add('reordered-wire',genesis,raw=json.dumps(dict(reversed(list(genesis.items()))),ensure_ascii=False).encode())
 (ROOT/'protocol/test-vectors/signed-records.json').write_text(json.dumps({'format_version':1,'status':'DRAFT_CRYPTO_CORE','warning':'ALL SEEDS ARE PUBLIC TEST ONLY. Not a protocol freeze approval.','test_seed_labels':['service-1','service-2','node-1'],'cases':cases,'stories':{'genesis':genesis,'successor':revision,'rotation':rotation,'rotated':rotated,'migration':migration,'migrated':migrated}},indent=2,ensure_ascii=False)+'\n')

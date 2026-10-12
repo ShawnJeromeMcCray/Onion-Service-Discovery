@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Onion Service Discovery</title>
+  <link rel="stylesheet" href="client.css">
+  <script type="module" src="client.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to search</a>
+  <header class="page-header">
+    <div class="identity-mark" aria-hidden="true">◉</div>
+    <div><p class="eyebrow">Public, opt-in directory · local search</p><h1>Onion Service Discovery</h1></div>
+    <span class="release-label">Development preview</span>
+  </header>
+  <main id="main">
+    <section class="intro" aria-labelledby="intro-title">
+      <div><h2 id="intro-title">Find public onion services.</h2><p>Search runs on this device. Loading the directory requests generic signed data, without your search terms or pins.</p></div>
+      <p class="trust-note">Signatures describe key continuity. They do not establish who operates a service or whether its content is safe. Use Tor Browser for onion connections.</p>
+    </section>
+    <div id="host-boundary" class="notice">The Client Host controls this page’s code. Self-host a verified release for stronger separation from data Nodes.</div>
+    <div id="synthetic-notice" class="notice warning" hidden>Synthetic demonstration data. These addresses are fixtures, not live services.</div>
+    <section class="source-panel" aria-labelledby="sources-title">
+      <div class="section-heading"><h2 id="sources-title">Directory sources</h2><span id="coverage" class="muted">No sources loaded</span></div>
+      <p class="muted">Compare multiple data Nodes. Several signing keys can still belong to one operator.</p>
+      <details><summary>Source selection and expected keys</summary>
+      <form id="source-form">
+        <div id="source-options" class="source-options"></div>
+        <p id="source-empty" class="muted">No Nodes configured on this Client Host. You can import signed records or try the offline demonstration.</p>
+        <label class="check-label"><input type="checkbox" id="limited-coverage">Allow loading with fewer than three selected sources</label>
+      </form>
+      </details>
+      <div class="actions"><button type="submit" form="source-form" id="load-sources">Load directory</button><button type="button" id="cancel-load" class="secondary" disabled>Cancel</button><button type="button" id="load-demo" class="secondary">Try offline demo</button></div>
+      <div id="source-statuses" class="source-statuses"></div>
+    </section>
+    <div class="workspace-grid">
+      <section class="search-panel" aria-labelledby="search-title">
+        <div class="section-heading"><h2 id="search-title">Local search</h2><span id="record-count" class="muted">0 signed records</span></div>
+        <form id="search-form" role="search"><label for="query">Search names, descriptions or categories</label><input type="search" id="query" maxlength="256" autocomplete="off" spellcheck="false" placeholder="Search the loaded directory"><label for="language">Language</label><select id="language"><option value="">All languages</option></select></form>
+        <p id="result-summary" class="muted" aria-live="polite">Load sources or import signed records to begin.</p>
+        <div id="results" class="results"></div>
+      </section>
+      <aside class="pin-panel" aria-labelledby="pins-title">
+        <div class="section-heading"><h2 id="pins-title">Your local pins</h2><span id="pin-count" class="muted">0</span></div>
+        <p class="muted">A pin remembers your chosen key and context. Sources cannot vote to replace it.</p>
+        <label class="check-label"><input type="checkbox" id="remember-pins">Remember pins in this browser profile</label>
+        <p id="storage-status" class="muted">Session memory only. Tor Browser may clear profile storage.</p>
+        <div id="pins" class="pins"></div>
+        <div class="actions"><button id="export-pins" class="secondary" type="button">Export pins</button><label class="file-control" for="import-pins">Import pins<input id="import-pins" type="file" accept="application/json,.json"></label></div>
+        <p class="muted">Pin backups can reveal your interests. They stay local unless you share the downloaded file.</p>
+      </aside>
+    </div>
+    <section class="tools-panel" aria-labelledby="local-data-title">
+      <h2 id="local-data-title">Local data</h2><div class="actions"><label class="file-control" for="import-records">Import signed record bundle<input id="import-records" type="file" accept="application/json,.json"></label><button type="button" id="clear-index" class="secondary">Clear index</button><button type="button" id="forget-all" class="secondary">Forget local data</button></div>
+      <p class="muted">Clearing the index keeps pins and continuity witnesses. Forgetting local data removes these safeguards.</p>
+      <p id="operation-status" role="status" aria-live="polite">Ready. No remote directory requests have been made.</p>
+    </section>
+    <noscript><section class="notice"><h2>JavaScript is required for local verification and search.</h2><p>This Client Host does not send searches to a server as a fallback. Use the offline validator or a JavaScript-enabled Tor Browser.</p></section></noscript>
+  </main>
+  <footer><p>Onion Service Discovery · CC0-1.0 · No analytics, cookies or automatic service visits.</p><p>Real Tor Browser compatibility, independent audit and production release approval remain open for this development preview.</p></footer>
+  <dialog id="pin-import-dialog" aria-labelledby="pin-import-title"><form method="dialog"><h2 id="pin-import-title">Review imported pins</h2><p>These are local preferences, not cryptographic evidence. Existing conflicting pins will be preserved.</p><div id="pin-preview"></div><div class="actions"><button value="cancel" class="secondary">Cancel</button><button value="confirm">Import reviewed pins</button></div></form></dialog>
+  <dialog id="forget-dialog" aria-labelledby="forget-title"><form method="dialog"><h2 id="forget-title">Forget local data?</h2><p>This removes pins, the loaded index and continuity witnesses from this browser session and the saved pin profile. Revision and fork warnings will be lost. Export pins first if you need them.</p><div class="actions"><button value="cancel" class="secondary">Keep local data</button><button value="confirm">Forget local data</button></div></form></dialog>
+</body>
+</html>

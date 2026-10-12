@@ -35,7 +35,9 @@ final readonly class DataApi
         if (strlen($target) > 256 || preg_match('/[\x00-\x20\x7f]/', $target) === 1) { return $this->response(400, ['error' => 'REQUEST_INVALID'], $headers); }
         [$path, $query] = array_pad(explode('?', $target, 2), 2, '');
         try {
-            $state = $this->store->snapshot(); $published = $state['tables']['node']['key:published-snapshot'] ?? null;
+            $state = $this->store->snapshot(); $publicHashes = [];
+            foreach ($state['tables']['node'] as $key => $row) { if (str_starts_with($key,'key:public-index-')) { foreach ($row['hashes'] as $hash) { $publicHashes[$hash]=true; } } }
+            $published = $state['tables']['node']['key:published-snapshot'] ?? null;
             if ($path === '/onion-service-discovery/v1/node' && $query === '') {
                 $node = $state['tables']['node']['key:descriptor'] ?? null;
                 if ($node === null) { return $this->response(503, ['error' => 'NODE_NOT_INITIALIZED'], $headers); }
@@ -69,7 +71,7 @@ final readonly class DataApi
             }
             if ($path === '/onion-service-discovery/v1/changes' && preg_match('/\Aafter=(0|[1-9][0-9]{0,15})\z/D', $query, $match) === 1) {
                 $after = (int) $match[1]; if ($after > 9007199254740991 || $after > $state['last_sequence']) { throw new ProtocolException('CURSOR_INVALID'); }
-                $entries = $state['records']; uasort($entries, static fn (array $a, array $b): int => $a['sequence'] <=> $b['sequence']);
+                $entries = array_intersect_key($state['records'], $publicHashes); uasort($entries, static fn (array $a, array $b): int => $a['sequence'] <=> $b['sequence']);
                 $records = []; $cursor = $after; $bytes = 256;
                 $selected = [];
                 foreach ($entries as $hash => $metadata) {
@@ -84,12 +86,12 @@ final readonly class DataApi
                     if ($bytes + $size > 1048576) { break; }
                     $records[] = $entry; $cursor = $metadata['sequence']; $bytes += $size;
                 }
-                return $this->response(200, ['protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'after' => $after, 'cursor' => $cursor, 'has_more' => $cursor < $state['last_sequence'], 'records' => $records], $headers, $method, 1048576);
+                return $this->response(200, ['protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'after' => $after, 'cursor' => $cursor, 'has_more' => $cursor < max(array_column($entries,'sequence') ?: [0]), 'records' => $records], $headers, $method, 1048576);
             }
             if (preg_match('~\A/onion-service-discovery/v1/services/([a-z2-7]{56}\.onion)\z~D', $path, $match) === 1 && $query === '') {
                 $onion = OnionAddress::parse($match[1]); $records = [];
-                if (count($state['records']) > 256) { throw new ProtocolException('RESPONSE_TOO_LARGE'); }
-                foreach (array_chunk(array_keys($state['records']), 256) as $batch) {
+                if (count($publicHashes) > 256) { throw new ProtocolException('RESPONSE_TOO_LARGE'); }
+                foreach (array_chunk(array_keys(array_intersect_key($state['records'],$publicHashes)), 256) as $batch) {
                     foreach ($this->store->readRecords($batch) as $wire) {
                         $record = $this->verifier->verifyWire($wire); $document = $record->document();
                         if (($document->onion ?? null) === $onion->hostname || ($document->from_onion ?? null) === $onion->hostname || ($document->to_onion ?? null) === $onion->hostname) { $records[] = $document; if (count($records) > 256) { throw new ProtocolException('RESPONSE_TOO_LARGE'); } }

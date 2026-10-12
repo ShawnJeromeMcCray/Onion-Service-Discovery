@@ -1,0 +1,139 @@
+import { localSearch, type ClientView, type LocalPin, type ServiceRow } from './view-model.ts';
+import { parseStrictJson } from '../protocol/strict-json.ts';
+import { serializePins } from './pins.ts';
+import type { SourceSelection } from './source-loader.ts';
+interface SourceStatus {onion:string;status:string;nodeKey:string|null;generation:number|null;error:string|null;baselineHistoryProven:boolean;}
+interface ViewMessage {type:'view';view:ClientView;sources:SourceStatus[];synthetic:boolean;busy:boolean;witnessCount:number;}
+type WorkerMessage=ViewMessage|{type:'error';code:string}|{type:'pin-preview';pins:LocalPin[]};
+const storageKey='onion-service-discovery-pins-v1';
+const worker=new Worker(new URL('verifier-worker.js',document.baseURI),{type:'module'});
+let view:ClientView={services:[],pins:[],recordCount:0,pendingCount:0}; let synthetic=false; let busy=false; let pendingPinImport:ArrayBuffer|null=null;
+function el<T extends HTMLElement>(id:string):T { const element=document.getElementById(id); if(element===null) throw new Error('CLIENT_MARKUP_INVALID'); return element as T; }
+function text(tag:string,value:string,className=''):HTMLElement { const node=document.createElement(tag); node.textContent=value; if(className!=='') node.className=className; return node; }
+function operation(message:string):void { el('operation-status').textContent=message; }
+function button(label:string,action:()=>void):HTMLButtonElement { const node=document.createElement('button'); node.type='button'; node.className='secondary'; node.textContent=label; node.addEventListener('click',action); return node; }
+function visit(onion:string):HTMLAnchorElement { const node=document.createElement('a'); node.className='visit'; node.href='http://'+onion+'/'; node.rel='noreferrer noopener'; node.target='_blank'; node.textContent='Open onion service'; return node; }
+function persistPins():void {
+  if(!el<HTMLInputElement>('remember-pins').checked) return;
+  try { localStorage.setItem(storageKey,serializePins(view.pins.map(row=>row.pin))); el('storage-status').textContent='Pins saved in this origin’s browser profile. They are not sent to Nodes.'; }
+  catch { el('storage-status').textContent='Profile storage unavailable. New changes stay in session memory; older saved pins may remain.'; }
+}
+function renderResults():void {
+  const query=el<HTMLInputElement>('query').value; const language=el<HTMLSelectElement>('language').value;
+  const rows=localSearch(view.services,query,language); const results=el('results'); results.replaceChildren();
+  el('result-summary').textContent=rows.length+' matching identities'+(view.pendingCount>0?' · '+view.pendingCount+' manifests need more history':'')+'. Search terms stay on this device.';
+  for(const row of rows.slice(0,100)) {
+    const card=text('article','', 'result-card'); card.append(text('p','Service-declared metadata','muted')); card.append(text('h3',row.name),text('p',row.description));
+    if(row.onion!==null) card.append(text('p',row.onion,'onion-address'));
+    const tags=text('div','','tags'); for(const tag of [...row.categories,...row.languages]) tags.append(text('span',tag,'tag')); card.append(tags);
+    card.append(text('p',row.status==='FORKED'?'No current manifest selected':'Service-key signature validated · revision '+row.revision,'evidence-label'));
+    card.append(text('p','Host presence is not confirmed by this browser. '+row.observationClaims+' signed Node statements are claims, not independent proof.','muted'));
+    if(row.addressConflict) card.append(text('p','Different Service identities claim this onion address. A pinned key is never replaced by source agreement.','conflict'));
+    if(row.status==='FORKED') card.append(text('p','Fork evidence is retained. Faster responses or more Nodes do not resolve it.','conflict'));
+    const details=document.createElement('details'); details.append(text('summary','Identity and continuity details'),text('p',row.genesisKey,'key-value'),text('p',row.rotationCount+' key-rotation proofs · '+row.migrationCount+' migration proofs. These do not establish an operator’s real-world identity.')); card.append(details);
+    const actions=text('div','','actions');
+    if(row.status==='PUBLISHED') {
+      const pinned=view.pins.some(item=>item.pin.genesisKey===row.genesisKey);
+      const pin=button(pinned?'Pinned locally':'Pin this identity',()=>worker.postMessage({op:'pin',genesisKey:row.genesisKey})); pin.disabled=pinned; actions.append(pin);
+      if(row.onion!==null&&!synthetic) actions.append(visit(row.onion));
+    }
+    card.append(actions); results.append(card);
+  }
+  if(rows.length>100) results.append(text('p','Showing the first 100 matches. Refine your local search.','muted'));
+  if(rows.length===0) results.append(text('p',view.recordCount===0?'The local index is empty. Load configured sources, import a signed bundle or try the demonstration.':'No matching published identity in the loaded data. This does not prove that a service does not exist.','muted'));
+}
+function renderPins():void {
+  const container=el('pins'); container.replaceChildren(); el('pin-count').textContent=String(view.pins.length);
+  const labels:{[status:string]:string}={CONTINUITY_VALID:'Signed continuity matches your pin',MIGRATED:'Authorized onion migration from your saved context',WITHDRAWN:'Publication withdrawn; identity history retained',FORKED:'Fork conflict retained — no current branch selected',HISTORY_INCOMPLETE:'More history is needed to connect this pin',REVISION_DOWNGRADE:'Older than your remembered revision',IDENTITY_CHANGED:'Another key claims the saved onion; pin preserved',NOT_IN_INDEX:'Pinned identity absent from this loaded view'};
+  for(const row of view.pins) {
+    const card=text('article','','pin-card'); card.append(text('h3',row.pin.label),text('p',labels[row.status]??row.status,'pin-status'+(row.onion===null?' blocked':'')),text('p',row.pin.genesisKey,'key-value'),text('p','Saved onion: '+row.pin.contextOnion,'onion-address'));
+    if(row.onion!==null&&row.onion!==row.pin.contextOnion) card.append(text('p','Current signed onion: '+row.onion,'onion-address'));
+    if(row.onion!==null&&!synthetic) card.append(visit(row.onion));
+    card.append(button('Remove local pin',()=>worker.postMessage({op:'unpin',genesisKey:row.pin.genesisKey}))); container.append(card);
+  }
+  if(view.pins.length===0) container.append(text('p','No local pins yet. Pin a key you have chosen to remember.','muted'));
+}
+function renderSources(sources:SourceStatus[]):void {
+  const container=el('source-statuses'); container.replaceChildren(); const keys=new Set(sources.filter(source=>source.status==='COMPLETE').map(source=>source.nodeKey)); keys.delete(null);
+  el('coverage').textContent=keys.size+' distinct fresh signing keys · '+sources.filter(source=>source.status==='COMPLETE').length+' complete source views';
+  for(const source of sources) {
+    const card=text('div','','source-status'); card.append(text('strong',source.status),text('div',source.onion));
+    if(source.nodeKey!==null) card.append(text('div',source.nodeKey,'key-value'));
+    if(source.error!==null) card.append(text('div',source.error,'problem'));
+    if(source.status==='COMPLETE'&&!source.baselineHistoryProven) card.append(text('div','First-contact baseline; earlier Node checkpoint history is not proven.','problem'));
+    if(source.status==='STALE') card.append(text('div','Old checkpoint or clock discrepancy. Historical signatures remain evidence, not freshness.','problem'));
+    container.append(card);
+  }
+  if(sources.length>0&&keys.size<3) container.append(text('p','Limited source coverage. Multiple keys still do not guarantee independent operators. Identity pins do not depend on a vote.','conflict'));
+}
+worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
+  const message=event.data;
+  if(message.type==='error') { operation('Operation stopped: '+message.code+'. Existing pins and evidence are preserved.'); return; }
+  if(message.type==='pin-preview') {
+    const preview=el('pin-preview'); preview.replaceChildren(); for(const pin of message.pins) { const item=text('div','','preview-pin'); item.append(text('strong',pin.label),text('div',pin.genesisKey,'key-value'),text('div',pin.contextOnion,'onion-address')); preview.append(item); }
+    el<HTMLDialogElement>('pin-import-dialog').showModal(); return;
+  }
+  view=message.view; synthetic=message.synthetic; busy=message.busy; el('synthetic-notice').hidden=!synthetic;
+  for(const id of ['load-sources','load-demo','clear-index','forget-all']) el<HTMLButtonElement>(id).disabled=busy;
+  el<HTMLButtonElement>('cancel-load').disabled=!busy; el('record-count').textContent=view.recordCount+' signed records';
+  const language=el<HTMLSelectElement>('language'); const selected=language.value; const options=[...new Set(view.services.flatMap(row=>row.languages))].sort(); language.replaceChildren();
+  const all=document.createElement('option'); all.value=''; all.textContent='All languages'; language.append(all);
+  for(const value of options) { const option=document.createElement('option'); option.value=value; option.textContent=value; language.append(option); } language.value=options.includes(selected)?selected:'';
+  renderSources(message.sources); renderPins(); renderResults(); persistPins();
+  operation(busy?'Loading generic signed data. You can keep searching the existing local index.':'Local index ready. '+message.witnessCount+' Node continuity witnesses retained.');
+};
+let searchTimer:ReturnType<typeof setTimeout>|null=null;
+el('query').addEventListener('input',()=>{if(searchTimer!==null)clearTimeout(searchTimer);searchTimer=setTimeout(renderResults,120);});
+el('language').addEventListener('change',renderResults); el('search-form').addEventListener('submit',event=>event.preventDefault());
+el('source-form').addEventListener('submit',event=>{
+  event.preventDefault(); const sources:SourceSelection[]=[];
+  for(const node of el('source-options').querySelectorAll<HTMLInputElement>('input[data-source]')) {
+    if(!node.checked) continue; const onion=node.dataset.source!; const key=el<HTMLInputElement>(node.id+'-key').value.trim(); sources.push(key===''?{onion}:{onion,expectedKey:key});
+  }
+  if(sources.length===0) { operation('Select a configured data Node or import signed records.'); return; }
+  if(sources.length<3&&!el<HTMLInputElement>('limited-coverage').checked) { operation('Select at least three sources, or explicitly allow limited source coverage.'); return; }
+  worker.postMessage({op:'load',sources});
+});
+el('cancel-load').addEventListener('click',()=>worker.postMessage({op:'cancel'}));
+el('clear-index').addEventListener('click',()=>worker.postMessage({op:'clear-index'}));
+el('forget-all').addEventListener('click',()=>el<HTMLDialogElement>('forget-dialog').showModal());
+el('forget-dialog').addEventListener('close',()=>{
+  if(el<HTMLDialogElement>('forget-dialog').returnValue!=='confirm') return;
+  el<HTMLInputElement>('remember-pins').checked=false;
+  try {localStorage.removeItem(storageKey);el('storage-status').textContent='Saved profile pins removed. Session memory only.';} catch {el('storage-status').textContent='Saved profile pins could not be removed. Clear this origin’s storage in browser settings.';}
+  worker.postMessage({op:'clear-all'});
+});
+el('remember-pins').addEventListener('change',()=>{
+  if(el<HTMLInputElement>('remember-pins').checked)persistPins();
+  else {try{localStorage.removeItem(storageKey);el('storage-status').textContent='Session memory only. Saved profile pins removed.';}catch{el('storage-status').textContent='Session memory only for new changes; old saved pins could not be removed.';}}
+});
+el('export-pins').addEventListener('click',()=>{
+  const blob=new Blob([serializePins(view.pins.map(row=>row.pin))],{type:'application/json'});const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download='onion-service-discovery-pins.json';anchor.rel='noreferrer';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000);operation('Pin backup downloaded locally. It has not been uploaded.');
+});
+async function fileBytes(input:HTMLInputElement,max:number):Promise<ArrayBuffer|null>{const file=input.files?.[0];if(file===undefined)return null;if(file.size>max)throw new Error('FILE_TOO_LARGE');return file.arrayBuffer();}
+el('import-records').addEventListener('change',()=>{void fileBytes(el<HTMLInputElement>('import-records'),1048576).then(bytes=>{if(bytes!==null)worker.postMessage({op:'import-records',bytes},[bytes]);}).catch(()=>operation('Record bundle rejected: file exceeds the local limit or could not be read.'));});
+el('import-pins').addEventListener('change',()=>{void fileBytes(el<HTMLInputElement>('import-pins'),262144).then(bytes=>{if(bytes!==null){pendingPinImport=bytes;worker.postMessage({op:'preview-pins',bytes:bytes.slice(0)});}}).catch(()=>operation('Pin backup rejected: file exceeds the local limit or could not be read.'));});
+el('pin-import-dialog').addEventListener('close',()=>{if(el<HTMLDialogElement>('pin-import-dialog').returnValue==='confirm'&&pendingPinImport!==null){worker.postMessage({op:'restore-pins',bytes:pendingPinImport},[pendingPinImport]);}pendingPinImport=null;});
+el('load-demo').addEventListener('click',()=>{void localResource('demo.json',1048576).then(bytes=>{worker.postMessage({op:'import-records',bytes:bytes.buffer,synthetic:true},[bytes.buffer]);}).catch(()=>operation('Offline demonstration unavailable. You can import a signed record bundle.'));});
+async function localResource(name:'config.json'|'demo.json',limit:number):Promise<Uint8Array>{
+  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),15000);
+  try {
+  const response=await fetch(new URL(name,document.baseURI),{credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',redirect:'error',signal:controller.signal});
+  if(!response.ok||response.body===null||!/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(response.headers.get('content-type')??''))throw new Error('LOCAL_RESOURCE_UNAVAILABLE');
+  const reader=response.body.getReader();const parts:Uint8Array[]=[];let size=0;
+  try{while(true){const item=await reader.read();if(item.done)break;size+=item.value.byteLength;if(size>limit){await reader.cancel();throw new Error('LOCAL_RESOURCE_TOO_LARGE');}parts.push(item.value);}}finally{reader.releaseLock();}
+  const bytes=new Uint8Array(size);let offset=0;for(const part of parts){bytes.set(part,offset);offset+=part.byteLength;}return bytes;
+  }finally{clearTimeout(timeout);}
+}
+async function configure():Promise<void>{
+  try {
+    const value=parseStrictJson(await localResource('config.json',16384),16384);
+    if(Object.keys(value).length!==5||!('allowed_sources'in value)||!Array.isArray(value.allowed_sources)||value.allowed_sources.length>16||value.allowed_sources.some(source=>typeof source!=='string')||!('client_config_version'in value)||value.client_config_version!==1||!['client-host-proxy','direct-cross-origin'].includes(String(value.delivery_profile))||value.minimum_distinct_keys!==3)throw new Error('CONFIGURATION_INVALID');
+    const sources=value.allowed_sources as string[]; const container=el('source-options');container.replaceChildren();el('source-empty').hidden=sources.length>0;
+    sources.forEach((onion,index)=>{const item=text('div','','source-option');const check=document.createElement('input');check.type='checkbox';check.checked=true;check.dataset.source=onion;check.id='source-'+index;const label=document.createElement('label');label.className='check-label';label.append(check,text('span',onion));const key=document.createElement('input');key.type='text';key.id=check.id+'-key';key.maxLength=51;key.placeholder='Optional expected Node public key';key.autocomplete='off';const keyLabel=document.createElement('label');keyLabel.htmlFor=key.id;keyLabel.textContent='Expected Node key for source '+(index+1)+' (optional)';item.append(label,keyLabel,key);container.append(item);});
+    if('mode'in value&&value.mode==='combined')el('host-boundary').textContent='Combined deployment: this serving Node controls the page’s code and its data. A separate self-hosted Client Host gives stronger separation.';
+    worker.postMessage({op:'configure',allowedSources:sources,deliveryProfile:value.delivery_profile});
+  } catch {worker.postMessage({op:'configure',allowedSources:[],deliveryProfile:'direct-cross-origin'});operation('No usable Client Host source configuration. Local signed-record import remains available.');}
+  try{const saved=localStorage.getItem(storageKey);if(saved!==null&&saved.length<=262144){el<HTMLInputElement>('remember-pins').checked=true;const bytes=new TextEncoder().encode(saved).buffer;worker.postMessage({op:'restore-pins',bytes},[bytes]);}}catch{el('storage-status').textContent='Browser profile storage unavailable. Session memory remains available.';}
+}
+void configure();

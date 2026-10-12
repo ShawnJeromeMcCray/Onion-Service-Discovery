@@ -48,23 +48,35 @@ final readonly class DirectVerifier
             }
             if ($matched === null) { throw new ProtocolException('HISTORY_INCOMPLETE'); }
             if ($matched['identity_state'] !== 'VALID' || $matched['current_hash'] !== $manifest->contentHash) { throw new ProtocolException($matched['identity_state'] === 'FORKED' ? 'IDENTITY_FORKED' : 'REVISION_DOWNGRADE'); }
+            $previousLocal = $snapshot['tables']['local_observations']['key:' . $address->hostname] ?? null;
+            $previousRoot = $previousLocal['genesis_key'] ?? null;
+            if ($previousRoot === null && $previousLocal !== null) {
+                foreach ($view['identities'] as $known) { if (in_array($previousLocal['manifest_hash'], $known['history_hashes'], true)) { $previousRoot = $known['genesis_key']; break; } }
+                if ($previousRoot === null) { throw new ProtocolException('HISTORY_INCOMPLETE'); }
+            }
+            if ($previousRoot !== null && $previousRoot !== $matched['genesis_key']) { throw new ProtocolException('IDENTITY_CHANGED'); }
             $document = $manifest->document();
-            $observation = $this->verifier->verify($this->nodeSigner->signRecord((object) [
+            $unchanged = $previousLocal !== null && $previousLocal['manifest_hash'] === $manifest->contentHash;
+            $previousWire = $unchanged ? $this->store->readRecord($previousLocal['observation_hash']) : null;
+            if ($unchanged && $previousWire === null) { throw new ProtocolException('STORAGE_CORRUPT'); }
+            $observation = $previousWire !== null ? $this->verifier->verifyWire($previousWire) : $this->verifier->verify($this->nodeSigner->signRecord((object) [
                 'protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'record_type' => 'direct_observation',
                 'node_identity_public_key' => $this->nodeSigner->publicKey(), 'onion' => $address->hostname,
                 'service_identity_public_key' => $document->service_identity_public_key, 'revision' => $document->revision,
                 'manifest_hash' => $manifest->contentHash, 'result' => 'SUCCESS_CURRENT', 'observed_at' => gmdate('Y-m-d\TH:i:s\Z', $now),
             ]));
-            $this->store->transaction(static function (StorageTransaction $tx) use ($job, $manifest, $observation, $now, $snapshot): void {
+            $signedObservation = $observation->document();
+            if ($observation->type !== 'direct_observation' || $signedObservation->node_identity_public_key !== $this->nodeSigner->publicKey() || $signedObservation->manifest_hash !== $manifest->contentHash) { throw new ProtocolException('STORAGE_CORRUPT'); }
+            $this->store->transaction(static function (StorageTransaction $tx) use ($job, $manifest, $observation, $now, $snapshot, $matched, $signedObservation): void {
                 $row = CandidateQueue::claimedRow($tx, $job);
                 // Recheck if concurrent evidence admission changed the derived identity basis.
                 if ($tx->state()['generation'] !== $snapshot['generation']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
                 $tx->putRecord($observation);
-                $tx->set('local_observations', $job['onion'], ['manifest_hash' => $manifest->contentHash, 'observation_hash' => $observation->contentHash, 'observed_at' => $now]);
+                $tx->set('local_observations', $job['onion'], ['manifest_hash' => $manifest->contentHash, 'observation_hash' => $observation->contentHash, 'observed_at' => strtotime($signedObservation->observed_at), 'local_checked_at' => $now, 'genesis_key' => $matched['genesis_key']]);
                 $row['state'] = 'VERIFIED'; $row['claim'] = null; $row['lease_until'] = 0; $row['error'] = null; $row['next_attempt'] = $now + 86400 + random_int(0, 3600); $tx->set('candidates', $job['onion'], $row);
             });
-            return ['status' => 'VERIFIED', 'onion' => $address->hostname, 'manifest_hash' => $manifest->contentHash];
-        } catch (TransportException | ProtocolException $error) {
+            return ['status' => 'VERIFIED', 'onion' => $address->hostname, 'manifest_hash' => $manifest->contentHash, 'unchanged' => $unchanged];
+        } catch (TransportException | \InvalidArgumentException $error) {
             if ($error->getMessage() === 'CANDIDATE_CLAIM_LOST') { return ['status' => 'CLAIM_LOST']; }
             $quarantine = !in_array($error->getMessage(), ['TOR_REQUEST_FAILED', 'HTTP_STATUS_REJECTED', 'EVIDENCE_CHANGED_RETRY'], true);
             $queue->fail($job, $now, $error->getMessage(), $quarantine);
