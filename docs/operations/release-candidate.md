@@ -50,3 +50,9 @@ requirements, then run `python tools/verify_candidate.py ARTIFACT`. It checks
 bounded archive entries without extraction, file-manifest hashes and the strict
 CycloneDX 1.6 schema. It never executes the package and explicitly reports that
 artifact authentication was not performed. TUF/signature verification is separate.
+
+Trusted-push artifacts preserve `provenance.sigstore.json` and
+`sbom.sigstore.json` from the attestation actions alongside the candidate.
+Preservation alone does not verify their certificates, transparency proofs or
+workflow identity. Use a supported GitHub CLI with attestation verification;
+older installations without `gh attestation` are insufficient.

@@ -1,7 +1,7 @@
 # Implementation and release status
 
 The baseline repository contained only a one-line README. The implementation is
-on `implementation/repository-foundation`, draft PR #1. The project now contains
+on `implementation/repository-foundation`, [draft PR #3](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/pull/3). The project now contains
 an executable development Node, offline Service signer, separate Client Host,
 locally verifying/searching browser client and mature offline release verifier.
 There is no approved production release.

@@ -143,17 +143,25 @@ jobs:
       - name: Authenticate development build provenance on trusted pushes
         if: github.event_name == 'push'
         id: provenance
-        uses: actions/attest-build-provenance@43d14bc2b83dec42d39ecae14e916627a18bb661 # v3
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
         with:
           subject-path: .tools/candidate-a/onion-service-discovery-source-browser.tar.gz
       - name: Authenticate development dependency inventory on trusted pushes
         if: github.event_name == 'push'
         id: sbom
-        uses: actions/attest-sbom@51e74621a501c89df81fc1391c5a8f4cfc9fab2f # v3
+        uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34 # v3
         with:
           subject-path: .tools/candidate-a/onion-service-discovery-source-browser.tar.gz
           sbom-path: .tools/candidate-a/SBOM.cdx.json
-      - name: Preserve candidate and unsigned evidence
+      - name: Preserve authenticated development bundles
+        if: github.event_name == 'push'
+        env:
+          PROVENANCE_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+          SBOM_BUNDLE: ${{ steps.sbom.outputs.bundle-path }}
+        run: |
+          cp "$PROVENANCE_BUNDLE" .tools/candidate-a/provenance.sigstore.json
+          cp "$SBOM_BUNDLE" .tools/candidate-a/sbom.sigstore.json
+      - name: Preserve candidate and evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: unsigned-development-candidate
