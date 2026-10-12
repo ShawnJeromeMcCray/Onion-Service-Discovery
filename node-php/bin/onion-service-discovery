@@ -34,6 +34,26 @@ function boundedFile(string $path, int $maxBytes): string
     return $bytes;
 }
 
+function selectedStore(string $backend, string $path, bool $create = false): \OnionServiceDiscovery\Storage\StorageBackend
+{
+    return match ($backend) {
+        'filesystem' => new \OnionServiceDiscovery\Storage\FilesystemStore($path, create: $create),
+        'sqlite' => new \OnionServiceDiscovery\Storage\SQLiteStore($path, create: $create),
+        default => throw new ProtocolException('STORAGE_BACKEND_INVALID'),
+    };
+}
+
+function localPassphrase(string $path): string
+{
+    if (is_link($path) || !is_file($path) || (fileperms($path) & 0077) !== 0) {
+        throw new ProtocolException('PASSPHRASE_FILE_UNSAFE');
+    }
+    $value = boundedFile($path, 1025);
+    if (str_ends_with($value, "\n")) { $value = substr($value, 0, -1); }
+    if ($value === '' || strlen($value) > 1024) { throw new ProtocolException('PASSPHRASE_POLICY'); }
+    return $value;
+}
+
 $arguments = array_slice($argv, 1);
 $command = array_shift($arguments) ?? 'help';
 $arguments = array_values(array_filter($arguments, static fn (string $value): bool => $value !== '--json'));
@@ -42,7 +62,74 @@ $verifier = new RecordVerifier($root . '/protocol/schemas');
 
 try {
     if ($command === 'help') {
-        $output = ['status' => 'DEVELOPMENT', 'commands' => ['manifest:verify <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>'], 'network_side_effects' => false];
+        $output = ['status' => 'DEVELOPMENT', 'commands' => ['manifest:verify <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>', 'storage:init <filesystem|sqlite> <path>', 'storage:check <backend> <path>', 'storage:admit <backend> <path> <signed-record>', 'storage:export <backend> <path> <archive>', 'storage:import <backend> <new-staging-path> <archive>', 'config:validate <config>', 'doctor <config>', 'candidate:add <config> <onion>', 'node:init <config> --passphrase-file <file>', 'node:snapshot <config> --passphrase-file <file>', 'node:work-one <config> --passphrase-file <file>', 'key:create <service|node> <key-path> --passphrase-file <private-file>', 'record:sign <role> <key-path> <record> --passphrase-file <private-file> [--rotation-confirmation]' ], 'network_side_effects' => false];
+    } elseif ($command === 'config:validate' || $command === 'doctor') {
+        if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
+        $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
+        $output = ['status' => 'PASS', 'role' => $config->role, 'storage_backend' => $config->backend, 'features' => $config->features, 'source_count' => count($config->sources), 'network_side_effects' => false];
+        if ($command === 'doctor') {
+            $output['extensions'] = array_fill_keys(['json','sodium','iconv','curl'], true);
+            foreach (array_keys($output['extensions']) as $extension) { $output['extensions'][$extension] = extension_loaded($extension); }
+            $output['sqlite_driver'] = class_exists(PDO::class) && in_array('sqlite', PDO::getAvailableDrivers(), true);
+            $output['production_approval'] = 'OPEN';
+        }
+    } elseif ($command === 'candidate:add') {
+        if (count($arguments) !== 2) { throw new ProtocolException('USAGE_ERROR'); }
+        $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
+        if (!$config->features['discover_services'] || $config->role === 'client-host') { throw new ProtocolException('DISCOVERY_DISABLED'); }
+        $inserted = (new \OnionServiceDiscovery\Node\CandidateQueue($config->store()))->enqueue(OnionAddress::parse($arguments[1]));
+        $output = ['status' => 'QUEUED', 'inserted' => $inserted, 'network_side_effects' => false];
+    } elseif (in_array($command, ['node:init', 'node:snapshot', 'node:work-one'], true)) {
+        if (count($arguments) !== 3 || $arguments[1] !== '--passphrase-file') { throw new ProtocolException('USAGE_ERROR'); }
+        $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
+        if ($config->role === 'client-host' || $config->nodeKeyPath === null) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        if ($command === 'node:snapshot' && !$config->features['mirror_directory']) { throw new ProtocolException('MIRROR_DISABLED'); }
+        if ($command === 'node:work-one' && !$config->features['discover_services']) { throw new ProtocolException('DISCOVERY_DISABLED'); }
+        $passphrase = localPassphrase($arguments[2]);
+        try { $signer = \OnionServiceDiscovery\Signing\ProtectedFileSigner::open($config->nodeKeyPath, 'node', $passphrase, $verifier); }
+        finally { sodium_memzero($passphrase); }
+        if ($command === 'node:init') {
+            $output = \OnionServiceDiscovery\Node\NodeInitializer::initialize($config, $signer, $verifier);
+        } elseif ($command === 'node:snapshot') {
+            $output = (new \OnionServiceDiscovery\Node\SnapshotProducer($config->store(), new \OnionServiceDiscovery\Storage\PublicBlobStore($config->exportPath), $verifier, $signer))->publish(time());
+        } else {
+            $output = (new \OnionServiceDiscovery\Node\DirectVerifier($config->store(), $verifier, $config->transport(), $signer))->runOne(time());
+        }
+        unset($signer);
+    } elseif (in_array($command, ['storage:init', 'storage:check', 'storage:admit', 'storage:export', 'storage:import'], true)) {
+        $required = in_array($command, ['storage:init', 'storage:check'], true) ? 2 : 3;
+        if (count($arguments) !== $required) { throw new ProtocolException('USAGE_ERROR'); }
+        $store = selectedStore($arguments[0], $arguments[1], in_array($command, ['storage:init', 'storage:import'], true));
+        if ($command === 'storage:init' || $command === 'storage:check') {
+            $output = ['status' => 'PASS', 'backend' => $store->backendName(), 'integrity' => $store->integrityCheck()];
+        } elseif ($command === 'storage:admit') {
+            $record = $verifier->verifyWire(boundedFile($arguments[2], 65536));
+            $inserted = $store->transaction(static fn (\OnionServiceDiscovery\Storage\StorageTransaction $tx): bool => $tx->putRecord($record));
+            $output = ['status' => 'PASS', 'inserted' => $inserted, 'content_hash' => $record->contentHash, 'directly_observed' => false];
+        } elseif ($command === 'storage:export') {
+            $output = ['status' => 'PASS', 'archive' => \OnionServiceDiscovery\Storage\RecordArchive::export($store, $arguments[2])];
+        } else {
+            $output = ['status' => 'PASS', 'archive' => \OnionServiceDiscovery\Storage\RecordArchive::import($store, $arguments[2], $verifier), 'staging_only' => true];
+        }
+    } elseif ($command === 'key:create' || $command === 'record:sign') {
+        $confirmation = false;
+        if (end($arguments) === '--rotation-confirmation') { array_pop($arguments); $confirmation = true; }
+        $offset = $command === 'key:create' ? 2 : 3;
+        if (count($arguments) !== $offset + 2 || $arguments[$offset] !== '--passphrase-file' || ($command === 'key:create' && $confirmation)) { throw new ProtocolException('USAGE_ERROR'); }
+        $passphrase = localPassphrase($arguments[$offset + 1]);
+        try {
+            $signer = $command === 'key:create'
+                ? \OnionServiceDiscovery\Signing\ProtectedFileSigner::create($arguments[1], $arguments[0], $passphrase, $verifier)
+                : \OnionServiceDiscovery\Signing\ProtectedFileSigner::open($arguments[1], $arguments[0], $passphrase, $verifier);
+        } finally { sodium_memzero($passphrase); }
+        if ($command === 'key:create') {
+            $output = ['status' => 'PASS', 'role' => $signer->role(), 'public_key' => $signer->publicKey()];
+        } else {
+            $record = StrictJson::parse(boundedFile($arguments[2], 65536), 65536);
+            if (!$record instanceof stdClass) { throw new ProtocolException('SCHEMA_INVALID'); }
+            $output = $signer->signRecord($record, $confirmation);
+        }
+        unset($signer);
     } elseif (in_array($command, ['manifest:verify', 'validate-manifest', 'protocol:inspect', 'protocol:hash'], true)) {
         $path = array_shift($arguments);
         if ($path === null) {
@@ -89,6 +176,9 @@ try {
         throw new ProtocolException('USAGE_ERROR');
     }
     echo json_encode($output, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), PHP_EOL;
+} catch (\OnionServiceDiscovery\Storage\StorageException | \OnionServiceDiscovery\Signing\SignerException $error) {
+    echo json_encode(['status' => 'FAIL', 'error' => $error->getMessage()], JSON_THROW_ON_ERROR), PHP_EOL;
+    exit(4);
 } catch (InvalidArgumentException $error) {
     echo json_encode(['status' => 'FAIL', 'error' => $error->getMessage()], JSON_THROW_ON_ERROR), PHP_EOL;
     exit($error->getMessage() === 'USAGE_ERROR' ? 2 : 3);

@@ -52,3 +52,13 @@ jobs:
         run: .venv/bin/python -m unittest discover -s tests -v
       - name: Check whitespace
         run: git diff --check
+  formal-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Check finite safety models and rollback mutation
+        run: python3 tools/check_formal_model.py

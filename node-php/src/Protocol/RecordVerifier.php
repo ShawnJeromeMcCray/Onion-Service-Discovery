@@ -12,6 +12,9 @@ use Opis\JsonSchema\CompliantValidator;
 final class RecordVerifier
 {
     private readonly CompliantValidator $validator;
+    /**
+     * @var array<array-key, mixed>
+     */
     private array $schemas = [];
 
     public function __construct(private readonly string $schemaDirectory)
@@ -36,6 +39,24 @@ final class RecordVerifier
 
     public function assertValid(\stdClass $record, ?OnionAddress $expectedOnion = null): void
     {
+        $this->assertStructure($record, $expectedOnion);
+        $type = RecordFormat::type($record);
+        $message = RecordFormat::message($record);
+        $key = RecordFormat::TYPES[$type]['key'];
+        $signature = RecordFormat::TYPES[$type]['excluded'][0];
+        if (!sodium_crypto_sign_verify_detached(Encoding::signature($record->{$signature}), $message, Encoding::publicKey($record->{$key}))) {
+            throw new ProtocolException('SIGNATURE_INVALID');
+        }
+        if ($type === 'service_identity_key_rotation' && !sodium_crypto_sign_verify_detached(
+            Encoding::signature($record->new_key_confirmation), $message, Encoding::publicKey($record->new_public_key)
+        )) {
+            throw new ProtocolException('KEY_ROTATION_INVALID');
+        }
+    }
+
+    /** Signing preparation only: does not establish cryptographic authenticity. */
+    public function assertStructure(\stdClass $record, ?OnionAddress $expectedOnion = null): void
+    {
         $type = RecordFormat::type($record);
         $canonical = CanonicalJson::encode($record);
         if (strlen($canonical) > RecordFormat::TYPES[$type]['bytes']) {
@@ -54,17 +75,6 @@ final class RecordVerifier
         $this->semantics($record);
         if ($expectedOnion !== null && $type === 'service_manifest' && $record->onion !== $expectedOnion->hostname) {
             throw new ProtocolException('ONION_BINDING_MISMATCH');
-        }
-        $message = RecordFormat::message($record);
-        $key = RecordFormat::TYPES[$type]['key'];
-        $signature = RecordFormat::TYPES[$type]['excluded'][0];
-        if (!sodium_crypto_sign_verify_detached(Encoding::signature($record->{$signature}), $message, Encoding::publicKey($record->{$key}))) {
-            throw new ProtocolException('SIGNATURE_INVALID');
-        }
-        if ($type === 'service_identity_key_rotation' && !sodium_crypto_sign_verify_detached(
-            Encoding::signature($record->new_key_confirmation), $message, Encoding::publicKey($record->new_public_key)
-        )) {
-            throw new ProtocolException('KEY_ROTATION_INVALID');
         }
     }
 
