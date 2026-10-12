@@ -140,6 +140,8 @@ jobs:
           cmp .tools/candidate-a/onion-service-discovery-source-browser.tar.gz .tools/candidate-b/onion-service-discovery-source-browser.tar.gz
           .venv/bin/python release-tools/test_candidate_structure.py
           .venv/bin/python tools/verify_candidate.py .tools/candidate-a/onion-service-discovery-source-browser.tar.gz
+      - name: Exercise packaged operator workflow with locked runtime dependencies
+        run: .venv/bin/python tools/run_candidate_smoke.py .tools/candidate-a/onion-service-discovery-source-browser.tar.gz --expected-source "$(git rev-parse HEAD)" --execute-trusted-local-development-candidate
       - name: Authenticate development build provenance on trusted pushes
         if: github.event_name == 'push'
         id: provenance
@@ -158,9 +160,12 @@ jobs:
         env:
           PROVENANCE_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
           SBOM_BUNDLE: ${{ steps.sbom.outputs.bundle-path }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           cp "$PROVENANCE_BUNDLE" .tools/candidate-a/provenance.sigstore.json
           cp "$SBOM_BUNDLE" .tools/candidate-a/sbom.sigstore.json
+          gh attestation verify .tools/candidate-a/onion-service-discovery-source-browser.tar.gz --bundle "$PROVENANCE_BUNDLE" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/foundation.yml" --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners --format json > .tools/candidate-a/verified-provenance.json
+          gh attestation verify .tools/candidate-a/onion-service-discovery-source-browser.tar.gz --bundle "$SBOM_BUNDLE" --predicate-type https://cyclonedx.org/bom --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/foundation.yml" --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners --format json > .tools/candidate-a/verified-sbom.json
       - name: Preserve candidate and evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

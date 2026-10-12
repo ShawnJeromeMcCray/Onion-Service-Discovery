@@ -56,3 +56,13 @@ Trusted-push artifacts preserve `provenance.sigstore.json` and
 Preservation alone does not verify their certificates, transparency proofs or
 workflow identity. Use a supported GitHub CLI with attestation verification;
 older installations without `gh attestation` are insufficient.
+
+The package smoke check explicitly executes only a trusted local candidate:
+`python tools/run_candidate_smoke.py ARTIFACT --expected-source COMMIT
+--execute-trusted-local-development-candidate`. It first validates archive
+structure, provisions the Composer runtime lock with plugins/scripts disabled,
+and exercises packaged protocol validation, Client Host and the operator
+initialize/diagnose/publish/backup/restore workflow in disposable containers.
+Dependency provisioning needs HTTPS; application checks use `--network none`.
+A source-commit match is not authentication: verify trust before permitting code
+execution. These synthetic checks do not certify a deployed host or live Tor.

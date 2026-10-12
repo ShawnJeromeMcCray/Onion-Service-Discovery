@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "source_commit": "01569a630c95c9f0cffb9455b8121a15214692f6",
+  "checks": [
+    {
+      "check": "locked-runtime-provisioning",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "packaged-protocol",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "packaged-client-host",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "packaged-operator-workflow",
+      "status": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "scope": "Explicitly trusted development package; synthetic identities; no live Tor/deployment or production approval",
+  "authentication": "NOT_PERFORMED"
+}
