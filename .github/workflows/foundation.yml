@@ -1,0 +1,38 @@
+name: Foundation and input conformance
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  source-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, resolved 2026-10-12
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.19.0
+      - name: Install locked development dependencies
+        working-directory: web-local-search-client
+        run: npm ci --ignore-scripts --no-fund
+      - name: Pull pinned PHP test image
+        run: docker pull php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3
+      - name: Run three-language input conformance
+        run: python3 tools/run_input_conformance.py --php-container
+      - name: Audit locked dependencies
+        working-directory: web-local-search-client
+        run: npm audit
+      - name: Check source corpus and credential patterns
+        run: python3 tools/check_repository.py
+      - name: Test tamper and duplicate rejection
+        run: python3 -m unittest discover -s tests -v
+      - name: Check whitespace
+        run: git diff --check
