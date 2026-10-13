@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1YlAsPNdAwUmY6EjJDSRSEuo0pmuYSol84gwxezAmqlI/edit?usp=drivesdk
 
-Source modified: 2026-10-11T04:39:37.426Z
+Source modified: 2026-10-12T19:28:05.077Z
 
 ---
 
@@ -170,18 +170,29 @@ Same cryptographic requirements.
 Node key compromise does not rotate Service key automatically.
 
 
-12. Private Key Storage
-Reference node:
-- outside webroot;
-- dedicated service account;
-- restrictive permissions;
-- no source-control inclusion;
-- no log/debug dump;
-- no database storage by default;
-- backup instructions separate.
+12. Private Key Custody
+Tor Onion private keys remain exclusively under Tor and are never read by Onion Service Discovery.
 
 
-Optional future HSM/secret-manager support can be added behind an interface without changing Protocol.
+Service Identity private key:
+- preferred production profile is offline signing or an isolated SignerProvider;
+- the public web/PHP runtime MUST NOT require the Service private key in the preferred profile;
+- protected online signing is an explicit lower-assurance/hardened profile;
+- never stored in public webroot, ordinary logs, Protocol storage or source control.
+
+
+Node Identity private key:
+- normally required online for Node descriptors/observations/checkpoints;
+- kept outside webroot under least privilege or isolated SignerProvider;
+- never reused as Service or release key.
+
+
+Backup/custody requirements are defined in the High-Assurance Key Custody standard.
+Hardware/TPM/KMS/external-signer providers are implementation options behind SignerProvider and do not change Protocol bytes.
+
+
+
+
 
 
 13. Key Fingerprints
@@ -489,7 +500,13 @@ Reviewer must answer:
 - Can key rotation be replayed or forked silently?
 - Can migration be hijacked?
 - Is any private Tor key exposed?
-- Are all crypto claims backed by test vectors?
+- Are all crypto claims
+
+
+
+
+
+
 
 
 43. Protocol Freeze Gate
@@ -505,4 +522,33 @@ No production network implementation may freeze Protocol v1 until:
 
 44. No “Perfect Crypto” Claim
 Documentation states exact guarantees and limitations.
-Cryptography authenticates keys/records; it does not authenticate human brand ownership or service honesty.
+Cryptography authenticates keys/records; it does not authenticate human brand ownership or service honesty
+
+
+45. Logical Service Identifier Domain
+Protocol state MUST distinguish:
+- logical_service_id: stable genesis identity anchor;
+- current Service Identity public key;
+- key epoch.
+
+
+The proposed Protocol v1 logical_service_id representation reuses the canonical encoded genesis Service Identity public key, subject to D-051 Human Protocol/Crypto approval.
+No hash of the current rotated key may be substituted as the stable identity anchor.
+
+
+46. Signed Checkpoint Construction
+Signed Node checkpoints are a distinct signed record type and MUST use a distinct domain-separation prefix from Node Descriptor and Direct Observation.
+
+
+Checkpoint payload includes, once frozen under D-052:
+- Node Identity;
+- Protocol/index format version;
+- checkpoint sequence;
+- previous_checkpoint_hash;
+- active index root;
+- record count;
+- generated timestamp.
+
+
+Successor checkpoints form a signed hash chain.
+Exact genesis representation, checkpoint hash bytes and domain prefix require cross-language vectors and Human Protocol/Crypto review before Protocol v1 Freeze.

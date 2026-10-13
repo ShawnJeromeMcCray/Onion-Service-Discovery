@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1A8nFe3xFiF4w3eYQsAkLoXhFovKb07tXo5rzTfP7YFY/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:37:42.696Z
+Source modified: 2026-10-12T19:28:02.138Z
 
 ---
 
@@ -234,7 +234,7 @@ Nicht zulässig:
 - unbegrenzte Kaskaden von Folgeabrufen.
 
 
-15. Datenbankmodell auf hoher Ebene
+15. Logisches Persistenz-/Storage-Modell auf hoher Ebene
 Empfohlene Repositories/Tabellen:
 service_identities
 service_revisions
@@ -312,10 +312,10 @@ Vor Implementierung des Netzwerks muss der Agent im Code-Repository erzeugen:
 - Security-Invariants-Liste.
 
 
-Jede wesentliche Abweichung von diesem Dokument erfordert ein ADR mit Motivation, Risiken, Alternativen und Auswirkungen
+Jede wesentliche Abweichung von diesem Dokument erfordert ein ADR mit Motivation, Risiken, Alternativen und Auswirkungen 
 
 
-16. CLIENT ARCHITECTURE DECISION — WEB FIRST
+21. CLIENT ARCHITECTURE DECISION — WEB FIRST
 The separate browser extension has been removed from the product architecture.
 
 
@@ -341,25 +341,26 @@ Browser persistence is optional; correctness does not depend on IndexedDB surviv
 
 
 Trust boundary:
-the serving Node controls Web executable code. A malicious/compromised Node can violate local-query behavior or misrepresent UI. Reproducible static assets, CSP, hashes/provenance, independent Nodes and public disclosure mitigate/audit this risk but do not create an independent browser trust root.
+the serving Node controls Web executable code. A malicious/compromised Node can violate local-query behavior or misrepresent UI. Reproducible static assets, CSP, hashes/provenance, a self-hosted/trusted Client Host option, distinct selected data sources/source groups and public disclosure mitigate/audit this risk but do not create an independent browser trust root.
 
 
 Mobile:
 Android Tor Browser is a first-class supported Web Client target.
 
 
-17. SQLITE RUNTIME DECISION
-SQLite is the reference Node backend, but PHP installations are not assumed to include pdo_sqlite.
+22. STORAGE RUNTIME DECISION
+SQLiteStore is one required reference adapter alongside FilesystemStore. PHP installations are not assumed to include pdo_sqlite, and the Protocol is not defined by SQLite semantics.
 
 
-init/doctor/security:check MUST verify the PDO SQLite driver explicitly and fail clearly when absent.
+init/doctor/security:check MUST validate only the selected StorageBackend. pdo_sqlite is required and checked only when SQLiteStore is selected; FilesystemStore MUST operate without it.
 
 
 The Protocol remains storage-backend independent.
-auf Tests
 
 
-18. STORAGE ABSTRACTION
+
+
+23. STORAGE ABSTRACTION
 Storage is an implementation concern, not Protocol truth.
 
 
@@ -383,7 +384,7 @@ integrity verification;
 bounded supported scale.
 
 
-19. CLIENT HOST / DATA NODE SEPARATION
+24. CLIENT HOST / DATA NODE SEPARATION
 The Web Local Search architecture supports two independent roles.
 
 
@@ -405,7 +406,7 @@ it can censor/omit/stale/equivocate but cannot inject executable code into the s
 The Client Host remains a Web trust boundary.
 
 
-20. MULTI-SOURCE DATA MODEL
+25. MULTI-SOURCE DATA MODEL
 The client SHOULD support a union of valid records from multiple configured Nodes.
 
 
@@ -419,4 +420,3 @@ Rules:
 
 
 Node-signed snapshot/checkpoint hashes and future gossip/witness evidence support equivocation detection.
-.

@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1cULvv2DZXskb5Gg_D2al7biY1xNFUf4OvyWrIQ5DAX0/edit?usp=drivesdk
 
-Source modified: 2026-10-12T12:31:50.778Z
+Source modified: 2026-10-12T19:30:28.128Z
 
 ---
 
@@ -18,46 +18,48 @@ Du darfst Sicherheitsanforderungen nicht still vereinfachen. Du darfst Spezifika
 
 
 1. VERBINDLICHE LESEREIHENFOLGE
-Vor dem ersten produktiven Code vollständig lesen:
-1. 00 - MASTER EXECUTION BRIEF - Onion Service Discovery
-2. 01 - Definition of Done and Production Readiness Gates
-3. 01 - Product Requirements and System Architecture
-4. 02 - Protocol Version 1 Specification
-5. 03 - Threat Model and Security Architecture
-6. 04 - PHP Reference Node Implementation Specification
-7. 05 - Web Local Search Client Specification
-8. 06 - Test Strategy Conformance and Verification Matrix
-9. 07 - Production Operations Release and Incident Runbook
-10. dieses Dokument
-11. Implementation Backlog and Milestone Checklist, sobald vorhanden.
-
-
-Nach dem Lesen erstellst du eine kurze “Specification Understanding” im Repository:
-- Ziele;
-- Nicht-Ziele;
-- Komponenten;
-- Security Invariants;
-- offene Entscheidungen;
-- Abhängigkeiten;
+Vor Änderungen an produktivem Code MUSS der Coding Agent zuerst:
+Step 1 — 00 - Workspace Index and Required Reading Order vollständig lesen;
+Step 2 — alle dort als ACTIVE/MANDATORY aufgeführten Dokumente in der dort festgelegten Reihenfolge lesen;
+Step 3 — 99 - Archive and Superseded Drafts ausdrücklich NICHT als normative Quelle verwenden;
+Step 4 — danach eine kurze Specification Understanding im Repository erzeugen:
+- Ziele und Nicht-Ziele;
+- Komponenten/Trust Boundaries;
+- Security/Privacy Invariants;
+- offene D-XXX Human Gates;
+- normative Protocol-Freeze-Entscheidungen;
+- Abhängigkeiten/Milestone-Prerequisites;
 - Release Gates.
 
 
-2. PRIORITÄT DER QUELLEN
-Bei Konflikten:
-A. Security-Invarianten und explizite MUST/MUSS-Regeln.
-B. Protocol Specification.
-C. Master Execution Brief.
-D. Component Specifications.
-E. Architecture.
-F. Beispiele/Illustrationen.
+Eine statische Teilliste in diesem Work Order ersetzt den Workspace Index NICHT.
 
 
-Wenn Konflikt nicht eindeutig auflösbar:
-- ADR erstellen;
-- sicherste rückwärtskompatible Variante wählen;
-- Konflikt markieren;
-- betroffene Tests hinzufügen.
+2. PRIORITÄT DER QUELLEN UND KONFLIKTREGEL
+Normative Wire-/Crypto-/State-Semantik kommt ausschließlich aus den als normative Protocol-Spezifikation klassifizierten Dokumenten, akzeptierten Protocol Change Proposals, eingefrorenen Registries/Schemas/Vektoren und Human-approved D-XXX Entscheidungen.
+
+
+Security-/Privacy-Dokumente definieren zusätzliche Invarianten und dürfen Protocol-Semantik einschränken, aber nicht stillschweigend andere signierte Bytes/Wire-Bedeutungen erfinden.
+
+
+Product-/Component-/Operations-Dokumente implementieren diese Regeln und dürfen ihnen nicht widersprechen.
+
+
+Bei einem Widerspruch:
+- betroffenen Codepfad NICHT durch eigene Interpretation finalisieren;
+- Konflikt als BLOCKING-SPEC-CONFLICT markieren;
+- genaue Dokumente/Abschnitte referenzieren;
+- Decision Register/ADR/Protocol Change Proposal verwenden;
+- Regressionstest/Testvektor vorbereiten;
+- nur auf nicht betroffenen Modulen weiterarbeiten.
+
+
+Verboten ist die frühere Regel, einfach eine vermeintlich „sicherste rückwärtskompatible Variante“ zu wählen, wenn dadurch normative Semantik erfunden würde.
 Keine stille Interpretation.
+
+
+
+
 
 
 3. PROJEKTNAME
@@ -152,7 +154,7 @@ ADR-004 Service Identity Key Lifecycle
 ADR-005 Node Identity Key Lifecycle
 ADR-006 Manifest Schema und Unknown/Duplicate Field Policy
 ADR-007 Tor Transport und Isolation
-ADR-008 SQLite Storage/Transactions
+ADR-008 StorageBackend Contract, FilesystemStore/SQLiteStore Atomicity and Backend Selection
 ADR-009 Sync State/Delta Model
 ADR-010 Web Local Search Client Storage/Cache Strategy and Serving-Origin Trust Boundary
 ADR-011 Local Search Approach
@@ -182,7 +184,7 @@ SEC-INV-004 Lower revision never replaces higher valid revision.
 SEC-INV-005 Equal revision/different hash is fork.
 SEC-INV-006 Key change requires valid rotation proof.
 SEC-INV-007 Onion change requires migration proof for continuity.
-SEC-INV-008 Search query never leaves client.
+SEC-INV-008 In WEB-LOCAL mode the search query causes no query-dependent network traffic. The optional No-JavaScript Server Search is a separate explicitly disclosed profile: POST to the selected serving server, no URL/log/persistence and no query-dependent outbound work.
 SEC-INV-009 Moderation does not rewrite identity.
 SEC-INV-010 Resource usage bounded.
 Weitere Invarianten aus Threat Model ergänzen.
@@ -280,8 +282,8 @@ Implementiere:
 - startup validation;
 - key generation;
 - manifest generation;
-- db migration;
-- db verify;
+- storage:migrate / backend-specific migration;
+- storage:verify;
 - status;
 - offline manifest verification.
 
@@ -361,7 +363,7 @@ Rate limits.
 
 
 Exit:
-Mass candidate fixture bleibt innerhalb definierter CPU/Memory/DB/Network Budgets.
+Mass candidate fixture bleibt innerhalb definierter CPU/Memory/Storage/Network Budgets.
 
 
 19. PHASE 10 — WEB LOCAL SEARCH CLIENT CORE
@@ -434,7 +436,7 @@ Wenn Zeit/Scope begrenzt: dokumentierte Plugin-/Future-Schnittstelle statt unsic
 - node outage;
 - malicious/stale peer fixtures;
 - upgrade/migrations;
-- permission review;
+- Web Client origin/CSP/network-destination/browser-capability review;
 - dependency reduction.
 
 
@@ -594,7 +596,7 @@ Security-relevante Changes besonders markieren.
 - Welche externen Inputs berühre ich?
 - Welche Trust Boundary?
 - neue Persistenz?
-- neue Permission?
+- neuer Web-Origin/Netzwerkziel/Browser-Capability/Storage-Surface?
 - neue Dependency?
 - neue Logs?
 - neue URL/Network behavior?
@@ -757,7 +759,7 @@ Vor RC:
 - secrets scan;
 - dependency list review;
 - endpoints inventory;
-- permissions inventory;
+- Web Client origin/CSP/network-destination/capability inventory;
 - network destinations inventory;
 - logs inventory;
 - storage inventory.
@@ -802,7 +804,7 @@ Before Milestone 1 implementation work, also read and treat as binding:
 - 14 - Node API Sync Contract and Interoperability Specification
 - 15 - Abuse Resistance Sybil Spam and Resource Exhaustion Model
 - 16 - Privacy Data Classification Retention and Logging Specification
-- 17 - Canonical Data Model Database Invariants and Retention Schema
+- 17 - Canonical Data Model Storage Invariants and Retention Schema
 - 18 - PHP Node Deployment Hardening and Secure Configuration Matrix
 - 19 - Web Search Client Security Privacy and No-JavaScript Fallback Review
 - 20 - Project Governance Protocol Change and Security Decision Policy
@@ -824,8 +826,8 @@ Before production networking or cryptographic state mutation, create:
 - docs/security/invariants.md
 - docs/privacy/data-inventory.md
 - docs/data/data-dictionary.md
-- docs/client/permission-review.md
-- docs/client/fingerprinting-review.md
+- docs/client/web-origin-csp-network-review.md
+- docs/client/browser-privacy-fingerprinting-review.md
 - docs/operations/hardening-matrix.md
 - docs/audit/AUDIT-MAP.md
 
@@ -868,7 +870,7 @@ Every externally influenced queue, array, response, retry, network call, disk st
 “Unlimited” is forbidden as standard production configuration for attacker-influenced resources.
 
 
-56. DATABASE EVIDENCE RULE
+56. STORAGE EVIDENCE RULE
 
 
 Never model Service identity as only one mutable latest row.
@@ -880,7 +882,7 @@ Never use destructive replacement semantics that can erase forks, rotations or m
 
 
 Any change that adds remote Web Client dependencies, sends local-mode query data, weakens CSP, introduces service workers, or changes server-search privacy semantics is a Release Blocker until:
-- permission ADR;
+- Web origin/CSP/network-capability ADR;
 - Tor Browser desktop/Android Web behavior refreshed from current official docs;
 - fingerprinting/privacy review;
 - human approval;
@@ -992,7 +994,7 @@ Required:
 - privacy-safe support bundle;
 - fresh operator walkthrough;
 - fresh contributor walkthrough.
-No undocumented mandatory manual database surgery.
+No undocumented mandatory manual StorageBackend surgery.
 
 
 66. PERFORMANCE/CAPACITY GATE
@@ -1004,7 +1006,7 @@ Required:
 - stress modeling;
 - low-end client test;
 - Tor-aware concurrency evidence;
-- supported SQLite scale statement;
+- supported scale statement for each Production-supported StorageBackend;
 - resource/overload thresholds.
 
 
@@ -1171,8 +1173,8 @@ Do not make the query influence upstream source selection in either model.
 
 
 80. FINAL PRE-IMPLEMENTATION FREEZE
-Before first production code:
-- read documents 43–46;
+Before security-critical production code or Protocol Freeze:
+- read every ACTIVE/MANDATORY document in the Workspace Index, including documents 41–51 and later active corrections;
 - implement offline Service signer architecture from the start;
 - do not place Service private key in web-runtime dependency path;
 - design all signing behind SignerProvider;
@@ -1183,8 +1185,7 @@ Before first production code:
 
 
 81. STOP-PLANNING DIRECTIVE
-Once Final Pre-Implementation Closure Audit is PASS:
-begin repository implementation immediately.
+Repository implementation may proceed on unaffected modules while the Closure Audit is REOPENED for documented consistency remediation. Protocol Freeze, crypto-finalization, release signing finalization and Production Stable claims MUST wait until the Closure Audit is explicitly re-PASSed after cross-document consistency verification.
 
 
 The coding agent MUST NOT spend time expanding architecture documents merely to appear thorough.
@@ -1207,4 +1208,172 @@ reproducible builds;
 conformance reports;
 chaos tests;
 manual security review evidence.
-R
+
+
+
+
+83. OPERATOR DASHBOARD IMPLEMENTATION
+Implement document 47 as a first-class product surface.
+
+
+Required routes/features:
+- /onion-service-discovery/status/;
+- common config file;
+- role overview;
+- self-verification;
+- automatic bounded Candidate announcement;
+- external observation lookup;
+- sampled searchability lookup;
+- mobile/server-rendered baseline;
+- exact remediation messages.
+
+
+84. NO FAKE NETWORK MEMBERSHIP
+Do not implement a generic green “connected to network” boolean.
+
+
+Expose separate facts:
+Tor reachable;
+bootstrap sources reachable;
+known peers;
+announcement state;
+external current observations;
+current searchable confirmations.
+
+
+85. SIMPLE BY DEFAULT
+For the ordinary operator who only wants to be found:
+do not require them to enable Mirror, Discover or Sync.
+Do not require a SQL server.
+Do not require a browser extension.
+Do not require recurring manual registration.
+
+
+86. SAFE ADMIN BOUNDARY
+The read-only status dashboard can be public if it contains only safe public/aggregate state.
+State-changing web administration is optional and disabled by default.
+
+
+
+
+87. SYBIL RESISTANCE IMPLEMENTATION
+Implement document 49 as a hard security invariant.
+
+
+Never implement:
+one Onion = one vote;
+one Node key = one independent operator;
+observer majority = identity truth;
+witness count = trust score.
+
+
+88. BOUNDED SOURCE ENGINE
+Implement:
+- finite active peer set;
+- finite probation pool;
+- per-source candidate/referral byte/work caps;
+- global verification budget;
+- gradual peer replacement;
+- source-family grouping metadata/local config;
+- source concentration diagnostics.
+
+
+89. TARGET-CENTRIC DEDUP
+Repeated advertisements of the same Onion/Service target from arbitrarily many identities MUST collapse into bounded verification/backoff state.
+
+
+90. SEARCH SYBIL FARM
+Implement local result-spam controls:
+- TF saturation;
+- near-duplicate similarity grouping;
+- presentation diversity;
+- no boost from observer/backlink/witness counts.
+
+
+Do not silently delete distinct valid Services.
+
+
+91. OPTIONAL POW BOUNDARY
+If announcement PoW is prototyped:
+- treat only as admission effort;
+- no trust/ranking effect;
+- benchmark solving/verification cost;
+- replay protection;
+- keep disabled unless policy/load requires it and Human Security Gate approves.
+
+
+
+
+92. CATEGORY REGISTRY IMPLEMENTATION
+Implement document 50.
+
+
+Generate:
+protocol/registries/categories-v1.json;
+JSON Schema category enum;
+PHP CategoryId constants/type;
+TypeScript CategoryId union/constants;
+localized display map scaffold;
+conformance fixtures.
+
+
+adult MUST be included as a normal category and MUST NOT trigger relaxed rendering/security behavior.
+
+
+93. SECURE CODING IMPLEMENTATION
+Implement document 51 as mandatory engineering policy.
+
+
+Build narrow security wrappers/types before feature code:
+SafeJsonDecoder
+OnionAddress
+CategoryId
+Digest/PublicKey/Signature domain types
+TorHttpClient
+SafeRenderer
+ConfigLoader
+StorageBackend
+SignerProvider.
+
+
+94. DANGEROUS-SINK POLICY
+CI should flag/reject dangerous sinks/patterns unless a reviewed exception exists:
+eval
+unserialize on untrusted data
+dynamic include
+shell-string execution
+unsafe DOM HTML sinks
+generic outbound HTTP from Protocol/domain layers
+raw SQL concatenation
+attacker-controlled filesystem path construction.
+
+
+95. SECURITY COVERAGE ARTIFACTS
+Create and keep current:
+SECURITY-COVERAGE.md
+SECURITY-ATTACK-CLASS-REGISTRY.md
+ASVS-MAP.md
+OWASP-TOP10-MAP.md
+CWE-TOP25-MAP.md.
+
+
+Every applicable item points to implementation controls and tests.
+
+
+96. DEFENSIVE TEST GENERATION
+For every field/limit generate:
+min/max/off-by-one/wrong-type/duplicate/invalid-encoding tests.
+
+
+Fuzz all Protocol parsers and differential-test PHP/TypeScript/independent validator.
+
+
+97. NO “SANITIZE EVERYTHING” SHORTCUT
+Do not build a universal sanitizer.
+
+
+Use:
+field-specific positive validation;
+typed parsing;
+context-specific output encoding;
+prepared/structured APIs.

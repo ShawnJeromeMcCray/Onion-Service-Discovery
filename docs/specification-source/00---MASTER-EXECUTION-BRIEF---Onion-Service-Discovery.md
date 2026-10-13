@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1iavEaLZX4iFR0taaQ4jp_O-5mXLeTDPmof4x1prVrkA/edit?usp=drivesdk
 
-Source modified: 2026-10-12T12:31:56.427Z
+Source modified: 2026-10-12T19:33:40.863Z
 
 ---
 
@@ -38,7 +38,7 @@ Nicht verhandelbare Prinzipien
 
 Primäre Komponenten
 1. PHP-Referenznode für bestehende Onion-Service-Webserver.
-2. Web Local Search als direkt von teilnehmenden Discovery Nodes ausgelieferter Referenzclient für Tor Browser auf Desktop und Android; keine separate Browser-Extension.
+2. Web Local Search als statischer Referenzclient für Tor Browser auf Desktop und Android; WEB-COMBINED-V1 kann ihn vom Discovery Node ausliefern, WEB-SEPARATED-V1 von einem getrennten/self-hosted Client Host; keine separate Browser-Extension.
 3. Versionierte Protokoll- und JSON-Spezifikationen.
 4. Conformance- und Security-Test-Suite.
 5. Betriebs-, Release-, Incident- und Audit-Dokumentation.
@@ -104,7 +104,7 @@ Baue ein produktionsreifes System, mit dem öffentliche Onion Services freiwilli
 
 Das System besteht aus zwei primären Referenzimplementierungen:
 A) Onion Service Discovery Node: serverseitige PHP-Referenzimplementierung, die in einen bestehenden Onion-Service-Webstack integriert werden kann.
-B) Onion Service Discovery Web Local Search Client: statische HTML/CSS/JavaScript-Anwendung, die direkt von teilnehmenden Discovery Nodes ausgeliefert wird. Sie läuft ohne separate Extension in Tor Browser auf Desktop und Android. Bei verfügbarem JavaScript sucht sie lokal im geladenen Index; ohne JavaScript kann ein klar gekennzeichneter serverseitiger Such-Fallback angeboten werden.
+B) Onion Service Discovery Web Local Search Client: statische HTML/CSS/JavaScript-Anwendung. WEB-COMBINED-V1 liefert Code und generische Indexdaten von einem Node-Origin; WEB-SEPARATED-V1 trennt Client Host und Discovery-Data-Nodes gemäß eingefrorenem CORS/Proxy-Profil. Sie läuft ohne separate Extension in Tor Browser auf Desktop und Android. Bei verfügbarem JavaScript sucht WEB-LOCAL lokal im geladenen Index; ohne JavaScript kann ein klar gekennzeichneter serverseitiger Such-Fallback angeboten werden.
 
 
 Tor selbst wird NICHT geforkt, NICHT neu kompiliert und NICHT modifiziert.
@@ -351,7 +351,7 @@ Zielumgebung:
 - PHP 8.5 bevorzugt (Stand Oktober 2026); grundsätzlich eine zum Implementierungs- und Releasezeitpunkt aktiv unterstützte PHP-Version. Mindest-/Supportmatrix per ADR festlegen und vor jedem Major Release gegen php.net/supported-versions.php aktualisieren;
 - ext-sodium;
 - ext-curl;
-- PDO SQLite;
+- selected StorageBackend dependencies only; SQLiteStore requires PDO + pdo_sqlite, FilesystemStore does not;
 - Composer mit gelockten Abhängigkeiten;
 - nginx oder Apache;
 - lokaler Tor SOCKS-Port;
@@ -470,7 +470,7 @@ Keine Speicherung von Suchbegriffen, Browser-Historie, personenbezogenen Nutzerp
 Node-Logs minimieren, rotieren und standardmäßig sparsam.
 Keine Third-Party-Analytics.
 Keine externen Fonts/Tracker.
-Suche und Rendering laufen im Web Local Search Modus lokal im Browser; HTML/JS/CSS werden jedoch vom ausgewählten Discovery Node ausgeliefert und bilden damit eine dokumentierte Serving-Origin-Trust-Boundary.
+Suche und Rendering laufen im WEB-LOCAL-Modus lokal im Browser. Die ausführbaren HTML/JS/CSS kommen je nach aktivem Deploymentprofil entweder vom Combined Node oder vom getrennten Client Host; genau dieser Serving-Code-Origin ist die dokumentierte Web-Trust-Boundary.
 
 
 19. TESTANFORDERUNGEN
@@ -537,7 +537,7 @@ Erstelle README, Architecture, Protocol specification, Threat model, Security de
 
 Für jede Phase:
 1. Anforderungen aus allen Spezifikationsdokumenten lesen.
-2. Unklarheiten als ADR dokumentieren; bei sicherheitskritischen Punkten konservativ entscheiden.
+2. Unklarheiten als ADR/Decision/Protocol-Conflict dokumentieren. Bei normativer Wire-/Crypto-/State-Semantik NICHT eigenmächtig entscheiden; betroffenen Pfad blockieren, bis die zuständige Freeze-/Human-Gate-Entscheidung vorliegt.
 3. Threat Model aktualisieren, bevor Netzwerk-/Krypto-Funktionalität erweitert wird.
 4. Tests zuerst oder parallel schreiben.
 5. Kleinste kohärente Implementierung bauen.
@@ -588,7 +588,7 @@ Produktionsreif bedeutet mindestens:
 - Security- und Privacy-Dokumente vollständig.
 - CI reproduzierbar grün.
 - Dependency/SAST/secret scans sauber oder begründet.
-- Backups/Restore/DB migration getestet.
+- Backup/Restore und ausgewählte StorageBackend-/Schema-Migrationen getestet.
 - RC in isolierter Umgebung frisch installierbar.
 - Rollback dokumentiert.
 - unabhängige Security Review Findings abgearbeitet.
@@ -765,7 +765,7 @@ A deployment MAY combine both, but the stronger profile separates them.
 With an honest Client Host, a malicious Discovery Node cannot alter executable search code and therefore cannot directly force query exfiltration through Node-supplied JavaScript.
 
 
-The client SHOULD combine valid data from multiple independent Discovery Nodes, preserve conflicts, reject invalid signatures, track rollback, and compare signed Node checkpoints.
+WEB-SEPARATED-V1 SHOULD combine valid data from multiple distinct selected Discovery Node identities/source groups, preserve conflicts, reject invalid signatures, track checkpoint ancestry/rollback, and compare signed Node checkpoint chains. Distinct Node keys do not prove independent operators.
 
 
 No majority vote becomes Service identity truth.
@@ -783,12 +783,12 @@ The project mitigates this with:
 - strict CSP;
 - no remote code;
 - release hashes/provenance;
-- multiple independent Client Hosts;
+- multiple Client Hosts that are actually independently operated where this is known/documented; cryptographic host count alone is not proof of operator independence;
 - self-hosted Client Host option;
 - explicit non-claims.
 
 
-The strongest browser-only deployment is a self-hosted Client Host plus multiple independent data Nodes.
+The strongest browser-only reference deployment is a self-hosted/trusted Client Host plus multiple distinct selected data-node identities/source groups, with known operator diversity represented only where it is actually documented.
 
 
 
@@ -822,4 +822,181 @@ Once the Final Pre-Implementation Closure Audit is PASS, Onion Service Discovery
 
 
 From then on, additional preparation is justified only by concrete evidence or findings.
-F
+
+
+
+
+40. PLUG-AND-PLAY OPERATOR PRINCIPLE
+A normal Onion Service operator who only wants to be discoverable must not need to understand the internal peer protocol, storage engine or cryptographic byte format.
+
+
+The expected journey is:
+install;
+configure one clear file;
+install a signed Manifest;
+open the operator's own Onion Service in Tor Browser;
+visit /onion-service-discovery/status/;
+see truthful progress from local readiness to external observation/searchability.
+
+
+The dashboard distinguishes:
+local configuration;
+Tor self-verification;
+bootstrap connectivity;
+candidate announcement;
+external Direct Observation;
+actual sampled searchability.
+
+
+“Connected” and “Discoverable” are never treated as synonyms.
+
+
+41. SELF-SERVICE DISCOVERY
+Once publish is explicitly enabled and the signed Manifest self-verifies, the reference implementation SHOULD perform bounded automatic self-announcement to selected Discovery Nodes.
+
+
+Remote Nodes never trust the announcement itself; they fetch and verify the Service independently.
+
+
+No recurring central registration is introduced.
+
+
+42. PRODUCT QUALITY BAR
+The system is not considered polished if an ordinary operator must read protocol documentation just to answer whether their current Service revision can be found.
+
+
+The status dashboard and CLI must provide the answer and remediation directly.
+
+
+
+
+43. VERIFIABLE DISCOVERABILITY
+The product must allow an operator to independently verify that their exact current Service state is present in the actual active index delivered by external Discovery Nodes.
+
+
+The proof key is:
+Service Identity
++ canonical Onion
++ Manifest revision
++ Manifest hash.
+
+
+A Node's “listed” assertion is not authoritative.
+
+
+44. SIGNED INDEX STATE
+Discovery Nodes sign active-index checkpoints.
+The operator/client validates the checkpoint and locally verifies exact membership.
+
+
+For scalable deployments, a deterministic Merkle root and compact inclusion proof is preferred once its cross-language specification and vectors are frozen.
+
+
+45. MULTI-SOURCE PROPAGATION EVIDENCE
+The dashboard can truthfully report:
+“Current revision is included in the signed active index of 3 of 4 checked Discovery Nodes.”
+
+
+It must never convert that into global network completeness or Service trust.
+
+
+46. EQUIVOCATION
+Conflicting Node-signed checkpoints are retained as cryptographic source-integrity evidence.
+
+
+This is separate from Service identity forks and does not invalidate valid Service-signed records from other sources.
+
+
+
+
+47. SYBIL-RESISTANT GROWTH
+Network growth improves resilience only when additional participants provide independently useful replication/auditing.
+
+
+The Protocol MUST remain safe if one adversary creates arbitrarily many Onion Services, Service identities, Node identities or witness identities.
+
+
+Raw count has zero authority.
+
+
+48. EVIDENCE, NOT VOTING
+Service identity truth derives from Service cryptography/direct binding evidence.
+
+
+Node misconduct derives from locally verifiable signed contradictions/proofs.
+
+
+Neither is decided by majority vote.
+
+
+49. BOUNDED PARTICIPATION
+Every untrusted growth path has finite local cost:
+peer admission;
+candidate announcement;
+candidate verification;
+observation ingestion;
+witness/checkpoint gossip.
+
+
+New identities cannot bypass global work budgets.
+
+
+50. SEARCH FARM RESILIENCE
+Creating thousands of matching Onion Services cannot produce trust or automatically dominate relevance.
+
+
+Local search may cluster near-identical results for usability while preserving each distinct identity.
+
+
+51. INDEPENDENCE NON-CLAIM
+Different public keys are only distinct identities.
+
+
+The project does not cryptographically claim that they are distinct humans/operators.
+
+
+
+
+52. CATEGORY REGISTRY
+Protocol v1 uses a fixed broad category registry rather than arbitrary category spellings.
+
+
+adult is an ordinary content category.
+
+
+Categories describe content/function only and never produce trust/safety/legal status.
+
+
+Specific descriptors belong in separate tags rather than proliferating core categories.
+
+
+53. DEFENSIVE PROGRAMMING
+All attacker-controlled values are treated as typed untrusted data crossing explicit validation boundaries.
+
+
+The reference implementation uses:
+positive field validation;
+hard length/count/depth ceilings;
+strict encoding/type rules;
+context-safe output encoding;
+parameterized/structured sink APIs;
+bounded network/storage/CPU work;
+fail-closed Protocol state transitions.
+
+
+54. EXPLOIT-CLASS COVERAGE
+Production readiness requires explicit prevention/tests for applicable known classes including injection, XSS, SSRF, path traversal, authorization, CSRF, deserialization, resource exhaustion, race conditions, request/cache ambiguity, supply-chain compromise and exceptional-condition failures.
+
+
+OWASP/CWE lists are coverage inputs, not a claim that security can be frozen forever.
+
+
+55. SECURITY EVOLUTION
+A new material exploit class found after release triggers:
+applicability review;
+control/test update;
+regression fixture;
+security advisory/patch where needed.
+
+
+The project must remain maintainable rather than claim permanent invulnerability.

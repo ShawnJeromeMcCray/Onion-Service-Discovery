@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1afBIjZ14dkuQdu857tUjSvX-aANQmxJa7GjyzSBhFAI/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:11:50.685Z
+Source modified: 2026-10-12T18:11:27.316Z
 
 ---
 
@@ -15,7 +15,7 @@ Privacy is a protocol/product property, not a privacy-policy afterthought. This 
 
 
 2. Privacy Objectives
-PRIV-001 Search queries remain local to the client.
+PRIV-001 In WEB-LOCAL mode, search queries remain local to the browser and cause no query-dependent network request. The optional No-JavaScript Server Search is a separate disclosed privacy profile in which the selected serving server receives the POSTed query.
 PRIV-002 Browsing history is not automatically reported to Discovery Nodes.
 PRIV-003 No persistent global user identifier is required.
 PRIV-004 Standard node sync does not require user accounts, cookies or login.
@@ -74,14 +74,22 @@ incident evidence
 
 
 4. Search Query Lifecycle
-A search query:
-- enters client UI;
+WEB-LOCAL mode:
+- query enters browser UI;
 - is normalized/tokenized locally;
-- queries local index;
+- queries the locally loaded index;
 - renders results;
-- is not sent to node;
-- is not included in automatic support logs;
+- causes no query-dependent request, destination, header or payload;
+- is not included in support logs;
 - is not persisted by default.
+
+
+SERVER-FALLBACK mode:
+- user is explicitly told before submission that the selected serving server receives the query;
+- query is submitted by POST only;
+- query is processed only against the server's already-local active search index;
+- query is not logged/persisted by the reference implementation;
+- query triggers no remote Service/peer/moderation fetch.
 
 
 If optional local search history is ever introduced:
@@ -157,7 +165,7 @@ work-budget/rate-limit counters
 
 
 Default logs SHOULD NOT contain:
-raw search queries — none should reach node
+WEB-LOCAL queries — none reach the server; SERVER-FALLBACK queries — received only for in-request processing and prohibited from application/webserver body logging in the reference deployment
 full client fingerprint
 cookies
 private keys
@@ -207,7 +215,7 @@ Prefer hashes/error IDs to raw untrusted values.
 
 17. Retention Matrix
 Service identity/revision history:
-long-lived because continuity depends on history; retention linked to database budget and archival policy.
+long-lived because continuity depends on history; retention linked to storage budget and archival policy.
 
 
 Direct observations:
@@ -282,7 +290,7 @@ raw browser history
 Include:
 app version
 protocol version
-DB schema
+storage schema/backend format
 source health
 generic error classes
 index size/count
@@ -342,7 +350,7 @@ A fallback would materially alter privacy and requires new architecture/human ap
 29. Backup Privacy
 Operator backups contain:
 private application keys
-database/public metadata
+storage/public metadata
 config
 potential logs
 Treat as sensitive.
@@ -454,7 +462,7 @@ pin causes no network
 result rendering loads no remote asset
 moderation filtering local after list sync
 diagnostics excludes query/pins
-cache rebuild preserves pins without export
+cache rebuild preserves pins only when the pin store is distinct and actually persisted; if browser storage was cleared/unavailable, no persistence is falsely claimed
 full reset deletes local private preference data.
 
 
@@ -623,6 +631,7 @@ No assumption that Tor Browser preserves site data between sessions.
 
 56. ORIGIN-LOCAL PINS
 If Web pinning is implemented:
+- anchors the stable logical_service_id plus remembered current key epoch/Onion context;
 - remains local to the browser origin;
 - never sent to Node;
 - no automatic cross-Node portability;
@@ -631,14 +640,16 @@ If Web pinning is implemented:
 
 57. WEB CLIENT NETWORK-FLOW DIAGRAM UPDATE
 Web Local Search:
-Browser -> selected Node: generic static assets + generic index/snapshot/chunks.
-Search query: browser-local only in reference build.
+WEB-COMBINED-V1: Browser -> selected Node/Client Host: static assets + generic index/snapshot/chunks.
+WEB-SEPARATED-V1 direct profile: Browser -> selected Client Host for code; Browser -> configured credentialless data-node origins for generic Protocol data.
+WEB-SEPARATED-V1 proxy profile: Browser -> selected Client Host; Client Host obtains/caches generic query-independent Protocol data from configured data Nodes.
+WEB-LOCAL search query: browser-local only in the unmodified reference build; no query-dependent network side effect.
 Browser -> result Onion: only after explicit user navigation.
 
 
 Server Search fallback:
-Browser -> selected Node: POST containing query.
-Selected Node -> local DB/index only.
+Browser -> selected serving Client Host/combined Node: POST containing query after explicit disclosure.
+Selected server -> its already-local active search index only.
 No query-dependent outbound network call.
 
 
@@ -650,4 +661,3 @@ PASS requires:
 - server query absent from URL/logs;
 - no remote assets/analytics;
 - malicious-serving-origin limitation documented.
-ice opt-in.

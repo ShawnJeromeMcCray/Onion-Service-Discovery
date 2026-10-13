@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1vcK0HW3newL3tgIDHdrI8oieSANKXRvB42tvosn3HoY/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:15:37.867Z
+Source modified: 2026-10-12T19:26:50.382Z
 
 ---
 
@@ -128,9 +128,21 @@ Rules:
 - client/node must validate every descriptor.
 
 
-10. GET /services/{onion}
-Path variable is canonical Onion hostname form, URL-encoded only as necessary by HTTP.
-Server validates strict OnionAddress before DB lookup.
+10. SERVICE LOOKUP ENDPOINTS
+
+
+Canonical stable identity lookup:
+GET /services/by-id/{logical_service_id}
+
+
+The path value MUST parse as the frozen Protocol v1 Logical Service Identifier representation. URL encoding is applied only as required by HTTP; decode-once semantics apply. The server performs no fuzzy/prefix lookup and no live remote fetch.
+
+
+Address convenience lookup:
+GET /services/{onion}
+
+
+The path value MUST parse as a strict canonical OnionAddress before StorageBackend lookup. This route is address-oriented convenience and MUST return the resolved logical_service_id/current key epoch with the record. An Onion address alone is not the persistent logical identity across a valid migration.
 
 
 Response MAY include:
@@ -281,40 +293,80 @@ delete evidence
 Administration uses local CLI/filesystem mechanisms.
 
 
-24. CORS
-Reference Web Local Search uses same-origin Node endpoints by default, so broad CORS is unnecessary. Any future cross-origin browser fetch requires ADR and privacy/security review.
-API should not grant credentialed wildcard access.
-No cookies are needed for standard read sync.
+24. CORS and Web Profiles
+Machine Node API is public read-oriented data.
+
+
+WEB-COMBINED-V1:
+the Web Client uses same-origin endpoints; broad CORS is unnecessary.
+
+
+WEB-SEPARATED-V1:
+the selected reference architecture is frozen by D-004/D-044 after Tor Browser tests:
+A. credentialless browser reads from explicitly allowed/configured data-node origins; or
+B. the Client Host performs a query-independent generic proxy/cache fetch.
+
+
+Any direct cross-origin mode MUST use public read-only data, no cookies/Authorization/credentials, fixed methods/content types and a reviewed CSP/network-destination policy.
+Credentialed wildcard CORS is forbidden.
 
 
 25. HTTP Methods
-GET and HEAD only for public Protocol v1 reference API unless a future explicitly specified announcement endpoint is added.
-Unsupported method => 405 + Allow.
+Public Protocol read endpoints use GET/HEAD as specified.
+The Candidate Announcement endpoint is the explicit write-like exception: it accepts only an untrusted bounded Candidate hint and grants no remote administrative/storage authority.
+Unsupported methods return 405 + Allow.
 
 
 26. Candidate Announcement
-If Protocol v1 includes a public one-time announcement mechanism, prefer a separate carefully bounded endpoint and threat model.
-It MUST NOT be necessary for synchronization.
-It MUST NOT accept arbitrary URL.
-It accepts only canonical OnionAddress plus possibly proof-of-work/challenge fields if later approved.
-Rate-limit aggressively.
-This feature may be omitted from v1 production and handled manually/out-of-band without harming core protocol.
+Protocol v1 reference/operator profile includes bounded self-announcement for explicitly opted-in publishing.
+
+
+Proposed endpoint:
+POST /onion-service-discovery/v1/candidates/announce
+Exact route/media type is frozen under D-018 before Protocol Freeze.
+
+
+Accepted input is minimal and bounded:
+- Protocol version;
+- canonical OnionAddress;
+- optional current Manifest revision/hash and public identity hint for correlation only.
+
+
+The receiver MUST:
+- treat the request only as an untrusted Candidate;
+- apply global/per-source/target-centric work limits;
+- avoid synchronous expensive direct verification;
+- independently fetch the fixed Well-Known Manifest over Tor before creating a Direct Observation or active index record.
+
+
+The endpoint MUST NOT accept:
+- arbitrary URLs;
+- arbitrary ports/paths/proxies;
+- trusted metadata writes;
+- Service/Node trust assertions.
+
+
+Announcement is not required for node-to-node synchronization and is never proof of discoverability.
+
+
+
+
 
 
 27. Sync Algorithm Reference
 For each selected peer:
-1. GET /node if descriptor stale/unknown.
-2. verify Node Descriptor.
-3. GET /state.
-4. compare local known peer state.
-5. if current => stop.
-6. if valid incremental cursor => GET /changes bounded batches.
-7. validate each received record/envelope.
-8. stage records.
-9. resolve protocol conflicts to quarantine/state, never silent overwrite.
-10. commit transaction.
-11. update peer cursor only after commit.
-12. schedule direct service verification separately under work budget.
+Step 1 — GET /node if descriptor stale/unknown.
+Step 2 — verify Node Descriptor.
+Step 3 — GET /state.
+Step 4 — compare local known peer state.
+Step 5 — if current => stop.
+Step 6 — if valid incremental cursor => GET /changes bounded batches.
+Step 7 — validate each received record/envelope.
+Step 8 — stage records.
+Step 9 — resolve protocol conflicts to quarantine/state, never silent overwrite.
+Step 10 — commit the StorageBackend atomic batch/transaction boundary.
+Step 11 — update peer cursor only after durable commit.
+Step 12 — schedule direct service verification separately under work budget.
 
 
 28. Never Verify Inline Recursively
@@ -334,7 +386,7 @@ no duplicate semantic event.
 30. Transaction Boundaries
 Recommended:
 one bounded change batch per transaction.
-If any structural/database invariant fails:
+If any structural/storage invariant fails:
 rollback batch or isolate invalid record according to documented strategy.
 Do not advance cursor beyond uncommitted data.
 
@@ -380,7 +432,7 @@ Initial client can request a fixed profile if capability negotiation is not yet 
 
 34. Privacy
 No endpoint accepts search query.
-No endpoint offers server-side text search in Protocol v1 reference design.
+The machine Node API offers no free-text search endpoint. The optional human No-JavaScript Server Search route is a separate Web route with explicit privacy disclosure and is not part of the Node sync API.
 This is intentional.
 
 
@@ -616,4 +668,122 @@ Local and server search share a versioned search-semantics identifier so equival
 
 
 Search-semantics version is software/client behavior, not Service identity truth.
-.
+
+
+
+
+57. EXACT IDENTITY LOOKUP
+The Node API MUST provide a deterministic read-only method to retrieve the active index state for an exact Service Identity or canonical record identifier.
+
+
+It is not a free-text search endpoint.
+
+
+Response includes:
+Service Identity
+canonical Onion
+Manifest revision
+Manifest hash
+active/searchable flag
+checkpoint identifier
+Node Identity.
+
+
+58. SIGNED INDEX CHECKPOINT
+Production Nodes MUST expose a signed checkpoint for the active searchable index.
+
+
+Required:
+Node Identity
+Protocol version
+checkpoint sequence
+generated timestamp
+record count
+index root/hash
+previous checkpoint hash (genesis representation frozen by D-052)
+signature.
+
+
+59. INDEX ROOT
+The active record set MUST have a deterministic root.
+
+
+Protocol v1 minimum:
+deterministic canonical complete-index hash or a frozen Merkle construction.
+
+
+Preferred scalable capability:
+Merkle root with compact inclusion proofs.
+
+
+60. INCLUSION PROOF ENDPOINT/CAPABILITY
+If MERKLE_INCLUSION_PROOF capability is advertised, the Node provides a compact proof binding the exact active Service record to the signed checkpoint root.
+
+
+
+
+
+
+
+
+The proof MUST be locally verifiable without trusting a Node boolean.
+
+
+61. SEARCH-EXPORT EQUIVALENCE
+The record set committed by the signed active-index checkpoint MUST correspond to the record set eligible for normal Discovery index export/search.
+
+
+A conformant Node cannot advertise one hidden “proof index” while serving a materially different active search index under the same checkpoint.
+
+
+62. CHECKPOINT ROLLBACK
+Clients/operators track the newest known checkpoint sequence/root per Node where state persists.
+
+
+Unexpected rollback is flagged and not silently accepted as current.
+
+
+63. EQUIVOCATION
+A Node checkpoint history is valid only when each successor uses exact sequence +1 and previous_checkpoint_hash equals the accepted predecessor hash. Two valid signed checkpoints at the same sequence with different hashes, or two signed histories from the same Node that are not prefix-compatible, constitute equivocation evidence once both histories/evidence are available.
+
+
+The API/data model preserves both.
+
+
+64. CHECKPOINT GOSSIP
+Optional capability:
+CHECKPOINT_GOSSIP.
+
+
+Nodes can share public signed checkpoint observations for split-view detection.
+No user queries are included.
+
+
+65. API ERROR/ABUSE
+Exact identity lookup and proof retrieval:
+- validated identifier only;
+- finite response;
+- no arbitrary query;
+- cacheable;
+- no live Service fetch triggered;
+- rate-limited.
+
+
+
+
+66. LOGICAL SERVICE LOOKUP KEY
+Exact identity lookup MUST use logical_service_id or a deterministic active-record identifier, not the current rotatable Service Identity key fingerprint alone.
+
+
+The response includes:
+- logical_service_id;
+- current Service Identity key/key epoch;
+- canonical Onion;
+- current revision/hash;
+- active/searchable state;
+- signed checkpoint reference.
+
+
+67. CHECKPOINT HISTORY VERIFICATION
+A production index-exporting Node MUST make enough signed checkpoint metadata available for a verifier/auditor to validate the observed predecessor chain or obtain an equivalent frozen consistency proof.
+A latest-checkpoint signature alone is insufficient to claim that two views are prefix-consistent.

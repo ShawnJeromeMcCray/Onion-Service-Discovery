@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/19eXxSqAUNN3zU523KW8deC8O1pJfyTCYy-chRgZ_8FQ/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:14:32.328Z
+Source modified: 2026-10-12T18:14:50.942Z
 
 ---
 
@@ -109,7 +109,7 @@ Client with pins
 Client offline
 Client with only one malicious source
 Client with mixed honest/malicious sources
-Client upgrading IndexedDB schema.
+Client upgrading optional browser-cache persistence schema when that feature is enabled.
 
 
 10. Failure Injection
@@ -127,7 +127,7 @@ bandwidth throttle.
 
 Storage:
 disk full
-SQLite locked
+selected StorageBackend locked/unavailable; SQLiteStore profile also exercises SQLite lock contention
 transaction abort
 corrupted page/file fixture
 read-only filesystem
@@ -137,7 +137,7 @@ missing key file.
 Process:
 kill during sync
 kill during key rotation commit
-kill during DB migration
+kill during selected StorageBackend/schema migration
 restart loop
 scheduler overlap.
 

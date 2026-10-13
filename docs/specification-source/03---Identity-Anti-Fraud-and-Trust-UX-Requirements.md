@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1vfn7j1WMWNBm3DA1KIsRhU8zyGtm_FdeyCtybmI1mCQ/edit?usp=drivesdk
 
-Source modified: 2026-10-11T04:32:24.953Z
+Source modified: 2026-10-12T19:29:09.058Z
 
 ---
 
@@ -378,4 +378,22 @@ Anti-Fraud gilt als implementiert, wenn:
 - Unicode/Confusable-Risiken getestet sind;
 - Moderation getrennt ist;
 - kein UI-Label mehr verspricht als technisch bewiesen;
-- Security/UX Review durchgeführt ist.
+- Security/UX Review durchgeführt ist
+
+
+PIN ROTATION CORRECTION
+A user pin MUST anchor the stable Logical Service Identifier, not merely the current Service Identity signing key.
+
+
+On valid key rotation:
+- pinned logical_service_id stays unchanged;
+- current key epoch/key updates only after rotation proof validates;
+- UI may inform the user of the authorized rotation but MUST NOT present it as a different logical identity.
+
+
+On valid Onion migration:
+- pinned logical_service_id stays unchanged;
+- Onion context changes only after migration policy validates.
+
+
+A different logical_service_id is an identity mismatch regardless of display name.

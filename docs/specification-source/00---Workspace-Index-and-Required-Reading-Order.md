@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1jEGUdIe17knsWwzHhIRo5LyBwnVj8Czfy5zkFxs-SSw/edit?usp=drivesdk
 
-Source modified: 2026-10-12T12:31:45.611Z
+Source modified: 2026-10-12T19:27:04.726Z
 
 ---
 
@@ -82,9 +82,9 @@ URL:
 https://docs.google.com/document/d/1R3I1SbEphWuKyJK4XGx5acf_6Tid3yPpxfqtPDATXBQ
 
 
-8. 05 - Web Local Search Client Reference Client Specification
+8. 05 - Web Local Search Client Specification
 Rolle:
-Clientarchitektur, Berechtigungen, IndexedDB, lokale Suche, Updatepipeline, Pinning, UX, Datenschutz, Tests und Releaseanforderungen.
+Web-Deploymentprofile (WEB-COMBINED-V1 / WEB-SEPARATED-V1), CSP/CORS/Netzwerkgrenzen, optionale Browser-Persistenz, lokale Suche, Pinning, UX, Datenschutz, Tests und Releaseanforderungen.
 URL:
 https://docs.google.com/document/d/1UH4HobtYVGVG10nTY8De4C7X-uFIGha1-Cc4XgMigtw
 
@@ -196,91 +196,91 @@ MANDATORY ADDENDUM — AUDIT-GRADE EXPANSION
 The following documents are mandatory and part of the same specification set. They close protocol, security, standards, governance and audit gaps that would otherwise be left to implementation discretion.
 
 
-13. 11 - Current Standards Baseline and External References
+14. 11 - Current Standards Baseline and External References
 Role:
 Authoritative external-reference baseline and mandatory refresh policy for Tor specifications, Tor Browser Web behavior, PHP support, RFC 8785, OWASP ASVS, SLSA and CycloneDX.
 URL:
 https://docs.google.com/document/d/1UEeaBpx6Wnnjujk5dzELF3rxYgDc0Ci2eLomxzc6_10
 
 
-14. 12 - Protocol Limits Encoding Registry and State Machines
+15. 12 - Protocol Limits Encoding Registry and State Machines
 Role:
 Normative byte/field limits, exact encodings, integer interoperability limits, error registry, candidate/service/peer/sync state machines and work-budget principles.
 URL:
 https://docs.google.com/document/d/1-IqYDKd5RLl3bVUA5BjKoe94bUohVXpGBKtFQIn_Rec
 
 
-15. 13 - Cryptographic Construction Key Lifecycle and Domain Separation
+16. 13 - Cryptographic Construction Key Lifecycle and Domain Separation
 Role:
 Normative signed-byte design, domain separation, manifest hashes, key generation/storage/rotation, Onion migration, conflict semantics and cross-language crypto test vectors.
 URL:
 https://docs.google.com/document/d/1YlAsPNdAwUmY6EjJDSRSEuo0pmuYSol84gwxezAmqlI
 
 
-16. 14 - Node API Sync Contract and Interoperability Specification
+17. 14 - Node API Sync Contract and Interoperability Specification
 Role:
 Normative read API, state/delta/snapshot/chunk semantics, cursors, batching, conflict application, cache behavior and interoperability fixtures.
 URL:
 https://docs.google.com/document/d/1vcK0HW3newL3tgIDHdrI8oieSANKXRvB42tvosn3HoY
 
 
-17. 15 - Abuse Resistance Sybil Spam and Resource Exhaustion Model
+18. 15 - Abuse Resistance Sybil Spam and Resource Exhaustion Model
 Role:
 Mandatory candidate/peer/work quotas, retry/backoff, Sybil constraints, spam ranking considerations, disk/CPU/network bounds and overload behavior.
 URL:
 https://docs.google.com/document/d/1Kg3MOLH7urZ3i6UHTa0Hte3AnZOC8BwgvFBOJHhj7P8
 
 
-18. 16 - Privacy Data Classification Retention and Logging Specification
+19. 16 - Privacy Data Classification Retention and Logging Specification
 Role:
 Normative data inventory principles, query privacy, click/pin/favorite handling, logging/retention, diagnostics, withdrawal limitations and privacy tests.
 URL:
 https://docs.google.com/document/d/1afBIjZ14dkuQdu857tUjSvX-aANQmxJa7GjyzSBhFAI
 
 
-19. 17 - Canonical Data Model Database Invariants and Retention Schema
+20. 17 - Canonical Data Model Storage Invariants and Retention Schema
 Role:
 Logical evidence/current-view model, key epochs, forks, migrations, observations, candidates, snapshots, DB transactions, retention tiers and SQLite recovery invariants.
 URL:
 https://docs.google.com/document/d/1ACK4gDp3EB-f8wROvB5tspAzdlEyk4mwF6HcuNHX5dQ
 
 
-20. 18 - PHP Node Deployment Hardening and Secure Configuration Matrix
+21. 18 - PHP Node Deployment Hardening and Secure Configuration Matrix
 Role:
 Production PHP-FPM/webserver/filesystem/Tor-SOCKS hardening, key/DB permissions, scheduler, firewall defense-in-depth, secure defaults and deployment self-checks.
 URL:
 https://docs.google.com/document/d/1p07E8Y31GQY-_LQQon8f1mmXthZVVkmYDDsWji13CLA
 
 
-21. 19 - Web Search Client Security Privacy and No-JavaScript Fallback Review
+22. 19 - Web Search Client Security Privacy and No-JavaScript Fallback Review
 Role:
 Mandatory Web Local Search origin-trust, CSP/XSS, no-remote-asset, local-query privacy and No-JavaScript server-search review.
 URL:
 https://docs.google.com/document/d/1_1LTqsSS_402Jyb0IUvZo4y8ZG5geePELgeaJdDwx2I
 
 
-22. 20 - Project Governance Protocol Change and Security Decision Policy
+23. 20 - Project Governance Protocol Change and Security Decision Policy
 Role:
 ADRs, protocol proposals, breaking-version rules, seed governance, human/AI authority boundaries, emergency changes and security-exception governance.
 URL:
 https://docs.google.com/document/d/1e9oZYaeJIP8SzlMrXk7f5G6YVvmFSQucQd3lvZx3aj8
 
 
-23. 21 - Software Supply Chain Reproducible Build and Release Provenance Standard
+24. 21 - Software Supply Chain Reproducible Build and Release Provenance Standard
 Role:
 Lockfiles, dependency governance, SBOM, SLSA-aligned provenance, reproducible clean builds, artifact signing/hashes, CI least privilege and release archive.
 URL:
 https://docs.google.com/document/d/1xG4VpHZZhoW_pbdNipxqTXT4OUb9oJ20P7OqPeFyoj8
 
 
-24. 22 - Independent Security Audit Readiness and Verification Plan
+25. 22 - Independent Security Audit Readiness and Verification Plan
 Role:
 External audit package, ASVS mapping, independent build/testing, crypto/Tor/browser/privacy review scope and audit-finding remediation.
 URL:
 https://docs.google.com/document/d/1_ZF_9UOwtv3FpkVypW5dnXzIYkmJnQz5Kx7Jpn5MKXg
 
 
-25. 23 - Adversarial Red Team Review and Final Challenge Checklist
+26. 23 - Adversarial Red Team Review and Final Challenge Checklist
 Role:
 Hostile final review designed to falsify identity, privacy, decentralization, parsing, crypto, network, storage, extension, abuse, operations and supply-chain claims.
 URL:
@@ -325,7 +325,7 @@ Before Release Candidate, it MUST complete:
 
 
 
-26. 24 - Pre-Freeze Decision Register and Human Approval Gates
+27. 24 - Pre-Freeze Decision Register and Human Approval Gates
 Role:
 Explicit register of every decision that must not remain implicit: license, runtime baseline, Web Local Search browser compatibility/origin trust/server-search privacy, exact crypto bytes, genesis/revision rules, rotation/migration evidence, snapshot/delta format, seed set, release signing, rate limits, Tor isolation and final production approval.
 URL:
@@ -338,14 +338,14 @@ This decision register is mandatory before Protocol Freeze. Any item marked rele
 
 
 
-27. 25 - Normative Glossary Terminology and Security Semantics
+28. 25 - Normative Glossary Terminology and Security Semantics
 Role:
 Single project-wide definitions for Onion address, Service Identity, verification, observations, forks, migration, trust wording, decentralization, privacy and production-readiness semantics.
 URL:
 https://docs.google.com/document/d/19HdzJKytmIt44-HrWAsnmMLtblsuBJjWpiRk08qxxvU
 
 
-28. 26 - Known Limitations Non-Claims and Future Research Boundary
+29. 26 - Known Limitations Non-Claims and Future Research Boundary
 Role:
 Explicit limitations and non-claims covering trust, human identity, completeness, Sybil resistance, deletion, timing analysis, Web-serving-origin trust, key loss, endpoint compromise and future features that must stay outside Protocol v1 without separate review.
 URL:
@@ -364,98 +364,98 @@ AUDIT-PLUS EXPANSION — FORMAL METHODS, INTEROPERABILITY, TOOLING AND ADOPTION
 The following documents are mandatory and extend the required reading order after document 26.
 
 
-29. 27 - Formal Protocol Model and Model-Checking Verification Plan
+30. 27 - Formal Protocol Model and Model-Checking Verification Plan
 Role:
 Formal state model for revisions, forks, rotations, migrations, candidate verification, sync commit ordering, pins and liveness separation.
 URL:
 https://docs.google.com/document/d/1ZexdGAgo746df46SRwJOttMmpXq94QydK2I-LsFIUzs
 
 
-30. 28 - Independent Conformance Suite and Certification Harness
+31. 28 - Independent Conformance Suite and Certification Harness
 Role:
 Language-independent black-box and exact-byte interoperability suite with CORE/NODE/CLIENT/FULL profiles and reproducible reports.
 URL:
 https://docs.google.com/document/d/1fasTLWHCM9T2D2EiwUBf8iyzYUxGoT84pjI0Ed6lnHA
 
 
-31. 29 - Reproducible Test Network Chaos Lab and Failure Injection Specification
+32. 29 - Reproducible Test Network Chaos Lab and Failure Injection Specification
 Role:
 One-command local multi-node test world, controlled Tor/mock profiles, malicious personas, crash/fault injection, stress tests and release evidence.
 URL:
 https://docs.google.com/document/d/19eXxSqAUNN3zU523KW8deC8O1pJfyTCYy-chRgZ_8FQ
 
 
-32. 30 - Internet Standards IANA Registration and RFC Publication Plan
+33. 30 - Internet Standards IANA Registration and RFC Publication Plan
 Role:
 RFC 8615 Well-Known registration readiness, RFC 9457 error model, JSON Schema Draft 2020-12 discipline, registries and public standards publication path.
 URL:
 https://docs.google.com/document/d/1BtOUvrmldMUcytfqO29GIx6AnCkKaw9ooS9qWgFeNm0
 
 
-33. 31 - Accessibility Security UX and Human-Factors Validation Standard
+34. 31 - Accessibility Security UX and Human-Factors Validation Standard
 Role:
 WCAG 2.2 AA target, accessible warnings, security-copy discipline, comprehension testing, Unicode/confusable UX and human-factors acceptance.
 URL:
 https://docs.google.com/document/d/1p4czVA3MQXFxkOjSCejdA6xam_U7S78NmkDu41b3Smw
 
 
-34. 32 - Operator Developer Experience and Diagnostic Command Standard
+35. 32 - Operator Developer Experience and Diagnostic Command Standard
 Role:
 Production CLI, doctor/security checks, machine-readable health, support bundle, dangerous-command safeguards and contributor bootstrap.
 URL:
 https://docs.google.com/document/d/1rkfhjdiLlpoHDKmhtJCaq_pbxuXSflGZPkdFARNsTqI
 
 
-35. 33 - Capacity Performance Scalability and Benchmarking Model
+36. 33 - Capacity Performance Scalability and Benchmarking Model
 Role:
 1k/10k/100k/1m synthetic scale tiers, Tor-aware concurrency, search/sync/storage budgets, low-end device testing and benchmark-derived defaults.
 URL:
 https://docs.google.com/document/d/1uOqAkyTQTtpcw_UFK2tgD9uwAnsx7U-ANiYoYLHEgFw
 
 
-36. 34 - Synthetic Reference Dataset Fixtures and Golden Corpus Standard
+37. 34 - Synthetic Reference Dataset Fixtures and Golden Corpus Standard
 Role:
 Deterministic public synthetic datasets, invalid corpus, identity/fork/migration stories, benchmark fixtures and no real user/service data.
 URL:
 https://docs.google.com/document/d/1bma0eBbVdyjw1uvGD7mnN0GEKZngTRS9npaNaxQOx8c
 
 
-37. 35 - Record Lifecycle Matrix and Protocol Archaeology Standard
+38. 35 - Record Lifecycle Matrix and Protocol Archaeology Standard
 Role:
 Complete lifecycle/retention matrix and reproducibility of historical interpretation across software, Protocol, schemas, ranking and migrations.
 URL:
 https://docs.google.com/document/d/1i5kPoX4xFZ2eGyoGGmNl6GGy_jCaB8VS1KiR4pvEH8A
 
 
-38. 36 - Design Rationale Alternatives and Rejected Architectures
+39. 36 - Design Rationale Alternatives and Rejected Architectures
 Role:
 Why no central search, registry, majority trust, blockchain or initial DHT; why PHP, SQLite, local search, separate keys, pull sync and preserved forks.
 URL:
 https://docs.google.com/document/d/11YY3OH0OnJtRHf3JkTgidTDigN2GgdSybtmBFjTx7Gs
 
 
-39. 37 - Independent Minimal Validator SDK and Multi-Language Adoption Strategy
+40. 37 - Independent Minimal Validator SDK and Multi-Language Adoption Strategy
 Role:
 Third-language independent Protocol Core, SDK boundaries, misuse-resistant APIs, multi-language compatibility and community implementation rules.
 URL:
 https://docs.google.com/document/d/1OilZe0tPQL3vjsIWgW-5ZNYhXJkmLeUAk6zWsf88eeM
 
 
-40. 38 - Ecosystem Adoption Integration and Long-Term Evolution Strategy
+41. 38 - Ecosystem Adoption Integration and Long-Term Evolution Strategy
 Role:
 Publish-only adoption, Node ecosystem, alternative clients, maintainer succession, seed governance, Protocol maturity and no central runtime dependency.
 URL:
 https://docs.google.com/document/d/1NbPjqAkr5s0MiM5lCU98zgFDwaa30PoUlpiM5OodmiE
 
 
-41. 39 - Public Protocol Handbook RFC-Style Publication Blueprint
+42. 39 - Public Protocol Handbook RFC-Style Publication Blueprint
 Role:
 Single public implementer-facing Protocol document structure, editorial rules, normative appendices, security/privacy/IANA sections and public-review process.
 URL:
 https://docs.google.com/document/d/1ko-SYPTrgJCA-HfyHzYl_ibNK5HSQwZPa1aInXD_MKI
 
 
-42. 40 - Five-Minute Onion Service Operator Contract and Consequence Summary
+43. 40 - Five-Minute Onion Service Operator Contract and Consequence Summary
 Role:
 Concise operator-facing contract explaining what becomes public, key backup, withdrawal, migration, downtime, Node roles and technical verification limits.
 URL:
@@ -500,14 +500,14 @@ Before Production Stable:
 
 
 
-43. 41 - Pluggable Storage Backends and SQL-Free Persistence Standard
+44. 41 - Pluggable Storage Backends and SQL-Free Persistence Standard
 Role:
 Makes persistence an operator-selectable implementation detail instead of a Protocol requirement. Defines FilesystemStore, SQLiteStore, PostgreSQL/MySQL/MariaDB adapter expectations, backend-neutral atomicity, crash recovery, canonical export/import and SQL-free operation.
 URL:
 https://docs.google.com/document/d/1tOvXkoRp3bXi95xOi2PqLGIXatdhLXVmDDRN2jThIXY
 
 
-44. 42 - Malicious Node Isolation Client Host and Multi-Source Integrity Architecture
+45. 42 - Malicious Node Isolation Client Host and Multi-Source Integrity Architecture
 Role:
 Separates executable Client Host from data-only Discovery Nodes, defines multi-source union, signed checkpoints, rollback/equivocation detection, self-hosted Client Host and the exact residual trust boundary of remotely served browser code.
 URL:
@@ -535,33 +535,33 @@ Reference client supports multiple sources, valid-record union, source attributi
 Residual limitation:
 a malicious Client Host can still alter Web code.
 Strongest browser-only profile:
-self-hosted/trusted Client Host + multiple independent Discovery Nodes.
+self-hosted/trusted Client Host + multiple distinct selected Discovery Node identities/source groups; operator independence is claimed only when actually documented.
 
 
 
 
-45. 43 - High-Assurance Key Custody Offline Signing and Signer Provider Standard
+46. 43 - High-Assurance Key Custody Offline Signing and Signer Provider Standard
 Role:
 Makes the high-value Service Identity key offline by default, defines signer-provider isolation, encrypted software-key envelopes, HSM/TPM/KMS/external-signer options, backup recovery, and compromise containment.
 URL:
 https://docs.google.com/document/d/1jZ238Q7f5v2aFBnvR4HN-005fcW4e_ZhCtdZ7XvXpgU
 
 
-46. 44 - Secure Release Trust Root Update Rollback and Compromise Recovery Standard
+47. 44 - Secure Release Trust Root Update Rollback and Compromise Recovery Standard
 Role:
 Adds an explicit software-release trust root, TUF-style rollback/freeze protection, offline/threshold release roles, artifact verification and release-key compromise recovery.
 URL:
 https://docs.google.com/document/d/19x6FUX2YoWs7IFA2cbKDVt7gNf7wB3FAklcYmz7hlII
 
 
-47. 45 - Tor Compatibility Crypto Agility and Protocol Migration Policy
+48. 45 - Tor Compatibility Crypto Agility and Protocol Migration Policy
 Role:
 Defines strict Tor v3 support today, fail-closed unknown Onion versions, no v1 algorithm negotiation, Protocol-v2 migration rules and compatibility monitoring for Tor/crypto/browser/runtime changes.
 URL:
 https://docs.google.com/document/d/17rs4a64M6yk-wcGqooM9k71ACj77NdBJQnsWDWtvGTQ
 
 
-48. 46 - Final Pre-Implementation Closure Audit and Specification Freeze
+49. 46 - Final Pre-Implementation Closure Audit and Specification Freeze
 Role:
 Final planning gate. Once PASS, general architecture planning stops and implementation begins. New planning artifacts are created only for concrete findings, external changes, audit issues or measured problems.
 URL:
@@ -572,4 +572,81 @@ FINAL PRE-IMPLEMENTATION RULE
 After document 46 is satisfied, the project is PRE-IMPLEMENTATION READY.
 This status means there is no known reason to delay coding for more general planning.
 It does not claim vulnerability-free software.
-.
+
+
+
+
+50. 47 - Plug-and-Play Operator Dashboard Self-Service Onboarding and Discoverability UX Standard
+Role:
+Defines the simplest operator path: one clear config, signed Manifest, own-Onion status dashboard, self-verification, bounded self-announcement, external observation/searchability evidence, truthful discoverability states and mobile-first remediation UX.
+URL:
+https://docs.google.com/document/d/1KFC2Iah1WcHepCbuF0Gcm1eCqMvMiOFSRm0ADXvKGHk
+
+
+FINAL OPERATOR-EXPERIENCE RULE
+The normal operator who only wants to be found must not need to understand peer protocols, databases or cryptographic internals.
+
+
+They should be able to configure, open their own Onion Service status page and answer immediately:
+Is publishing enabled?
+Is my Manifest valid?
+Can the network reach it?
+Have external Nodes observed it?
+Is my current revision searchable?
+What should I do next?
+
+
+
+
+51. 48 - Verifiable Discoverability Index Inclusion and Checkpoint Proof Standard
+Role:
+Defines how an operator proves that their exact current Service Identity, Onion, revision and Manifest hash are actually present in a Node's signed active search index. Includes deterministic identity lookup, signed checkpoints, stale/omission handling, rollback/equivocation detection, multi-source comparison and optional compact Merkle inclusion proofs.
+URL:
+https://docs.google.com/document/d/16JxH-eAjGOsSVAl79okb2YgW_7qBjIziXJq7PIge-eI
+
+
+DISCOVERABILITY EVIDENCE RULE
+The operator dashboard MUST derive the green DISCOVERABLE state from actual locally verified index membership evidence for the exact current Service tuple.
+
+
+A Node's simple status claim is not enough.
+Ordinary text-search ranking is not used as the proof mechanism.
+
+
+
+
+52. 49 - Sybil-Resistant Identity Quantity Neutrality Source Diversity and Admission Control Standard
+Role:
+Prevents cheap mass-created Onion/Service/Node/Witness identities from becoming authority. Defines zero trust weight for raw identity counts, bounded peer/source admission, source grouping, eclipse resistance, target-centric deduplication, search-farm defenses, objective misbehavior proofs and the strict boundary that optional PoW is admission effort only.
+URL:
+https://docs.google.com/document/d/1S9XHh_lmhPrau9oI2xRFro-JVchVKeXE6XZGqHvMKXA
+
+
+SYBIL HARD RULE
+More cryptographic identities do not mean more independent actors.
+More identities alone MUST NOT create more trust, ranking authority, identity authority or moderation authority.
+
+
+
+
+53. 50 - Protocol Category Registry v1 Tags Localization and Content Classification Standard
+Role:
+Freezes the Protocol v1 broad category vocabulary, including adult, separates categories from moderation/trust, defines localization and future tags, and requires a single machine-readable registry source for schemas/code.
+URL:
+https://docs.google.com/document/d/1OkWgB_tMUtBJ8iZXqyqBFfiIKwQcyXyFURtxijNNZhw
+
+
+54. 51 - Secure Coding Defensive Programming Input Output Validation and Exploit Resistance Standard
+Role:
+Defines mandatory secure coding construction rules, validation/output encoding, PHP/browser/network/filesystem/SQL hardening, bounded resource handling, dangerous API policy, fuzz/property/mutation testing and OWASP ASVS/Top 10/CWE coverage.
+URL:
+https://docs.google.com/document/d/101_LkUsgBbt09iSmKrk9vXIzJPccscBUCeBILyAWGJA
+
+
+CATEGORY RULE
+Protocol categories are now a versioned registry, not arbitrary free text.
+adult is explicitly included.
+
+
+SECURE CODING RULE
+General feature implementation MUST use the constrained security primitives and coverage/test requirements in document 51.

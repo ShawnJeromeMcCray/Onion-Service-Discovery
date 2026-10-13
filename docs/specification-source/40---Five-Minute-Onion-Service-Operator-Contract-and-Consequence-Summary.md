@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1ZiRFTgUwz0zlacA_HU3LVqFIqxIpH39JWTkVqeK935k/edit?usp=drivesdk
 
-Source modified: 2026-10-11T06:24:07.405Z
+Source modified: 2026-10-12T19:32:41.131Z
 
 ---
 
@@ -18,7 +18,7 @@ This is the concise operator-facing contract. A Service operator should understa
 When you publish an Onion Service Discovery Manifest, you are explicitly opting your Onion Service into a decentralized public discovery ecosystem.
 
 
-Other independent Nodes may:
+Other Nodes/operators may:
 - fetch your public Manifest;
 - verify its signature and Onion binding;
 - store it;
@@ -103,7 +103,7 @@ Do not reuse the same revision with different content; that creates a Fork/confl
 
 11. Moving to a New Onion Address
 Use the defined Onion Migration workflow.
-The same Service Identity key signs the transition from old Onion to new Onion.
+The currently authorized Service Identity key signs the migration transition under the frozen migration rules; the stable Logical Service Identifier remains unchanged across a valid migration.
 When possible, old and new endpoints provide direct confirmation.
 
 
@@ -191,7 +191,7 @@ Use bounded retention.
 Back up separately:
 Service Identity private key
 Node Identity private key if running Node
-database
+selected StorageBackend data
 production config.
 
 
@@ -237,7 +237,7 @@ Other Nodes/implementations can continue following the public Protocol.
 [ ] Configure roles.
 [ ] Configure finite resource limits.
 [ ] Configure scheduler.
-[ ] Configure database/backup.
+[ ] Configure selected StorageBackend data/backup.
 [ ] Run doctor.
 [ ] Run security:check.
 [ ] Sync with test/known peers.
@@ -250,7 +250,7 @@ do not rotate/delete blindly.
 Capture:
 software version
 current revision/hash
-identity fingerprint
+Logical Service Identifier plus current Service Identity key/fingerprint + key epoch
 error code
 health report.
 Then follow relevant runbook.
@@ -267,4 +267,34 @@ which private key matters;
 how to withdraw;
 how to migrate;
 why downtime is not withdrawal;
-what technical verification does and does not prove.
+what technical verification does and does not prove
+
+
+31. What You See After Setup
+Open your own Onion Service and visit:
+/onion-service-discovery/status/
+
+
+The page should tell you, in plain language:
+- whether Onion Service Discovery is configured;
+- whether publishing is enabled;
+- whether your signed Manifest is valid;
+- whether it is reachable through your Onion Service;
+- whether Discovery Nodes can be reached;
+- whether your Service has been announced;
+- whether external Nodes have directly observed the current revision;
+- whether the current revision is searchable on checked Nodes.
+
+
+32. What “Discoverable” Means
+“Discoverable” means the current revision is confirmed as searchable on one or more checked Discovery Nodes.
+
+
+It does not mean every Node in the decentralized network has already received it.
+
+
+33. Normal First-Publish Flow
+Configure -> Sign Manifest -> Self-check -> Automatic bounded announcement -> External verification -> Discoverable.
+
+
+You do not need to manually register again on a schedule.

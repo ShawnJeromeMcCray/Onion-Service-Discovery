@@ -16,7 +16,7 @@ SPEC.loader.exec_module(CHECKS)
 
 
 class RepositoryChecks(unittest.TestCase):
-    def test_original_corpus_integrity(self) -> None:
+    def test_current_corpus_integrity(self) -> None:
         self.assertEqual([], CHECKS.check_manifest(ROOT))
 
     def test_credential_patterns_without_real_secrets(self) -> None:

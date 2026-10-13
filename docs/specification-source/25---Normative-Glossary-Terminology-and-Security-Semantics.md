@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/19HdzJKytmIt44-HrWAsnmMLtblsuBJjWpiRk08qxxvU/edit?usp=drivesdk
 
-Source modified: 2026-10-11T04:51:25.705Z
+Source modified: 2026-10-12T19:29:01.069Z
 
 ---
 
@@ -468,4 +468,32 @@ The coding agent must:
 
 
 Acceptance
-Public UX copy, Protocol specs and implementation state names must be traceable to this glossary without contradictory meanings.
+Public UX copy, Protocol specs and implementation state names must be traceable to this glossary without contradictory meanings
+
+
+ADDITIONAL NORMATIVE TERMS — IDENTITY ANCHOR
+
+
+Logical Service Identifier:
+The stable Protocol identity anchor for one logical Service continuity lineage.
+For Protocol v1, the proposed representation is the canonical genesis Service Identity public-key encoding, subject to D-051 Human Protocol/Crypto approval.
+It does not change when the current Service Identity key rotates or the Onion address migrates.
+
+
+Current Service Identity Key:
+The currently authorized application signing key for the logical Service.
+It is epoch-specific and MUST NOT be confused with the stable Logical Service Identifier.
+
+
+Genesis Service Identity Key:
+The initial Service Identity public key that anchors the logical Service lineage.
+
+
+Key Epoch:
+A contiguous period during which one Service Identity key is the current authorized signer.
+
+
+Pin:
+A local user continuity anchor to the Logical Service Identifier plus remembered current key epoch/Onion context.
+A valid rotation changes the current key epoch without changing the pinned Logical Service Identifier.
+A valid migration changes the current Onion context without changing the pinned Logical Service Identifier.

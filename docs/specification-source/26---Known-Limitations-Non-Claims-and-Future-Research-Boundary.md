@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1CJo71y488nBv81WM-6GVfQ5rf_K9F7hn4llcDy9VBfY/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:39:02.176Z
+Source modified: 2026-10-12T18:13:32.987Z
 
 ---
 
@@ -59,7 +59,7 @@ Governance, diversity and user-added peers reduce but do not eliminate this soft
 
 
 9. No Guaranteed Global Deletion
-Once public metadata has been mirrored by independent Nodes, one operator cannot force all copies to be deleted.
+Once public metadata has been mirrored by other Nodes/operators, the Service operator cannot force every independently controlled copy to be deleted. Distinct Node keys alone do not prove independent control.
 Withdrawal stops/changes normal discoverability policy but is not global erasure.
 
 

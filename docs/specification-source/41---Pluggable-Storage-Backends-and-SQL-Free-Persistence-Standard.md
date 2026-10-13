@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1tOvXkoRp3bXi95xOi2PqLGIXatdhLXVmDDRN2jThIXY/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:36:28.762Z
+Source modified: 2026-10-12T14:30:34.261Z
 
 ---
 
@@ -25,7 +25,7 @@ Operators choose a storage backend appropriate to their environment.
 
 
 2. Required Reference Backends
-The reference implementation SHOULD provide at minimum:
+The reference implementation MUST provide at minimum:
 - FilesystemStore — no SQL/database server required;
 - SQLiteStore — simple embedded SQL backend.
 
@@ -99,7 +99,7 @@ data/
       ab/
         <full-hash>.json
   identities/
-    <service-identity-fingerprint>/
+    <logical-service-id>/
       current.json
       history.jsonl
       state.json
@@ -160,18 +160,24 @@ Never overwrite critical state in-place without atomic replacement.
 Multi-record state transitions use an append-only local journal/change log.
 
 
-A transaction-like operation:
+A transaction-like operation MUST never expose uncommitted derived state.
+Reference pattern:
 1. validate all input;
 2. acquire writer lock;
-3. write immutable objects;
-4. append PREPARE record;
-5. atomically update derived state;
-6. append COMMIT record;
-7. release lock.
+3. write/fsync immutable evidence objects;
+4. append/fsync PREPARE containing the intended new generation/evidence set;
+5. write the new derived generation/checkpoint to new files without replacing the committed pointer;
+6. append/fsync COMMIT for that transaction/generation;
+7. atomically replace the single committed-generation pointer (or rebuild the committed view deterministically from committed journal entries);
+8. fsync the containing directory where supported;
+9. release lock.
 
 
 Recovery:
-incomplete PREPARE without COMMIT is detected and either rolled back/rebuilt according to documented recovery rules.
+- PREPARE without COMMIT is never current and its staged derived generation is discarded/ignored;
+- COMMIT whose committed pointer was not yet advanced is completed idempotently during recovery;
+- current derived state is always reconstructable from committed evidence/journal state;
+- crash after any numbered step yields either the previous committed state or the new fully committed state, never a half-transition.
 
 
 12. Writer Model
@@ -301,9 +307,9 @@ Publish-only Service operators may not need the full Node index database.
 
 
 A minimal publish-only installation MAY:
-- keep Service Identity key outside webroot;
-- keep local Manifest source/config;
-- generate signed Manifest;
+- keep the Service Identity private key offline or behind the selected SignerProvider in the preferred profile;
+- keep local public Manifest source/config;
+- generate/install a signed Manifest through the controlled signing workflow;
 - serve static Well-Known Manifest;
 without initializing a mirror/discovery database.
 
@@ -320,8 +326,8 @@ Migration uses a backend-neutral canonical export format.
 
 25. Backend-Neutral Export
 Export contains:
-- immutable Protocol records;
-- derived-state version;
+- immutable Protocol records/evidence;
+- derived-state format/version metadata (derived state itself is non-authoritative and MUST be recomputed or verified on import);
 - peer/candidate/observation operational records as selected;
 - cursor/change state;
 - metadata and hashes.
@@ -390,7 +396,7 @@ prepared statements only for untrusted values.
 Filesystem adapter:
 strict canonical path construction;
 never use untrusted text as raw path;
-hash/fingerprint derived filenames only;
+hash/stable-logical-service-id/generated identifiers only;
 no path traversal.
 
 

@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1ZexdGAgo746df46SRwJOttMmpXq94QydK2I-LsFIUzs/edit?usp=drivesdk
 
-Source modified: 2026-10-11T06:16:26.935Z
+Source modified: 2026-10-12T19:18:05.817Z
 
 ---
 
@@ -233,9 +233,11 @@ Imported DirectObservation remains attributed to remote Node and never becomes l
 
 11. Pinning Model
 Variables:
-PinnedServiceIdentity
+PinnedLogicalServiceId
+PinnedCurrentKeyEpoch
 PinnedOnionContext
-ObservedIdentity
+ObservedLogicalServiceId
+ObservedCurrentKeyEpoch
 MigrationValid
 
 
@@ -245,7 +247,7 @@ Peer majority cannot mutate a local pin.
 
 
 FORMAL-PIN-002:
-Different Service Identity produces warning state.
+A different Logical Service Identifier produces an identity-mismatch warning. A valid authorized Service-key rotation changes the current key epoch without changing the pinned logical identity.
 
 
 FORMAL-PIN-003:
@@ -277,7 +279,7 @@ No safety property may assume:
 
 14. Crash Model
 Introduce nondeterministic crash points around:
-- DB transaction;
+- StorageBackend commit boundary;
 - key rotation;
 - migration;
 - sync batch;
@@ -309,7 +311,7 @@ State explosion is controlled by symmetry and bounded domains.
 Explicitly model assumptions:
 ASSUME_SIGNATURE_VERIFIER_SOUND
 ASSUME_HASH_COLLISION_RESISTANCE for modeled logic
-ASSUME_DATABASE_TRANSACTION_ATOMIC within selected storage model
+ASSUME_STORAGE_COMMIT_ATOMICITY according to the selected StorageBackend contract; the FilesystemStore model must explicitly include its journal/generation recovery semantics rather than assuming SQL transactions
 ASSUME_TOR_TRANSPORT_BINDING when DirectVerification predicate succeeds
 
 
@@ -398,4 +400,136 @@ Passing model checking does not prove the entire implementation correct. It prov
 
 
 25. Final Requirement
-Any future change to revision, rotation, migration, sync commit, pinning or conflict semantics requires updating the formal model before the change can become Protocol normative.
+Any future change to revision, rotation, migration, sync commit, pinning or conflict semantics requires updating the formal model before the change can become Protocol normative
+
+
+26. FORMAL INDEX-INCLUSION MODEL
+Add variables:
+NodeCheckpoint
+CheckpointSequence
+CheckpointRoot
+ActiveIndexRecords
+InclusionEvidence
+KnownNodeCheckpoint
+EquivocationEvidence
+
+
+27. FORMAL INDEX PROPERTIES
+FORMAL-IDX-001:
+INDEX_INCLUDED(Node, ServiceState) can become true only after local validation that the exact current Service tuple is a member of the Node's active signed checkpoint/index.
+
+
+FORMAL-IDX-002:
+A Node boolean/assertion alone cannot establish INDEX_INCLUDED.
+
+
+FORMAL-IDX-003:
+A stale revision cannot satisfy inclusion for a newer local current revision.
+
+
+FORMAL-IDX-004:
+Absence from Node A cannot erase valid inclusion evidence from Node B.
+
+
+FORMAL-IDX-005:
+A lower checkpoint sequence cannot replace a previously accepted newer checkpoint absent an explicit valid reset rule.
+
+
+FORMAL-IDX-006:
+Two valid Node-signed checkpoints at one sequence with different hashes, or two valid signed checkpoint histories from the same Node that are not prefix-compatible, produce EquivocationEvidence once both histories are available.
+
+
+32. FORMAL LOGICAL IDENTITY
+Add:
+LogicalServiceId
+GenesisServiceIdentityKey
+CurrentServiceIdentityKey
+KeyEpoch
+
+
+FORMAL-ID-001:
+A valid Service-key rotation changes CurrentServiceIdentityKey/KeyEpoch but never changes LogicalServiceId.
+
+
+FORMAL-ID-002:
+A valid Onion migration changes CurrentOnion but never changes LogicalServiceId.
+
+
+FORMAL-ID-003:
+A claimed LogicalServiceId cannot be established without a valid continuity path to the genesis identity anchor.
+
+
+33. FORMAL CHECKPOINT CHAIN
+Add:
+CheckpointHash
+PreviousCheckpointHash
+CheckpointHistory
+
+
+FORMAL-CP-001:
+A checkpoint successor is accepted as a continuation only if sequence increments by exactly one and previous_checkpoint_hash equals the accepted predecessor hash.
+
+
+FORMAL-CP-002:
+A later numeric sequence alone cannot replace an accepted checkpoint if ancestry is inconsistent or unknown.
+
+
+FORMAL-CP-003:
+Two non-prefix-compatible valid signed histories from the same Node are retained as equivocation evidence.
+
+
+
+
+FORMAL-IDX-007:
+Node count/majority cannot change Service cryptographic identity truth.
+
+
+28. SEARCH-EXPORT PROPERTY
+FORMAL-IDX-008:
+A record counted as included in the active checkpoint must belong to the same logical active export set used for search under that checkpoint generation.
+
+
+29. CRASH PROPERTY
+FORMAL-IDX-009:
+A Node must never publish/sign a checkpoint that references an index state not durably committed according to storage semantics.
+
+
+
+
+30. FORMAL SYBIL MODEL
+The formal model abstracts an adversary that can create arbitrarily many Service, Node and Witness identities.
+
+
+The model MUST NOT assume:
+- bounded adversarial identity count;
+- majority-honest Node population;
+- one key equals one operator.
+
+
+31. FORMAL SYBIL PROPERTIES
+FORMAL-SYBIL-001:
+Adding arbitrary new Node identities cannot change the validity of a Service-signed record.
+
+
+FORMAL-SYBIL-002:
+Adding arbitrary observer/witness identities cannot resolve a Service fork or key conflict.
+
+
+FORMAL-SYBIL-003:
+Repeated candidate advertisements from arbitrarily many identities cannot produce unbounded verification jobs for the same target.
+
+
+FORMAL-SYBIL-004:
+Active peer-set cardinality remains bounded independently of advertised peer identities.
+
+
+FORMAL-SYBIL-005:
+One referral source cannot replace all stable selected sources in one transition.
+
+
+FORMAL-SYBIL-006:
+A valid Node equivocation proof remains valid regardless of additional identities attesting otherwise.
+
+
+FORMAL-SYBIL-007:
+Search relevance state contains no transition whose sole positive input is observer/witness/backlink identity count.

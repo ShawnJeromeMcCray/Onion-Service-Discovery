@@ -2,14 +2,16 @@
 
 Opt-in decentralized discovery for public Tor Onion Services, with self-published metadata and local browser search.
 
-**Status: runnable development Node and browser client. Production release reviews, live Tor/Android evidence and independent audit remain open.**
+**Status: development implementation of the earlier draft. The refreshed 55-document specification has material changes that are not yet implemented. Production approval remains open.**
+
+See the [source refresh and implementation gaps](docs/specification-refresh.md). Historical passing tests do not certify the revised specification.
 
 Technical identity evidence must not be presented as an assurance about content or operator honesty. Tor itself is not modified and its private keys must never be accessed.
 
 ## Current implementation
 
-- Import of 50 current specification documents with observed source links, modification times and integrity hashes.
-- [Decision register](docs/governance/decision-register.md) preserving all 50 owner/reviewer decisions without inferred approvals.
+- Import of 55 current specification documents with observed source links, modification times and integrity hashes.
+- [Decision register](docs/governance/decision-register.md) preserving the 54 owner/reviewer decisions without inferred approvals.
 - [Implementation status](docs/implementation-status.md) distinguishing requirements from verified behavior.
 - Strict Onion v3, bounded JSON, canonical bytes, signed-record schemas and Ed25519 verification in PHP, TypeScript and independent Python.
 - Deterministic evidence graphs for forks, exact revision chains, countersigned rotation and signed migration.

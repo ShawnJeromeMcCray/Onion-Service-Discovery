@@ -1,0 +1,54 @@
+{
+  "status": "PASS_DEVELOPMENT",
+  "tor_package": "0.4.9.14-0+deb13u1",
+  "tor_package_sha256": "ab591371ae6a0e4266f75191fde3483617679b83a56d5d2d748969b75528a325",
+  "acquisition": "Debian security repository through authenticated APT metadata; no unauthenticated override",
+  "php_container": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3",
+  "host": "Debian 13 amd64; Tor child uses host shared libraries read-only",
+  "external_tcp_grants": {
+    "domains": [],
+    "ip_ranges": []
+  },
+  "results": [
+    {
+      "status": "PASS_DEVELOPMENT",
+      "tor_version": "0.4.9.14",
+      "checks": [
+        "REAL_TOR_CONFIG_VALID",
+        "REAL_TOR_DAEMON_CONTROL_CONFIRMED",
+        "DISABLE_NETWORK_CONFIRMED",
+        "TOR_DISABLED_LISTENER_FAILURE_NORMALIZED",
+        "CLI_EXIT_5_TYPED_JSON",
+        "NO_DIRECT_HTTP_PROXY_FALLBACK",
+        "NO_APPLICATION_STATE_OR_KEYS_CREATED"
+      ],
+      "duration_ms": 20,
+      "network_mode": "Docker network none and Tor DisableNetwork 1",
+      "live_tor_bootstrap_verified": false,
+      "onion_fetch_verified": false,
+      "browser_verified": false,
+      "production_approved": false
+    },
+    {
+      "status": "PASS_DEVELOPMENT",
+      "tor_version": "0.4.9.14",
+      "checks": [
+        "REAL_TOR_CONFIG_VALID",
+        "REAL_TOR_DAEMON_CONTROL_CONFIRMED",
+        "LOOPBACK_ONLY_SYNTHETIC_AUTHORITY_CONFIRMED",
+        "REAL_TOR_SOCKS_ONION_STREAM_OBSERVED",
+        "REAL_SOCKS_FAILURE_NORMALIZED",
+        "CLI_EXIT_5_TYPED_JSON",
+        "NO_DIRECT_HTTP_PROXY_FALLBACK",
+        "NO_APPLICATION_STATE_OR_KEYS_CREATED"
+      ],
+      "duration_ms": 2025,
+      "network_mode": "Docker network none; network-enabled Tor with only synthetic loopback authority and no default fallback directories",
+      "live_tor_bootstrap_verified": false,
+      "onion_fetch_verified": false,
+      "browser_verified": false,
+      "production_approved": false
+    }
+  ],
+  "production_approved": false
+}

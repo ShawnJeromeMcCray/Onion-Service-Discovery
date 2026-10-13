@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/13ceVELv_g4BJHeAldwPbPQ6MJPo_NJCGrqUNg2qkMeU/edit?usp=drivesdk
 
-Source modified: 2026-10-11T04:29:06.971Z
+Source modified: 2026-10-12T19:30:25.241Z
 
 ---
 
@@ -20,7 +20,7 @@ kleine deterministische Domain-/Parser-/Crypto-/State-Machine-Einheiten.
 
 
 Component Tests:
-Storage, HTTP, Transport Adapter, Sync Engine, IndexedDB.
+StorageBackend adapters, HTTP, Tor Transport Adapter, Sync Engine, and optional browser persistence/cache.
 
 
 Integration Tests:
@@ -176,8 +176,8 @@ Mit austauschbarem Transport Adapter:
 - truncated body;
 - oversized body;
 - wrong content type;
-- redirect same host soweit erlaubt;
-- redirect other host bei Identity Check => reject;
+- any redirect during identity-binding Manifest verification => reject;
+- same-host and cross-host redirect fixtures both fail before identity state mutation;
 - proxy unavailable;
 - kein definierter Proxy => fail entsprechend Konfiguration;
 - keine versteckte Direktverbindung im Test.
@@ -205,19 +205,19 @@ Erwartung: nur spezifikationskonforme Ziele erreichen Transport Adapter.
 - records per response;
 - JSON depth;
 - concurrent verification budget;
-- DB size threshold;
+- selected StorageBackend size/disk thresholds;
 - Retention cleanup.
 Jedes Limit besitzt Boundary Tests: limit-1, limit, limit+1.
 
 
-16. Datenbanktests
+16. StorageBackend Integration Tests
 - fresh migrate;
 - migrate jede unterstützte Vorversion;
 - doppelte Migration;
 - crash simulation;
 - lock contention;
 - transaction rollback;
-- corrupt test DB;
+- corrupt backend fixture for each Production-supported StorageBackend;
 - backup;
 - restore;
 - integrity verification;
@@ -226,6 +226,11 @@ Jedes Limit besitzt Boundary Tests: limit-1, limit, limit+1.
 
 
 17. PHP API Contract Tests
+Required identity routes include:
+- GET /services/by-id/{logical_service_id}: stable identity lookup;
+- GET /services/{onion}: address convenience lookup returning/resolving logical_service_id.
+
+
 Für jeden Endpoint:
 - success schema;
 - wrong method;
@@ -244,24 +249,29 @@ Für jeden Endpoint:
 - manifest generate;
 - verify service gegen Mock;
 - sync dry/simulated;
-- db migrate;
-- db verify;
+- storage:migrate;
+- storage:verify;
 - key generation safety;
 - refusal to overwrite key;
 - exit codes;
 - noninteractive behavior.
 
 
-19. Client Storage Tests
-- fresh IndexedDB;
-- upgrade from every supported schema;
-- interrupted migration;
+19. Client Storage/Cache Tests
+In-memory operation is the correctness baseline.
+Always test:
+- fresh in-memory index;
 - index rebuild;
-- preserve pins on cache rebuild;
-- full reset;
-- corrupted records;
-- duplicate records;
-- merge conflict.
+- corrupted/duplicate records;
+- merge conflict;
+- full reset.
+If origin-local persistence is enabled/supported, additionally test:
+- fresh persistent store;
+- upgrade from every supported cache schema;
+- interrupted cache migration;
+- rebuild from validated network/snapshot evidence;
+- origin-local pin persistence where available;
+- graceful operation when persistent storage is unavailable/cleared.
 
 
 20. Search Tests
@@ -278,23 +288,28 @@ Für jeden Endpoint:
 
 
 21. Query Privacy Tests
-Instrumentiere alle Netzwerkadapter.
-Während lokaler Suche:
-- keine Query in URL;
-- keine Query im Body;
-- keine Query in Headers;
-- keine queryabhängigen direkten Requests.
-Test mit mehreren deutlich verschiedenen Suchbegriffen.
+Instrument all browser/server/network adapters.
+WEB-LOCAL:
+- no query in URL/body/headers;
+- no query-dependent destination, partition fetch or timing-triggered remote work;
+- repeat with substantially different queries and assert identical remote request set absent independent update triggers.
+SERVER-FALLBACK:
+- explicit disclosure before submit;
+- POST only to selected serving server;
+- query absent from URL/logs/persistence;
+- no discovered-Service/peer/moderation/candidate remote work triggered by query.
 
 
 22. Pinning Tests
-- Pin erstellen;
-- Neustart;
-- Pin erhalten;
-- gleicher Name anderer Key => warning;
-- gleicher Key neue Onion mit gültiger Migration => migration state;
-- neue Onion ohne Nachweis => identity change;
-- Peer-Mehrheit darf Pin nicht ersetzen.
+- Pin anchors logical_service_id;
+- valid Service-key rotation changes current key epoch without identity mismatch;
+- same name different logical_service_id => warning;
+- valid Onion migration preserves logical_service_id and updates Onion context;
+- new Onion without migration evidence => identity change/unproven state;
+- peer/source majority cannot replace the pin.
+Persistence-specific:
+- if origin-local persistence is available, restart preserves the pin;
+- if browser storage is unavailable/cleared, the client degrades transparently and MUST NOT claim a pin still exists.
 
 
 23. UI Security Tests
@@ -327,18 +342,17 @@ Nach Sync:
 
 
 26. Offline E2E
-Client mit bestehendem Index:
-- alle Nodes offline;
-- Suche funktioniert;
-- UI zeigt Indexalter;
-- keine Datenlöschung.
+With a currently loaded valid in-memory index, network outage MUST NOT break search during the session.
+If a valid persistent cache exists, restart may also recover that cached index.
+If no persistent cache exists/was cleared, restart may require a generic network refresh; the UI MUST NOT pretend offline persistence was guaranteed.
+In all cases, stale age/source limitations are visible and valid local evidence is not silently corrupted/deleted.
 
 
 27. Upgrade E2E
 - alte produktnahe Version installieren;
 - reale Testdaten;
 - Upgrade;
-- DB/IndexedDB Migration;
+- selected StorageBackend migration; optional browser-cache migration only when that persistence feature exists;
 - Sync;
 - Suche;
 - Pins;
@@ -454,9 +468,72 @@ Eine Phase darf erst abgeschlossen werden, wenn:
 38. Testphilosophie für den KI-Coding-Agenten
 Der Agent darf Tests nicht abschwächen, löschen oder mit pauschalen Mocks umgehen, nur um CI grün zu bekommen.
 Bei einem scheiternden Sicherheitstest:
-1. Root Cause ermitteln.
-2. Spezifikation prüfen.
-3. minimalen reproduzierbaren Fall sichern.
-4. Code korrigieren.
-5. Regression Test behalten.
-6. verwandte Invarianten prüfen.
+Step 1 — Root Cause ermitteln.
+Step 2 — Spezifikation prüfen.
+Step 3 — minimalen reproduzierbaren Fall sichern.
+Step 4 — Code korrigieren.
+Step 5 — Regression Test behalten.
+Step 6 — verwandte Invarianten prüfen.
+
+
+39. SECURE CODING TEST MATRIX
+Required automated suites map document 51 controls to executable tests.
+
+
+At minimum:
+input boundary matrix;
+invalid UTF-8/control/bidi;
+duplicate JSON keys;
+integer/type confusion;
+XSS/DOM XSS;
+SQL injection;
+command/code injection guard;
+path traversal/symlink;
+SSRF/destination policy;
+CRLF/header;
+CSRF/admin if enabled;
+open redirect;
+deserialization ban;
+ReDoS;
+resource exhaustion;
+compression/archive bombs where applicable;
+concurrency/TOCTOU;
+cache/storage corruption;
+security headers;
+dependency/secret scanning.
+
+
+40. ASVS MAPPING
+Maintain an OWASP ASVS 5.0.0 applicability matrix for the release baseline.
+
+
+Applicable Critical/High failures block Production Stable without exception. Lower-severity exceptions, where governance permits, must be explicit, expiring and evidence-backed.
+
+
+41. OWASP TOP 10 / CWE TOP 25
+Release review explicitly maps current OWASP Top 10 and CWE Top 25 to:
+control;
+test;
+not-applicable rationale;
+runtime/native dependency scope.
+
+
+42. MUTATION TESTING
+Security-critical validators/state machines SHOULD undergo mutation testing so removing a validation branch causes a failing test.
+
+
+43. NEGATIVE TEST COMPLETENESS
+Every normative rejection rule requires at least one negative conformance/regression test.
+
+
+44. CATEGORY REGISTRY TESTS
+Include:
+adult;
+all v1 category IDs;
+unknown;
+wrong case;
+duplicate;
+overlong;
+Unicode lookalike;
+33-category overflow;
+category-count ranking neutrality.

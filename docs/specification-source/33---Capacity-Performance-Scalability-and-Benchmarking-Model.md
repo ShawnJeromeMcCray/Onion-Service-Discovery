@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1uOqAkyTQTtpcw_UFK2tgD9uwAnsx7U-ANiYoYLHEgFw/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:14:30.281Z
+Source modified: 2026-10-12T18:14:53.727Z
 
 ---
 
@@ -44,7 +44,7 @@ TIER-L:
 TIER-XL:
 1,000,000 Services
 100+ synthetic Nodes.
-Used for capacity modeling; not a promise that reference SQLite deployment is optimal at this tier.
+Used for capacity modeling; not a promise that every StorageBackend/reference deployment is appropriate at this tier. Each Production-supported backend publishes its measured support envelope.
 
 
 4. Service Data Profiles
@@ -133,7 +133,7 @@ Record:
 device class
 OS
 Tor Browser/Firefox base
-extension version
+Web Client build/version and deployment profile
 dataset hash
 cold/warm state.
 
@@ -146,7 +146,7 @@ transaction duration
 full snapshot bytes/time
 chunk count
 peak memory
-DB growth.
+storage growth.
 
 
 12. Verification Metrics
@@ -154,7 +154,7 @@ Tor/mock connect duration separated from application processing.
 Manifest bytes.
 Parser time.
 signature verify time.
-DB commit time.
+StorageBackend commit time.
 requests/hour under configured safe concurrency.
 
 
@@ -164,13 +164,13 @@ Tor circuit/Service behavior favors conservative concurrency and distributed sch
 
 
 14. Storage Metrics
-Current-view DB size
+Current-view storage size
 continuity evidence size
 observations
 peer assertions
 candidate/quarantine
 snapshot cache
-WAL peak
+backend journal/WAL peak where applicable
 backup size.
 
 
@@ -250,10 +250,10 @@ migration.
 If reference SQLite becomes impractical beyond defined supported tier, document support ceiling rather than hiding it.
 
 
-23. Alternative Backend Boundary
-Protocol must not depend on SQLite.
-A future PostgreSQL/other adapter can be added after storage conformance tests.
-No need to implement prematurely unless evidence requires it.
+23. Storage Backend Boundary
+Protocol must not depend on SQLite or any one backend.
+FilesystemStore and SQLiteStore are required reference adapters and MUST pass the same conformance suite.
+PostgreSQL/MySQL/MariaDB or other adapters are optional and become Production-supported only after equivalent conformance, crash-recovery and benchmark evidence.
 
 
 24. CPU DoS Benchmark
@@ -341,7 +341,7 @@ No per-query network helps.
 Timeout storm
 slow peer
 bad chunks
-DB locked.
+selected StorageBackend locked/unavailable.
 System should not hang UI indefinitely.
 
 
@@ -424,5 +424,5 @@ S/M/L datasets;
 server + client reports;
 safe default limits derived from evidence;
 low-end client test;
-SQLite supported-scale statement;
+supported-scale statement per Production-supported StorageBackend, including a SQLiteStore-specific ceiling/profile when enabled;
 overload behavior tested.

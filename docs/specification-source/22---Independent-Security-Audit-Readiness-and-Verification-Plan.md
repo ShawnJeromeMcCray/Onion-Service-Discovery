@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1_ZF_9UOwtv3FpkVypW5dnXzIYkmJnQz5Kx7Jpn5MKXg/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:13:11.154Z
+Source modified: 2026-10-12T18:13:24.287Z
 
 ---
 
@@ -85,11 +85,11 @@ Tor transport
 redirect handling
 candidate scheduler
 sync conflict application
-database transactions
+StorageBackend atomic commit/recovery semantics
 browser network instrumentation and Web Client fetch layer
 optional Web Client storage/cache behavior and migration/failure handling
 pinning
-permission manifest
+Web Client origin/CSP/network-capability manifest/inventory
 release scripts.
 
 
@@ -144,12 +144,12 @@ no Tor private key access.
 
 11. Web Local Search Review
 Assess:
-permissions
-host permissions
-content script absence/scope
-remote code
+Web Client deployment profile
+served-code origin(s)
+data-node origin(s)/proxy path
+remote code prohibition
 CSP
-network destinations
+network destinations/browser capabilities
 query privacy
 pin storage
 navigation construction
@@ -313,10 +313,10 @@ Use controlled observation to ensure Onion host is handed to Tor proxy, not syst
 No public sensitive query needed.
 
 
-28. Permission Review
+28. Web Client Origin/CSP/Network Review
 Compare source asset manifest/CSP/network inventory to the built and served Web Client bundle.
-No build-time permission injection.
-Permission inventory matches docs.
+No build-time injection of undeclared origins/network destinations/capabilities.
+Built asset/CSP/network inventory matches docs and the release manifest.
 
 
 29. Artifact Inspection
@@ -400,7 +400,7 @@ New independent review considered when:
 new protocol version
 crypto changes
 new recovery mechanism
-new browser broad permissions
+new broad browser origin/network/capability access
 new remote admin
 major sync architecture
 new anonymity/privacy data collection

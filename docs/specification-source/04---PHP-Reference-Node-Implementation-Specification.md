@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1R3I1SbEphWuKyJK4XGx5acf_6Tid3yPpxfqtPDATXBQ/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:37:45.748Z
+Source modified: 2026-10-12T19:30:16.394Z
 
 ---
 
@@ -16,10 +16,14 @@ Die PHP-Referenzimplementierung soll auf einem bestehenden Onion-Service-Webserv
 
 2. Laufzeit
 Bei Implementierungsbeginn ist eine aktuell unterstützte, sichere PHP-Version zu wählen und per ADR festzuschreiben.
-Pflicht-Extensions:
+Pflicht-Extensions für alle Profile:
 - sodium;
-- curl;
-- PDO SQLite.
+- curl.
+
+
+Adapter-spezifisch:
+- PDO + pdo_sqlite nur wenn SQLiteStore ausgewählt ist;
+- entsprechende Treiber nur wenn ein Server-DB-Adapter ausgewählt ist.
 Composer wird mit Lockfile verwendet.
 
 
@@ -44,11 +48,11 @@ bin/
   onion-service-discovery
   sync
   verify-service
-  verify-database
+  storage:verify
   rotate-service-key
   rotate-node-key
   generate-manifest
-  migrate-database
+  storage:migrate
 public/
   index.php
 config/
@@ -57,7 +61,7 @@ schemas/
 tests/
 docs/
 var/
-  database/
+  storage/
   cache/
   quarantine/
   logs/
@@ -176,49 +180,87 @@ Der Betreiber pflegt:
 - optionale Links.
 
 
-Generator:
-- validiert;
-- erhöht Revision kontrolliert;
-- setzt previous hash;
-- signiert;
-- schreibt atomisch an den vom Webserver ausgelieferten Ort.
+Generator workflow:
+- validates metadata/config;
+- derives the next candidate revision only under the frozen revision/auto-regeneration policy;
+- sets previous hash according to the accepted chain;
+- emits canonical unsigned signing payload/artifact;
+- obtains the signature through OfflineSigner/selected SignerProvider;
+- verifies the completed signed Manifest before installation;
+- atomically installs only the verified public Manifest at the served path.
 
 
-11. Datenbank
-SQLite Referenzbackend.
-Repository-Abstraktion soll spätere Backends erlauben, ohne Domain/Protocol zu verändern.
+The web request path MUST NOT increment/sign revisions merely because a page is loaded.
 
 
-Tabellen mindestens:
-schema_migrations
-service_identities
-service_revisions
-service_manifests
-service_key_rotations
-service_migrations
-direct_observations
-peer_assertions
-nodes
-node_descriptors
-peer_sync_state
-candidates
-candidate_events
+11. StorageBackend
+Persistence is accessed only through the backend-neutral StorageBackend contract.
+
+
+Required reference adapters:
+- FilesystemStore;
+- SQLiteStore.
+
+
+Additional adapters such as PostgreSQLStore/MySQL/MariaDBStore are supported only when implemented and passing the same StorageBackend conformance suite.
+
+
+The domain/protocol layer MUST NOT depend on:
+- PDO;
+- SQL syntax;
+- SQLite pragmas;
+- table/column names;
+- filesystem layout.
+
+
+Persistent logical entities include:
+service identities/epochs
+service revisions/manifests
+service key rotations
+service migrations
+direct observations
+peer assertions
+Nodes/descriptors
+peer sync state
+candidates/candidate events
 quarantine
-moderation_signals
-snapshot_metadata
-chunk_metadata
+moderation signals
+snapshot/checkpoint/chunk metadata
+change/cursor state.
 
 
-12. Datenbankregeln
-- Foreign Keys aktivieren;
-- pragmas dokumentieren;
-- busy timeout;
-- WAL nur nach Test/Begründung;
-- Transaktionen für zusammengehörige Identitätsupdates;
-- UNIQUE constraints für Identität/Revision/Hash;
-- keine “INSERT OR REPLACE” Semantik bei Identitätskonflikten;
-- Schema Migration nummeriert und idempotent geprüft;
-- Backup/Restore getestet.
+12. Storage Rules
+All supported backends provide equivalent Protocol semantics:
+- atomic logical state transitions;
+- immutable continuity evidence;
+- fork preservation;
+- cursor advancement only after durable commit;
+- bounded iteration/query;
+- integrity verification;
+- backup/export/restore;
+- crash recovery;
+- storage schema/version migration.
+
+
+FilesystemStore:
+- content-addressed immutable evidence;
+- journal/staged generations;
+- committed-generation recovery;
+- stable logical_service_id paths;
+- no attacker-controlled raw path names.
+
+
+SQLiteStore:
+- foreign keys enabled;
+- explicit transactions;
+- prepared statements;
+- busy/locking policy;
+- WAL only after tested decision;
+- UNIQUE/constraint mapping equivalent to backend-neutral invariants;
+- no destructive INSERT OR REPLACE conflict handling.
+
+
+No adapter may erase fork/rotation/migration evidence merely to create one mutable latest row.
 
 
 13. Candidate Queue
@@ -272,18 +314,18 @@ Pflicht:
 15. Direct Verification Service
 Input: validierter OnionAddress Candidate.
 Ablauf:
-1. Budget/Rate Limit prüfen.
-2. Well-Known-Manifest abrufen.
-3. Transportresultat klassifizieren.
-4. Body-Größe/Encoding prüfen.
-5. Schema validieren.
-6. Onion-Bindung prüfen.
-7. Signatur prüfen.
-8. Revision/History prüfen.
-9. Rotation/Migration prüfen.
-10. in DB-Transaktion schreiben.
-11. DirectObservation erzeugen/signieren.
-12. Queue-Status aktualisieren.
+Step 1 — Budget/Rate Limit prüfen.
+Step 2 — Well-Known-Manifest abrufen.
+Step 3 — Transportresultat klassifizieren.
+Step 4 — Body-Größe/Encoding prüfen.
+Step 5 — Schema validieren.
+Step 6 — Onion-Bindung prüfen.
+Step 7 — Signatur prüfen.
+Step 8 — Revision/History prüfen.
+Step 9 — Rotation/Migration prüfen.
+Step 10 — über die StorageBackend-Atomicity-Grenze committen.
+Step 11 — DirectObservation erzeugen/signieren.
+Step 12 — Queue-Status aktualisieren.
 
 
 Kein Schritt darf einen späteren Prüfpunkt als implizit bestanden markieren.
@@ -366,8 +408,8 @@ peer:remove
 sync:run
 candidate:list
 quarantine:list
-db:migrate
-db:verify
+storage:migrate
+storage:verify
 key:service:generate
 key:service:rotate
 key:node:generate
@@ -414,7 +456,7 @@ service onion;
 service metadata;
 paths;
 Tor transport;
-database;
+selected storage backend;
 limits;
 timeouts;
 peer seeds;
@@ -451,11 +493,15 @@ API:
 - content sniffing verhindern.
 
 
-26. CORS
-Öffentliche API-CORS-Regeln so eng wie praktisch.
-Web Local Search uses same-origin Node endpoints; broad browser-extension CORS/permission support is not required. Optional server-search fallback is tested separately.
-Nicht pauschal * setzen, wenn es nicht notwendig ist.
-Keine Credentials-basierte Cross-Origin-API als Standard.
+26. CORS / Web Deployment Profiles
+WEB-COMBINED-V1 and WEB-SEPARATED-V1 follow the Node API/Web Client profile rules.
+
+
+Combined/proxy mode needs no broad browser CORS.
+Separated direct-fetch mode is allowed only under the frozen D-044 policy and uses public credentialless Protocol data, fixed methods/content types and explicitly configured data-node origins.
+
+
+No credentialed wildcard CORS. No arbitrary user-selected cross-origin destination. No query-bearing CORS request.
 
 
 27. Logging
@@ -483,8 +529,8 @@ Health darf keine internen Pfade, Keys, Peer-Details oder Stacktraces offenlegen
 Periodische Tasks:
 - alte transient peer assertions bereinigen;
 - Quarantine nach Policy erhalten;
-- DB vacuum nur kontrolliert;
-- integrity_check;
+- backend-specific compaction/maintenance only under its tested policy;
+- selected StorageBackend integrity check;
 - Snapshot cleanup;
 - stale peer cleanup;
 - log rotation außerhalb App oder dokumentiert.
@@ -507,9 +553,9 @@ Restore Drill ist Pflicht.
 Upgrade-Reihenfolge:
 - Backup;
 - Version Compatibility Check;
-- DB Migration Dry Run falls möglich;
+- selected StorageBackend migration/import dry run where possible;
 - App deploy;
-- migrate;
+- storage migrate/import;
 - self-check;
 - health;
 - controlled sync.
@@ -531,9 +577,9 @@ Fehler => Rollback Runbook.
 - API contract;
 - CLI;
 - concurrency;
-- DB recovery;
+- StorageBackend crash/recovery;
 - config validation;
-- permissions/key file checks.
+- filesystem permissions and selected SignerProvider/key-custody checks.
 
 
 33. Static Analysis
@@ -577,37 +623,46 @@ Der Agent liefert:
 
 
 36. Abnahme
-PHP-Node gilt erst als fertig, wenn ein frischer Server aus der Dokumentation reproduzierbar eingerichtet werden k
+Der PHP-Referenznode gilt erst als fertig, wenn ein frischer Server aus der Dokumentation reproduzierbar eingerichtet werden kann, die ausgewählten StorageBackend-/SignerProvider-Abhängigkeiten korrekt geprüft werden, und mindestens zwei kontrollierte Testnodes ohne zentrale Laufzeitinfrastruktur und ohne Modifikation des Tor-Binaries interoperabel synchronisieren können.
 
 
-37. SQLITE AVAILABILITY AND RUNTIME CHECK
-SQLite support is NOT assumed to exist merely because PHP exists.
+Die Abnahme erfordert nicht SQLite, wenn FilesystemStore gewählt ist, und sie erfordert nicht, dass der Service Identity private key auf dem Webserver liegt.
 
 
-The reference implementation requires:
-- PDO extension;
-- pdo_sqlite driver;
-- an SQLite library version that satisfies the documented minimum capability set.
+37. SELECTED STORAGE BACKEND AVAILABILITY AND RUNTIME CHECK
+No database/storage driver is assumed merely because PHP exists.
 
 
-At startup/init/doctor/security:check:
-- verify extension_loaded('pdo');
-- verify 'sqlite' exists in PDO::getAvailableDrivers();
-- verify database open/transaction/foreign-key behavior;
-- report exact remediation when unavailable.
+At init/startup/doctor/security:check:
+- read and validate the selected StorageBackend;
+- check only that backend's runtime dependencies/capabilities;
+- perform a bounded open/write/commit/integrity self-test appropriate to the adapter where safe;
+- report exact remediation.
 
 
-If SQLite support is missing:
-- initialization and write-capable Node startup fail clearly;
-- no half-functional fallback to flat files;
-- no silent database substitution;
-- publish-only static Manifest generation MAY remain available only if its workflow does not require the Node database.
+FilesystemStore:
+- no PDO/SQL dependency;
+- verify directory ownership/permissions;
+- verify tested local-filesystem atomic rename/locking semantics;
+- verify journal/generation recovery capability;
+- external sqlite3 is irrelevant.
 
 
-The external sqlite3 command-line executable is NOT a runtime requirement.
+SQLiteStore:
+- require PDO + pdo_sqlite;
+- verify the documented SQLite capability/version floor;
+- verify transaction/foreign-key behavior;
+- external sqlite3 CLI is NOT a runtime requirement.
 
 
-Storage interfaces remain abstract enough that a future PostgreSQL or other backend can be added without changing Protocol v1 semantics.
+Other adapters:
+- require only their selected driver/capabilities.
+
+
+Missing an UNUSED backend driver is never an error and MUST NOT cause silent backend substitution.
+
+
+Publish-only operation may use its minimal selected storage/state path and controlled signing workflow without a full mirror/discovery datastore.
 
 
 38. WEB LOCAL SEARCH SERVING
@@ -616,10 +671,11 @@ GET /onion-service-discovery/
 or the final frozen equivalent.
 
 
-The Node also serves same-origin generic index/snapshot/chunk endpoints consumed by that page.
+WEB-COMBINED-V1: the same Node origin serves the static Web Client and generic index/snapshot/chunk data.
+WEB-SEPARATED-V1: the PHP package MAY operate as Client Host, data-only Node, or both, according to the frozen direct-fetch/proxy profile.
 
 
-No extension-specific CORS or host-permission support is required.
+No browser-extension permission model exists. CORS/CSP/network destinations are profile-specific and must match the reviewed Web Client security specification.
 
 
 39. OPTIONAL NO-JAVASCRIPT SERVER SEARCH
@@ -662,7 +718,8 @@ Built assets:
 
 
 A compromised/malicious serving Node remains capable of altering Web code; this is a documented Web-origin trust boundary rather than a claim solved by PHP.
-ann und zwei unabhängige Testnodes synchronisieren können, ohne zentrale Infrastruktur und ohne Modifikation des Tor-Binaries
+
+
 
 
 42. STORAGE BACKEND PLUG-IN ARCHITECTURE
@@ -674,7 +731,7 @@ FilesystemStore
 SQLiteStore
 
 
-Planned production adapters:
+Optional additional adapters, Production-supported only if implemented and passing the same conformance/recovery suite:
 PostgreSQLStore
 MySQL/MariaDBStore
 
@@ -688,11 +745,11 @@ FilesystemStore provides a SQL-free deployment.
 
 It uses:
 - content-addressed immutable signed records;
-- deterministic derived-state files;
-- append-only journal;
-- atomic temporary write + rename;
+- deterministic derived-state generations keyed by stable logical_service_id;
+- append-only journal with PREPARE/COMMIT semantics;
+- staged generation plus atomic committed-generation pointer/rebuild rule;
 - single-writer process lock;
-- crash recovery;
+- crash recovery that exposes only previous or fully committed new state;
 - integrity checker;
 - canonical backend-neutral export/import.
 
@@ -726,15 +783,151 @@ In data-only mode:
 
 
 46. SIGNED NODE CHECKPOINTS
-The Node SHOULD produce signed snapshot/checkpoint metadata containing at minimum:
+A production index-exporting Node MUST produce signed checkpoint metadata containing at minimum:
 Node Identity
 sequence/revision
 generated timestamp
 Protocol version
 record count
 snapshot root/hash
-previous checkpoint hash where defined.
+previous_checkpoint_hash according to the frozen D-052 checkpoint-chain rule.
 
 
-Conflicting signed checkpoints are preserved as equivocation evidence.
-.
+Same-sequence conflicting checkpoints and non-prefix-compatible signed checkpoint histories are preserved as equivocation evidence.
+
+
+
+
+47. OPERATOR STATUS ROUTES
+Reference PHP Node MUST serve:
+GET /onion-service-discovery/status/
+as a server-rendered safe baseline.
+
+
+Optional JavaScript MAY enhance refresh but is not required for essential status.
+
+
+48. STATUS DERIVATION SERVICE
+Implement a deterministic StatusService/DiscoverabilityService that derives UI and CLI state from actual evidence.
+
+
+Inputs:
+runtime checks;
+validated config;
+Manifest state;
+Tor self-verification;
+bootstrap/peer state;
+announcement attempts;
+external observation responses;
+current searchable/export state;
+storage/scheduler health.
+
+
+UI MUST NOT invent states independently from this service.
+
+
+49. SELF-ANNOUNCEMENT
+Implement a bounded outbound CandidateAnnouncementClient.
+
+
+It submits only minimal canonical Service identity/location hints.
+It never writes trusted remote state.
+Receiving Nodes independently direct-verify the target Onion Service.
+
+
+50. DISCOVERABILITY CHECK
+Implement a read-only external check against configured/selected Nodes for the operator's own public Service using stable logical_service_id lookup:
+GET /onion-service-discovery/v1/services/by-id/{logical_service_id}
+
+
+The address convenience route may be cross-checked, but discoverability identity continuity MUST NOT depend on the current Onion or current rotatable Service key alone.
+
+
+It distinguishes:
+announcement accepted;
+current revision directly observed;
+current revision included in active searchable export;
+stale external revision;
+conflict.
+
+
+51. SAFE STATUS OUTPUT
+Public status output excludes:
+secrets;
+private paths;
+stack traces;
+raw config;
+auth tokens;
+private keys;
+raw quarantine data.
+
+
+52. FAILURE ISOLATION
+Failure of Onion Service Discovery routes/storage SHOULD NOT take down unrelated content on the host Onion Service where practical.
+
+
+
+
+53. SECURE CODING BASELINE
+The PHP reference implementation MUST comply with document 51.
+
+
+Required coding constraints include:
+declare(strict_types=1);
+strict comparison in security logic;
+typed validated domain objects;
+no eval;
+no untrusted unserialize;
+no dynamic include from input;
+no shell-string command construction;
+parameterized SQL;
+canonical safe filesystem paths;
+approved TorHttpClient for outbound Onion verification;
+bounded SafeJsonDecoder;
+context-safe rendering;
+explicit exception/failure handling.
+
+
+54. REQUEST VALIDATION PIPELINE
+Every endpoint follows:
+method/content-type/body-size gate
+-> parse under depth/member/string limits
+-> structural schema validation
+-> field grammar/range validation
+-> semantic validation
+-> cryptographic/state-machine validation
+-> atomic mutation or read response.
+
+
+No expensive crypto/network/storage work before cheap structural limits.
+
+
+55. PHP SECURITY REGRESSION
+CI and release testing include:
+static analysis;
+security lint;
+dependency scanning;
+secret scanning;
+fuzz/property tests for parsers;
+path traversal tests;
+SQL-injection tests;
+SSRF tests;
+exception/fault injection;
+security header tests.
+
+
+56. DANGEROUS API REVIEW
+Any introduction of:
+exec/system/shell_exec/proc_open;
+unserialize;
+eval;
+dynamic include;
+general-purpose outbound HTTP client outside approved transport
+is a security-review blocker and requires explicit justification/ADR.
+
+
+57. CATEGORY SOURCE OF TRUTH
+PHP configuration validation and Manifest generation consume the machine-readable Category Registry v1 artifact/generated constants.
+
+
+adult is accepted as a normal content category and has no special server-side execution behavior.

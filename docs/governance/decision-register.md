@@ -23,7 +23,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-015 | Snapshot Partitioning | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-016 | Delta Change Model | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-017 | Mixed-Validity Sync Batch Policy | UNRESOLVED | Project owner / reviewer | YES | framing/hash failure rejects batch; individually valid signed records can be independently quarantined/committed only if envelope remains trustworthy. Freeze exact transaction semantics. |
-| D-018 | Public Candidate Announcement Endpoint | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | omit from first core release unless strong need; manual/out-of-band candidate seeding plus service graph/peer propagation can work. If included, new abuse spec/limits. |
+| D-018 | Public Candidate Announcement Endpoint | UNRESOLVED | Project owner / reviewer | YES for plug-and-play publish workflow | Now included as a bounded candidate-hint flow; final endpoint, limits and retry policy need approval. |
 | D-019 | Automated Crawler | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | optional/post-core. Must not crawl private/non-opt-in indiscriminately. |
 | D-020 | Proof of Work | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | not Protocol v1 core. Only reconsider after measured abuse pressure. |
 | D-021 | Moderation in Initial Release | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | avoid mandatory central moderation. |
@@ -56,3 +56,15 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-048 | Real-World Legal/Policy Review | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-049 | External Audit Provider | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-050 | Production Release Approval | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
+
+The refreshed source decision register adds four unresolved release blockers:
+
+| ID | Decision | State | Owner | Release blocker | Source recommendation |
+| --- | --- | --- | --- | --- | --- |
+| D-051 | Stable Logical Service Identifier | UNRESOLVED | Human Protocol/Crypto reviewer | YES | Genesis public-key encoding is proposed; claimed identifiers need full continuity evidence. |
+| D-052 | Signed Node Checkpoint Chain | UNRESOLVED | Human Protocol/Security reviewer | YES | Exact successor +1, chained previous hash and non-prefix-compatible-history evidence; exact bytes/genesis representation need freeze. |
+| D-053 | Category Registry v1 Immutability | UNRESOLVED | Human Protocol/Product reviewer | YES | Frozen IDs cannot change or silently expand; extensions need explicit versioning. |
+| D-054 | Language Tag Wire Grammar | UNRESOLVED | Human Protocol/I18N reviewer | YES | One tested RFC 5646 grammar, lowercase ASCII wire form and canonical uniqueness are proposed. |
+
+These are source recommendations, not implementation-selected wire formats or
+approvals. D-001 remains approved by the owner's earlier explicit CC0 instruction.

@@ -7,7 +7,13 @@ an executable development Node, offline Service signer, separate Client Host,
 locally verifying/searching browser client and mature offline release verifier.
 There is no approved production release.
 
-All 50 current nonarchived Google Drive sources were read and imported with
+The 2026-10-13 refresh found 55 active sources: 43 updated, five added, seven
+unchanged. The full updated corpus is imported but its complete review and
+implementation alignment remain pending. Existing conformance evidence applies
+to the earlier draft, not the revised specifications. See
+[source refresh](specification-refresh.md).
+
+The earlier 50-source baseline was read and imported with
 observed links, source modification times and SHA-256 hashes. REVIEWED means
 implementation-agent review, not human approval. Later specifications require
 FilesystemStore alongside optional SQLite, separate executable hosting roles,
