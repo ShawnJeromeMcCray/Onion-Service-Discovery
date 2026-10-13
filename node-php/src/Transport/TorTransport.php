@@ -15,12 +15,14 @@ final readonly class TorTransport
         $handle = curl_init();
         if ($handle === false) { throw new TransportException('TRANSPORT_UNAVAILABLE'); }
         $body = ''; $headers = []; $headerBytes = 0; $rejected = null;
-        // Random per-job isolation credentials are unrelated to users or Service identities.
+        // Tor SOCKS extension format 0: a fresh per-request isolation parameter.
+        // This is not an end-user identifier and is never persisted.
         $isolation = bin2hex(random_bytes(16));
         $options = [
             CURLOPT_URL => 'http://' . $onion->hostname . $endpoint->path,
             CURLOPT_PROXY => $this->proxyHost, CURLOPT_PROXYPORT => $this->proxyPort,
-            CURLOPT_PROXYTYPE => CURLPROXY_SOCKS5_HOSTNAME, CURLOPT_PROXYUSERPWD => $isolation . ':' . bin2hex(random_bytes(16)),
+            CURLOPT_PROXYTYPE => CURLPROXY_SOCKS5_HOSTNAME,
+            CURLOPT_PROXYUSERNAME => '<torS0X>0', CURLOPT_PROXYPASSWORD => $isolation,
             CURLOPT_NOPROXY => '', CURLOPT_FOLLOWLOCATION => false, CURLOPT_MAXREDIRS => 0,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP, CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP,
             CURLOPT_CONNECTTIMEOUT_MS => min(10000, $this->timeoutMilliseconds), CURLOPT_TIMEOUT_MS => $this->timeoutMilliseconds,

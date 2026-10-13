@@ -71,3 +71,10 @@ approvals. D-001 remains approved by the owner's earlier explicit CC0 instructio
 
 PCP-001 records the current category/language implementation experiment and stricter
 draft acceptance. Tests do not approve these freeze decisions.
+
+Continuation evidence: D-051 has executable genesis-anchor/current-key/key-epoch
+comparison in the offline complete-snapshot verifier, with shared rotation and
+migration fixtures. This is concrete development evidence for review, not wire
+freeze approval. D-042 now has the format-zero transport implementation and
+[ADR 005](../adr/005-tor-socks-format-zero.md); actual deployed Tor and human
+review remain open. No decision approval is inferred.

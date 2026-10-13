@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add exact-state offline complete-snapshot membership in PHP, TypeScript and
+  independent Python, shared adversarial vectors and an operator CLI.
+- Add local peer source groups and concentration diagnostics without key-count trust.
+- Use Tor SOCKS extension format zero with fresh per-request isolation parameters.
+
 - Read all 55 refreshed source documents and record current requirement/security inventories.
 - Add draft shared category registry and RFC 5646 validation in three languages, local filters and grouped result pagination.
 - Add publisher-only initialization and a truthful read-only local status page.

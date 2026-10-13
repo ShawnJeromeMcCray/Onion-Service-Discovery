@@ -1,0 +1,21 @@
+{
+  "status": "FINITE_DRAFT_MODEL_PASS",
+  "human_review": "OPEN",
+  "tool_sha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88",
+  "results": [
+    {
+      "model": "SnapshotMembership",
+      "expected": "all invariants hold",
+      "passed": true,
+      "exit_code": 0,
+      "output": "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\nRunning breadth-first search Model-Checking with fp 0 and seed 8785 with 2 workers on 2 cores with 1365MB heap and 64MB offheap memory [pid: 6509] (Linux 6.18.44 amd64, Debian 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).\nParsing file /workspace/Onion-Service-Discovery/formal/SnapshotMembership.tla\nParsing file /tmp/Naturals.tla\nParsing file /tmp/TLC.tla\nParsing file /tmp/Sequences.tla\nParsing file /tmp/FiniteSets.tla\nSemantic processing of module Naturals\nSemantic processing of module Sequences\nSemantic processing of module FiniteSets\nSemantic processing of module TLC\nSemantic processing of module SnapshotMembership\nStarting... (2026-10-13 16:20:45)\nComputing initial states...\nFinished computing initial states: 1 distinct state generated at 2026-10-13 16:20:46.\nModel checking completed. No error has been found.\n  Estimates of the probability that TLC did not check all reachable states\n  because two distinct states had the same fingerprint:\n  calculated (optimistic):  val = 2.5E-12\n41617 states generated, 1156 distinct states found, 0 states left on queue.\nThe depth of the complete state graph search is 7.\nThe average outdegree of the complete state graph is 1 (minimum is 0, the maximum 31 and the 95th percentile is 2).\nFinished in 02s at (2026-10-13 16:20:47)\n"
+    },
+    {
+      "model": "UnsafeAssertionMutation",
+      "expected": "NoUnprovedInclusion rejection",
+      "passed": true,
+      "exit_code": 12,
+      "output": "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)\nRunning breadth-first search Model-Checking with fp 0 and seed 8785 with 2 workers on 2 cores with 1365MB heap and 64MB offheap memory [pid: 6536] (Linux 6.18.44 amd64, Debian 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).\nParsing file /workspace/Onion-Service-Discovery/formal/SnapshotMembership.tla\nParsing file /tmp/Naturals.tla\nParsing file /tmp/TLC.tla\nParsing file /tmp/Sequences.tla\nParsing file /tmp/FiniteSets.tla\nSemantic processing of module Naturals\nSemantic processing of module Sequences\nSemantic processing of module FiniteSets\nSemantic processing of module TLC\nSemantic processing of module SnapshotMembership\nStarting... (2026-10-13 16:20:48)\nComputing initial states...\nFinished computing initial states: 1 distinct state generated at 2026-10-13 16:20:49.\nError: Invariant NoUnprovedInclusion is violated.\nError: The behavior up to this point is:\nState 1: <Initial predicate>\n/\\ included = [A |-> FALSE, B |-> FALSE]\n/\\ artifacts = [ A |->\n      [ signed |-> FALSE,\n        complete |-> FALSE,\n        exactCurrentTuple |-> FALSE,\n        active |-> FALSE ],\n  B |->\n      [ signed |-> FALSE,\n        complete |-> FALSE,\n        exactCurrentTuple |-> FALSE,\n        active |-> FALSE ] ]\n/\\ claims = [A |-> FALSE, B |-> FALSE]\n\nState 2: <NodeAssertion line 17, col 21 to line 19, col 42 of module SnapshotMembership>\n/\\ included = [A |-> TRUE, B |-> FALSE]\n/\\ artifacts = [ A |->\n      [ signed |-> FALSE,\n        complete |-> FALSE,\n        exactCurrentTuple |-> FALSE,\n        active |-> FALSE ],\n  B |->\n      [ signed |-> FALSE,\n        complete |-> FALSE,\n        exactCurrentTuple |-> FALSE,\n        active |-> FALSE ] ]\n/\\ claims = [A |-> TRUE, B |-> FALSE]\n\n37 states generated, 18 distinct states found, 14 states left on queue.\nThe depth of the complete state graph search is 3.\nFinished in 01s at (2026-10-13 16:20:49)\n"
+    }
+  ]
+}
