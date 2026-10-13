@@ -45,8 +45,10 @@ Peer sync is resumable with at most six generic requests and two chunks per step
 
 The PHP public entrypoint requires `ONION_SERVICE_DISCOVERY_CONFIG` containing
 only the configuration path. Serve only `node-php/public` as the document root;
-keep config, dependencies, data, exports and all keys outside it. Its protocol
-surface is GET/HEAD only and has no signer/admin dependency. A global token
+keep config, dependencies, data, exports and all keys outside it. Its data protocol
+surface is GET/HEAD only and has no signer/admin dependency. The separately
+opted-in experimental candidate receiver accepts one bounded POST hint and
+never performs synchronous outbound work; see [PCP-002](../protocol/proposals/PCP-002-bounded-announcement-draft.md). A global token
 bucket stores only token count and time, with no IP or user identifiers. Default
 burst is 20 and refill is two requests per second; deployment worker/connection
 limits are additional requirements. Disable access logs and raw exception logs
@@ -67,3 +69,8 @@ Tor Browser also passes scoped local headless checks. See
 [executed evidence](../conformance/private-tor-onion-report.json) and
 [browser evidence](../conformance/tor-browser-local-report.json). These do not
 complete the deployed public-Tor/browser privacy gates above.
+
+`service:announce` makes one fixed-endpoint Tor POST for an explicitly published
+signed Service manifest. The exact unconfirmed response is required; no automatic
+retry or signing/storage side effect occurs. A received hint never supplies an
+identity, observation or active-index claim.

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add default-off bounded candidate announcement hints and a one-shot Tor
+  operator command; accepted hints never claim observation or index inclusion.
+
 - Add owner-approved genesis-key service lookup with complete rotation/migration,
   persistent fork and withdrawal evidence on both storage backends.
 - Add successful real private-Tor application tests and signature-verified

@@ -71,7 +71,9 @@ the additional route checks are defense in depth, not an alternative to it.
 
 `private-tor-onion.php` reads only Tor's **public hostname**, never its private
 key. It creates separate temporary Service/Node keys and tests successful signed
-manifest retrieval, transport-backed direct observation, a pinned complete signed
+manifest retrieval, a bounded Tor POST hint through the production HTTP entrypoint
+(with no signed evidence or observation immediately afterward), transport-backed
+direct observation, a pinned complete signed
 snapshot, exact owner-state membership and PeerSync on both backends. Imported
 observations never become local observations. Application and Tor fixture state
 are removed on exit. No production root or live seed is created.

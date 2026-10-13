@@ -39,7 +39,7 @@ try {
     $config = json_decode(file_get_contents($project . '/node-php/config/node.example.json'), true);
     $config['node'] = ['onion' => $address->hostname, 'key_path' => $root . '/node.key'];
     $config['storage']['path'] = $root . '/source'; $config['export_path'] = $root . '/exports';
-    $config['features']['mirror_directory'] = true; $config['transport']['proxy_port'] = (int)$argv[2];
+    $config['features']['mirror_directory'] = true; $config['features']['discover_services'] = true; $config['features']['accept_announcements'] = true; $config['transport']['proxy_port'] = (int)$argv[2];
     file_put_contents($root . '/node.json', json_encode($config)); chmod($root . '/node.json', 0600);
     NodeInitializer::initialize(NodeConfig::load($root . '/node.json'), $node, $verifier);
     putenv('OSD_PRIVATE_TOR_LAB_ROOT=' . $root);
@@ -52,7 +52,9 @@ try {
     $fetched = $verifier->verifyWire($transport->get($address, ProtocolEndpoint::manifest()), $address);
     if ($fetched->contentHash !== $manifest->contentHash) { throw new RuntimeException('onion manifest mismatch'); }
     $source = new FilesystemStore($root . '/source');
-    (new CandidateQueue($source))->enqueue($address);
+    $transport->announce($address, $address);
+    $afterHint = $source->snapshot();
+    if (count($afterHint['tables']['candidates']) !== 1 || $afterHint['tables']['local_observations'] !== [] || $source->readRecord($manifest->contentHash) !== null) { throw new RuntimeException('hint elevated to verified state'); }
     if ((new DirectVerifier($source, $verifier, $transport, $node))->runOne(time())['status'] !== 'VERIFIED') { throw new RuntimeException('real Tor direct verification failed'); }
     if (count($source->snapshot()['tables']['local_observations']) !== 1) { throw new RuntimeException('missing real direct observation'); }
     $blobs = new PublicBlobStore($root . '/exports');
@@ -71,7 +73,7 @@ try {
         if ($receiver->snapshot()['tables']['local_observations'] !== []) { throw new RuntimeException('imported claim elevated to local observation'); }
         $receiver->integrityCheck(); unset($receiver);
     }
-    echo json_encode(['status'=>'PASS_DEVELOPMENT', 'network'=>'private Tor network in Docker network none', 'checks'=>['SIGNED_ONION_MANIFEST_FETCH','REAL_TOR_DIRECT_OBSERVATION','PINNED_SIGNED_SNAPSHOT_FETCH','EXACT_OWNER_STATE_MEMBERSHIP','FILESYSTEM_PEER_SYNC','SQLITE_PEER_SYNC','IMPORTED_OBSERVATION_NOT_LOCAL'], 'public_tor_verified'=>false, 'browser_verified'=>false, 'production_approved'=>false], JSON_THROW_ON_ERROR), PHP_EOL;
+    echo json_encode(['status'=>'PASS_DEVELOPMENT', 'network'=>'private Tor network in Docker network none', 'checks'=>['SIGNED_ONION_MANIFEST_FETCH','BOUNDED_TOR_ANNOUNCEMENT_UNCONFIRMED','PRODUCTION_HTTP_ENTRYPOINT','REAL_TOR_DIRECT_OBSERVATION','PINNED_SIGNED_SNAPSHOT_FETCH','EXACT_OWNER_STATE_MEMBERSHIP','FILESYSTEM_PEER_SYNC','SQLITE_PEER_SYNC','IMPORTED_OBSERVATION_NOT_LOCAL'], 'public_tor_verified'=>false, 'browser_verified'=>false, 'production_approved'=>false], JSON_THROW_ON_ERROR), PHP_EOL;
 } finally {
     if (is_resource($server)) { proc_terminate($server); proc_close($server); }
     putenv('OSD_PRIVATE_TOR_LAB_ROOT'); unset($source, $blobs, $service, $node);

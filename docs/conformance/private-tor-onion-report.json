@@ -3,6 +3,8 @@
   "network": "private Tor network in Docker network none",
   "checks": [
     "SIGNED_ONION_MANIFEST_FETCH",
+    "BOUNDED_TOR_ANNOUNCEMENT_UNCONFIRMED",
+    "PRODUCTION_HTTP_ENTRYPOINT",
     "REAL_TOR_DIRECT_OBSERVATION",
     "PINNED_SIGNED_SNAPSHOT_FETCH",
     "EXACT_OWNER_STATE_MEMBERSHIP",
@@ -20,5 +22,6 @@
   "php_image": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3",
   "reproduction_driver": "lab/private-tor-network.sh",
   "fresh_network_reproduction_passed": true,
-  "cleanup": "temporary application/network fixture state removed; Docker --rm container stopped"
+  "cleanup": "temporary application/network fixture state removed; Docker --rm container stopped",
+  "announcement_source": "PCP-002 development experiment"
 }

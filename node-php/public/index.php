@@ -12,6 +12,7 @@ if (!is_file(dirname(__DIR__) . '/vendor/autoload.php')) {
 require dirname(__DIR__) . '/vendor/autoload.php';
 use OnionServiceDiscovery\Configuration\NodeConfig;
 use OnionServiceDiscovery\Http\DataApi;
+use OnionServiceDiscovery\Http\CandidateAnnouncement;
 use OnionServiceDiscovery\Http\ClientAssets;
 use OnionServiceDiscovery\Http\ClientHostRelay;
 use OnionServiceDiscovery\Http\PublicRequestBudget;
@@ -34,6 +35,20 @@ try {
     elseif (str_starts_with($target, '/onion-service-discovery/relay/')) {
         if (!(new PublicRequestBudget($config->exportPath . '/.relay-budget'))->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
         else { $response = (new ClientHostRelay($config))->handle($method, $target); }
+    }
+    elseif ($target === CandidateAnnouncement::PATH && $config->features['accept_announcements']) {
+        if ($method !== 'POST') { $response = ['status' => 405, 'headers' => ['Allow' => 'POST'], 'body' => '{"error":"METHOD_NOT_ALLOWED"}']; }
+        elseif (isset($_SERVER['CONTENT_LENGTH']) && (!is_string($_SERVER['CONTENT_LENGTH']) || preg_match('/\A(?:0|[1-9][0-9]{0,2})\z/D', $_SERVER['CONTENT_LENGTH']) !== 1 || (int)$_SERVER['CONTENT_LENGTH'] > CandidateAnnouncement::MAX_BYTES)) { $response = ['status' => 413, 'headers' => [], 'body' => '{"error":"REQUEST_TOO_LARGE"}']; }
+        elseif (!(new PublicRequestBudget($config->exportPath . '/.request-budget'))->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
+        else {
+            // Read one byte beyond the cap; never parse or persist a raw unbounded request.
+            $input = fopen('php://input', 'rb');
+            if ($input === false) { throw new RuntimeException('Request input unavailable'); }
+            try { $body = stream_get_contents($input, CandidateAnnouncement::MAX_BYTES + 1); }
+            finally { fclose($input); }
+            if ($body === false) { throw new RuntimeException('Request input unavailable'); }
+            $response = (new CandidateAnnouncement($config->store()))->handle($method, $_SERVER['CONTENT_TYPE'] ?? '', $body, time());
+        }
     }
     elseif ($target === '/.well-known/onion-service-discovery.json' && $config->nodeOnion !== null && in_array($method,['GET','HEAD'],true)) {
         $path=__DIR__.'/.well-known/onion-service-discovery.json';

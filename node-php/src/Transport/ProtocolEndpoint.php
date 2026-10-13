@@ -7,6 +7,7 @@ final readonly class ProtocolEndpoint
 {
     private function __construct(public string $path, public int $maxBytes) {}
     public static function manifest(): self { return new self('/.well-known/onion-service-discovery.json', 16384); }
+    public static function announcement(): self { return new self('/onion-service-discovery/v1/candidates/announce', 1024); }
     public static function node(): self { return new self('/onion-service-discovery/v1/node', 16384); }
     public static function state(): self { return new self('/onion-service-discovery/v1/state', 16384); }
     public static function peers(): self { return new self('/onion-service-discovery/v1/peers', 262144); }

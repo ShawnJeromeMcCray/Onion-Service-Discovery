@@ -17,6 +17,9 @@ learned-source admission remains open. Tor transport uses explicit format-zero
 SOCKS isolation. The D-051 owner-approved genesis-key ID now has a complete-history lookup.
 Real private-Tor application traffic and actual headless Tor Browser local tests
 have passed; public Tor, Android and browser security-level profiles remain open.
+A default-off bounded announcement receiver and one-shot Tor operator command
+are implemented as PCP-002; human D-018 freeze and automated multi-Node onboarding
+remain open.
 See [continuation evidence](production-completion-review.md).
 
 The 2026-10-13 refresh found 55 active sources: 43 updated, five added, seven

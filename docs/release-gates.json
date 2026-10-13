@@ -198,6 +198,17 @@
         "lab/tor-browser-local.py"
       ],
       "remaining": "Headless local direct-loopback profile only; desktop Normal/Safer/Safest, Android and privacy reviews remain open."
+    },
+    {
+      "id": "BOUNDED_ANNOUNCEMENT_EXPERIMENT",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/protocol/proposals/PCP-002-bounded-announcement-draft.md",
+        "docs/conformance/announcement-report.json",
+        "docs/conformance/announcement-php84-report.json",
+        "docs/conformance/private-tor-onion-report.json"
+      ],
+      "remaining": "Human D-018 endpoint/media/numeric budget/retry freeze, deployed framing/overload review and automated multi-Node onboarding."
     }
   ]
 }

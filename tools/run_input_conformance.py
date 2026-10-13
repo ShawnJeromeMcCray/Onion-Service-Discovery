@@ -48,6 +48,8 @@ def main() -> int:
         ('php-service-id-api', php + ['node-php/tests/service-id-api.php'], ROOT),
         ('php-snapshot-membership-cli', php + ['node-php/tests/snapshot-membership-cli.php'], ROOT),
         ('php-static-analysis', php + ['node-php/vendor/bin/phpstan', 'analyse', 'node-php/src', '--level=8', '--no-progress'], ROOT),
+        ('php-announcement-http', php + ['node-php/tests/announcement-http.php'], ROOT),
+        ('php-candidate-announcement', php + ['node-php/tests/candidate-announcement.php'], ROOT),
         ('php-candidate-queue', php + ['node-php/tests/candidate-queue.php'], ROOT),
         ('php-candidate-budgets', php + ['node-php/tests/candidate-budgets.php'], ROOT),
         ('php-peer-source-groups', php + ['node-php/tests/peer-source-groups.php'], ROOT),

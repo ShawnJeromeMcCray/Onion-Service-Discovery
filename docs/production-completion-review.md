@@ -58,9 +58,12 @@ is fabricated. Existing historical reports/requirements remain preserved.
 External inputs: supplied public snapshot/owner history and local group tokens.
 Trust boundary: independent local artifact verification; stored local peer policy.
 Network: existing Tor adapter only; offline membership/groups make no request.
+The explicit publisher announcement makes one bounded fixed-endpoint POST;
+its default-off receiver cannot perform network requests or signing.
 Web client: no CSP, runtime origin, remote asset or query-flow change.
 Dependencies: none added. Secrets/logging: none added.
-Persistence: one optional local peer operational field; no native schema/format
+Persistence: optional peer grouping and default-off receiver configuration;
+received hints use the existing bounded queue/admission schema; no native schema/format
 migration or signed-record rewrite. Public/group counts grant no trust authority.
 Work limits: descriptor-first 10,000-record/32-MiB checks; merged owner/source
 evidence remains bounded at 20,000 records. Negative/overflow/tamper tests remain.
@@ -83,8 +86,10 @@ continuity evidence. The owner approved that choice on 2026-10-13; independent r
 The existing complete-snapshot diagnostic is not the missing active-root scheme.
 
 D-018 still controls final bounded announcement endpoint/media type/default
-retry policy. Full self-announcement/external observation/active-index onboarding
-is not implemented. Local source grouping does not implement bounded learned
+retry policy. The default-off receiver and one-shot operator Tor announcement
+are implemented as [PCP-002](protocol/proposals/PCP-002-bounded-announcement-draft.md).
+Automated multi-Node self-announcement/external observation/active-index onboarding
+remains incomplete. Local source grouping does not implement bounded learned
 probation/referral admission/gradual source rotation. No-JavaScript fallback,
 full atomic requirement traceability, expanded capacity/chaos profiles and
 complete secure-coding evidence remain engineering work.
@@ -110,3 +115,10 @@ records a verified official 15.0.25 binary with headless local tests in Docker
 network none. Neither report certifies public-network operation, Android or
 privacy/security-level profiles. Reproduction and precise limits are in
 [the lab instructions](../lab/real-tor-cli.md).
+
+The bounded announcement continuation passes all 41 suites on both executed
+PHP minors: [8.5](conformance/announcement-report.json) and
+[8.4](conformance/announcement-php84-report.json). This includes actual public
+HTTP routing and controlled SOCKS/CLI assertions; the fresh real-Tor lab also
+passes announcement followed by independent verification. The hints alone
+produce no signed record or local observation. No D-018 approval is inferred.

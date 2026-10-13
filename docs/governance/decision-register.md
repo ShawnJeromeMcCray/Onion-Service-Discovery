@@ -81,3 +81,9 @@ independent cryptographic review. The derived by-ID endpoint now preserves
 rotation, migration, withdrawal and fork evidence on both storage backends. D-042 now has the format-zero transport implementation and
 [ADR 005](../adr/005-tor-socks-format-zero.md); actual deployed Tor and human
 review remain open. No other decision approval is inferred.
+
+D-018 now has the executable default-off receiver and one-shot publisher Tor
+POST in [PCP-002](../protocol/proposals/PCP-002-bounded-announcement-draft.md).
+A received hint has no signature/observation/index authority; anonymous caller
+identity rotation cannot increase its shared source/global budget. The endpoint,
+limits and retry freeze remain explicitly human-review-open.
