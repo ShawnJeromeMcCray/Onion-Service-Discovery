@@ -52,9 +52,13 @@ final class PeerSync
             $this->observe($onion, $claim, $checkpoint);
             $sync = $this->store->snapshot()['tables']['sync']['key:' . $onion->hostname] ?? [];
             $anchorGeneration = $sync['generation'] ?? 0; $anchorHash = $sync['checkpoint_hash'] ?? null;
+            $legacyBaseline = ($sync['baseline_history_proven_version'] ?? 0) !== 2;
+            $sync['baseline_history_proven'] = (!$legacyBaseline && ($sync['baseline_history_proven'] ?? false) === true) || $anchorGeneration === 1;
+            $sync['baseline_history_proven_version'] = 2;
             if ($document->generation < ($sync['seen_generation'] ?? 0) || $document->generation < $anchorGeneration) { throw new ProtocolException('SOURCE_CHECKPOINT_ROLLBACK'); }
             if ($document->generation === $anchorGeneration) {
                 if ($checkpoint->contentHash !== $anchorHash) { throw new ProtocolException('SOURCE_CHECKPOINT_EQUIVOCATION'); }
+                if ($legacyBaseline) { $this->saveSync($onion, $claim, $sync); }
                 $this->finish($onion, $claim, $now, 'ACTIVE'); return ['status' => 'CURRENT', 'generation' => $anchorGeneration];
             }
             if (($sync['pending_hash'] ?? null) !== $checkpoint->contentHash) {
@@ -101,7 +105,7 @@ final class PeerSync
             }
             if ($sync['chunk_index'] === count($document->chunks)) {
                 if ($sync['received'] !== $document->record_count) { throw new ProtocolException('SOURCE_RECORD_COUNT_INVALID'); }
-                $sync['checkpoint_hash'] = $checkpoint->contentHash; $sync['generation'] = $document->generation; $sync['cursor'] = $document->cursor; $sync['last_sync'] = $now; $sync['baseline_history_proven'] = $anchorGeneration > 0 || $document->generation === 1;
+                $sync['checkpoint_hash'] = $checkpoint->contentHash; $sync['generation'] = $document->generation; $sync['cursor'] = $document->cursor; $sync['last_sync'] = $now; $sync['baseline_history_proven'] = ($sync['baseline_history_proven'] ?? false) || $document->generation === 1;
                 $this->store->transaction(function (StorageTransaction $tx) use ($onion, $claim, $sync, $now): void {
                     $row = $this->claimed($tx, $onion, $claim); $tx->set('sync', $onion->hostname, $sync);
                     $row['state'] = 'ACTIVE'; $row['failures'] = 0; $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $now + 3600 + random_int(0,300); $row['error'] = null; $tx->set('peers', $onion->hostname, $row);

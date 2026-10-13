@@ -119,7 +119,20 @@ if($bounded['status']!=='PROGRESS'||$bounded['phase']!=='CHECKPOINT_CHAIN'||$cac
 $completed=runPeer($api,$root.'/cached-long.sqlite',$onion,1700908000);
 if($completed['status']!=='CURRENT'||$completed['generation']!==36)throw new RuntimeException('cached chain failed resume');
 $cached->integrityCheck();
+// Continuity after late first contact must not invent proof back to genesis.
+$late=new SQLiteStore($root.'/late.sqlite',create:true); PeerRegistry::add($late,OnionAddress::parse($onion),$signer->publicKey());
+runPeer($api,$root.'/late.sqlite',$onion,1701000000);
+if($late->snapshot()['tables']['sync']['key:'.$onion]['baseline_history_proven']!==false)throw new RuntimeException('late baseline invented genesis history');
+$late->transaction(static function(StorageTransaction $tx) use($onion): void { $row=$tx->get('sync',$onion); $row['baseline_history_proven']=true; unset($row['baseline_history_proven_version']); $tx->set('sync',$onion,$row); });
+$legacy=runPeer($api,$root.'/late.sqlite',$onion,1701004000);
+if($legacy['status']!=='CURRENT'||$late->snapshot()['tables']['sync']['key:'.$onion]['baseline_history_proven']!==false)throw new RuntimeException('legacy overclaimed baseline was retained');
+$later=clone $base; $later->generation=37; $later->previous_checkpoint_hash=$parent; $later->cursor='long-37';
+$later=$verifier->verify($signer->signRecord($later));
+$source->transaction(static function(StorageTransaction $tx) use($later): void { $tx->putRecord($later); $tx->set('node','published-snapshot',['hash'=>$later->contentHash]); });
+$followed=runPeer($api,$root.'/late.sqlite',$onion,1701008000);
+if($followed['status']!=='CURRENT'||$late->snapshot()['tables']['sync']['key:'.$onion]['baseline_history_proven']!==false)throw new RuntimeException('one successor invented unavailable genesis ancestry');
+$late->integrityCheck();
 $long->integrityCheck();
-$target->integrityCheck(); $staging->integrityCheck(); unset($target,$staging,$cached,$long,$source,$api,$producer,$blobs,$signer,$config);
+$target->integrityCheck(); $staging->integrityCheck(); unset($target,$staging,$cached,$late,$long,$source,$api,$producer,$blobs,$signer,$config);
 $it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST); foreach($it as $file) { $file->isDir()?rmdir($file->getPathname()):unlink($file->getPathname()); } rmdir($root);
 echo "PASS: controlled peer sync, fork union, omission, rollback, equivocation partial-chunk cursor safety and bounded long-absence catch-up\n";

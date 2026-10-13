@@ -63,3 +63,21 @@ Node explicitly enables the feature. The HTML form discloses query transfer befo
 submission. Results are Node-controlled claims, without browser verification.
 Browser and PHP presentation share frozen Unicode 17 search semantics and golden
 ranking fixtures. See [operations contract](../operations/server-search.md).
+
+## Bounded long-absence refresh
+
+A signed checkpoint gap beyond 32 generations can be verified across explicit
+refreshes. Each refresh verifies at most 32 predecessor records. A session-only
+cache retains at most 16 verified walk cursors, bound to source key, target hash
+and accepted anchor. It is not peer-supplied or serialized and is erased with
+Clear All Data. PARTIAL means no newer source snapshot has been admitted; another
+explicit refresh can continue and existing verified records remain searchable.
+Cancelled/timed-out work cannot advance the accepted anchor. A changed target
+must establish its own verified prefix before using a cursor.
+
+A late initial baseline remains marked as lacking earlier checkpoint history
+even after valid successors. Retrying a failed first import also cannot invent
+a genesis proof. These are checkpoint-continuity claims, not independent Node
+trust, direct Service presence or the still-unimplemented active-index scheme.
+The session witness/storage caps and withheld/changing history remain availability
+limits; a browser restart loses its session walk progress.

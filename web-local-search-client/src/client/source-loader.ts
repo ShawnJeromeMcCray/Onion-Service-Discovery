@@ -14,6 +14,7 @@ export interface SourceLedger {
   descriptorHash: string;
   equivocated: boolean;
   observed: { [position: string]: string[] };
+  baselineHistoryProven?: boolean;
 }
 export interface LoadedSource { records: VerifiedRecord[]; checkpoint: VerifiedRecord; ledger: SourceLedger; createdAt: string; baselineHistoryProven: boolean; }
 const prefix = '/onion-service-discovery/v1/';
@@ -64,7 +65,10 @@ async function fetchBytes(onion: string, endpoint: Endpoint, limit: number, pare
 
 export class SourceLoader {
   private readonly crypto:CryptoProviders; private readonly delivery:DeliveryProfile;
+  // Session-only verified walk cursors; never supplied by a peer or serialized.
+  #ancestry = new Map<string,{nodeKey:string;targetHash:string;anchorHash:string;anchorGeneration:number;ancestor:VerifiedRecord}>();
   constructor(crypto:CryptoProviders,delivery:DeliveryProfile='direct-cross-origin'){this.crypto=crypto;this.delivery=delivery;}
+  clear():void { this.#ancestry.clear(); }
   validate(selection: SourceSelection): SourceSelection {
     validateOnionAddress(selection.onion, this.crypto.sha3);
     if (selection.expectedKey !== undefined && !this.crypto.validateEd25519Point(publicKeyBytes(selection.expectedKey))) throw new Error('PUBLIC_KEY_INVALID');
@@ -100,13 +104,17 @@ export class SourceLoader {
     if (sum > 33554432) throw new Error('SOURCE_WORK_BUDGET_EXHAUSTED');
     let ancestor = document; let walks = 0;
     if (ledger.generation > 0 && Number(document.generation) > ledger.generation) {
-      if (Number(document.generation) - ledger.generation > 32) throw new Error('SOURCE_HISTORY_BUDGET_EXHAUSTED');
+      const pending=this.#ancestry.get(selection.onion);
+      if(pending?.nodeKey===nodeKey&&pending.targetHash===checkpointHash&&pending.anchorHash===ledger.checkpointHash&&pending.anchorGeneration===ledger.generation) ancestor=parseStrictJson(new TextEncoder().encode(pending.ancestor.canonicalWire),65536);
       while (ancestor.previous_checkpoint_hash !== ledger.checkpointHash) {
-        if (++walks > 32 || Number(ancestor.generation) <= ledger.generation + 1) throw new Error('SOURCE_CHECKPOINT_CHAIN_BROKEN');
+        if (Number(ancestor.generation) <= ledger.generation + 1) throw new Error('SOURCE_CHECKPOINT_CHAIN_BROKEN');
+        if (++walks > 32) throw new Error('SOURCE_HISTORY_PROGRESS');
         const parentHash = hash(requiredString(ancestor.previous_checkpoint_hash));
         const parent = await verifyWire(await fetchBytes(selection.onion, { snapshot: parentHash }, 65536, signal, deadline,this.delivery), this.crypto);
         const value = parseStrictJson(new TextEncoder().encode(parent.canonicalWire), 65536);
         if (parent.type !== 'snapshot_descriptor' || parent.contentHash !== parentHash || value.node_identity_public_key !== nodeKey || Number(value.generation) !== Number(ancestor.generation) - 1) throw new Error('SOURCE_CHECKPOINT_CHAIN_BROKEN');
+        if(!this.#ancestry.has(selection.onion)&&this.#ancestry.size>=16) this.#ancestry.delete(this.#ancestry.keys().next().value!);
+        this.#ancestry.set(selection.onion,{nodeKey,targetHash:checkpointHash,anchorHash:ledger.checkpointHash,anchorGeneration:ledger.generation,ancestor:parent});
         ancestor = value;
       }
       if (Number(ancestor.generation) !== ledger.generation + 1) throw new Error('SOURCE_CHECKPOINT_CHAIN_BROKEN');
@@ -132,10 +140,12 @@ export class SourceLoader {
       }
       if (Number(current.descriptor_revision) !== prior.descriptorRevision + 1) throw new Error('SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE');
     }
+    ledger.baselineHistoryProven=prior?.baselineHistoryProven===true||prior?.generation===1||document.generation===1;
     ledger.generation = Number(document.generation); ledger.checkpointHash = checkpointHash; ledger.descriptorRevision = Number(node.descriptor_revision); ledger.descriptorHash = descriptor.contentHash;
+    this.#ancestry.delete(selection.onion);
     // Bound witness positions while preserving any equivocation; signed evidence is separately retained.
     const positions = Object.keys(ledger.observed).sort((a,b) => Number(b)-Number(a));
     for (const old of positions.slice(32)) delete ledger.observed[old];
-    return { records, checkpoint, ledger, createdAt: requiredString(document.created_at), baselineHistoryProven: prior !== undefined || document.generation === 1 };
+    return { records, checkpoint, ledger, createdAt: requiredString(document.created_at), baselineHistoryProven: ledger.baselineHistoryProven };
   }
 }

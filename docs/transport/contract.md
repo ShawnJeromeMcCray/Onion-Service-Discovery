@@ -86,6 +86,12 @@ generation. Partial progress persists the walk position but never advances the
 accepted cursor/anchor. Storage quotas, withheld ancestry and a continually changing
 remote target can still prevent catch-up; no availability guarantee is inferred.
 Tests cover 35 missed generations, cache-only progress boundaries, rollback,
-equivocation and broken chunks. The browser still has its separate 32-generation
-refresh bound. PCP-003 researches alternatives without changing accepted wire
+equivocation and broken chunks. The browser now has a separate session-only resumable path with 32 verified
+predecessors per explicit refresh; see [browser contract](../browser/client-contract.md). PCP-003 researches alternatives without changing accepted wire
 formats or claiming active-index proof.
+
+The `baseline_history_proven` operational flag is versioned as 2. It records
+actual genesis-anchored checkpoint history and stays false for late initial
+baselines after subsequent valid links. Old unversioned flags at generations
+beyond one are conservatively downgraded; they are not trusted as genesis proofs.
+This changes operational diagnostics, not signed records or accepted anchors.

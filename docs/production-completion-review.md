@@ -156,3 +156,14 @@ passes all 45 local suites on both pinned minors:
 [PHP 8.4](conformance/checkpoint-catchup-php84-report.json). Its accepted anchor
 remains unchanged while verifying 35 missed generations; cached ancestors also
 obey the per-step 32-record work limit. Browser catch-up remains bounded separately.
+
+The browser now resumes a 35-generation checkpoint gap across explicit bounded
+refreshes, using at most 16 session-only verified cursors. Partial work admits no
+new source records or anchor. Tests reject a changed target with a skipped link
+and keep late first-contact/failed-first-import history claims unproven. PHP
+likewise preserves genesis confidence and conservatively normalizes old unversioned
+flags. All 45 suites pass on both pinned PHP minors:
+[PHP 8.5](conformance/browser-catchup-report.json),
+[PHP 8.4](conformance/browser-catchup-php84-report.json); four Chromium browser
+checks and the TypeScript sink policy pass. No compact research proof is used
+by either runtime, and active-index/onboarding approval remains open.
