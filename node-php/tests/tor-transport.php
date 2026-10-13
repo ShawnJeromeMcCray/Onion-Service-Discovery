@@ -18,12 +18,27 @@ $cases = [
     'oversize' => ["HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 16385\r\n\r\n" . str_repeat('x', 16385), ['error' => 'RESPONSE_TOO_LARGE']],
     'duplicate' => ["HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{}", ['error' => 'HEADERS_INVALID']],
 ];
+$manifest = $case->records[0];
+$verified = (new \OnionServiceDiscovery\Protocol\RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas'))->verify($manifest);
+$wire = json_encode($manifest, JSON_THROW_ON_ERROR);
+$cases['cli-valid'] = ["HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " . strlen($wire) . "\r\n\r\n" . $wire, ['status'=>'SIGNATURE_AND_BINDING_VALID','onion'=>$onion,'manifest_hash'=>$verified->contentHash,'service_identity_public_key'=>$manifest->service_identity_public_key,'revision'=>$manifest->revision,'publish_service'=>$manifest->discovery->publish_service,'identity_state'=>'NOT_DERIVED','state_mutated'=>false,'network_side_effects'=>true]];
+$cases['cli-invalid'] = [$cases['valid'][0], ['status'=>'FAIL','error'=>'PROTOCOL_UNSUPPORTED']];
+$cases['cli-redirect'] = [$cases['redirect'][0], ['status'=>'FAIL','error'=>'HTTP_STATUS_REJECTED']];
 $checks = 0;
 foreach ($cases as $name => [$response, $expected]) {
     $server = stream_socket_server('tcp://127.0.0.1:0', $errno, $error);
     if ($server === false) { throw new RuntimeException('local fixture unavailable'); }
     $port = (int) substr(strrchr(stream_socket_get_name($server, false), ':'), 1);
-    $process = proc_open([PHP_BINARY, __DIR__ . '/tor-transport-worker.php', (string) $port, $onion], [['pipe','r'],['pipe','w'],['pipe','w']], $pipes, null, ['NO_PROXY' => '*', 'HTTP_PROXY' => 'http://127.0.0.1:1']);
+    $cli = str_starts_with($name, 'cli-'); $private = null;
+    $command = [PHP_BINARY, __DIR__ . '/tor-transport-worker.php', (string) $port, $onion];
+    if ($cli) {
+        $private = sys_get_temp_dir() . '/osd-cli-probe-' . bin2hex(random_bytes(12)); mkdir($private, 0700);
+        $config = json_decode(file_get_contents(__DIR__ . '/../config/node.example.json'), true, 32, JSON_THROW_ON_ERROR);
+        $config['storage']['path']=$private.'/data'; $config['export_path']=$private.'/exports'; $config['node']['key_path']=$private.'/node.key'; $config['transport']['proxy_port']=$port; $config['transport']['timeout_ms']=3000;
+        file_put_contents($private.'/config.json',json_encode($config)); chmod($private.'/config.json',0600);
+        $command=[PHP_BINARY,__DIR__.'/../bin/onion-service-discovery','service:verify',$private.'/config.json',$onion,'--json','--no-interaction'];
+    }
+    $process = proc_open($command, [['pipe','r'],['pipe','w'],['pipe','w']], $pipes, null, ['NO_PROXY' => '*', 'HTTP_PROXY' => 'http://127.0.0.1:1']);
     fclose($pipes[0]);
     $socket = stream_socket_accept($server, 3);
     if ($socket === false) { throw new RuntimeException('proxy bypass or timeout'); }
@@ -43,7 +58,13 @@ foreach ($cases as $name => [$response, $expected]) {
     if (!str_starts_with($requestLines, "GET /.well-known/onion-service-discovery.json HTTP/1.1\r\n") || str_contains(strtolower($requestLines), 'cookie:')) { throw new RuntimeException('unexpected HTTP request'); }
     fwrite($socket, $response); fclose($socket); fclose($server);
     $output = stream_get_contents($pipes[1]); $stderr = stream_get_contents($pipes[2]); fclose($pipes[1]); fclose($pipes[2]);
-    if (proc_close($process) !== 0 || json_decode($output, true) !== $expected) { throw new RuntimeException('transport case ' . $name . ': ' . $output . $stderr); }
+    $exit = proc_close($process);
+    if ($private !== null) {
+        if (is_dir($private.'/data') || is_dir($private.'/exports') || is_file($private.'/node.key')) { throw new RuntimeException('read-only CLI probe created runtime state'); }
+        unlink($private.'/config.json'); rmdir($private);
+    }
+    $expectedExit = $name === 'cli-invalid' ? 3 : ($name === 'cli-redirect' ? 5 : 0);
+    if ($exit !== $expectedExit || $stderr !== '' || json_decode($output, true) !== $expected) { throw new RuntimeException('transport case ' . $name . ': ' . $output . $stderr); }
     ++$checks;
 }
 try { new TorTransport('example.org'); throw new RuntimeException('remote proxy accepted'); } catch (TransportException) { ++$checks; }

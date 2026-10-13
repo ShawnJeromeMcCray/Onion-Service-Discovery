@@ -2,6 +2,10 @@
 <?php
 declare(strict_types=1);
 
+// Operational failures return typed JSON; PHP warnings must not expose paths.
+ini_set('display_errors', '0');
+ini_set('log_errors', '0');
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use OnionServiceDiscovery\Crypto\CanonicalJson;
@@ -58,14 +62,24 @@ function localPassphrase(string $path): string
 $arguments = array_slice($argv, 1);
 $command = array_shift($arguments) ?? 'help';
 $arguments = array_values(array_filter($arguments, static fn (string $value): bool => !in_array($value, ['--json', '--no-interaction'], true)));
-$command = ['status'=>'node:status', 'peer:list'=>'peers:list', 'peer:add'=>'peers:add', 'peer:disable'=>'peers:disable', 'backup:create'=>'storage:backup', 'db:verify'=>'storage:check', 'restore:verify'=>'storage:check', 'manifest:show'=>'protocol:inspect'][$command] ?? $command;
+if (in_array($command, ['key:service:generate', 'key:node:generate'], true)) { array_unshift($arguments, $command === 'key:service:generate' ? 'service' : 'node'); $command = 'key:create'; }
+$command = ['manifest:generate'=>'manifest:init', 'sync:run'=>'sync:peer-step', 'status'=>'node:status', 'peer:list'=>'peers:list', 'peer:add'=>'peers:add', 'peer:disable'=>'peers:disable', 'backup:create'=>'storage:backup', 'db:verify'=>'storage:check', 'restore:verify'=>'storage:check', 'manifest:show'=>'protocol:inspect'][$command] ?? $command;
 $exitCode = 0;
 $root = dirname(__DIR__, 2);
 $verifier = new RecordVerifier($root . '/protocol/schemas');
 
 try {
     if ($command === 'help') {
-        $output = ['status' => 'DEVELOPMENT', 'commands' => ['manifest:verify <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>', 'storage:init <filesystem|sqlite> <path>', 'storage:check <backend> <path>', 'storage:admit <backend> <path> <signed-record>', 'storage:backup <backend> <path> <private-backup>', 'storage:restore <backend> <new-staging-path> <private-backup> --trusted-private-backup', 'storage:export <backend> <path> <archive>', 'storage:import <backend> <new-staging-path> <archive>', 'manifest:install <signed-manifest> <public-hostname-file> <webroot> [--rotation <proof>] [--migration <proof>]', 'manifest:init <onion> <service-public-key> <metadata-file>', 'manifest:revise <signed-manifest> <metadata-file>', 'manifest:withdraw <signed-manifest>', 'manifest:rotate <signed-manifest> <new-public-key>', 'manifest:migrate <signed-manifest> <new-onion>', 'peers:add <config> <onion> --expected-node-key <public-key>', 'peers:list <config>', 'peers:disable <config> <onion>', 'peers:retry <config> <onion> --acknowledge-quarantine', 'sync:peer-step <config> <onion>', 'client:init <config>', 'config:validate <config>', 'doctor <config>', 'security:check <config>', 'release:info', 'backup:verify <private-backup>', 'db:migrate <backend> <path>', 'candidate:list <config>', 'quarantine:list <config>', 'sync:status <config>', 'node:status <config>', 'node:maintain <config>', 'exports:prune <config> --workers-stopped', 'candidate:add <config> <onion>', 'node:init <config> --passphrase-file <file>', 'node:snapshot <config> --passphrase-file <file>', 'node:work-one <config> --passphrase-file <file>', 'key:create <service|node> <key-path> --passphrase-file <private-file>', 'record:sign <role> <key-path> <record> --passphrase-file <private-file> [--rotation-confirmation]' ], 'network_side_effects' => false];
+        $output = ['status' => 'DEVELOPMENT', 'commands' => ['manifest:verify <file>', 'manifest:generate <onion> <service-public-key> <metadata-file>', 'service:verify <config> <onion>', 'sync:run <config> <peer-onion> (one bounded step)', 'key:service:generate <key-path> --passphrase-file <file>', 'key:node:generate <key-path> --passphrase-file <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>', 'storage:init <filesystem|sqlite> <path>', 'storage:check <backend> <path>', 'storage:admit <backend> <path> <signed-record>', 'storage:backup <backend> <path> <private-backup>', 'storage:restore <backend> <new-staging-path> <private-backup> --trusted-private-backup', 'storage:export <backend> <path> <archive>', 'storage:import <backend> <new-staging-path> <archive>', 'manifest:install <signed-manifest> <public-hostname-file> <webroot> [--rotation <proof>] [--migration <proof>]', 'manifest:init <onion> <service-public-key> <metadata-file>', 'manifest:revise <signed-manifest> <metadata-file>', 'manifest:withdraw <signed-manifest>', 'manifest:rotate <signed-manifest> <new-public-key>', 'manifest:migrate <signed-manifest> <new-onion>', 'peers:add <config> <onion> --expected-node-key <public-key>', 'peers:list <config>', 'peers:disable <config> <onion>', 'peers:retry <config> <onion> --acknowledge-quarantine', 'sync:peer-step <config> <onion>', 'client:init <config>', 'config:validate <config>', 'doctor <config>', 'security:check <config>', 'release:info', 'backup:verify <private-backup>', 'db:migrate <backend> <path>', 'candidate:list <config>', 'quarantine:list <config>', 'sync:status <config>', 'node:status <config>', 'node:maintain <config>', 'exports:prune <config> --workers-stopped', 'candidate:add <config> <onion>', 'node:init <config> --passphrase-file <file>', 'node:snapshot <config> --passphrase-file <file>', 'node:work-one <config> --passphrase-file <file>', 'key:create <service|node> <key-path> --passphrase-file <private-file>', 'record:sign <role> <key-path> <record> --passphrase-file <private-file> [--rotation-confirmation]' ], 'network_side_effects' => false];
+    } elseif ($command === 'service:verify') {
+        if (count($arguments) !== 2) { throw new ProtocolException('USAGE_ERROR'); }
+        $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
+        if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        $address = OnionAddress::parse($arguments[1]);
+        $record = $verifier->verifyWire($config->transport()->get($address, \OnionServiceDiscovery\Transport\ProtocolEndpoint::manifest()), $address);
+        if ($record->type !== 'service_manifest') { throw new ProtocolException('SCHEMA_INVALID'); }
+        $document = $record->document();
+        $output = ['status' => 'SIGNATURE_AND_BINDING_VALID', 'onion' => $address->hostname, 'manifest_hash' => $record->contentHash, 'service_identity_public_key' => $document->service_identity_public_key, 'revision' => $document->revision, 'publish_service' => $document->discovery->publish_service, 'identity_state' => 'NOT_DERIVED', 'state_mutated' => false, 'network_side_effects' => true];
     } elseif ($command === 'backup:verify') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $output = ['status' => 'PASS', 'backup' => \OnionServiceDiscovery\Storage\PrivateBackup::verify($arguments[0], $verifier)];
@@ -305,6 +319,9 @@ try {
 } catch (\OnionServiceDiscovery\Storage\StorageException | \OnionServiceDiscovery\Signing\SignerException $error) {
     echo json_encode(['status' => 'FAIL', 'error' => $error->getMessage()], JSON_THROW_ON_ERROR), PHP_EOL;
     exit(4);
+} catch (\OnionServiceDiscovery\Transport\TransportException $error) {
+    echo json_encode(['status' => 'FAIL', 'error' => $error->getMessage()], JSON_THROW_ON_ERROR), PHP_EOL;
+    exit(5);
 } catch (InvalidArgumentException $error) {
     echo json_encode(['status' => 'FAIL', 'error' => $error->getMessage()], JSON_THROW_ON_ERROR), PHP_EOL;
     exit($error->getMessage() === 'USAGE_ERROR' ? 2 : 3);

@@ -1,7 +1,8 @@
 # Implementation and release status
 
 The baseline repository contained only a one-line README. The implementation is
-on `implementation/repository-foundation`, [draft PR #3](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/pull/3). The project now contains
+on `implementation/repository-foundation`; incremental PRs #1–#3 have been merged
+by the repository owner. Subsequent development continues on that branch. The project now contains
 an executable development Node, offline Service signer, separate Client Host,
 locally verifying/searching browser client and mature offline release verifier.
 There is no approved production release.
@@ -22,6 +23,8 @@ required decisions/reviews remain unresolved.
 - The shared unit/integration harness has 33 passing checks on digest-pinned
   PHP 8.5.11 and PHP 8.4.26, including PHPStan level 8, both storage backends,
   read-only diagnostics, staged private backup, quotas and eight process exits.
+  Separate actual ENOSPC checks pass on isolated 2 MiB tmpfs on both PHP minors
+  and both backends, preserving record/cursor and resuming after space restoration.
 - The seeded differential malformed-input run rejects 1,024 inputs per language
   with matching error classifications. This is smoke fuzzing, not exhaustive
   or coverage-guided assurance.
@@ -44,10 +47,11 @@ required decisions/reviews remain unresolved.
   Advisory scans and secret detection do not replace independent security review.
 
 Reports and exact scope are linked in [release-gates.json](release-gates.json).
-GitHub run [38302098291](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38302098291)
-passed all four then-current jobs for commit `5ad0006`. Later expanded CI adds a
-PHP minor matrix, dependency scans and reproducible unsigned candidate packaging;
-its exact commit/run evidence must be recorded after execution.
+GitHub run [38323991393](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38323991393)
+passed all eight expanded jobs for commit `bb681c6`, including both PHP minors,
+dependency scans, Git-history secret detection and candidate packaging. The later
+packaged runtime smoke and exact-identity attestation verification also passed
+in their CI job at commit `9ca5834`; the complete run must be checked separately.
 
 ## Available implementation
 
@@ -71,8 +75,11 @@ systemd/nginx/FPM templates and operator runbooks are included.
 
 Reproducible unsigned source/browser candidates include a dependency inventory,
 file manifest, checksums and explicitly unattested source/hash provenance. The
-established TUF verifier never executes artifacts. Production root/key custody,
-authenticated CI provenance and stable signing are still open.
+established TUF verifier never executes artifacts. Authenticated GitHub provenance and SBOM bundles were locally verified against
+the exact workflow, commit and development ref, including wrong-ref/commit
+rejection. The local build hash matches the distinct GitHub-hosted builder; see
+[the scoped report](conformance/ci-attestation-report.json). Production root/key
+custody, hardened release-builder policy and stable signing are still open.
 
 ## Remaining release gates
 
@@ -80,7 +87,7 @@ Required independent protocol/crypto/model/security and human UX review; actual
 Tor Browser desktop/Android and live Tor tests; deployed privilege separation,
 physical power-loss/disk-full and authenticated restore/incident drills;
 operational-heavy multi-peer soak, broader capacity/profile evidence; independent
-build reproduction/authenticated provenance, license review and production trust
+release-builder review, production provenance acceptance policy, license review and production trust
 root/threshold ceremony. No verified production seed infrastructure is invented.
 
 The 318 extracted candidate requirements now have partial evidence pointers for

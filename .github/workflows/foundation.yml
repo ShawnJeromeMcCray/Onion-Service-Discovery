@@ -7,6 +7,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: conformance-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   source-integrity:
     strategy:
@@ -48,6 +52,8 @@ jobs:
         run: docker pull "${{ matrix.php_image }}"
       - name: Run three-language input conformance
         run: .venv/bin/python tools/run_input_conformance.py --php-container --php-image "${{ matrix.php_image }}"
+      - name: Exercise actual disk-full recovery in isolated tiny tmpfs
+        run: docker run --rm --network none --tmpfs /fault:rw,size=2097152,mode=0700 --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/app,readonly" --workdir /app "${{ matrix.php_image }}" php node-php/tests/storage-disk-full.php /fault
       - name: Run independent black-box conformance
         run: .venv/bin/python protocol-conformance/runner.py --php-container --php-image "${{ matrix.php_image }}"
       - name: Seeded three-language malformed-input smoke fuzzing

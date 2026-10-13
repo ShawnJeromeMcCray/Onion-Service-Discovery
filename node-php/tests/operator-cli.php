@@ -7,7 +7,7 @@ function command(array $arguments,int $expected=0):array{
 }
 file_put_contents($root.'/passphrase','TEST ONLY private operator passphrase');chmod($root.'/passphrase',0600);
 $v=json_decode(file_get_contents($project.'/node-php/config/node.example.json'),true,32,JSON_THROW_ON_ERROR);$v['storage']['path']=$root.'/data';$v['export_path']=$root.'/exports';$v['node']['key_path']=$root.'/node.key';$v['features']['mirror_directory']=true;file_put_contents($root.'/config.json',json_encode($v));chmod($root.'/config.json',0600);$config=$root.'/config.json';
-command(['config:validate',$config]);command(['key:create','node',$root.'/node.key','--passphrase-file',$root.'/passphrase']);command(['node:init',$config,'--passphrase-file',$root.'/passphrase']);command(['doctor',$config],6);
+command(['config:validate',$config]);command(['key:node:generate',$root.'/node.key','--passphrase-file',$root.'/passphrase']);command(['node:init',$config,'--passphrase-file',$root.'/passphrase']);command(['doctor',$config],6);
 $published=command(['node:snapshot',$config,'--passphrase-file',$root.'/passphrase']);if($published['status']!=='PUBLISHED')throw new RuntimeException('first snapshot failed');
 command(['doctor',$config]);command(['security:check',$config]);
 $unchanged=command(['node:snapshot',$config,'--passphrase-file',$root.'/passphrase']);if($unchanged['status']!=='UNCHANGED')throw new RuntimeException('snapshot idempotence lost');

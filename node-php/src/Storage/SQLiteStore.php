@@ -98,7 +98,7 @@ final class SQLiteStore implements StorageBackend
             $this->database->exec('PRAGMA user_version=1');
             $this->database->exec('COMMIT');
         } catch (\Throwable $error) {
-            $this->database->exec('ROLLBACK');
+            if ($this->database->inTransaction()) { $this->database->exec('ROLLBACK'); }
             throw $error;
         }
     }
@@ -173,7 +173,8 @@ final class SQLiteStore implements StorageBackend
             $this->fault('after_commit');
             return $result;
         } catch (\Throwable $error) {
-            if (!$committed) {
+            // SQLITE_FULL/IOERR may already have rolled back the transaction.
+            if (!$committed && $this->database->inTransaction()) {
                 $this->database->exec('ROLLBACK');
             }
             if ($error instanceof StorageException) {
@@ -194,7 +195,7 @@ final class SQLiteStore implements StorageBackend
             $this->database->exec('COMMIT');
             return $state;
         } catch (\Throwable $error) {
-            $this->database->exec('ROLLBACK');
+            if ($this->database->inTransaction()) { $this->database->exec('ROLLBACK'); }
             if ($error instanceof StorageException) {
                 throw $error;
             }
