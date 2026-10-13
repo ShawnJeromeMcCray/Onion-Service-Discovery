@@ -113,6 +113,7 @@ final class RecordVerifier
         }
         $sets = [];
         if (isset($record->service)) {
+            foreach ($record->service->languages as $language) { \OnionServiceDiscovery\Domain\LanguageTag::parse($language); }
             $sets[] = $record->service->languages;
             $sets[] = $record->service->categories;
         }

@@ -24,6 +24,10 @@ foreach (['server-search', 'unknown', 'flag', 'role', 'path', 'proxy', 'source',
     try { NodeConfig::load($path); throw new RuntimeException('accepted ' . $case); } catch (InvalidArgumentException) { ++$checks; }
 }
 $alias = sys_get_temp_dir() . '/osd-public-alias-' . bin2hex(random_bytes(12)); symlink($root . '/node-php/public', $alias);
+foreach ([$root . '/node-php/public/index.php', $alias . '/index.php'] as $publicConfig) {
+    try { NodeConfig::load($publicConfig); throw new RuntimeException('public configuration path accepted'); }
+    catch (InvalidArgumentException $error) { if ($error->getMessage() !== 'PRIVATE_PATH_IN_WEBROOT') { throw $error; } ++$checks; }
+}
 $v = $original; $v['storage']['path'] = $alias . '/would-be-private.sqlite'; file_put_contents($path, json_encode($v));
 try { NodeConfig::load($path); throw new RuntimeException('symlink parent exposed private storage'); }
 catch (InvalidArgumentException $error) { if ($error->getMessage() !== 'PRIVATE_PATH_IN_WEBROOT') { throw $error; } ++$checks; }

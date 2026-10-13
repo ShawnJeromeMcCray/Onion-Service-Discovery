@@ -39,7 +39,7 @@
     <div class="workspace-grid">
       <section class="search-panel" aria-labelledby="search-title">
         <div class="section-heading"><h2 id="search-title">Local search</h2><span id="record-count" class="muted">0 signed records</span></div>
-        <form id="search-form" role="search"><label for="query">Search names, descriptions or categories</label><input type="search" id="query" maxlength="256" autocomplete="off" spellcheck="false" placeholder="Search the loaded directory"><label for="language">Language</label><select id="language"><option value="">All languages</option></select></form>
+        <form id="search-form" role="search"><label for="query">Search names, descriptions or categories</label><input type="search" id="query" maxlength="256" autocomplete="off" spellcheck="false" placeholder="Search the loaded directory"><label for="language">Language</label><select id="language"><option value="">All languages</option></select><label for="category">Operator-declared category</label><select id="category"><option value="">All categories</option></select><label for="adult-visibility">Adult category display (this session only)</label><select id="adult-visibility"><option value="show">Show</option><option value="de-emphasize">De-emphasize</option><option value="hide">Hide</option></select></form>
         <p id="result-summary" class="muted" aria-live="polite">Load sources or import signed records to begin.</p>
         <div id="results" class="results"></div>
       </section>
@@ -58,7 +58,7 @@
       <p class="muted">Clearing the index keeps pins and continuity witnesses. Forgetting local data removes these safeguards.</p>
       <p id="operation-status" role="status" aria-live="polite">Ready. No remote directory requests have been made.</p>
     </section>
-    <noscript><section class="notice"><h2>JavaScript is required for local verification and search.</h2><p>This Client Host does not send searches to a server as a fallback. Use the offline validator or a JavaScript-enabled Tor Browser.</p></section></noscript>
+    <noscript><section class="notice"><h2>Local verification and search are unavailable with JavaScript disabled.</h2><p>No search has been sent. You can verify downloaded public records with the offline validator. A separate server search interface is not available in this development build.</p></section></noscript>
   </main>
   <footer><p>Onion Service Discovery · CC0-1.0 · No analytics, cookies or automatic service visits.</p><p>Real Tor Browser compatibility, independent audit and production release approval remain open for this development preview.</p></footer>
   <dialog id="pin-import-dialog" aria-labelledby="pin-import-title"><form method="dialog"><h2 id="pin-import-title">Review imported pins</h2><p>These are local preferences, not cryptographic evidence. Existing conflicting pins will be preserved.</p><div id="pin-preview"></div><div class="actions"><button value="cancel" class="secondary">Cancel</button><button value="confirm">Import reviewed pins</button></div></form></dialog>

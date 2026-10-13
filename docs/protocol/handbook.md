@@ -138,9 +138,10 @@ candidates per sync step and requires its explicit feature flag.
 ## Storage, operation and releases
 
 Required FilesystemStore and additional SQLiteStore share append-only record,
-atomic data/cursor, rollback, quota and backend-neutral tests. Filesystem HEAD is
-the commit point; checksummed journal recovery distinguishes pre/post-commit
-crashes. SQLite uses WAL, FULL synchronous commits and foreign keys. Read-only
+atomic data/cursor, rollback, quota and backend-neutral tests. Filesystem format 2 writes a durable journal COMMIT before publishing HEAD.
+A committed successor with a lagging HEAD is completed during explicit recovery;
+PREPARE without COMMIT remains inactive. Legacy format 1 requires explicit
+migration preserving its historical HEAD commit interpretation. SQLite uses WAL, FULL synchronous commits and foreign keys. Read-only
 HTTP/diagnostics never initiate journal repair or application transactions.
 Doctor reports pending recovery; an explicit operator action performs it.
 
@@ -175,3 +176,13 @@ proofs and moderation cannot override identity validity. The offline source
 corpus, exact schema/vector files, implementation status and known limitations
 travel with development artifacts; human review remains required for a stable
 standard and a public production release.
+
+## Updated category and language draft
+
+Category Registry v1 uses the 38 machine-readable IDs, including adult; generated
+schema membership rejects unknown IDs. Local display labels are outside signed
+bytes. Tags are absent and cannot be substituted into category identifiers.
+The current language experiment uses lowercase RFC 5646 well-formed tags with
+no duplicate variants/extension singletons. Limits remain 35 ASCII characters
+and 16 entries. This is syntax validation, not registered-language validation.
+See PCP-001 for compatibility and the unresolved D-053/D-054 freeze approvals.

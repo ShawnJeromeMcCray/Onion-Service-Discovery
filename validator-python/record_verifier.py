@@ -1,3 +1,4 @@
+from language_tag import validate_language_tag
 """Independent read-only record verifier using local schemas and mature Ed25519."""
 from datetime import datetime
 import json
@@ -56,6 +57,8 @@ def verify_record(record, expected_onion=None):
                 raise ValueError('SCHEMA_INVALID')
     sets = []
     if 'service' in record:
+        for language in record['service']['languages']:
+            validate_language_tag(language)
         sets += [record['service']['languages'], record['service']['categories']]
     if 'links' in record and 'related_onion_services' in record['links']:
         related = record['links']['related_onion_services']

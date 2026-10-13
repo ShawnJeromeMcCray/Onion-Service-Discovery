@@ -14,12 +14,12 @@ final class Diagnostics
         $checks['runtime'] = PHP_INT_SIZE === 8 ? 'PASS' : 'FAIL';
         foreach (['json','sodium','iconv','curl'] as $extension) { $checks['extension_' . $extension] = extension_loaded($extension) ? 'PASS' : 'FAIL'; }
         if (!str_starts_with(PHP_VERSION, '8.4.') && !str_starts_with(PHP_VERSION, '8.5.')) { $warnings[] = 'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX'; }
-        if ($config->role !== 'client-host' && $config->backend === 'sqlite') {
+        if (!in_array($config->role, ['client-host','publisher'], true) && $config->backend === 'sqlite') {
             $checks['sqlite_driver'] = class_exists(\PDO::class) && in_array('sqlite', \PDO::getAvailableDrivers(), true) ? 'PASS' : 'FAIL';
         }
         $checks['tor_transport_configuration'] = 'PASS'; // NodeConfig already restricts loopback SOCKS and finite timeout.
         $checks['server_search_disabled'] = 'PASS';
-        $checks['export_directory'] = !is_link($config->exportPath) && is_dir($config->exportPath) && (fileperms($config->exportPath) & 0077) === 0 ? 'PASS' : 'FAIL';
+        if ($config->role !== 'publisher') { $checks['export_directory'] = !is_link($config->exportPath) && is_dir($config->exportPath) && (fileperms($config->exportPath) & 0077) === 0 ? 'PASS' : 'FAIL'; }
         if ($config->nodeKeyPath !== null) {
             $checks['node_key_permissions'] = !is_link($config->nodeKeyPath) && is_file($config->nodeKeyPath) && (fileperms($config->nodeKeyPath) & 0077) === 0 ? 'PASS' : 'WARN';
             if ($checks['node_key_permissions'] === 'WARN') { $warnings[] = 'NODE_KEY_MISSING_OR_UNSAFE'; }
@@ -30,9 +30,10 @@ final class Diagnostics
             catch (\OnionServiceDiscovery\Signing\SignerException) { $checks['node_key_envelope_header'] = 'FAIL'; $failures[] = 'NODE_KEY_ENVELOPE_INVALID'; }
         }
         $state = null;
-        if ($config->role !== 'client-host') {
+        if (!in_array($config->role, ['client-host','publisher'], true)) {
             try {
                 $store = $config->store(readOnly: true); $state = $store->snapshot(); $store->integrityCheck(); $checks['storage_integrity'] = 'PASS';
+                if ($store instanceof \OnionServiceDiscovery\Storage\FilesystemStore && $store->formatVersion() === 1) { $warnings[] = 'FILESYSTEM_FORMAT_MIGRATION_REQUIRED'; }
                 $descriptor = $state['tables']['node']['key:descriptor'] ?? null;
                 if ($descriptor === null) { $checks['node_descriptor'] = 'WARN'; $warnings[] = 'NODE_NOT_INITIALIZED'; }
                 else {

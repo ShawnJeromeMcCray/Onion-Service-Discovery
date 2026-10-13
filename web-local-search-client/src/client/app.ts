@@ -1,4 +1,6 @@
-import { localSearch, metadataWarnings, type ClientView, type LocalPin, type ServiceRow } from './view-model.ts';
+import { localSearch, metadataWarnings, type AdultVisibility, type ClientView, type LocalPin, type ServiceRow } from './view-model.ts';
+import { CATEGORY_IDS, CATEGORY_LABELS } from '../protocol/category-id.ts';
+import { groupSimilarResults } from './result-groups.ts';
 import { parseStrictJson } from '../protocol/strict-json.ts';
 import { serializePins } from './pins.ts';
 import type { SourceSelection } from './source-loader.ts';
@@ -18,11 +20,19 @@ function persistPins():void {
   try { localStorage.setItem(storageKey,serializePins(view.pins.map(row=>row.pin))); el('storage-status').textContent='Pins saved in this origin’s browser profile. They are not sent to Nodes.'; }
   catch { el('storage-status').textContent='Profile storage unavailable. New changes stay in session memory; older saved pins may remain.'; }
 }
-function renderResults():void {
+let resultPage=0;
+function renderResults(resetPage=true):void {
+  if(resetPage)resultPage=0;
   const query=el<HTMLInputElement>('query').value; const language=el<HTMLSelectElement>('language').value;
-  const rows=localSearch(view.services,query,language); const results=el('results'); results.replaceChildren();
+  const category=el<HTMLSelectElement>('category').value;
+  const adultValue=el<HTMLSelectElement>('adult-visibility').value;
+  const adult:AdultVisibility=adultValue==='hide'?'hide':adultValue==='de-emphasize'?'de-emphasize':'show';
+  const rows=localSearch(view.services,query,language,category,adult); const results=el('results'); results.replaceChildren();
   el('result-summary').textContent=rows.length+' matching identities'+(view.pendingCount>0?' · '+view.pendingCount+' manifests need more history':'')+'. Search terms stay on this device.';
-  for(const row of rows.slice(0,100)) {
+  const groups=groupSimilarResults(rows);const pageSize=25;
+  resultPage=Math.min(resultPage,Math.max(0,Math.ceil(groups.length/pageSize)-1));
+  for(const group of groups.slice(resultPage*pageSize,(resultPage+1)*pageSize)) {
+    const row=group.representative;
     const card=text('article','', 'result-card'); card.append(text('p','Service-declared metadata','muted')); card.append(text('h3',row.name),text('p',row.description));
     for(const warning of metadataWarnings(row.name,row.description)) card.append(text('p',warning,'metadata-warning'));
     if(row.onion!==null) card.append(text('p',row.onion,'onion-address'));
@@ -38,9 +48,33 @@ function renderResults():void {
       const pin=button(pinned?'Pinned locally':'Pin this identity',()=>worker.postMessage({op:'pin',genesisKey:row.genesisKey})); pin.disabled=pinned; actions.append(pin);
       if(row.onion!==null&&!synthetic) actions.append(visit(row.onion));
     }
-    card.append(actions); results.append(card);
+    card.append(actions);
+    if(group.entries.length>1) {
+      const similar=document.createElement('details');similar.append(text('summary','Similar entries ('+group.entries.length+') — distinct identities'));
+      similar.append(text('p','Similar metadata does not prove common ownership or fraud. Each signed identity is preserved.','muted'));
+      const list=text('div','');let offset=0;
+      const show=()=>{
+        list.replaceChildren();
+        for(const entry of group.entries.slice(offset,offset+25)) {
+          const item=text('article','','pin-card');item.append(text('p',entry.genesisKey,'key-value'));
+          if(entry.onion!==null)item.append(text('p',entry.onion,'onion-address'));
+          const open=button('Inspect this identity',()=>{el<HTMLInputElement>('query').value=entry.genesisKey;renderResults();});item.append(open);list.append(item);
+        }
+      };
+      const previous=button('Previous similar identities',()=>{offset=Math.max(0,offset-25);show();});
+      const next=button('Next similar identities',()=>{offset=Math.min(Math.max(0,Math.floor((group.entries.length-1)/25)*25),offset+25);show();});
+      // No network work is tied to expansion; render bounded pages on demand.
+      similar.addEventListener('toggle',()=>{if(similar.open)show();else list.replaceChildren();});
+      similar.append(list,previous,next);card.append(similar);
+    }
+    results.append(card);
   }
-  if(rows.length>100) results.append(text('p','Showing the first 100 matches. Refine your local search.','muted'));
+  if(groups.length>pageSize) {
+    results.append(text('p','Result groups '+(resultPage*pageSize+1)+'–'+Math.min(groups.length,(resultPage+1)*pageSize)+' of '+groups.length+'. Group size gives no ranking or trust advantage.','muted'));
+    const previous=button('Previous result groups',()=>{resultPage--;renderResults(false);});previous.disabled=resultPage===0;
+    const next=button('Next result groups',()=>{resultPage++;renderResults(false);});next.disabled=(resultPage+1)*pageSize>=groups.length;
+    results.append(previous,next);
+  }
   if(rows.length===0) results.append(text('p',view.recordCount===0?'The local index is empty. Load configured sources, import a signed bundle or try the demonstration.':'No matching published identity in the loaded data. This does not prove that a service does not exist.','muted'));
 }
 function renderPins():void {
@@ -85,7 +119,10 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
 };
 let searchTimer:ReturnType<typeof setTimeout>|null=null;
 el('query').addEventListener('input',()=>{if(searchTimer!==null)clearTimeout(searchTimer);searchTimer=setTimeout(renderResults,120);});
-el('language').addEventListener('change',renderResults); el('search-form').addEventListener('submit',event=>event.preventDefault());
+el('language').addEventListener('change',()=>renderResults()); el('search-form').addEventListener('submit',event=>event.preventDefault());
+for(const id of CATEGORY_IDS) { const option=document.createElement('option');option.value=id;option.textContent=CATEGORY_LABELS[id];el('category').append(option); }
+el('category').addEventListener('change',()=>renderResults());
+el('adult-visibility').addEventListener('change',()=>renderResults());
 el('source-form').addEventListener('submit',event=>{
   event.preventDefault(); const sources:SourceSelection[]=[];
   for(const node of el('source-options').querySelectorAll<HTMLInputElement>('input[data-source]')) {

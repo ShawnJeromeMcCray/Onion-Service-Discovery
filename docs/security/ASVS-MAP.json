@@ -1,0 +1,3931 @@
+{
+  "standard": "OWASP ASVS 5.0.0",
+  "source": "https://github.com/OWASP/ASVS/releases/tag/v5.0.0",
+  "source_sha256": "98c8fe911b9edb403af8ee05d3ce8201ecac2659e313b053890a62847cdcf680",
+  "assessment": "DRAFT_APPLICABILITY_REVIEW; neither full ASVS verification nor certification",
+  "requirements": [
+    {
+      "id": "V1.1.1",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Encoding and Sanitization Architecture",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.1.2",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Encoding and Sanitization Architecture",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.2.1",
+      "level": "1",
+      "chapter": "Encoding and Sanitization",
+      "section": "Injection Prevention",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.2.2",
+      "level": "1",
+      "chapter": "Encoding and Sanitization",
+      "section": "Injection Prevention",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.2.3",
+      "level": "1",
+      "chapter": "Encoding and Sanitization",
+      "section": "Injection Prevention",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.2.4",
+      "level": "1",
+      "chapter": "Encoding and Sanitization",
+      "section": "Injection Prevention",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.2.5",
+      "level": "1",
+      "chapter": "Encoding and Sanitization",
+      "section": "Injection Prevention",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.2.6",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Injection Prevention",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.2.7",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Injection Prevention",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.2.8",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Injection Prevention",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.2.9",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Injection Prevention",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.2.10",
+      "level": "3",
+      "chapter": "Encoding and Sanitization",
+      "section": "Injection Prevention",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.1",
+      "level": "1",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.2",
+      "level": "1",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.3",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.4",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.5",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.6",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.7",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.8",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.9",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.10",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.11",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.3.12",
+      "level": "3",
+      "chapter": "Encoding and Sanitization",
+      "section": "Sanitization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.4.1",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Memory, String, and Unmanaged Code",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.4.2",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Memory, String, and Unmanaged Code",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.4.3",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Memory, String, and Unmanaged Code",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.5.1",
+      "level": "1",
+      "chapter": "Encoding and Sanitization",
+      "section": "Safe Deserialization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.5.2",
+      "level": "2",
+      "chapter": "Encoding and Sanitization",
+      "section": "Safe Deserialization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V1.5.3",
+      "level": "3",
+      "chapter": "Encoding and Sanitization",
+      "section": "Safe Deserialization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Validation",
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.1.1",
+      "level": "1",
+      "chapter": "Validation and Business Logic",
+      "section": "Validation and Business Logic Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.1.2",
+      "level": "2",
+      "chapter": "Validation and Business Logic",
+      "section": "Validation and Business Logic Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.1.3",
+      "level": "2",
+      "chapter": "Validation and Business Logic",
+      "section": "Validation and Business Logic Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.2.1",
+      "level": "1",
+      "chapter": "Validation and Business Logic",
+      "section": "Input Validation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.2.2",
+      "level": "1",
+      "chapter": "Validation and Business Logic",
+      "section": "Input Validation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.2.3",
+      "level": "2",
+      "chapter": "Validation and Business Logic",
+      "section": "Input Validation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.3.1",
+      "level": "1",
+      "chapter": "Validation and Business Logic",
+      "section": "Business Logic Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.3.2",
+      "level": "2",
+      "chapter": "Validation and Business Logic",
+      "section": "Business Logic Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.3.3",
+      "level": "2",
+      "chapter": "Validation and Business Logic",
+      "section": "Business Logic Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.3.4",
+      "level": "2",
+      "chapter": "Validation and Business Logic",
+      "section": "Business Logic Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.3.5",
+      "level": "3",
+      "chapter": "Validation and Business Logic",
+      "section": "Business Logic Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.4.1",
+      "level": "2",
+      "chapter": "Validation and Business Logic",
+      "section": "Anti-automation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V2.4.2",
+      "level": "3",
+      "chapter": "Validation and Business Logic",
+      "section": "Anti-automation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "web-local-search-client/src/client/view-model.ts"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.1.1",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Web Frontend Security Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.2.1",
+      "level": "1",
+      "chapter": "Web Frontend Security",
+      "section": "Unintended Content Interpretation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.2.2",
+      "level": "1",
+      "chapter": "Web Frontend Security",
+      "section": "Unintended Content Interpretation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.2.3",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Unintended Content Interpretation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.3.1",
+      "level": "1",
+      "chapter": "Web Frontend Security",
+      "section": "Cookie Setup",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.3.2",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Cookie Setup",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.3.3",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Cookie Setup",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.3.4",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Cookie Setup",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.3.5",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Cookie Setup",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.4.1",
+      "level": "1",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Security Mechanism Headers",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.4.2",
+      "level": "1",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Security Mechanism Headers",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.4.3",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Security Mechanism Headers",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.4.4",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Security Mechanism Headers",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.4.5",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Security Mechanism Headers",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.4.6",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Security Mechanism Headers",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.4.7",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Security Mechanism Headers",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.4.8",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Security Mechanism Headers",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.5.1",
+      "level": "1",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Origin Separation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.5.2",
+      "level": "1",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Origin Separation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.5.3",
+      "level": "1",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Origin Separation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.5.4",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Origin Separation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.5.5",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Origin Separation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.5.6",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Origin Separation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.5.7",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Origin Separation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.5.8",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Browser Origin Separation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.6.1",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "External Resource Integrity",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.7.1",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Other Browser Security Considerations",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.7.2",
+      "level": "2",
+      "chapter": "Web Frontend Security",
+      "section": "Other Browser Security Considerations",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.7.3",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Other Browser Security Considerations",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.7.4",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Other Browser Security Considerations",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V3.7.5",
+      "level": "3",
+      "chapter": "Web Frontend Security",
+      "section": "Other Browser Security Considerations",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http",
+        "web-local-search-client/src/client"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.1.1",
+      "level": "1",
+      "chapter": "API and Web Service",
+      "section": "Generic Web Service Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.1.2",
+      "level": "2",
+      "chapter": "API and Web Service",
+      "section": "Generic Web Service Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.1.3",
+      "level": "2",
+      "chapter": "API and Web Service",
+      "section": "Generic Web Service Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.1.4",
+      "level": "3",
+      "chapter": "API and Web Service",
+      "section": "Generic Web Service Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.1.5",
+      "level": "3",
+      "chapter": "API and Web Service",
+      "section": "Generic Web Service Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.2.1",
+      "level": "2",
+      "chapter": "API and Web Service",
+      "section": "HTTP Message Structure Validation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.2.2",
+      "level": "3",
+      "chapter": "API and Web Service",
+      "section": "HTTP Message Structure Validation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.2.3",
+      "level": "3",
+      "chapter": "API and Web Service",
+      "section": "HTTP Message Structure Validation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.2.4",
+      "level": "3",
+      "chapter": "API and Web Service",
+      "section": "HTTP Message Structure Validation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.2.5",
+      "level": "3",
+      "chapter": "API and Web Service",
+      "section": "HTTP Message Structure Validation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.3.1",
+      "level": "2",
+      "chapter": "API and Web Service",
+      "section": "GraphQL",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.3.2",
+      "level": "2",
+      "chapter": "API and Web Service",
+      "section": "GraphQL",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.4.1",
+      "level": "1",
+      "chapter": "API and Web Service",
+      "section": "WebSocket",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.4.2",
+      "level": "2",
+      "chapter": "API and Web Service",
+      "section": "WebSocket",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.4.3",
+      "level": "2",
+      "chapter": "API and Web Service",
+      "section": "WebSocket",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V4.4.4",
+      "level": "2",
+      "chapter": "API and Web Service",
+      "section": "WebSocket",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Http"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.1.1",
+      "level": "2",
+      "chapter": "File Handling",
+      "section": "File Handling Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.2.1",
+      "level": "1",
+      "chapter": "File Handling",
+      "section": "File Upload and Content",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.2.2",
+      "level": "1",
+      "chapter": "File Handling",
+      "section": "File Upload and Content",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.2.3",
+      "level": "2",
+      "chapter": "File Handling",
+      "section": "File Upload and Content",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.2.4",
+      "level": "3",
+      "chapter": "File Handling",
+      "section": "File Upload and Content",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.2.5",
+      "level": "3",
+      "chapter": "File Handling",
+      "section": "File Upload and Content",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.2.6",
+      "level": "3",
+      "chapter": "File Handling",
+      "section": "File Upload and Content",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.3.1",
+      "level": "1",
+      "chapter": "File Handling",
+      "section": "File Storage",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.3.2",
+      "level": "1",
+      "chapter": "File Handling",
+      "section": "File Storage",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.3.3",
+      "level": "3",
+      "chapter": "File Handling",
+      "section": "File Storage",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.4.1",
+      "level": "2",
+      "chapter": "File Handling",
+      "section": "File Download",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.4.2",
+      "level": "2",
+      "chapter": "File Handling",
+      "section": "File Download",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V5.4.3",
+      "level": "2",
+      "chapter": "File Handling",
+      "section": "File Download",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "tools/verify_candidate.py",
+        "node-php/src/Storage"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.1.1",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Authentication Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.1.2",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Authentication Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.1.3",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Authentication Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.1",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.2",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.3",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.4",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.5",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.6",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.7",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.8",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.9",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.10",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.11",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.2.12",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Password Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.3.1",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "General Authentication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.3.2",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "General Authentication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.3.3",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "General Authentication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.3.4",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "General Authentication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.3.5",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "General Authentication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.3.6",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "General Authentication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.3.7",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "General Authentication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.3.8",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "General Authentication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.4.1",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Authentication Factor Lifecycle and Recovery",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.4.2",
+      "level": "1",
+      "chapter": "Authentication",
+      "section": "Authentication Factor Lifecycle and Recovery",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.4.3",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Authentication Factor Lifecycle and Recovery",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.4.4",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Authentication Factor Lifecycle and Recovery",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.4.5",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "Authentication Factor Lifecycle and Recovery",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.4.6",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "Authentication Factor Lifecycle and Recovery",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.5.1",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "General Multi-factor authentication requirements",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.5.2",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "General Multi-factor authentication requirements",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.5.3",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "General Multi-factor authentication requirements",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.5.4",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "General Multi-factor authentication requirements",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.5.5",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "General Multi-factor authentication requirements",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.5.6",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "General Multi-factor authentication requirements",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.5.7",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "General Multi-factor authentication requirements",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.5.8",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "General Multi-factor authentication requirements",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.6.1",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Out-of-Band authentication mechanisms",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.6.2",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Out-of-Band authentication mechanisms",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.6.3",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Out-of-Band authentication mechanisms",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.6.4",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "Out-of-Band authentication mechanisms",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.7.1",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "Cryptographic authentication mechanism",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.7.2",
+      "level": "3",
+      "chapter": "Authentication",
+      "section": "Cryptographic authentication mechanism",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.8.1",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Authentication with an Identity Provider",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.8.2",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Authentication with an Identity Provider",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.8.3",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Authentication with an Identity Provider",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V6.8.4",
+      "level": "2",
+      "chapter": "Authentication",
+      "section": "Authentication with an Identity Provider",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privileged web administration is absent; CLI authorization relies on OS credentials"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.1.1",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Session Management Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.1.2",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Session Management Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.1.3",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Session Management Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.2.1",
+      "level": "1",
+      "chapter": "Session Management",
+      "section": "Fundamental Session Management Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.2.2",
+      "level": "1",
+      "chapter": "Session Management",
+      "section": "Fundamental Session Management Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.2.3",
+      "level": "1",
+      "chapter": "Session Management",
+      "section": "Fundamental Session Management Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.2.4",
+      "level": "1",
+      "chapter": "Session Management",
+      "section": "Fundamental Session Management Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.3.1",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Session Timeout",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.3.2",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Session Timeout",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.4.1",
+      "level": "1",
+      "chapter": "Session Management",
+      "section": "Session Termination",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.4.2",
+      "level": "1",
+      "chapter": "Session Management",
+      "section": "Session Termination",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.4.3",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Session Termination",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.4.4",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Session Termination",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.4.5",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Session Termination",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.5.1",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Defenses Against Session Abuse",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.5.2",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Defenses Against Session Abuse",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.5.3",
+      "level": "3",
+      "chapter": "Session Management",
+      "section": "Defenses Against Session Abuse",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.6.1",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Federated Re-authentication",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V7.6.2",
+      "level": "2",
+      "chapter": "Session Management",
+      "section": "Federated Re-authentication",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No public sessions/cookies; local pins are origin-local"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.1.1",
+      "level": "1",
+      "chapter": "Authorization",
+      "section": "Authorization Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.1.2",
+      "level": "2",
+      "chapter": "Authorization",
+      "section": "Authorization Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.1.3",
+      "level": "3",
+      "chapter": "Authorization",
+      "section": "Authorization Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.1.4",
+      "level": "3",
+      "chapter": "Authorization",
+      "section": "Authorization Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.2.1",
+      "level": "1",
+      "chapter": "Authorization",
+      "section": "General Authorization Design",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.2.2",
+      "level": "1",
+      "chapter": "Authorization",
+      "section": "General Authorization Design",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.2.3",
+      "level": "2",
+      "chapter": "Authorization",
+      "section": "General Authorization Design",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.2.4",
+      "level": "3",
+      "chapter": "Authorization",
+      "section": "General Authorization Design",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.3.1",
+      "level": "1",
+      "chapter": "Authorization",
+      "section": "Operation Level Authorization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.3.2",
+      "level": "3",
+      "chapter": "Authorization",
+      "section": "Operation Level Authorization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.3.3",
+      "level": "3",
+      "chapter": "Authorization",
+      "section": "Operation Level Authorization",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.4.1",
+      "level": "2",
+      "chapter": "Authorization",
+      "section": "Other Authorization Considerations",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V8.4.2",
+      "level": "3",
+      "chapter": "Authorization",
+      "section": "Other Authorization Considerations",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No privileged web API; local command/OS permissions"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V9.1.1",
+      "level": "1",
+      "chapter": "Self-contained Tokens",
+      "section": "Token source and integrity",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No bearer/JWT authorization; separately assess signed Protocol data and TUF metadata applicability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V9.1.2",
+      "level": "1",
+      "chapter": "Self-contained Tokens",
+      "section": "Token source and integrity",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No bearer/JWT authorization; separately assess signed Protocol data and TUF metadata applicability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V9.1.3",
+      "level": "1",
+      "chapter": "Self-contained Tokens",
+      "section": "Token source and integrity",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No bearer/JWT authorization; separately assess signed Protocol data and TUF metadata applicability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V9.2.1",
+      "level": "1",
+      "chapter": "Self-contained Tokens",
+      "section": "Token content",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No bearer/JWT authorization; separately assess signed Protocol data and TUF metadata applicability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V9.2.2",
+      "level": "2",
+      "chapter": "Self-contained Tokens",
+      "section": "Token content",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No bearer/JWT authorization; separately assess signed Protocol data and TUF metadata applicability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V9.2.3",
+      "level": "2",
+      "chapter": "Self-contained Tokens",
+      "section": "Token content",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No bearer/JWT authorization; separately assess signed Protocol data and TUF metadata applicability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V9.2.4",
+      "level": "2",
+      "chapter": "Self-contained Tokens",
+      "section": "Token content",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "No bearer/JWT authorization; separately assess signed Protocol data and TUF metadata applicability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.1.1",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "Generic OAuth and OIDC Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.1.2",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "Generic OAuth and OIDC Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.2.1",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Client",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.2.2",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Client",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.2.3",
+      "level": "3",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Client",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.3.1",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Resource Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.3.2",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Resource Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.3.3",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Resource Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.3.4",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Resource Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.3.5",
+      "level": "3",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Resource Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.1",
+      "level": "1",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.2",
+      "level": "1",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.3",
+      "level": "1",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.4",
+      "level": "1",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.5",
+      "level": "1",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.6",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.7",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.8",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.9",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.10",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.11",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.12",
+      "level": "3",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.13",
+      "level": "3",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.14",
+      "level": "3",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.15",
+      "level": "3",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.4.16",
+      "level": "3",
+      "chapter": "OAuth and OIDC",
+      "section": "OAuth Authorization Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.5.1",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OIDC Client",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.5.2",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OIDC Client",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.5.3",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OIDC Client",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.5.4",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OIDC Client",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.5.5",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OIDC Client",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.6.1",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OpenID Provider",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.6.2",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "OpenID Provider",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.7.1",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "Consent Management",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.7.2",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "Consent Management",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V10.7.3",
+      "level": "2",
+      "chapter": "OAuth and OIDC",
+      "section": "Consent Management",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "OAuth/OIDC absent; verify not-applicable assessment against exact requirement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.1.1",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Cryptographic Inventory and Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.1.2",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Cryptographic Inventory and Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.1.3",
+      "level": "3",
+      "chapter": "Cryptography",
+      "section": "Cryptographic Inventory and Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.1.4",
+      "level": "3",
+      "chapter": "Cryptography",
+      "section": "Cryptographic Inventory and Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.2.1",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Secure Cryptography Implementation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.2.2",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Secure Cryptography Implementation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.2.3",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Secure Cryptography Implementation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.2.4",
+      "level": "3",
+      "chapter": "Cryptography",
+      "section": "Secure Cryptography Implementation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.2.5",
+      "level": "3",
+      "chapter": "Cryptography",
+      "section": "Secure Cryptography Implementation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.3.1",
+      "level": "1",
+      "chapter": "Cryptography",
+      "section": "Encryption Algorithms",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.3.2",
+      "level": "1",
+      "chapter": "Cryptography",
+      "section": "Encryption Algorithms",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.3.3",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Encryption Algorithms",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.3.4",
+      "level": "3",
+      "chapter": "Cryptography",
+      "section": "Encryption Algorithms",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.3.5",
+      "level": "3",
+      "chapter": "Cryptography",
+      "section": "Encryption Algorithms",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.4.1",
+      "level": "1",
+      "chapter": "Cryptography",
+      "section": "Hashing and Hash-based Functions",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.4.2",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Hashing and Hash-based Functions",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.4.3",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Hashing and Hash-based Functions",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.4.4",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Hashing and Hash-based Functions",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.5.1",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Random Values",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.5.2",
+      "level": "3",
+      "chapter": "Cryptography",
+      "section": "Random Values",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.6.1",
+      "level": "2",
+      "chapter": "Cryptography",
+      "section": "Public Key Cryptography",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.6.2",
+      "level": "3",
+      "chapter": "Cryptography",
+      "section": "Public Key Cryptography",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.7.1",
+      "level": "3",
+      "chapter": "Cryptography",
+      "section": "In-Use Data Cryptography",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V11.7.2",
+      "level": "3",
+      "chapter": "Cryptography",
+      "section": "In-Use Data Cryptography",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Crypto",
+        "node-php/src/Signing"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.1.1",
+      "level": "1",
+      "chapter": "Secure Communication",
+      "section": "General TLS Security Guidance",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.1.2",
+      "level": "2",
+      "chapter": "Secure Communication",
+      "section": "General TLS Security Guidance",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.1.3",
+      "level": "2",
+      "chapter": "Secure Communication",
+      "section": "General TLS Security Guidance",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.1.4",
+      "level": "3",
+      "chapter": "Secure Communication",
+      "section": "General TLS Security Guidance",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.1.5",
+      "level": "3",
+      "chapter": "Secure Communication",
+      "section": "General TLS Security Guidance",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.2.1",
+      "level": "1",
+      "chapter": "Secure Communication",
+      "section": "HTTPS Communication with External Facing Services",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.2.2",
+      "level": "1",
+      "chapter": "Secure Communication",
+      "section": "HTTPS Communication with External Facing Services",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.3.1",
+      "level": "2",
+      "chapter": "Secure Communication",
+      "section": "General Service to Service Communication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.3.2",
+      "level": "2",
+      "chapter": "Secure Communication",
+      "section": "General Service to Service Communication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.3.3",
+      "level": "2",
+      "chapter": "Secure Communication",
+      "section": "General Service to Service Communication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.3.4",
+      "level": "2",
+      "chapter": "Secure Communication",
+      "section": "General Service to Service Communication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V12.3.5",
+      "level": "3",
+      "chapter": "Secure Communication",
+      "section": "General Service to Service Communication Security",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "node-php/src/Transport"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.1.1",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Configuration Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.1.2",
+      "level": "3",
+      "chapter": "Configuration",
+      "section": "Configuration Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.1.3",
+      "level": "3",
+      "chapter": "Configuration",
+      "section": "Configuration Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.1.4",
+      "level": "3",
+      "chapter": "Configuration",
+      "section": "Configuration Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.2.1",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Backend Communication Configuration",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.2.2",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Backend Communication Configuration",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.2.3",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Backend Communication Configuration",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.2.4",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Backend Communication Configuration",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.2.5",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Backend Communication Configuration",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.2.6",
+      "level": "3",
+      "chapter": "Configuration",
+      "section": "Backend Communication Configuration",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.3.1",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Secret Management",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.3.2",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Secret Management",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.3.3",
+      "level": "3",
+      "chapter": "Configuration",
+      "section": "Secret Management",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.3.4",
+      "level": "3",
+      "chapter": "Configuration",
+      "section": "Secret Management",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.4.1",
+      "level": "1",
+      "chapter": "Configuration",
+      "section": "Unintended Information Leakage",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.4.2",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Unintended Information Leakage",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.4.3",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Unintended Information Leakage",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.4.4",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Unintended Information Leakage",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.4.5",
+      "level": "2",
+      "chapter": "Configuration",
+      "section": "Unintended Information Leakage",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.4.6",
+      "level": "3",
+      "chapter": "Configuration",
+      "section": "Unintended Information Leakage",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V13.4.7",
+      "level": "3",
+      "chapter": "Configuration",
+      "section": "Unintended Information Leakage",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Configuration and deployment templates"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.1.1",
+      "level": "2",
+      "chapter": "Data Protection",
+      "section": "Data Protection Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.1.2",
+      "level": "2",
+      "chapter": "Data Protection",
+      "section": "Data Protection Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.2.1",
+      "level": "1",
+      "chapter": "Data Protection",
+      "section": "General Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.2.2",
+      "level": "2",
+      "chapter": "Data Protection",
+      "section": "General Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.2.3",
+      "level": "2",
+      "chapter": "Data Protection",
+      "section": "General Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.2.4",
+      "level": "2",
+      "chapter": "Data Protection",
+      "section": "General Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.2.5",
+      "level": "3",
+      "chapter": "Data Protection",
+      "section": "General Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.2.6",
+      "level": "3",
+      "chapter": "Data Protection",
+      "section": "General Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.2.7",
+      "level": "3",
+      "chapter": "Data Protection",
+      "section": "General Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.2.8",
+      "level": "3",
+      "chapter": "Data Protection",
+      "section": "General Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.3.1",
+      "level": "1",
+      "chapter": "Data Protection",
+      "section": "Client-side Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.3.2",
+      "level": "2",
+      "chapter": "Data Protection",
+      "section": "Client-side Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V14.3.3",
+      "level": "2",
+      "chapter": "Data Protection",
+      "section": "Client-side Data Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy and storage data inventory"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.1.1",
+      "level": "1",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Secure Coding and Architecture Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.1.2",
+      "level": "2",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Secure Coding and Architecture Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.1.3",
+      "level": "2",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Secure Coding and Architecture Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.1.4",
+      "level": "3",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Secure Coding and Architecture Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.1.5",
+      "level": "3",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Secure Coding and Architecture Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.2.1",
+      "level": "1",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Security Architecture and Dependencies",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.2.2",
+      "level": "2",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Security Architecture and Dependencies",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.2.3",
+      "level": "2",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Security Architecture and Dependencies",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.2.4",
+      "level": "3",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Security Architecture and Dependencies",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.2.5",
+      "level": "3",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Security Architecture and Dependencies",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.3.1",
+      "level": "1",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Defensive Coding",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.3.2",
+      "level": "2",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Defensive Coding",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.3.3",
+      "level": "2",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Defensive Coding",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.3.4",
+      "level": "2",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Defensive Coding",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.3.5",
+      "level": "2",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Defensive Coding",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.3.6",
+      "level": "2",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Defensive Coding",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.3.7",
+      "level": "2",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Defensive Coding",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.4.1",
+      "level": "3",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Safe Concurrency",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.4.2",
+      "level": "3",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Safe Concurrency",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.4.3",
+      "level": "3",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Safe Concurrency",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V15.4.4",
+      "level": "3",
+      "chapter": "Secure Coding and Architecture",
+      "section": "Safe Concurrency",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Storage fault handling and budget enforcement"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.1.1",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Security Logging Documentation",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.2.1",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "General Logging",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.2.2",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "General Logging",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.2.3",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "General Logging",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.2.4",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "General Logging",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.2.5",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "General Logging",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.3.1",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Security Events",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.3.2",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Security Events",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.3.3",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Security Events",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.3.4",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Security Events",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.4.1",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Log Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.4.2",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Log Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.4.3",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Log Protection",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.5.1",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Error Handling",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.5.2",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Error Handling",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.5.3",
+      "level": "2",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Error Handling",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V16.5.4",
+      "level": "3",
+      "chapter": "Security Logging and Error Handling",
+      "section": "Error Handling",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "Privacy-safe errors/diagnostics"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.1.1",
+      "level": "2",
+      "chapter": "WebRTC",
+      "section": "TURN Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.1.2",
+      "level": "3",
+      "chapter": "WebRTC",
+      "section": "TURN Server",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.2.1",
+      "level": "2",
+      "chapter": "WebRTC",
+      "section": "Media",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.2.2",
+      "level": "2",
+      "chapter": "WebRTC",
+      "section": "Media",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.2.3",
+      "level": "2",
+      "chapter": "WebRTC",
+      "section": "Media",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.2.4",
+      "level": "2",
+      "chapter": "WebRTC",
+      "section": "Media",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.2.5",
+      "level": "3",
+      "chapter": "WebRTC",
+      "section": "Media",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.2.6",
+      "level": "3",
+      "chapter": "WebRTC",
+      "section": "Media",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.2.7",
+      "level": "3",
+      "chapter": "WebRTC",
+      "section": "Media",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.2.8",
+      "level": "3",
+      "chapter": "WebRTC",
+      "section": "Media",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.3.1",
+      "level": "2",
+      "chapter": "WebRTC",
+      "section": "Signaling",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    },
+    {
+      "id": "V17.3.2",
+      "level": "2",
+      "chapter": "WebRTC",
+      "section": "Signaling",
+      "status": "REVIEW_REQUIRED",
+      "candidate_scope": [
+        "WebRTC absent; no WebRTC dependency or runtime capability"
+      ],
+      "human_review": "OPEN"
+    }
+  ]
+}

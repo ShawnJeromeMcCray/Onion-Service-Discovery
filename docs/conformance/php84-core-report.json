@@ -1,20 +1,20 @@
 {
   "profile": "DRAFT_CORE",
   "status": "PASS",
-  "generated_at": "2026-10-12T20:43:07.519847+00:00",
-  "fixture_count_per_implementation": 134,
+  "generated_at": "2026-10-13T09:37:59.793213+00:00",
+  "fixture_count_per_implementation": 202,
   "fixture_hashes": {
-    "browser-dataset.json": "452c59c35b14d9dbc380ee2d1dd06ca054adf7e593e30d2fff2d9426cec36d3c",
+    "browser-dataset.json": "a95459b99b24c4c34be336299fdd77fbad75eb8d6f937148bb176d4976028c14",
     "canonical-json.json": "2a4b9d19cdd0f6557bd1a27b7ce6442370be53fed777a4e769db71b4bd723f22",
     "identity-sequences.json": "f4dc1aa4c4cd3450ac85fcefb569305bff04aee82d046c57544691a646d3f507",
     "onion-addresses.json": "6bc903a317b7532cf18fec7d88e662004667a2700cb7c6805b397e0dd46db3ef",
-    "signed-records.json": "f8e7691358c7554eae3cd9d1ead6063a120bc55d2ba6e6ff081652d08ebe179b",
+    "signed-records.json": "7207bed7413cab5baffec56bf4315391008d4b4e013a9ece1c7124ab46ed2dec",
     "strict-json.json": "39bb19e02002ac9f23e138e8ff93612d1ba502456f649f77db6f3e03e57fc583"
   },
   "results": [
     {
       "implementation": "PHP",
-      "pass": 134,
+      "pass": 202,
       "fail": 0,
       "skip": 0,
       "checks": [
@@ -320,6 +320,278 @@
         },
         {
           "id": "manifest-optional-fields-absent",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-adult",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-archives",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-art",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-audio",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-blogs",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-books",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-business",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-commerce",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-communication",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-community",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-directories",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-documentation",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-education",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-entertainment",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-files",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-finance",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-forums",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-games",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-health",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-hosting",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-images",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-journalism",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-legal",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-media",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-music",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-other",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-politics",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-privacy",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-research",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-search",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-security",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-services",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-social",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-software",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-technology",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-tools",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-video",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-wiki",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-unknown",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-case",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-unicode",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-long",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-order",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-private",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-grandfathered",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-script-region",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-numeric-region",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-variant",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-extension",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-extensions",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-private-tail",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-reserved",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-extlang",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-case",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-short",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-long-primary",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-variant-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-extension-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-empty-extension",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-empty-private",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-trailing",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-newline",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-unicode",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-numeric-primary",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-too-many-extlangs",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-overlong",
           "status": "PASS"
         },
         {
@@ -558,7 +830,7 @@
     },
     {
       "implementation": "TypeScript",
-      "pass": 134,
+      "pass": 202,
       "fail": 0,
       "skip": 0,
       "checks": [
@@ -864,6 +1136,278 @@
         },
         {
           "id": "manifest-optional-fields-absent",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-adult",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-archives",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-art",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-audio",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-blogs",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-books",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-business",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-commerce",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-communication",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-community",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-directories",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-documentation",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-education",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-entertainment",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-files",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-finance",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-forums",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-games",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-health",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-hosting",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-images",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-journalism",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-legal",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-media",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-music",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-other",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-politics",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-privacy",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-research",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-search",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-security",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-services",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-social",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-software",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-technology",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-tools",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-video",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-wiki",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-unknown",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-case",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-unicode",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-long",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-order",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-private",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-grandfathered",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-script-region",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-numeric-region",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-variant",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-extension",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-extensions",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-private-tail",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-reserved",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-extlang",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-case",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-short",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-long-primary",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-variant-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-extension-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-empty-extension",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-empty-private",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-trailing",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-newline",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-unicode",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-numeric-primary",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-too-many-extlangs",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-overlong",
           "status": "PASS"
         },
         {
@@ -1102,7 +1646,7 @@
     },
     {
       "implementation": "Python",
-      "pass": 134,
+      "pass": 202,
       "fail": 0,
       "skip": 0,
       "checks": [
@@ -1408,6 +1952,278 @@
         },
         {
           "id": "manifest-optional-fields-absent",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-adult",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-archives",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-art",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-audio",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-blogs",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-books",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-business",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-commerce",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-communication",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-community",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-directories",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-documentation",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-education",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-entertainment",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-files",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-finance",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-forums",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-games",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-health",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-hosting",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-images",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-journalism",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-legal",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-media",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-music",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-other",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-politics",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-privacy",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-research",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-search",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-security",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-services",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-social",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-software",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-technology",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-tools",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-video",
+          "status": "PASS"
+        },
+        {
+          "id": "category-valid-wiki",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-unknown",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-case",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-unicode",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-long",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-overflow",
+          "status": "PASS"
+        },
+        {
+          "id": "category-invalid-order",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-private",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-grandfathered",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-script-region",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-numeric-region",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-variant",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-extension",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-extensions",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-private-tail",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-reserved",
+          "status": "PASS"
+        },
+        {
+          "id": "language-valid-extlang",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-case",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-short",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-long-primary",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-variant-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-extension-duplicate",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-empty-extension",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-empty-private",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-trailing",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-newline",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-unicode",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-numeric-primary",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-too-many-extlangs",
+          "status": "PASS"
+        },
+        {
+          "id": "language-invalid-overlong",
           "status": "PASS"
         },
         {
@@ -1649,5 +2465,6 @@
     "Not Protocol Stable",
     "No NODE/CLIENT network profile",
     "Human crypto approval remains open"
-  ]
+  ],
+  "scope_note": "Current draft implementation and synthetic fixtures; full updated-source conformance, historical protocol transition and human freeze remain incomplete."
 }

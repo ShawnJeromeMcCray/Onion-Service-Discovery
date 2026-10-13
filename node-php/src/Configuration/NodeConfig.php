@@ -20,9 +20,12 @@ final readonly class NodeConfig
     public static function load(string $path): self
     {
         if (str_contains($path, '://') || is_link($path) || !is_file($path) || filesize($path) > 16384) { throw new ProtocolException('CONFIGURATION_UNAVAILABLE'); }
-        $bytes = file_get_contents($path); if ($bytes === false) { throw new ProtocolException('CONFIGURATION_UNAVAILABLE'); }
+        $publicRoot = realpath(dirname(__DIR__, 2) . '/public');
+        $realConfig = realpath($path);
+        if ($realConfig === false || ($publicRoot !== false && str_starts_with($realConfig, $publicRoot . '/'))) { throw new ProtocolException('PRIVATE_PATH_IN_WEBROOT'); }
+        $bytes = file_get_contents($path, false, null, 0, 16385); if ($bytes === false || strlen($bytes) > 16384) { throw new ProtocolException('CONFIGURATION_UNAVAILABLE'); }
         $v = StrictJson::parse($bytes, 16384);
-        if (count(get_object_vars($v)) !== 9 || array_diff(array_keys(get_object_vars($v)), ['configuration_version','role','storage','export_path','node','features','transport','sources','allowed_client_origins']) !== [] || ($v->configuration_version ?? null) !== 1 || !in_array($v->role ?? null, ['node','client-host','combined'], true)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
+        if (count(get_object_vars($v)) !== 9 || array_diff(array_keys(get_object_vars($v)), ['configuration_version','role','storage','export_path','node','features','transport','sources','allowed_client_origins']) !== [] || ($v->configuration_version ?? null) !== 1 || !in_array($v->role ?? null, ['node','client-host','combined','publisher'], true)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
         self::shape($v->storage, ['backend','path']); self::shape($v->node, ['onion','key_path']); self::shape($v->transport, ['proxy_host','proxy_port','timeout_ms']);
         self::shape($v->features, ['publish_service','mirror_directory','discover_services','sync_with_peers','server_search']);
         foreach (get_object_vars($v->features) as $flag) { if (!is_bool($flag)) { throw new ProtocolException('CONFIGURATION_INVALID'); } }
@@ -39,6 +42,9 @@ final readonly class NodeConfig
         if (count(array_unique($v->allowed_client_origins)) !== count($v->allowed_client_origins)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
         if ($v->role === 'client-host') {
             if ($v->node->onion !== null || $v->node->key_path !== null || array_filter(get_object_vars($v->features)) !== []) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        } elseif ($v->role === 'publisher') {
+            if (!is_string($v->node->onion) || $v->node->key_path !== null || $v->features->mirror_directory || $v->features->discover_services || $v->features->sync_with_peers || $v->allowed_client_origins !== []) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+            OnionAddress::parse($v->node->onion);
         } else {
             if (!is_string($v->node->onion)) { throw new ProtocolException('CONFIGURATION_INVALID'); } OnionAddress::parse($v->node->onion); self::path($v->node->key_path);
         }
@@ -50,7 +56,11 @@ final readonly class NodeConfig
         }
         return new self($v->role, $v->storage->backend, $v->storage->path, $v->export_path, $v->node->onion, $v->node->key_path, get_object_vars($v->features), $v->sources, $v->allowed_client_origins, $v->transport->proxy_host, $v->transport->proxy_port, $v->transport->timeout_ms);
     }
-    public function store(bool $create = false, bool $readOnly = false): StorageBackend { return $this->backend === 'filesystem' ? new FilesystemStore($this->storagePath, create: $create, readOnly: $readOnly) : new SQLiteStore($this->storagePath, create: $create, readOnly: $readOnly); }
+    public function store(bool $create = false, bool $readOnly = false): StorageBackend
+    {
+        if ($this->role === 'publisher') { throw new ProtocolException('STORAGE_NOT_REQUIRED_FOR_PUBLISHER'); }
+        return $this->backend === 'filesystem' ? new FilesystemStore($this->storagePath, create: $create, readOnly: $readOnly) : new SQLiteStore($this->storagePath, create: $create, readOnly: $readOnly);
+    }
     public function transport(): TorTransport { return new TorTransport($this->proxyHost, $this->proxyPort, $this->timeout); }
     /**
      * @param array<array-key, mixed> $keys

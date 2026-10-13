@@ -1,16 +1,16 @@
 # Implementation and release status
 
 The baseline repository contained only a one-line README. The implementation is
-on `implementation/repository-foundation`; incremental PRs #1–#3 have been merged
+on `implementation/repository-foundation`; incremental PRs #1–#6 have been merged
 by the repository owner. Subsequent development continues on that branch. The project now contains
 an executable development Node, offline Service signer, separate Client Host,
 locally verifying/searching browser client and mature offline release verifier.
 There is no approved production release.
 
 The 2026-10-13 refresh found 55 active sources: 43 updated, five added, seven
-unchanged. The full updated corpus is imported but its complete review and
-implementation alignment remain pending. Existing conformance evidence applies
-to the earlier draft, not the revised specifications. See
+unchanged. The full updated corpus has been read in the mandatory order.
+Implementation alignment remains partial. Historical reports describe the earlier draft. Current reports cover specific
+updated draft behavior, without full revised-specification conformance. See
 [source refresh](specification-refresh.md).
 
 The earlier 50-source baseline was read and imported with
@@ -23,20 +23,20 @@ required decisions/reviews remain unresolved.
 
 ## Executed development evidence
 
-- 134 independent black-box cases pass per PHP/TypeScript/Python, no failures or
+- 202 independent black-box cases pass per PHP/TypeScript/Python, no failures or
   skips, including exact signed bytes, absent optional metadata, strict Ed25519
   edge cases and identity conflict/rotation/migration sequences.
-- The shared unit/integration harness has 33 passing checks on digest-pinned
+- The shared unit/integration harness has 36 passing checks on digest-pinned
   PHP 8.5.11 and PHP 8.4.26, including PHPStan level 8, both storage backends,
-  read-only diagnostics, staged private backup, quotas and eight process exits.
+  read-only diagnostics, staged private backup, quotas, journal-first commit recovery and explicit historical-format migration.
   Separate actual ENOSPC checks pass on isolated 2 MiB tmpfs on both PHP minors
   and both backends, preserving record/cursor and resuming after space restoration.
 - The seeded differential malformed-input run rejects 1,024 inputs per language
   with matching error classifications. This is smoke fuzzing, not exhaustive
   or coverage-guided assurance.
-- Three controlled Chromium browser tests verify signed three-source import,
+- Four controlled Chromium browser tests verify signed three-source import,
   query isolation, text-only hostile metadata, withdrawal, local pin handling,
-  blocked profile storage and continued local search after a failed refresh.
+  blocked profile storage, local category/adult filters and continued local search after a failed refresh.
   They are not Tor Browser desktop/Android evidence.
 - The finite TLA+ safety model passes both network outcomes and rejects a
   deliberate rollback mutation. Human model review and unbounded/liveness
@@ -61,6 +61,21 @@ ENOSPC and unprovisioned-package diagnostic checks extend that evidence; their
 exact latest CI run must be checked separately.
 
 ## Available implementation
+
+Current additions include publisher-only setup and safe server-rendered status,
+a draft 38-category registry and precise lowercase RFC 5646 validation in three
+languages, local filters and result-group pagination, persistent candidate
+admission/work budgets shared with PeerSync, bounded pinned peers, and syntax
+sink checks. Ten thousand rotated sources cannot reset the tested global quota.
+A separate 100,001-row presentation test preserves all grouped result identities;
+it does not measure verified signature import or live-network capacity.
+
+FilesystemStore format 2 obeys durable journal COMMIT before HEAD. Explicit
+format-1 migration preserves old accepted records/cursors, including interrupted
+legacy commits, and rejects corrupted objects before modification. See ADR 004.
+Category/language tightening has no automatic continuity-preserving migration;
+PCP-001 remains a release blocker. Security inventories cover 345 ASVS requirements
+and current OWASP/CWE classes but still require applicability/evidence review.
 
 Strict bounded parsing/canonicalization, six signed-record schemas and mature
 crypto feed immutable verified records and deterministic identity graphs. The

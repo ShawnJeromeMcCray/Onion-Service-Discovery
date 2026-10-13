@@ -9,6 +9,7 @@ final class FilesystemStore implements StorageBackend
     private readonly string $root;
     private readonly StorageLimits $limits;
     private readonly ?\Closure $faultHook;
+    private int $formatVersion = 2;
 
     public function __construct(string $directory, ?StorageLimits $limits = null, bool $create = false, ?\Closure $faultHook = null, private readonly bool $readOnly = false)
     {
@@ -42,19 +43,50 @@ final class FilesystemStore implements StorageBackend
                 $bytes = StorageJson::encode(StorageTransaction::emptyState());
                 $hash = hash('sha256', $bytes);
                 $this->writeImmutable($this->checkpointPath($hash), $bytes);
-                $this->atomicWrite($this->root . '/storage-version', '1');
+                $this->atomicWrite($this->root . '/storage-version', '2');
                 $this->atomicWrite($this->root . '/HEAD', StorageJson::encode(['generation' => 0, 'checkpoint' => $hash]));
                 $this->atomicWrite($this->root . '/journal.log', '');
             }
-            if ($this->readBounded($this->root . '/storage-version', 16) !== '1') {
+            $version = $this->readBounded($this->root . '/storage-version', 16);
+            if (!in_array($version, ['1','2'], true)) {
                 throw new StorageException('STORAGE_VERSION_UNSUPPORTED');
             }
-            if ($this->readOnly) { $this->loadCheckpoint($this->head()); }
+            $this->formatVersion = (int)$version;
+            if (!$this->readOnly && $this->formatVersion === 1) { throw new StorageException('STORAGE_MIGRATION_REQUIRED'); }
+            if ($this->readOnly && $this->formatVersion === 1) { $this->loadCheckpoint($this->head()); }
+            elseif ($this->readOnly) { $this->recover(false); }
             else { $this->recover(); }
         });
     }
 
     public function backendName(): string { return 'filesystem'; }
+    public function formatVersion(): int { return $this->formatVersion; }
+
+    /** Explicit local migration preserves format-1 recovery semantics before switching formats.
+     * @return array<string,mixed>
+     */
+    public static function migrateFormat(string $directory, ?\Closure $faultHook = null): array
+    {
+        $store = new self($directory, faultHook: $faultHook, readOnly: true);
+        return $store->withLock(function () use ($store): array {
+            $version = $store->readBounded($store->root . '/storage-version', 16);
+            if ($version === '2') { $store->recover(false); return ['status' => 'UNCHANGED', 'backend_format' => 2]; }
+            if ($version !== '1') { throw new StorageException('STORAGE_VERSION_UNSUPPORTED'); }
+            $store->formatVersion = 1;
+            $head = $store->head();
+            $state = $store->loadCheckpoint($head);
+            foreach ($state['records'] as $metadata) {
+                $bytes = $store->readBounded($store->objectPath($metadata['object_hash']), 65536);
+                if (!hash_equals($metadata['object_hash'], hash('sha256', $bytes))) { throw new StorageException('STORAGE_CORRUPT'); }
+            }
+            $store->recover(true);
+            $store->fault('after_legacy_recovery');
+            $store->atomicWrite($store->root . '/storage-version', '2');
+            $store->formatVersion = 2;
+            $store->fault('after_format_switch');
+            return ['status' => 'MIGRATED', 'from_format' => 1, 'backend_format' => 2, 'generation' => $state['generation'], 'records' => count($state['records']), 'evidence_rewritten' => false];
+        }, forceWriter: true);
+    }
 
     public function transaction(callable $mutation): mixed
     {
@@ -92,10 +124,10 @@ final class FilesystemStore implements StorageBackend
             }
             $last = $this->appendJournal('PREPARE', $nextHead, $previousHead['checkpoint'], $journal['last_hash']);
             $this->fault('after_prepare');
-            $this->atomicWrite($this->root . '/HEAD', StorageJson::encode($nextHead));
-            $this->fault('after_head');
             $this->appendJournal('COMMIT', $nextHead, $previousHead['checkpoint'], $last);
             $this->fault('after_commit');
+            $this->atomicWrite($this->root . '/HEAD', StorageJson::encode($nextHead));
+            $this->fault('after_head');
             $this->cleanCheckpoints($previousHead['checkpoint'], $checkpointHash);
             return $result;
         });
@@ -193,7 +225,7 @@ final class FilesystemStore implements StorageBackend
     }
 
     /**
-     * HEAD is the commit point. A complete PREPARE is rolled forward or aborted after a crash.
+     * Format 2 commits in the journal before HEAD; format 1 is read/migrated explicitly.
      * @return array<array-key, mixed>
      */
     private function recover(bool $repair = true): array
@@ -210,6 +242,7 @@ final class FilesystemStore implements StorageBackend
         }
         $lastHash = str_repeat('0', 64);
         $expected = null;
+        $lastCommittedPrevious = null;
         $pending = null;
         $partialOffset = null;
         try {
@@ -254,6 +287,7 @@ final class FilesystemStore implements StorageBackend
                     $pending = ['next' => $next, 'previous' => $expected];
                 } elseif (in_array($entry['phase'], ['COMMIT', 'ABORT'], true) && $pending !== null && $pending['next'] === $next && $entry['previous_checkpoint'] === $pending['previous']['checkpoint']) {
                     if ($entry['phase'] === 'COMMIT') {
+                        $lastCommittedPrevious = $pending['previous']['checkpoint'];
                         $expected = $next;
                     }
                     $pending = null;
@@ -265,10 +299,18 @@ final class FilesystemStore implements StorageBackend
             fclose($stream);
         }
         if ($pending !== null) {
-            if ($head !== $pending['next'] && $head !== $pending['previous']) {
+            if (($this->formatVersion === 2 && $head !== $pending['previous']) || ($head !== $pending['next'] && $head !== $pending['previous'])) {
                 throw new StorageException('STORAGE_CORRUPT');
             }
-        } elseif (($expected !== null && $head !== $expected) || ($expected === null && $head['generation'] !== 0)) {
+        } elseif ($expected !== null && $head !== $expected) {
+            if ($this->formatVersion !== 2 || $head['generation'] + 1 !== $expected['generation']) { throw new StorageException('STORAGE_CORRUPT'); }
+            // Only a valid committed successor can repair a lagging HEAD.
+            if (($lastCommittedPrevious ?? null) !== $head['checkpoint']) { throw new StorageException('STORAGE_CORRUPT'); }
+            $this->loadCheckpoint($expected);
+            if (!$repair) { throw new StorageException('STORAGE_RECOVERY_REQUIRED'); }
+            $this->atomicWrite($this->root . '/HEAD', StorageJson::encode($expected));
+            $head = $expected;
+        } elseif ($expected === null && $head['generation'] !== 0) {
             throw new StorageException('STORAGE_CORRUPT');
         }
         if (!$repair && ($partialOffset !== null || $pending !== null)) { throw new StorageException('STORAGE_RECOVERY_REQUIRED'); }
@@ -280,7 +322,7 @@ final class FilesystemStore implements StorageBackend
             fclose($stream);
         }
         if ($pending !== null) {
-            $phase = $head === $pending['next'] ? 'COMMIT' : 'ABORT';
+            $phase = $this->formatVersion === 1 && $head === $pending['next'] ? 'COMMIT' : 'ABORT';
             $lastHash = $this->appendJournal($phase, $pending['next'], $pending['previous']['checkpoint'], $lastHash);
         }
         return ['last_hash' => $lastHash];
@@ -421,19 +463,20 @@ final class FilesystemStore implements StorageBackend
         }
     }
 
-    private function withLock(callable $action): mixed
+    private function withLock(callable $action, bool $forceWriter = false): mixed
     {
         $path = $this->root . '/locks/writer.lock';
         if (is_link($path)) {
             throw new StorageException('STORAGE_CORRUPT');
         }
-        $lock = fopen($path, $this->readOnly ? 'rb' : 'c+b');
+        $readLock = $this->readOnly && !$forceWriter;
+        $lock = fopen($path, $readLock ? 'rb' : 'c+b');
         if ($lock === false) {
             throw new StorageException('STORAGE_UNAVAILABLE');
         }
-        if (!$this->readOnly) { chmod($path, 0600); }
+        if (!$readLock) { chmod($path, 0600); }
         $deadline = hrtime(true) + $this->limits->lockWaitMilliseconds * 1000000;
-        while (!flock($lock, ($this->readOnly ? LOCK_SH : LOCK_EX) | LOCK_NB)) {
+        while (!flock($lock, ($readLock ? LOCK_SH : LOCK_EX) | LOCK_NB)) {
             if (hrtime(true) >= $deadline) {
                 fclose($lock);
                 throw new StorageException('STORAGE_BUSY');

@@ -15,8 +15,8 @@ Tor connectivity, scheduler, backup freshness, deployed headers and independent
 security/release review are not inferred from local configuration. Use separate
 transport/browser tests and operator acceptance to establish those properties.
 The web front controller also opens a read-only store; an HTTP visit cannot
-trigger operational transactions or journal repair. HEAD's validated immutable
-checkpoint remains the filesystem commit point, including before journal repair.
+trigger operational transactions or journal repair. Filesystem format 2 uses the journal COMMIT as durable authority before HEAD.
+Read-only opening refuses unresolved recovery rather than repairing it.
 
 `storage:check` is a separate explicit integrity/recovery command.
 `storage:backup`/`backup:create` captures trusted private records and operational
@@ -77,3 +77,14 @@ Use the normal candidate worker for stored continuity checks and observations.
 An unprovisioned source package returns typed `RUNTIME_DEPENDENCIES_MISSING`
 with exit 3 and no raw include warning. Install the locked Composer runtime
 dependencies before invoking application commands.
+
+`init CONFIG ONION [--publish]` creates a publisher-only configuration in an
+existing private directory, refuses overwrite, creates no keys/storage/Manifest,
+and makes no network request. `publisher:status CONFIG` is read-only and uses
+the public status page's fact derivation. See publish-only.md for consequences.
+
+`storage:migrate filesystem PATH` explicitly migrates native format 1 to 2.
+Stop workers and make a tested backup with the historical release before migrating.
+Legacy HEAD-published transactions retain their old interpretation; new writes
+are refused until migration. Logical storage schema remains 1 and signed records
+are not rewritten. `storage:migrate sqlite PATH` checks the unchanged schema.

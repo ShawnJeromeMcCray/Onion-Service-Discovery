@@ -1,0 +1,272 @@
+{
+  "registry_version": 1,
+  "status": "DRAFT_NEEDS_D053_APPROVAL",
+  "categories": [
+    {
+      "id": "adult",
+      "canonical_label": "Adult",
+      "description": "Adult-oriented sexual/erotic content or services intended for adults. This identifier is a content category, not a legal determination.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "archives",
+      "canonical_label": "Archives",
+      "description": "Historical archives, mirrors, preserved datasets or collections.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "art",
+      "canonical_label": "Art",
+      "description": "Visual arts, creative work, design and artistic projects.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "audio",
+      "canonical_label": "Audio",
+      "description": "Audio content, radio, podcasts, spoken audio and sound.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "blogs",
+      "canonical_label": "Blogs",
+      "description": "Blogs, personal publishing and journals.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "books",
+      "canonical_label": "Books",
+      "description": "Books, literature, long-form texts and publishing.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "business",
+      "canonical_label": "Business",
+      "description": "Business information, organizations and commercial operations not primarily a storefront.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "commerce",
+      "canonical_label": "Commerce",
+      "description": "Shops, marketplaces, product/service sales and commercial listings.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "communication",
+      "canonical_label": "Communication",
+      "description": "Messaging, email, chat, contact and communications services.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "community",
+      "canonical_label": "Community",
+      "description": "General communities, groups and community hubs.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "directories",
+      "canonical_label": "Directories",
+      "description": "Structured listings or directories of resources/services.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "documentation",
+      "canonical_label": "Documentation",
+      "description": "Technical/manual/reference documentation.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "education",
+      "canonical_label": "Education",
+      "description": "Courses, tutorials, educational resources and teaching.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "entertainment",
+      "canonical_label": "Entertainment",
+      "description": "General entertainment not more specifically categorized.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "files",
+      "canonical_label": "Files",
+      "description": "File hosting, file sharing, downloads and repositories of files.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "finance",
+      "canonical_label": "Finance",
+      "description": "Financial information/services, accounting, payments or finance-related content. Category does not imply regulation or legitimacy.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "forums",
+      "canonical_label": "Forums",
+      "description": "Threaded discussion boards and forum-style communities.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "games",
+      "canonical_label": "Games",
+      "description": "Games, gaming communities and game-related services.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "health",
+      "canonical_label": "Health",
+      "description": "Health, wellness or medical information/services. Category does not establish medical reliability.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "hosting",
+      "canonical_label": "Hosting",
+      "description": "Hosting, infrastructure, network/server services and related tooling.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "images",
+      "canonical_label": "Images",
+      "description": "Image galleries, photography and image-centric services.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "journalism",
+      "canonical_label": "Journalism",
+      "description": "Journalism, reporting, newsrooms and current-affairs publications.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "legal",
+      "canonical_label": "Legal",
+      "description": "Legal information, legal resources or legal-service information. Category does not establish attorney status or jurisdictional validity.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "media",
+      "canonical_label": "Media",
+      "description": "General mixed-media publishing.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "music",
+      "canonical_label": "Music",
+      "description": "Music-focused content/services.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "politics",
+      "canonical_label": "Politics",
+      "description": "Political discussion, organizations, commentary, campaigning or policy content. Category is descriptive only and not an endorsement.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "privacy",
+      "canonical_label": "Privacy",
+      "description": "Privacy-focused information, software or services.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "research",
+      "canonical_label": "Research",
+      "description": "Research, academic/scientific projects, datasets and publications.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "search",
+      "canonical_label": "Search",
+      "description": "Search engines, discovery services and searchable indexes.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "security",
+      "canonical_label": "Security",
+      "description": "Cybersecurity, defensive security, vulnerability research and security tooling.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "services",
+      "canonical_label": "Services",
+      "description": "General online services not fitting a narrower functional category.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "social",
+      "canonical_label": "Social",
+      "description": "Social-networking or social-feed services.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "software",
+      "canonical_label": "Software",
+      "description": "Software projects, packages, applications and source/software distribution.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "technology",
+      "canonical_label": "Technology",
+      "description": "General technology content and technical communities.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "tools",
+      "canonical_label": "Tools",
+      "description": "Utilities, online tools and functional web applications.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "video",
+      "canonical_label": "Video",
+      "description": "Video hosting, streaming and video-centric publishing.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "wiki",
+      "canonical_label": "Wiki",
+      "description": "Wiki-style collaborative knowledge bases.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    },
+    {
+      "id": "other",
+      "canonical_label": "Other",
+      "description": "Broad fallback only when no registered category reasonably applies.",
+      "status": "PROVISIONAL",
+      "introduced": 1
+    }
+  ]
+}

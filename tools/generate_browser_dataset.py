@@ -23,8 +23,8 @@ f=json.loads((ROOT/'protocol/test-vectors/signed-records.json').read_text())
 records=[f['stories']['genesis'],f['stories']['successor']]
 for label,name,description,categories,languages in [
     ('climate','Synthetic Climate Archive','Fictional climate research and public data.',['research'],['en']),
-    ('html','<img src=x onerror=alert(1)>','<script>alert("fixture")</script> — text only.',['testing'],['en']),
-    ('withdrawn','Synthetic Withdrawn Service','Fictional service withdrawal example.',['testing'],['de']),
+    ('html','<img src=x onerror=alert(1)>','<script>alert("fixture")</script> — text only.',['other'],['en']),
+    ('withdrawn','Synthetic Withdrawn Service','Fictional service withdrawal example.',['other'],['de']),
 ]:
     record=copy.deepcopy(f['stories']['genesis']);record.update(onion=onion(label),service_identity_public_key=public(key('browser-service-'+label)),revision=1,previous_manifest_hash=None)
     record['service'].update(name=name,description=description,categories=categories,languages=languages)

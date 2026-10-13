@@ -10,7 +10,7 @@
       "url": "https://docs.google.com/document/d/1jEGUdIe17knsWwzHhIRo5LyBwnVj8Czfy5zkFxs-SSw/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:27:04.726Z",
       "sha256": "83f593109180aa47b74caeeb54cc1942acd3cb541b7cb7f6df9f83597e65742e",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 0
     },
     {
@@ -19,7 +19,7 @@
       "url": "https://docs.google.com/document/d/1iavEaLZX4iFR0taaQ4jp_O-5mXLeTDPmof4x1prVrkA/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:33:40.863Z",
       "sha256": "efe11a10585f7b616c7f25fbafb0a2ac6d7017ca316d11b3c8499ba92aff8f98",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 1
     },
     {
@@ -28,7 +28,7 @@
       "url": "https://docs.google.com/document/d/1TBZrr-vBQMdKnz43x06yyx38PoSU1ocKaG5OqxrVWfg/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:34:20.687Z",
       "sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 2
     },
     {
@@ -37,7 +37,7 @@
       "url": "https://docs.google.com/document/d/1A8nFe3xFiF4w3eYQsAkLoXhFovKb07tXo5rzTfP7YFY/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:28:02.138Z",
       "sha256": "b2da0ffc63cc2c72e031ebe1b8c1ecdb6d17036bcfc74ef78b6159b32ce7bd93",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 3
     },
     {
@@ -46,7 +46,7 @@
       "url": "https://docs.google.com/document/d/1jrJyPDRXFChFXSPe9SgOldeVYOcZ-GTmUzH4WmZW64o/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:28:58.271Z",
       "sha256": "dc53cd57e27c1832a15cfa295f00ef8ff84f3ddbd6f211cc320db2bdce357c3c",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 4
     },
     {
@@ -55,7 +55,7 @@
       "url": "https://docs.google.com/document/d/12wZrysCvp9G7pzYsHw8w8rHQ_bxLxGEpQ-58SjaitDo/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:29:06.451Z",
       "sha256": "60f597a0de457158c5608c9539f6af243789795258cb131c279286fa8f853184",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 5
     },
     {
@@ -64,7 +64,7 @@
       "url": "https://docs.google.com/document/d/1vfn7j1WMWNBm3DA1KIsRhU8zyGtm_FdeyCtybmI1mCQ/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:29:09.058Z",
       "sha256": "0b8fb46e39cda13ec1f86f5df79135211b9392564fb633b53951e35b0fd905fb",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 6
     },
     {
@@ -73,7 +73,7 @@
       "url": "https://docs.google.com/document/d/1R3I1SbEphWuKyJK4XGx5acf_6Tid3yPpxfqtPDATXBQ/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:30:16.394Z",
       "sha256": "21d85339b64f20e0b0a08e40d9b46e987c2c08386a28114e054c7ebe3f73e99c",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 7
     },
     {
@@ -82,7 +82,7 @@
       "url": "https://docs.google.com/document/d/1UH4HobtYVGVG10nTY8De4C7X-uFIGha1-Cc4XgMigtw/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:30:22.337Z",
       "sha256": "f4ab1e38c27b36b393d3308c229eadb0d0b7f54e481c7fe9182c925a88d4bb0d",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 8
     },
     {
@@ -91,7 +91,7 @@
       "url": "https://docs.google.com/document/d/13ceVELv_g4BJHeAldwPbPQ6MJPo_NJCGrqUNg2qkMeU/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:30:25.241Z",
       "sha256": "9451ec7730edd9a04cd7e83368a97055546e2185fc158d6f2d3bc8782ad3719b",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 9
     },
     {
@@ -100,7 +100,7 @@
       "url": "https://docs.google.com/document/d/1t4pj8ohdbf9nAi9JwFuFxkVQK6IsSHCcjIC7VVTcFsg/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T14:45:14.714Z",
       "sha256": "b9e4b6456fc19e721be01f27fde7c8e621cb7614b8c7ab8bd89af4a0980d99d2",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 10
     },
     {
@@ -109,7 +109,7 @@
       "url": "https://docs.google.com/document/d/1cULvv2DZXskb5Gg_D2al7biY1xNFUf4OvyWrIQ5DAX0/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:30:28.128Z",
       "sha256": "14c804f3a0fddac2e97b600d8e9418bd8403e5dd91af30f1f7ca25b15f480381",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 11
     },
     {
@@ -118,7 +118,7 @@
       "url": "https://docs.google.com/document/d/1Hwzdbl4RUEkUJkTDqkc61nHu-Jjnux5vMJYvGoNhVR0/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:27:01.953Z",
       "sha256": "ae8f980e7c5fc1f29d18f622c334583208d6a4ac07d6809873f4fd5b20837630",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 12
     },
     {
@@ -127,7 +127,7 @@
       "url": "https://docs.google.com/document/d/1gQrpvdulg1TMiiAHo6TPGQvhNdH5Qw99ByS-SA-3sLg/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T18:12:59.759Z",
       "sha256": "dfa5802434e31a960b1646bbbf12eb81e25f533dd2d8dc4a5113c202cdb94eda",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 13
     },
     {
@@ -136,7 +136,7 @@
       "url": "https://docs.google.com/document/d/1UEeaBpx6Wnnjujk5dzELF3rxYgDc0Ci2eLomxzc6_10/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:31:07.710Z",
       "sha256": "8714d495f588c99f9ee996a52c86adbd7bf158d3bd1f3c8c8e29fcd446494358",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 14
     },
     {
@@ -145,7 +145,7 @@
       "url": "https://docs.google.com/document/d/1-IqYDKd5RLl3bVUA5BjKoe94bUohVXpGBKtFQIn_Rec/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T14:29:16.326Z",
       "sha256": "cbb1c2a3df2cbd1582cbb85d671790ab93fdeb974bcf41120ec87a6edea4b680",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 15
     },
     {
@@ -154,7 +154,7 @@
       "url": "https://docs.google.com/document/d/1YlAsPNdAwUmY6EjJDSRSEuo0pmuYSol84gwxezAmqlI/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:28:05.077Z",
       "sha256": "25b026580b2b31bbc89c0dd682ab0d4a84fc152f37ad9958d706c57c56337305",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 16
     },
     {
@@ -163,7 +163,7 @@
       "url": "https://docs.google.com/document/d/1vcK0HW3newL3tgIDHdrI8oieSANKXRvB42tvosn3HoY/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:26:50.382Z",
       "sha256": "1a26ab7a5bee095a7bc572e58c07c589b7f59f16b3ca06f8a6e5a7938424e73c",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 17
     },
     {
@@ -172,7 +172,7 @@
       "url": "https://docs.google.com/document/d/1Kg3MOLH7urZ3i6UHTa0Hte3AnZOC8BwgvFBOJHhj7P8/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:29:11.452Z",
       "sha256": "8abb1e9f911f242d79a3510109c72f9ffa837df061a88f02754e8d8272473559",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 18
     },
     {
@@ -181,7 +181,7 @@
       "url": "https://docs.google.com/document/d/1afBIjZ14dkuQdu857tUjSvX-aANQmxJa7GjyzSBhFAI/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T18:11:27.316Z",
       "sha256": "26bc6232fdc60da7efeece2f4351a16017485cafe2ac705b6b3cc4de075cc0f5",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 19
     },
     {
@@ -190,7 +190,7 @@
       "url": "https://docs.google.com/document/d/1ACK4gDp3EB-f8wROvB5tspAzdlEyk4mwF6HcuNHX5dQ/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T18:17:13.397Z",
       "sha256": "3ec1493e6a2a8a90a3669366838fe2e19674ff790edda8709157ad23ab6648b9",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 20
     },
     {
@@ -199,7 +199,7 @@
       "url": "https://docs.google.com/document/d/1p07E8Y31GQY-_LQQon8f1mmXthZVVkmYDDsWji13CLA/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T14:43:46.437Z",
       "sha256": "60cc430451b00f08699f87adbfe62de3a51ac7d6a7bd06ff5fd82e2ab8018c62",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 21
     },
     {
@@ -208,7 +208,7 @@
       "url": "https://docs.google.com/document/d/1_1LTqsSS_402Jyb0IUvZo4y8ZG5geePELgeaJdDwx2I/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:30:19.236Z",
       "sha256": "8ad7a67e5a724975a8c21ddc16a50ad996db388dab0e5b2d97639d0be9e755bc",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 22
     },
     {
@@ -217,7 +217,7 @@
       "url": "https://docs.google.com/document/d/1e9oZYaeJIP8SzlMrXk7f5G6YVvmFSQucQd3lvZx3aj8/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T18:13:15.823Z",
       "sha256": "31307ec7840155a2fdb8167ae3504219a7526780e0296ef6d59736f0245d77e9",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 23
     },
     {
@@ -226,7 +226,7 @@
       "url": "https://docs.google.com/document/d/1xG4VpHZZhoW_pbdNipxqTXT4OUb9oJ20P7OqPeFyoj8/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T18:13:09.009Z",
       "sha256": "515cffe89421a5d38c8a0700f806b75a433437920049ab2b27f3666dc49065a6",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 24
     },
     {
@@ -235,7 +235,7 @@
       "url": "https://docs.google.com/document/d/1_ZF_9UOwtv3FpkVypW5dnXzIYkmJnQz5Kx7Jpn5MKXg/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T18:13:24.287Z",
       "sha256": "6d097e1b874826089babae9ac9ecd0451d7dfb8766b28fa810d11a417173f6cf",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 25
     },
     {
@@ -244,7 +244,7 @@
       "url": "https://docs.google.com/document/d/17A6V9fEYKNRMeS7beT7a7yMt6wbpBsjIDWzWhZzAMjE/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:18:00.863Z",
       "sha256": "ea38ce7fa0728db84dace26d0a73d2d8ba17e73d224dbddd0e444984bcf80114",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 26
     },
     {
@@ -253,7 +253,7 @@
       "url": "https://docs.google.com/document/d/1_B5uqXfbpNJ73JY1qY7ysIUfQjB5Hy66k7TqkY_f61o/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:25:34.446Z",
       "sha256": "9871880425f8e8c0f3c18213582aac495646aafbd18b8e1aeb19469cbc125137",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 27
     },
     {
@@ -262,7 +262,7 @@
       "url": "https://docs.google.com/document/d/19HdzJKytmIt44-HrWAsnmMLtblsuBJjWpiRk08qxxvU/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:29:01.069Z",
       "sha256": "f4be60916fe9634b41964bd36571398a1f313436e18e5aee5d3edd0a989242d6",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 28
     },
     {
@@ -271,7 +271,7 @@
       "url": "https://docs.google.com/document/d/1CJo71y488nBv81WM-6GVfQ5rf_K9F7hn4llcDy9VBfY/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T18:13:32.987Z",
       "sha256": "524520a0806694469ea8514355720b894791017236bdf4448794ceafb0cabff3",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 29
     },
     {
@@ -280,7 +280,7 @@
       "url": "https://docs.google.com/document/d/1ZexdGAgo746df46SRwJOttMmpXq94QydK2I-LsFIUzs/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:18:05.817Z",
       "sha256": "edb8f69f067b0caa05332ca12e1a698cf797121ba09078671f2883225842d284",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 30
     },
     {
@@ -289,7 +289,7 @@
       "url": "https://docs.google.com/document/d/1fasTLWHCM9T2D2EiwUBf8iyzYUxGoT84pjI0Ed6lnHA/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:21:10.482Z",
       "sha256": "18e9181a518a3975457668802c213847b774e550f55e4472be75141b43cca244",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 31
     },
     {
@@ -298,7 +298,7 @@
       "url": "https://docs.google.com/document/d/19eXxSqAUNN3zU523KW8deC8O1pJfyTCYy-chRgZ_8FQ/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T18:14:50.942Z",
       "sha256": "41faf730a519b8310a78e4a3576d93d5137c151686f435b8a0c25aabb1f57bfd",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 32
     },
     {
@@ -316,7 +316,7 @@
       "url": "https://docs.google.com/document/d/1p4czVA3MQXFxkOjSCejdA6xam_U7S78NmkDu41b3Smw/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:19:16.163Z",
       "sha256": "ba0519fc0be256cbed9a13aaca791e7a79abc3f1b57e6232e695d2eb3ee4c019",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 34
     },
     {
@@ -325,7 +325,7 @@
       "url": "https://docs.google.com/document/d/1rkfhjdiLlpoHDKmhtJCaq_pbxuXSflGZPkdFARNsTqI/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:19:08.262Z",
       "sha256": "26373f8e18f1f56dce396974d5f91b8d9eaaceb194d01d51a4b159ee3b9bf973",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 35
     },
     {
@@ -334,7 +334,7 @@
       "url": "https://docs.google.com/document/d/1uOqAkyTQTtpcw_UFK2tgD9uwAnsx7U-ANiYoYLHEgFw/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T18:14:53.727Z",
       "sha256": "5fcfb827be98d17bb3427b2a41fe3e7c5bce322b96c214232ec2cf295a1f3157",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 36
     },
     {
@@ -352,7 +352,7 @@
       "url": "https://docs.google.com/document/d/1i5kPoX4xFZ2eGyoGGmNl6GGy_jCaB8VS1KiR4pvEH8A/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:31:50.627Z",
       "sha256": "21ac3a130571f475ee3b3e146344fcf4bf6a23591f87700e8c29e75cefac3c12",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 38
     },
     {
@@ -361,7 +361,7 @@
       "url": "https://docs.google.com/document/d/11YY3OH0OnJtRHf3JkTgidTDigN2GgdSybtmBFjTx7Gs/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T14:34:39.730Z",
       "sha256": "8e79d92006dbbc40fbf153dec0d66aafec288ca88046809722fbc4199a84c4b2",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 39
     },
     {
@@ -379,7 +379,7 @@
       "url": "https://docs.google.com/document/d/1NbPjqAkr5s0MiM5lCU98zgFDwaa30PoUlpiM5OodmiE/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T18:15:16.950Z",
       "sha256": "ad1a93449981de7f728180437ecbf68950c01c708f4af2284d345655a1ee8edb",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 41
     },
     {
@@ -397,7 +397,7 @@
       "url": "https://docs.google.com/document/d/1ZiRFTgUwz0zlacA_HU3LVqFIqxIpH39JWTkVqeK935k/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:32:41.131Z",
       "sha256": "4ff9b108ec61a2a3083c259dfff1ee64402f432c99e97af45ff6ba72f24e6d36",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 43
     },
     {
@@ -406,7 +406,7 @@
       "url": "https://docs.google.com/document/d/1tOvXkoRp3bXi95xOi2PqLGIXatdhLXVmDDRN2jThIXY/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T14:30:34.261Z",
       "sha256": "d524745dc44a05ff115c58748ea9a5c88f5f0c9687b39ba597616bb86c10b082",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 44
     },
     {
@@ -415,7 +415,7 @@
       "url": "https://docs.google.com/document/d/1FtNkCQMShutKcLzRwVA-LBUS7XuCa_GFCPqgRDty4PY/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:29:03.719Z",
       "sha256": "2af94403584d2a1cbfbf1d65a4e4b5c6a6bb52130f0e021c53d82b64e8ea5e56",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 45
     },
     {
@@ -451,7 +451,7 @@
       "url": "https://docs.google.com/document/d/1qjIhv8nJyBeQbhKJpSxoxpuC-T7QE_4uLYU4UNjvjXc/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:35:10.569Z",
       "sha256": "4f06f45cf7171010eea12cdc11f010151a8c1f69ede330a44960f06b4775fadb",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 49
     },
     {
@@ -460,7 +460,7 @@
       "url": "https://docs.google.com/document/d/1KFC2Iah1WcHepCbuF0Gcm1eCqMvMiOFSRm0ADXvKGHk/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:32:38.463Z",
       "sha256": "fa5143106d086fad7ff5272eaa725a96d5273e0b7ae8beda99c07e07d11c35f2",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 50
     },
     {
@@ -469,7 +469,7 @@
       "url": "https://docs.google.com/document/d/16JxH-eAjGOsSVAl79okb2YgW_7qBjIziXJq7PIge-eI/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:26:53.173Z",
       "sha256": "811df29a2a80cbe1aa695c390e3d0f5a686d5f2ec7590b52acf00f42f5f21c9c",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 51
     },
     {
@@ -478,7 +478,7 @@
       "url": "https://docs.google.com/document/d/1S9XHh_lmhPrau9oI2xRFro-JVchVKeXE6XZGqHvMKXA/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T19:30:13.509Z",
       "sha256": "b5153ab7fd7d6d222669dc3ac5b15a59da9ac3b4f654e7b7e46185c5d882c051",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 52
     },
     {
@@ -487,7 +487,7 @@
       "url": "https://docs.google.com/document/d/1OkWgB_tMUtBJ8iZXqyqBFfiIKwQcyXyFURtxijNNZhw/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T14:28:23.622Z",
       "sha256": "d09c294fdf84550d61d14e7e697d5ed13d8a23a56f76546497e8a4ba31eaa274",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 53
     },
     {
@@ -496,8 +496,10 @@
       "url": "https://docs.google.com/document/d/101_LkUsgBbt09iSmKrk9vXIzJPccscBUCeBILyAWGJA/edit?usp=drivesdk",
       "source_modified_at": "2026-10-12T14:43:16.277Z",
       "sha256": "1f7b413ac09f99162c2885dafa70c2821cd030a631a2a53a4c40403991fcd1f5",
-      "review_status": "IMPORTED_NOT_FULLY_REVIEWED",
+      "review_status": "REVIEWED",
       "required_reading_order": 54
     }
-  ]
+  ],
+  "reviewed_at": "2026-10-13",
+  "review_scope": "Full source reading; implementation conformance and human approval are separate."
 }

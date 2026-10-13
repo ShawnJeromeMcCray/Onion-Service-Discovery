@@ -62,4 +62,7 @@ local admission sequences and restores no operational authority. Empty staging,
 whole-archive signature/hash/shape checks and explicit trust are mandatory.
 Read-only backend mode rejects transactions, creates no database and performs no
 filesystem journal repair. HTTP and doctor use it; explicit storage:check can
-recover a pending journal. Filesystem HEAD remains the atomic commit point.
+recover a pending journal. Filesystem format 2 commits in the journal before HEAD publication. A lagging
+HEAD can be completed only for its exactly linked committed successor. PREPARE
+alone never becomes current. Format 1 is read/migrated using its historical
+semantics and is refused for new writes until explicit storage:migrate.

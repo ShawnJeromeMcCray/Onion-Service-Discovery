@@ -2,7 +2,7 @@
 
 Opt-in decentralized discovery for public Tor Onion Services, with self-published metadata and local browser search.
 
-**Status: development implementation of the earlier draft. The refreshed 55-document specification has material changes that are not yet implemented. Production approval remains open.**
+**Status: development implementation partially aligned with the fully read 55-document specification. Significant production requirements remain open. Production approval remains open.**
 
 See the [source refresh and implementation gaps](docs/specification-refresh.md). Historical passing tests do not certify the revised specification.
 
@@ -15,12 +15,15 @@ Technical identity evidence must not be presented as an assurance about content 
 - [Implementation status](docs/implementation-status.md) distinguishing requirements from verified behavior.
 - Strict Onion v3, bounded JSON, canonical bytes, signed-record schemas and Ed25519 verification in PHP, TypeScript and independent Python.
 - Deterministic evidence graphs for forks, exact revision chains, countersigned rotation and signed migration.
-- [134 black-box core cases per language](docs/conformance/core-report.json), with zero failures/skips in the current offline draft suite.
-- Required FilesystemStore plus SQLiteStore, read-only diagnostics, trusted private staged backup/restore and eight process-exit fault points.
+- [202 black-box core cases per language](docs/conformance/core-report.json), with zero failures/skips in the current offline draft suite.
+- Required FilesystemStore plus SQLiteStore, read-only diagnostics, trusted private staged backup/restore and journal-first durable commits, explicit legacy-format migration and process-interruption tests.
 - Encrypted offline Service signing, role-separated Node signing, manifest revision/withdrawal/rotation/migration and atomic public installation.
 - Bounded Tor-only transport, direct verification, resumable peer snapshots and read-only protocol API.
 - Bundled local-search client, query-independent Client Host relay, explicit source allowlist and origin-local pins.
-- Finite TLA+ models, PHPStan Level 8 and controlled browser/privacy tests.
+- Shared draft category/language rules, local category/adult filters and paginated duplicate-result groups.
+- Publisher-only initialization and a read-only status page that keeps untested external discoverability unconfirmed.
+- Persistent candidate admission/work budgets shared by enqueue and PeerSync, with a bounded pinned-peer pool.
+- Finite TLA+ models, PHPStan Level 8, syntax sink checks and controlled browser/privacy tests.
 
 After installing the hash-locked validator dependencies in a virtual environment:
 

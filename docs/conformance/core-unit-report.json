@@ -1,8 +1,8 @@
 {
   "profile": "DRAFT_CORE_UNIT_SUITES",
   "status": "PASS",
-  "generated_at": "2026-10-12T20:57:20.819056+00:00",
-  "shared_fixture_count": 134,
+  "generated_at": "2026-10-13T09:37:05.948773+00:00",
+  "shared_fixture_count": 202,
   "php_container": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3",
   "checks": [
     {
@@ -81,6 +81,11 @@
       "exit_code": 0
     },
     {
+      "check": "php-publisher-status",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
       "check": "php-snapshot-chunks",
       "status": "PASS",
       "exit_code": 0
@@ -106,6 +111,11 @@
       "exit_code": 0
     },
     {
+      "check": "php-candidate-budgets",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
       "check": "php-direct-verification-controlled",
       "status": "PASS",
       "exit_code": 0
@@ -127,6 +137,11 @@
     },
     {
       "check": "php-storage-crash-recovery",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-storage-format-migration",
       "status": "PASS",
       "exit_code": 0
     },
@@ -176,5 +191,6 @@
     "Not browser compatibility evidence",
     "Tor transport tested only through controlled loopback SOCKS; not live Tor or actual Tor Browser/Android; physical power-loss not established",
     "No production release approval"
-  ]
+  ],
+  "scope_note": "Current draft implementation and synthetic fixtures; full updated-source conformance, historical protocol transition and human freeze remain incomplete."
 }
