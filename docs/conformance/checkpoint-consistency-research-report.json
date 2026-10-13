@@ -1,0 +1,20 @@
+{
+  "status": "PASS_RESEARCH",
+  "scope": "RFC 6962 opaque-leaf prefix-consistency experiment only; no OSD wire, signatures, hidden-chain validation or active-index implementation",
+  "prefix_pairs_checked": 8515,
+  "maximum_test_tree_size": 129,
+  "checks": [
+    "all prefixes and power-of-two boundaries",
+    "each proof hash bit mutation",
+    "truncated proofs",
+    "extra proof nodes",
+    "divergent prefix",
+    "rollback sizes",
+    "boolean size rejection",
+    "empty-root boundaries"
+  ],
+  "production_approved": false,
+  "independent_crypto_review": false,
+  "runtime_integrated": false,
+  "tested_proof_hash_upper_bound": 9
+}

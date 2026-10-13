@@ -139,3 +139,10 @@ passes two-build byte reproducibility, structure/hash/SBOM validation and all si
 packaged runtime smoke checks. See [candidate report](conformance/nojs-candidate-report.json).
 A subsequent CLI guard also rejects aliases resolving to known Tor-private-key
 filenames before opening input; tests use synthetic files only.
+
+Checkpoint longevity research is recorded in [PCP-003](protocol/proposals/PCP-003-checkpoint-longevity-research.md).
+Its isolated RFC 6962 experiment checks 8,515 prefix pairs through 129 opaque leaves
+and adversarial proof mutations. This does not validate hidden signed checkpoint
+links, establish active-index freshness, or implement an accepted OSD wire format.
+[Research scope](conformance/checkpoint-consistency-research-report.json) is separate
+from production conformance.
