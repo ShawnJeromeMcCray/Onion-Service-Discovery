@@ -25,7 +25,10 @@ function boundedFile(string $path, int $maxBytes): string
     if (str_contains($path, '://') || !is_file($path) || !is_readable($path)) {
         throw new ProtocolException('INPUT_FILE_UNAVAILABLE');
     }
-    $stream = fopen($path, 'rb');
+    $resolved = realpath($path);
+    if ($resolved === false) { throw new ProtocolException('INPUT_FILE_UNAVAILABLE'); }
+    if (in_array(basename($resolved), ['hs_ed25519_secret_key', 'private_key'], true)) { throw new ProtocolException('TOR_KEY_ACCESS_FORBIDDEN'); }
+    $stream = fopen($resolved, 'rb');
     if ($stream === false) {
         throw new ProtocolException('INPUT_FILE_UNAVAILABLE');
     }

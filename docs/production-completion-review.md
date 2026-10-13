@@ -133,3 +133,9 @@ Unicode 17 tables avoid PHP/browser runtime-version drift. Official normalizatio
 fixtures and shared ranking cases cover both implementations. See
 [scope and evidence](operations/server-search.md). Public-Tor deployment, process
 isolation, accessibility and independent review remain open.
+
+The clean NoJS candidate at `e009e239fe8ccb40b12f21dbb33f20fd07a38c34`
+passes two-build byte reproducibility, structure/hash/SBOM validation and all six
+packaged runtime smoke checks. See [candidate report](conformance/nojs-candidate-report.json).
+A subsequent CLI guard also rejects aliases resolving to known Tor-private-key
+filenames before opening input; tests use synthetic files only.
