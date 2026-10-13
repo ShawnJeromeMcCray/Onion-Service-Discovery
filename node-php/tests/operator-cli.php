@@ -10,6 +10,10 @@ $v=json_decode(file_get_contents($project.'/node-php/config/node.example.json'),
 command(['config:validate',$config]);command(['key:node:generate',$root.'/node.key','--passphrase-file',$root.'/passphrase']);command(['node:init',$config,'--passphrase-file',$root.'/passphrase']);command(['doctor',$config],6);
 $published=command(['node:snapshot',$config,'--passphrase-file',$root.'/passphrase']);if($published['status']!=='PUBLISHED')throw new RuntimeException('first snapshot failed');
 command(['doctor',$config]);command(['security:check',$config]);
+$v['features']['discover_services'] = true; file_put_contents($config, json_encode($v));
+$queued = command(['candidate:add', $config, $v['node']['onion']]);
+$duplicate = command(['candidate:add', $config, $v['node']['onion']]);
+if ($queued['status'] !== 'QUEUED' || !$queued['inserted'] || $duplicate['status'] !== 'NOT_INSERTED' || $duplicate['inserted']) { throw new RuntimeException('candidate CLI reported insertion without admission'); }
 $unchanged=command(['node:snapshot',$config,'--passphrase-file',$root.'/passphrase']);if($unchanged['status']!=='UNCHANGED')throw new RuntimeException('snapshot idempotence lost');
 command(['status',$config]);command(['candidate:list',$config]);command(['quarantine:list',$config]);command(['sync:status',$config]);command(['node:maintain',$config]);command(['exports:prune',$config,'--workers-stopped']);
 $backup=command(['backup:create','filesystem',$root.'/data',$root.'/backup.ndjson']);$verified=command(['backup:verify',$root.'/backup.ndjson']);if($backup['backup']['sha256']!==$verified['backup']['sha256'])throw new RuntimeException('backup verify mismatch');

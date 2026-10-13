@@ -222,7 +222,7 @@ try {
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         if (!$config->features['discover_services'] || $config->role === 'client-host') { throw new ProtocolException('DISCOVERY_DISABLED'); }
         $inserted = (new \OnionServiceDiscovery\Node\CandidateQueue($config->store()))->enqueue(OnionAddress::parse($arguments[1]));
-        $output = ['status' => 'QUEUED', 'inserted' => $inserted, 'network_side_effects' => false];
+        $output = ['status' => $inserted ? 'QUEUED' : 'NOT_INSERTED', 'inserted' => $inserted, 'network_side_effects' => false];
     } elseif (in_array($command, ['node:init', 'node:snapshot', 'node:work-one'], true)) {
         if (count($arguments) !== 3 || $arguments[1] !== '--passphrase-file') { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);

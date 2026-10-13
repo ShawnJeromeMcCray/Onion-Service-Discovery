@@ -26,6 +26,8 @@ successful requests. Failed checks consume work budget too.
 Repeated targets preserve backoff, attempt count, lease and quarantine. At most
 eight attribution strings are retained, without voting or ranking authority.
 Reaching a limit rejects admission/claim without evicting established entries.
+The CLI reports NOT_INSERTED when no new candidate was admitted, including
+duplicates and quota denial; it does not describe either as a new queued job.
 PeerSync still records verified evidence/cursors when candidate admission is
 denied, and never starts synchronous recursive fetching.
 

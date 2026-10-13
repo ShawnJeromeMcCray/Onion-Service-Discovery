@@ -131,7 +131,7 @@
         "docs/requirements.json",
         "docs/protocol/handbook.md"
       ],
-      "remaining": "283/318 candidate blocks have related evidence pointers; complete detailed MUST-level acceptance is still open."
+      "remaining": "Current 2,813-section inventory has source hashes/locations but is not atomic MUST-level acceptance or complete code/test traceability. Historical 318-block mappings remain in Git history."
     },
     {
       "id": "PRODUCTION_RELEASE",
