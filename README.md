@@ -87,3 +87,8 @@ are available. The [draft protocol handbook](docs/protocol/handbook.md) and
 scope and remaining external evidence. No approved production root, public seed
 infrastructure, independent audit or live Tor Browser/Android certification is
 invented. Public release requires those applicable gates to pass.
+
+Optional explicit [NoJS server search](docs/operations/server-search.md) is available
+as a default-off development profile. It sends queries to the selected Node and
+does not provide local-browser verification. Bundled Unicode data retains its
+[third-party license notice](THIRD_PARTY_NOTICES.md).

@@ -1,0 +1,43 @@
+{
+  "status": "PASS_DEVELOPMENT",
+  "profile": "S1000-typical-5-node-claims",
+  "scope": "real signed synthetic records, prepared local cache and HTML search; no Tor/network/browser/capacity certification",
+  "dataset_sha256": "eec98bcfff59da3dbc3d4222a48569537fb98db2131a7647ac7a3ab0ebaba323",
+  "record_count": 7005,
+  "php": "8.5.11",
+  "backends": {
+    "filesystem": {
+      "snapshot_and_search_cache_publish_ms": 5893.177529,
+      "prepared_search": {
+        "samples": 30,
+        "p50_ms": 166.676443,
+        "p95_ms": 178.468295,
+        "p99_ms": 180.638718,
+        "maximum_ms": 183.846826
+      },
+      "maximum_response_bytes": 49868,
+      "wall_budget_ms": 500,
+      "maximum_result_count": 50,
+      "snapshot_record_count": 7005,
+      "query_mutated_storage": false
+    },
+    "sqlite": {
+      "snapshot_and_search_cache_publish_ms": 5502.219536,
+      "prepared_search": {
+        "samples": 30,
+        "p50_ms": 117.234597,
+        "p95_ms": 150.236352,
+        "p99_ms": 158.575527,
+        "maximum_ms": 159.396711
+      },
+      "maximum_response_bytes": 49868,
+      "wall_budget_ms": 500,
+      "maximum_result_count": 50,
+      "snapshot_record_count": 7005,
+      "query_mutated_storage": false
+    }
+  },
+  "production_approved": false,
+  "peak_php_memory_bytes": 73400320,
+  "evidence_date": "2026-10-13"
+}

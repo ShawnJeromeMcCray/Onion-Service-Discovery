@@ -32,6 +32,9 @@ def sbom(commit,epoch):
    name,version=match.groups();purl=f'pkg:pypi/{name.lower().replace("_","-")}@{version}'
    row={'type':'library','name':name,'version':version,'purl':purl,'bom-ref':purl,'scope':'optional' if lock.startswith('tools/') else 'required','hashes':[{'alg':'SHA-256','content':value} for value in sorted(set(re.findall(r'--hash=sha256:([0-9a-f]{64})',line)))]}
    components[purl]=row
+ unicode=json.loads((ROOT/'protocol/registries/search-unicode-v1.provenance.json').read_text())
+ purl='pkg:generic/unicode/ucd@'+unicode['unicode_version']
+ components[purl]={'type':'data','name':'Unicode search tables and official normalization fixtures','version':unicode['unicode_version'],'purl':purl,'bom-ref':purl,'scope':'required','licenses':[{'license':{'id':'Unicode-3.0'}}],'hashes':[{'alg':'SHA-256','content':unicode['table_sha256']}],'externalReferences':[{'type':'distribution','url':unicode['source_url'],'hashes':[{'alg':'SHA-256','content':unicode['archive_sha256']}]}],'properties':[{'name':'osd:derived-search-table-sha256','value':unicode['table_sha256']},{'name':'osd:license-notice','value':unicode['license_file']}]}
  return {'bomFormat':'CycloneDX','specVersion':'1.6','version':1,'serialNumber':'urn:uuid:'+str(uuid.uuid5(uuid.NAMESPACE_URL,'OSD-SBOM-'+commit)),'metadata':{'component':{'type':'application','name':'Onion Service Discovery','version':'development-'+commit[:12]}},'components':[components[key] for key in sorted(components)]}
 def build(destination):
  commit=git('rev-parse','HEAD');epoch=int(git('show','-s','--format=%ct','HEAD'))

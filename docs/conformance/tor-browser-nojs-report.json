@@ -1,0 +1,18 @@
+{
+  "status": "PASS_DEVELOPMENT",
+  "browser_version": "140.17.0",
+  "javascript_enabled": false,
+  "checks": [
+    "ACTUAL_TOR_BROWSER_NOJS_RECOVERY_LINK",
+    "EXPLICIT_SERVER_PRIVACY_DISCLOSURE",
+    "REAL_HTML_FORM_POST_SEARCH",
+    "QUERY_NOT_IN_URL_OR_RESPONSE_OR_REFERENCE_LOG",
+    "COOKIE_FREE_SEARCH"
+  ],
+  "profile": "headless direct loopback in Docker network none; external Tor launcher disabled",
+  "public_tor_verified": false,
+  "privacy_security_level_certified": false,
+  "android_verified": false,
+  "production_approved": false,
+  "evidence_date": "2026-10-13"
+}

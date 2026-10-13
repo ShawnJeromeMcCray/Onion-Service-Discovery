@@ -1,0 +1,21 @@
+; Optional bounded staging pool. A different socket alone is NOT key isolation.
+; Establish mount/network/credential isolation before production deployment.
+[onion-service-discovery-search]
+user = osd-worker
+group = osd
+listen = /run/php/onion-service-discovery-search.sock
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0660
+pm = ondemand
+pm.max_children = 2
+pm.process_idle_timeout = 5s
+pm.max_requests = 100
+clear_env = yes
+catch_workers_output = no
+request_terminate_timeout = 2s
+php_admin_value[max_execution_time] = 1
+php_admin_value[memory_limit] = 128M
+php_admin_flag[display_errors] = off
+php_admin_flag[log_errors] = off
+php_admin_value[expose_php] = Off

@@ -112,3 +112,10 @@ malformed acknowledgement and bare inclusion assertions fail. This is the
 [PCP-002 draft](../protocol/proposals/PCP-002-bounded-announcement-draft.md),
 subject to D-018 human endpoint/limits/retry freeze. Receiving Nodes must
 explicitly enable both discovery and the optional announcement switch.
+
+## Explicit derived-export reconstruction
+
+`node:snapshot CONFIG --passphrase-file PRIVATE_FILE --rebuild-derived`
+reconstructs derived exports from verified records and signs a new generation.
+Ordinary publication fails on corrupted exports. See [server search](server-search.md)
+for cache preparation, limits and query privacy.

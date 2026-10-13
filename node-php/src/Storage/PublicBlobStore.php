@@ -4,7 +4,7 @@ namespace OnionServiceDiscovery\Storage;
 /** Immutable public export bytes, kept outside the HTTP document root. */
 final readonly class PublicBlobStore
 {
-    public function __construct(private string $directory, bool $create = false, private int $maxBytes = 268435456)
+    public function __construct(private string $directory, bool $create = false, private int $maxBytes = 268435456, private bool $repairDerived = false)
     {
         if ($maxBytes < 1 || $maxBytes > 1073741824 || str_contains($directory, '://') || is_link($directory) || (!is_dir($directory) && (!$create || !mkdir($directory, 0700, true))) || (fileperms($directory) & 0077) !== 0) { throw new StorageException('EXPORT_DIRECTORY_UNSAFE'); }
     }
@@ -57,10 +57,19 @@ final readonly class PublicBlobStore
     {
         $path = $this->path($hash);
         if (strlen($bytes) > 524288) { throw new StorageException('EXPORT_BUDGET_EXHAUSTED'); }
-        if (is_file($path)) { if ($this->get($hash) !== $bytes) { throw new StorageException('EXPORT_CORRUPT'); } return; }
+        if (is_link($path)) { throw new StorageException('EXPORT_CORRUPT'); }
+        if (is_file($path)) {
+            $existing = null;
+            try { $existing = $this->get($hash); }
+            catch (StorageException $error) { if (!$this->repairDerived || $error->errorCode !== 'EXPORT_CORRUPT') { throw $error; } }
+            if ($existing === $bytes) { return; }
+            if (!$this->repairDerived) { throw new StorageException('EXPORT_CORRUPT'); }
+            // Explicit operator rebuild only: canonical bytes were reconstructed
+            // from independently verified immutable records by SnapshotProducer.
+        }
         $total = 0; $count = 0;
         foreach (new \DirectoryIterator($this->directory) as $file) {
-            if ($file->isDot() || $file->getFilename() === '.writer.lock') { continue; }
+            if ($file->isDot() || $file->getFilename() === '.writer.lock' || ($this->repairDerived && $file->getFilename() === basename($path))) { continue; }
             if ($file->isLink() || !$file->isFile() || ++$count > 4096) { throw new StorageException('EXPORT_BUDGET_EXHAUSTED'); }
             $total += $file->getSize();
         }

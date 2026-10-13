@@ -20,7 +20,13 @@ have passed; public Tor, Android and browser security-level profiles remain open
 A default-off bounded announcement receiver and one-shot Tor operator command
 are implemented as PCP-002; human D-018 freeze and automated multi-Node onboarding
 remain open.
-See [continuation evidence](production-completion-review.md).
+The optional default-off NoJS profile now serves explicit HTML POST search from a
+prepared local index, with frozen Unicode 17 normalization shared with browser search.
+Queries do not trigger discovery or synchronization. Both storage backends, corrupt-cache
+rejection and explicit reconstruction are tested; actual headless Tor Browser with
+JavaScript disabled has exercised the form. This is development evidence, not a
+public-Tor, browser-security-level or production certification. See
+[server search](operations/server-search.md) and [continuation evidence](production-completion-review.md).
 
 The 2026-10-13 refresh found 55 active sources: 43 updated, five added, seven
 unchanged. The full updated corpus has been read in the mandatory order.

@@ -13,6 +13,7 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 use OnionServiceDiscovery\Configuration\NodeConfig;
 use OnionServiceDiscovery\Http\DataApi;
 use OnionServiceDiscovery\Http\CandidateAnnouncement;
+use OnionServiceDiscovery\Http\ServerSearch;
 use OnionServiceDiscovery\Http\ClientAssets;
 use OnionServiceDiscovery\Http\ClientHostRelay;
 use OnionServiceDiscovery\Http\PublicRequestBudget;
@@ -21,6 +22,7 @@ use OnionServiceDiscovery\Configuration\PublisherStatus;
 use OnionServiceDiscovery\Protocol\RecordVerifier;
 use OnionServiceDiscovery\Domain\OnionAddress;
 use OnionServiceDiscovery\Storage\PublicBlobStore;
+$requestStarted = hrtime(true);
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $target = $_SERVER['REQUEST_URI'] ?? '/';
 try {
@@ -28,7 +30,23 @@ try {
     if ($configPath === false || $configPath === '') { throw new RuntimeException('Configuration unavailable'); }
     $config = NodeConfig::load($configPath);
     $asset = (new ClientAssets($config, dirname(__DIR__, 2) . '/web-local-search-client/dist'))->handle($method, $target);
-    if ($target === '/onion-service-discovery/status/') {
+    if (str_starts_with($target, '/onion-service-discovery/search/')) {
+        if (!$config->features['server_search']) { $response = ServerSearch::page(404, '<p>Server search is not enabled on this serving host. Use a local-search client.</p>', [], false); }
+        elseif (!in_array($target, [ServerSearch::FORM, ServerSearch::POST, ServerSearch::STYLE], true)) { $response = ServerSearch::page(400, '<p>Use the exact form routes. Queries are never accepted in URLs.</p>'); }
+        elseif ($target === ServerSearch::FORM || $target === ServerSearch::STYLE) {
+            $response = in_array($method, ['GET','HEAD'], true) ? ($target === ServerSearch::STYLE ? ServerSearch::style() : ServerSearch::page()) : ServerSearch::page(405, '<p>This route accepts GET or HEAD only.</p>', ['Allow' => 'GET, HEAD']);
+        }
+        elseif ($method !== 'POST') { $response = ServerSearch::page(405, '<p>Search requires an explicit POST form submission.</p>', ['Allow' => 'POST']); }
+        elseif (isset($_SERVER['CONTENT_LENGTH']) && (!is_string($_SERVER['CONTENT_LENGTH']) || preg_match('/\A(?:0|[1-9][0-9]{0,3})\z/D', $_SERVER['CONTENT_LENGTH']) !== 1 || (int)$_SERVER['CONTENT_LENGTH'] > ServerSearch::MAX_BODY)) { $response = ServerSearch::page(413, '<p>Search request exceeds the finite byte limit.</p>'); }
+        elseif (!(new PublicRequestBudget($config->exportPath . '/.request-budget'))->admit(microtime(true))) { $response = ServerSearch::page(429, '<p>The shared request budget is exhausted. Retry later.</p>', ['Retry-After' => '1']); }
+        else {
+            $input = fopen('php://input', 'rb'); if ($input === false) { throw new RuntimeException('Request input unavailable'); }
+            try { $body = stream_get_contents($input, ServerSearch::MAX_BODY + 1); } finally { fclose($input); }
+            if ($body === false) { throw new RuntimeException('Request input unavailable'); }
+            $response = (new ServerSearch($config->store(readOnly: true), new PublicBlobStore($config->exportPath), new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas')))->search($method, $_SERVER['CONTENT_TYPE'] ?? '', $body, $requestStarted);
+        }
+    }
+    elseif ($target === '/onion-service-discovery/status/') {
         $response = StatusPage::render(PublisherStatus::inspect($config, new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas'), __DIR__ . '/.well-known/onion-service-discovery.json'), $method);
     }
     elseif ($asset !== null) { $response = $asset; }
@@ -70,9 +88,11 @@ try {
     }
 
 } catch (Throwable) {
-    $response = $target === '/onion-service-discovery/status/'
+    $response = str_starts_with($target, '/onion-service-discovery/search/')
+        ? ServerSearch::page(503, '<p>Server search configuration or local index is unavailable. No query-dependent remote work is performed.</p>', [], false)
+        : ($target === '/onion-service-discovery/status/'
         ? StatusPage::render(['overall' => 'NOT_CONFIGURED', 'next_action' => 'Configuration is missing or invalid. Run config:validate locally; no private configuration details are exposed here.'], $method)
-        : ['status' => 503, 'headers' => [], 'body' => '{"error":"NODE_UNAVAILABLE"}'];
+        : ['status' => 503, 'headers' => [], 'body' => '{"error":"NODE_UNAVAILABLE"}']);
 }
 http_response_code($response['status']);
 foreach (array_merge(['Content-Type' => 'application/json; charset=utf-8', 'X-Content-Type-Options' => 'nosniff', 'Referrer-Policy' => 'no-referrer', 'Cache-Control' => 'no-store', 'Content-Security-Policy' => "default-src 'none'; frame-ancestors 'none'"], $response['headers']) as $name => $value) { header($name . ': ' . $value); }

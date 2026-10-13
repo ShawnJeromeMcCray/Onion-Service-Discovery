@@ -90,8 +90,9 @@ retry policy. The default-off receiver and one-shot operator Tor announcement
 are implemented as [PCP-002](protocol/proposals/PCP-002-bounded-announcement-draft.md).
 Automated multi-Node self-announcement/external observation/active-index onboarding
 remains incomplete. Local source grouping does not implement bounded learned
-probation/referral admission/gradual source rotation. No-JavaScript fallback,
-full atomic requirement traceability, expanded capacity/chaos profiles and
+probation/referral admission/gradual source rotation. The optional No-JavaScript
+profile now has scoped development evidence described below; full atomic
+requirement traceability, expanded capacity/chaos profiles and
 complete secure-coding evidence remain engineering work.
 
 Tor Browser normal/Safer/Safest desktop and Android profiles, public live Tor integration,
@@ -122,3 +123,13 @@ PHP minors: [8.5](conformance/announcement-report.json) and
 HTTP routing and controlled SOCKS/CLI assertions; the fresh real-Tor lab also
 passes announcement followed by independent verification. The hints alone
 produce no signed record or local observation. No D-018 approval is inferred.
+
+## Optional NoJS search continuation
+
+Implemented default-off explicit HTML POST search over a prepared local cache.
+No query-triggered transport, signing or maintenance occurs. Corrupt/stale data
+fails closed; an explicit operator rebuild reconstructs derived bytes. Shared
+Unicode 17 tables avoid PHP/browser runtime-version drift. Official normalization
+fixtures and shared ranking cases cover both implementations. See
+[scope and evidence](operations/server-search.md). Public-Tor deployment, process
+isolation, accessibility and independent review remain open.

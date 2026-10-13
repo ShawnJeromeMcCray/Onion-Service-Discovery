@@ -20,6 +20,10 @@ final readonly class ClientAssets
             $path=$this->directory.'/'.$name;
             if(is_link($path)||!is_file($path)||filesize($path)>2097152)return ['status'=>503,'headers'=>$headers+['Content-Type'=>'application/json'],'body'=>'{"error":"CLIENT_BUILD_UNAVAILABLE"}'];
             $body=file_get_contents($path);if($body===false)throw new \RuntimeException('Client asset unavailable');
+            if ($name === 'index.html') {
+                $notice = $this->config->features['server_search'] ? '<section class="notice"><h2>Optional server search</h2><p><a href="/onion-service-discovery/search/">Use server search: your query is sent to this Node only after submitting its disclosed form.</a></p></section>' : '<p class="muted">Server search is not enabled on this serving host.</p>';
+                $body = str_replace('<!--server-search-fallback-->', $notice, $body);
+            }
             $type=match(pathinfo($name,PATHINFO_EXTENSION)){'html'=>'text/html','js'=>'application/javascript','css'=>'text/css',default=>'application/json'};
         }
         return ['status'=>200,'headers'=>$headers+['Content-Type'=>$type.'; charset=utf-8','Content-Length'=>(string)strlen($body)],'body'=>$method==='HEAD'?'':$body];

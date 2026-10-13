@@ -18,7 +18,8 @@ final class Diagnostics
             $checks['sqlite_driver'] = class_exists(\PDO::class) && in_array('sqlite', \PDO::getAvailableDrivers(), true) ? 'PASS' : 'FAIL';
         }
         $checks['tor_transport_configuration'] = 'PASS'; // NodeConfig already restricts loopback SOCKS and finite timeout.
-        $checks['server_search_disabled'] = 'PASS';
+        $checks['server_search_disabled'] = $config->features['server_search'] ? 'WARN' : 'PASS';
+        if ($config->features['server_search']) { $warnings[] = 'SERVER_SEARCH_ENABLED_QUERIES_SENT_TO_NODE'; }
         if ($config->role !== 'publisher') { $checks['export_directory'] = !is_link($config->exportPath) && is_dir($config->exportPath) && (fileperms($config->exportPath) & 0077) === 0 ? 'PASS' : 'FAIL'; }
         if ($config->nodeKeyPath !== null) {
             $checks['node_key_permissions'] = !is_link($config->nodeKeyPath) && is_file($config->nodeKeyPath) && (fileperms($config->nodeKeyPath) & 0077) === 0 ? 'PASS' : 'WARN';
@@ -61,6 +62,12 @@ final class Diagnostics
                         if ($body === null || 'sha256:' . hash('sha256', "Onion Service Discovery/service-lookup/v1\0" . $body) !== $row['hash']) { throw new StorageException('EXPORT_CORRUPT'); }
                     }
                     $checks['snapshot_exports'] = 'PASS';
+                    if ($config->features['server_search']) {
+                        try {
+                            \OnionServiceDiscovery\Search\SearchIndex::load($store, $blobs, $verifier, static function (): void {});
+                            $checks['server_search_index'] = 'PASS';
+                        } catch (\Throwable) { $checks['server_search_index'] = 'FAIL'; $failures[] = 'SERVER_SEARCH_INDEX_UNAVAILABLE_OR_CORRUPT'; }
+                    }
                 }
             } catch (StorageException $error) { $checks[str_starts_with($error->getMessage(), 'EXPORT_') ? 'snapshot_exports' : 'storage_integrity'] = 'FAIL'; $failures[] = $error->getMessage(); }
             catch (\InvalidArgumentException) { $checks['node_descriptor'] = 'FAIL'; $failures[] = 'NODE_DESCRIPTOR_INVALID'; }

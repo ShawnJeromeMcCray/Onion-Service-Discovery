@@ -33,7 +33,7 @@ final readonly class NodeConfig
         self::shape($v->features, ['publish_service','mirror_directory','discover_services','sync_with_peers','server_search','accept_announcements']);
         foreach (get_object_vars($v->features) as $flag) { if (!is_bool($flag)) { throw new ProtocolException('CONFIGURATION_INVALID'); } }
         if ($v->features->accept_announcements && (!in_array($v->role, ['node','combined'], true) || !$v->features->discover_services)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
-        if ($v->features->server_search) { throw new ProtocolException('SERVER_SEARCH_UNSUPPORTED'); }
+        if ($v->features->server_search && !in_array($v->role, ['node','combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         if (!in_array($v->storage->backend, ['filesystem','sqlite'], true)) { throw new ProtocolException('STORAGE_BACKEND_INVALID'); }
         self::path($v->storage->path); self::path($v->export_path);
         if (!is_array($v->sources) || !array_is_list($v->sources) || count($v->sources) > 16 || count(array_unique($v->sources, SORT_REGULAR)) !== count($v->sources)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
