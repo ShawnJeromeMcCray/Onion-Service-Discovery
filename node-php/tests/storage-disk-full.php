@@ -42,4 +42,46 @@ foreach(['filesystem','sqlite']as $backend){
  $iterator=new RecursiveIteratorIterator(new RecursiveDirectoryIterator('/fault',FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST);
  foreach($iterator as $file){$file->isDir()?rmdir($file->getPathname()):unlink($file->getPathname());}
 }
+// Exhaust space after durable transaction phases, including HEAD publication.
+foreach (['filesystem'=>['after_objects','after_prepare','after_head'], 'sqlite'=>['before_cursor_commit']] as $backend=>$points) {
+ foreach ($points as $point) {
+  $armed=false;
+  $hook=static function(string $stage)use(&$armed,$point):void {
+   if (!$armed || $stage!==$point) return;
+   $padding=fopen('/fault/padding','xb');$written=0;
+   while($written<4194304){$count=fwrite($padding,str_repeat('x',32768));if($count===false||$count===0)break;$written+=$count;}
+   fflush($padding);fclose($padding);
+   if(disk_free_space('/fault')!==0.0)throw new RuntimeException('phase filesystem not exhausted');
+  };
+  $path='/fault/'.($backend==='filesystem'?'data':'data.sqlite');
+  $store=$backend==='filesystem'?new FilesystemStore($path,create:true,faultHook:$hook):new SQLiteStore($path,create:true,faultHook:$hook);
+  $store->transaction(static function(StorageTransaction $tx)use($first):void{$tx->putRecord($first);$tx->set('sync','disk-full',['cursor'=>1]);});
+  if($store instanceof SQLiteStore)$store->checkpoint();
+  if ($point==='after_head') {
+   // Place the next COMMIT across a page boundary: appending inside an already
+   // allocated page can legitimately succeed even when free bytes are zero.
+   $aligned=false;
+   for($step=0;$step<64;++$step){
+    $journal=file_get_contents($path.'/journal.log');$lines=explode("\n",rtrim($journal,"\n"));$entry=json_decode($lines[count($lines)-1],true,16,JSON_THROW_ON_ERROR);$entry['generation']=$store->snapshot()['generation']+1;
+    $entry['phase']='PREPARE';$prepareBytes=strlen(\OnionServiceDiscovery\Storage\StorageJson::encode($entry))+1;
+    $entry['phase']='COMMIT';$commitBytes=strlen(\OnionServiceDiscovery\Storage\StorageJson::encode($entry))+1;
+    if((strlen($journal)+$prepareBytes)%4096+$commitBytes>4096){$aligned=true;break;}
+    $store->transaction(static function(StorageTransaction $tx)use($step):void{$tx->set('maintenance','journal-alignment',['step'=>$step]);});
+   }
+   if(!$aligned)throw new RuntimeException('journal boundary alignment failed');
+  }
+  $armed=true;$error=null;
+  try{$store->transaction(static function(StorageTransaction $tx)use($second):void{$tx->putRecord($second);$tx->set('sync','disk-full',['cursor'=>2]);});}
+  catch(StorageException $failure){$error=$failure->getMessage();}
+  if($error===null)throw new RuntimeException('full-disk phase failure missing '.$backend.'/'.$point);
+  unlink('/fault/padding');unset($store);
+  $store=$backend==='filesystem'?new FilesystemStore($path):new SQLiteStore($path);
+  $state=$store->snapshot();$expected=$point==='after_head'?2:1;
+  if(count($state['records'])!==$expected||$state['last_sequence']!==$expected||$state['tables']['sync']['key:disk-full']['cursor']!==$expected)throw new RuntimeException('disk-full phase record/cursor atomicity lost');
+  $store->integrityCheck();unset($store);
+  $results[]=['backend'=>$backend,'phase'=>$point,'status'=>'PASS','error'=>$error,'recovered_record_count'=>$expected,'recovered_cursor'=>$expected,'head_is_filesystem_commit_point'=>$point==='after_head'];
+  $iterator=new RecursiveIteratorIterator(new RecursiveDirectoryIterator('/fault',FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST);
+  foreach($iterator as $file){$file->isDir()?rmdir($file->getPathname()):unlink($file->getPathname());}
+ }
+}
 restore_error_handler();echo json_encode(['status'=>'PASS','scope'=>'Actual ENOSPC on isolated 2 MiB tmpfs; not physical power-loss or deployed disk evidence','checks'=>$results],JSON_THROW_ON_ERROR),PHP_EOL;

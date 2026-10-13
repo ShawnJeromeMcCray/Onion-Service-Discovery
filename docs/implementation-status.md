@@ -47,11 +47,12 @@ required decisions/reviews remain unresolved.
   Advisory scans and secret detection do not replace independent security review.
 
 Reports and exact scope are linked in [release-gates.json](release-gates.json).
-GitHub run [38323991393](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38323991393)
-passed all eight expanded jobs for commit `bb681c6`, including both PHP minors,
-dependency scans, Git-history secret detection and candidate packaging. The later
-packaged runtime smoke and exact-identity attestation verification also passed
-in their CI job at commit `9ca5834`; the complete run must be checked separately.
+GitHub run [38324913078](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38324913078)
+passed all eight expanded jobs for commit `7ee3170`, including both PHP minors,
+actual initial ENOSPC, dependency scans, Git-history secret detection, packaged
+runtime smoke and exact-identity attestation verification. Later durable-phase
+ENOSPC and unprovisioned-package diagnostic checks extend that evidence; their
+exact latest CI run must be checked separately.
 
 ## Available implementation
 

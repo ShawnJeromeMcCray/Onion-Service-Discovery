@@ -1,6 +1,6 @@
 {
   "status": "PASS_DEVELOPMENT",
-  "scope": "Real kernel ENOSPC in disposable 2 MiB tmpfs; both stores preserve prior record/cursor, normalize CLI errors and resume after space restoration",
+  "scope": "Real kernel ENOSPC before mutation and at durable phases in disposable 2 MiB tmpfs; old/new records and cursors remain atomic; failed final journal append after HEAD recovers new committed state",
   "results": [
     {
       "status": "PASS",
@@ -19,6 +19,42 @@
           "error": "STORAGE_ERROR",
           "prior_record_and_cursor_preserved": true,
           "admission_after_space_restored": true
+        },
+        {
+          "backend": "filesystem",
+          "phase": "after_objects",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "recovered_record_count": 1,
+          "recovered_cursor": 1,
+          "head_is_filesystem_commit_point": false
+        },
+        {
+          "backend": "filesystem",
+          "phase": "after_prepare",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "recovered_record_count": 1,
+          "recovered_cursor": 1,
+          "head_is_filesystem_commit_point": false
+        },
+        {
+          "backend": "filesystem",
+          "phase": "after_head",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "recovered_record_count": 2,
+          "recovered_cursor": 2,
+          "head_is_filesystem_commit_point": true
+        },
+        {
+          "backend": "sqlite",
+          "phase": "before_cursor_commit",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "recovered_record_count": 1,
+          "recovered_cursor": 1,
+          "head_is_filesystem_commit_point": false
         }
       ],
       "php_minor": "84"
@@ -40,6 +76,42 @@
           "error": "STORAGE_ERROR",
           "prior_record_and_cursor_preserved": true,
           "admission_after_space_restored": true
+        },
+        {
+          "backend": "filesystem",
+          "phase": "after_objects",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "recovered_record_count": 1,
+          "recovered_cursor": 1,
+          "head_is_filesystem_commit_point": false
+        },
+        {
+          "backend": "filesystem",
+          "phase": "after_prepare",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "recovered_record_count": 1,
+          "recovered_cursor": 1,
+          "head_is_filesystem_commit_point": false
+        },
+        {
+          "backend": "filesystem",
+          "phase": "after_head",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "recovered_record_count": 2,
+          "recovered_cursor": 2,
+          "head_is_filesystem_commit_point": true
+        },
+        {
+          "backend": "sqlite",
+          "phase": "before_cursor_commit",
+          "status": "PASS",
+          "error": "STORAGE_ERROR",
+          "recovered_record_count": 1,
+          "recovered_cursor": 1,
+          "head_is_filesystem_commit_point": false
         }
       ],
       "php_minor": "85"

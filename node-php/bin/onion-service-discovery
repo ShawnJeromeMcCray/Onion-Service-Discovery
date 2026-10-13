@@ -6,6 +6,10 @@ declare(strict_types=1);
 ini_set('display_errors', '0');
 ini_set('log_errors', '0');
 
+if (!is_file(dirname(__DIR__) . '/vendor/autoload.php')) {
+    echo '{"status":"FAIL","error":"RUNTIME_DEPENDENCIES_MISSING"}', PHP_EOL;
+    exit(3);
+}
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use OnionServiceDiscovery\Crypto\CanonicalJson;
