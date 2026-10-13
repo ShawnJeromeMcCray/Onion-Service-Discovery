@@ -146,3 +146,13 @@ and adversarial proof mutations. This does not validate hidden signed checkpoint
 links, establish active-index freshness, or implement an accepted OSD wire format.
 [Research scope](conformance/checkpoint-consistency-research-report.json) is separate
 from production conformance.
+
+The implemented NoJS/private-key-alias commit `04e5328c49fc0f3102f1ca7148c11558f3194b33`
+passes all eight hosted jobs in [run 38476299383](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38476299383),
+including both PHP minors, formal models, controlled browser, dependency/secret
+checks and packaged-candidate validation. The later bounded PHP chain catch-up
+passes all 45 local suites on both pinned minors:
+[PHP 8.5](conformance/checkpoint-catchup-report.json),
+[PHP 8.4](conformance/checkpoint-catchup-php84-report.json). Its accepted anchor
+remains unchanged while verifying 35 missed generations; cached ancestors also
+obey the per-step 32-record work limit. Browser catch-up remains bounded separately.

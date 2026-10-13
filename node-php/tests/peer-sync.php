@@ -88,6 +88,38 @@ $result=runPeer($api,$root.'/partial.sqlite',$onion,1700040010,true); if($result
 $beforeMaintenance=count($target->snapshot()['records']);
 $maintenance=(new \OnionServiceDiscovery\Node\LocalMaintenance($target))->run(1700700000);
 if($maintenance['assertions_removed']<3||$target->snapshot()['tables']['assertions']!==[]||count($target->snapshot()['records'])!==$beforeMaintenance) { throw new RuntimeException('assertion cleanup removed identity evidence or failed expiry'); }
-$target->integrityCheck(); $staging->integrityCheck(); unset($target,$staging,$source,$api,$producer,$blobs,$signer,$config);
+// A long absence must be catchable in finite steps without resetting trust.
+$source->transaction(static function(StorageTransaction $tx) use($first): void { $tx->set('node','published-snapshot',['hash'=>$first['checkpoint_hash']]); });
+$long=new SQLiteStore($root.'/long.sqlite',create:true); PeerRegistry::add($long,OnionAddress::parse($onion),$signer->publicKey());
+$baseline=runPeer($api,$root.'/long.sqlite',$onion,1700800000);
+if($baseline['status']!=='CURRENT'||$baseline['generation']!==1)throw new RuntimeException('long-history baseline');
+$parent=$first['checkpoint_hash']; $longRecords=[];
+for($generation=2;$generation<=36;++$generation){
+ $next=clone $base; $next->generation=$generation; $next->previous_checkpoint_hash=$parent; $next->cursor='long-'.$generation;
+ $next=$verifier->verify($signer->signRecord($next));
+ $source->transaction(static function(StorageTransaction $tx) use($next): void { $tx->putRecord($next); $tx->set('node','published-snapshot',['hash'=>$next->contentHash]); });
+ $parent=$next->contentHash;
+ $longRecords[]=$next;
+}
+$progress=0;
+for($step=1;$step<=20;++$step){
+ $caught=runPeer($api,$root.'/long.sqlite',$onion,1700800000+$step*4000);
+ if($caught['status']==='CURRENT')break;
+ if($caught['status']!=='PROGRESS'||$caught['phase']!=='CHECKPOINT_CHAIN'||$long->snapshot()['tables']['sync']['key:'.$onion]['generation']!==1)throw new RuntimeException('long catch-up discarded or activated unverified anchor: '.json_encode($caught));
+ ++$progress;
+}
+if($caught['status']!=='CURRENT'||$caught['generation']!==36||$progress<2)throw new RuntimeException('long catch-up failed bounded progress');
+$source->transaction(static function(StorageTransaction $tx) use($first): void { $tx->set('node','published-snapshot',['hash'=>$first['checkpoint_hash']]); });
+$cached=new SQLiteStore($root.'/cached-long.sqlite',create:true); PeerRegistry::add($cached,OnionAddress::parse($onion),$signer->publicKey());
+runPeer($api,$root.'/cached-long.sqlite',$onion,1700900000);
+$cached->transaction(static function(StorageTransaction $tx) use($longRecords): void { foreach($longRecords as $record)$tx->putRecord($record); });
+$source->transaction(static function(StorageTransaction $tx) use($parent): void { $tx->set('node','published-snapshot',['hash'=>$parent]); });
+$bounded=runPeer($api,$root.'/cached-long.sqlite',$onion,1700904000);
+if($bounded['status']!=='PROGRESS'||$bounded['phase']!=='CHECKPOINT_CHAIN'||$cached->snapshot()['tables']['sync']['key:'.$onion]['generation']!==1)throw new RuntimeException('cached chain bypassed per-step work bound');
+$completed=runPeer($api,$root.'/cached-long.sqlite',$onion,1700908000);
+if($completed['status']!=='CURRENT'||$completed['generation']!==36)throw new RuntimeException('cached chain failed resume');
+$cached->integrityCheck();
+$long->integrityCheck();
+$target->integrityCheck(); $staging->integrityCheck(); unset($target,$staging,$cached,$long,$source,$api,$producer,$blobs,$signer,$config);
 $it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST); foreach($it as $file) { $file->isDir()?rmdir($file->getPathname()):unlink($file->getPathname()); } rmdir($root);
-echo "PASS: controlled peer sync, fork union, omission, rollback, equivocation and partial-chunk cursor safety\n";
+echo "PASS: controlled peer sync, fork union, omission, rollback, equivocation partial-chunk cursor safety and bounded long-absence catch-up\n";

@@ -7,11 +7,15 @@ representation and exact signed bytes remain unresolved.
 
 ## Observed problems
 
-The current PHP peer and browser refresh paths reject a gap exceeding 32 signed
-snapshot generations. This preserves a finite work budget but prevents a pinned
+The browser refresh path rejects a gap exceeding 32 signed snapshot generations;
+the PHP peer path had the same global cutoff before the bounded catch-up correction. This preserves a finite work budget but prevents a pinned
 client from recovering after an ordinary sufficiently long absence. Resetting
 the accepted anchor would discard continuity protection. Raising the limit alone
-would postpone the same failure and increase work. A fresh initial baseline is
+would postpone the same failure and increase work. The PHP correction walks the
+full existing chain in resumable steps (32 verified ancestors and six network
+requests maximum per step), retaining the accepted anchor until complete. It
+changes no signed bytes and remains subject to storage quotas and proof availability.
+The compact-proof experiment below is separate. A fresh initial baseline is
 explicitly marked as lacking historical proof; it is not genesis verification.
 
 The generic snapshot is a complete evidence export, not the required active index.

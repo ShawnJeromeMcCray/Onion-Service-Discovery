@@ -119,3 +119,8 @@ explicitly enable both discovery and the optional announcement switch.
 reconstructs derived exports from verified records and signs a new generation.
 Ordinary publication fails on corrupted exports. See [server search](server-search.md)
 for cache preparation, limits and query privacy.
+
+`sync:peer-step` may return `PROGRESS` with phase `CHECKPOINT_CHAIN` after a long
+absence. Run another scheduled bounded step after the peer retry time. This
+preserves the previous accepted cursor until full ancestry verifies; do not
+clear the peer ledger to bypass a history failure.

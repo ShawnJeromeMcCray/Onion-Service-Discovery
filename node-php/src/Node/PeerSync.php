@@ -57,7 +57,6 @@ final class PeerSync
                 if ($checkpoint->contentHash !== $anchorHash) { throw new ProtocolException('SOURCE_CHECKPOINT_EQUIVOCATION'); }
                 $this->finish($onion, $claim, $now, 'ACTIVE'); return ['status' => 'CURRENT', 'generation' => $anchorGeneration];
             }
-            if ($anchorGeneration > 0 && $document->generation - $anchorGeneration > 32) { throw new ProtocolException('SOURCE_CHECKPOINT_HISTORY_TOO_LARGE'); }
             if (($sync['pending_hash'] ?? null) !== $checkpoint->contentHash) {
                 $sync = array_merge($sync, ['seen_generation' => $document->generation, 'pending_hash' => $checkpoint->contentHash, 'walk_hash' => $document->previous_checkpoint_hash, 'walk_generation' => $document->generation - 1, 'chain_complete' => $anchorGeneration === 0, 'chunk_index' => 0, 'received' => 0, 'transfer_bytes' => 0, 'last_record_hash' => null]);
                 $this->saveSync($onion, $claim, $sync);
@@ -65,7 +64,8 @@ final class PeerSync
             $walks = 0;
             while (!$sync['chain_complete']) {
                 if ($sync['walk_hash'] === $anchorHash && $sync['walk_generation'] === $anchorGeneration) { $sync['chain_complete'] = true; $this->saveSync($onion, $claim, $sync); break; }
-                if (++$walks > 32 || $sync['walk_generation'] <= $anchorGeneration) { throw new ProtocolException('SOURCE_CHECKPOINT_CHAIN_BROKEN'); }
+                if ($sync['walk_generation'] <= $anchorGeneration) { throw new ProtocolException('SOURCE_CHECKPOINT_CHAIN_BROKEN'); }
+                if (++$walks > 32) { $this->finish($onion, $claim, $now, 'CANDIDATE'); return ['status' => 'PROGRESS', 'phase' => 'CHECKPOINT_CHAIN']; }
                 $cached = $this->store->readRecord($sync['walk_hash']);
                 if ($cached === null && $this->requests >= 6) { $this->finish($onion, $claim, $now, 'CANDIDATE'); return ['status' => 'PROGRESS', 'phase' => 'CHECKPOINT_CHAIN']; }
                 $parent = $this->verifier->verifyWire($cached ?? $this->fetch($onion, ProtocolEndpoint::snapshot($sync['walk_hash']))); $p = $parent->document();

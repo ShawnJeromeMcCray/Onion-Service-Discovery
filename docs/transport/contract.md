@@ -35,7 +35,8 @@ resolution. A crashed worker lease is recovered with backoff.
 records, excluding snapshot descriptors to avoid self-referential content.
 Snapshot generations have signed predecessor hashes. The cursor is the highest
 included admission sequence; repeated publication with unchanged content does
-not create another checkpoint. Chunks use SHA-256 over ASCII
+not create another checkpoint within the daily refresh window. An explicit
+derived-export rebuild also creates a new generation. Chunks use SHA-256 over ASCII
 `Onion Service Discovery/snapshot-chunk/v1`, NUL and canonical array bytes.
 The root hashes ASCII `Onion Service Discovery/snapshot-root/v1`, NUL and the
 canonical ordered chunk descriptors. These are draft byte choices requiring
@@ -74,3 +75,17 @@ complete the deployed public-Tor/browser privacy gates above.
 signed Service manifest. The exact unconfirmed response is required; no automatic
 retry or signing/storage side effect occurs. A received hint never supplies an
 identity, observation or active-index claim.
+
+## Long-absence PHP checkpoint catch-up
+
+The Node peer workflow resumes full signed ancestry over multiple steps instead
+of rejecting a gap beyond 32 generations. Each step still permits at most six
+network requests and 32 verified ancestors, including cached records. Every
+ancestor must match its signed hash, expected Node key and exact predecessor
+generation. Partial progress persists the walk position but never advances the
+accepted cursor/anchor. Storage quotas, withheld ancestry and a continually changing
+remote target can still prevent catch-up; no availability guarantee is inferred.
+Tests cover 35 missed generations, cache-only progress boundaries, rollback,
+equivocation and broken chunks. The browser still has its separate 32-generation
+refresh bound. PCP-003 researches alternatives without changing accepted wire
+formats or claiming active-index proof.
