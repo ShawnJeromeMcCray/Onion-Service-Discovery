@@ -207,4 +207,4 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
       - name: Scan Git history with pinned mature detector and redaction
-        run: docker run --rm --user "$(id -u):$(id -g)" --network none --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/repo,readonly" zricethezav/gitleaks@sha256:cdbb7c955abce02001a9f6c9f602fb195b7fadc1e812065883f695d1eeaba854 git /repo --redact --no-banner
+        run: docker run --rm --user "$(id -u):$(id -g)" --network none --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/repo,readonly" zricethezav/gitleaks@sha256:cdbb7c955abce02001a9f6c9f602fb195b7fadc1e812065883f695d1eeaba854 git /repo --redact --no-banner --gitleaks-ignore-path /repo

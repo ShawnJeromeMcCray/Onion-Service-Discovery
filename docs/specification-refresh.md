@@ -69,3 +69,10 @@ Tor CLI plus SOCKS is sufficient for Node/service transport integration tests
 when Tor network access is available. Browser behavior still needs browser
 execution: rendering, CSP/CORS, local query traffic, storage/pins and desktop/mobile
 compatibility cannot be established by a CLI HTTP client.
+
+The mature secret scanner flagged a plain-English Workspace Index sentence about engineering test
+coverage as a generic credential. Manual review
+confirmed that the full source line is an engineering coverage description,
+not a credential. `.gitleaksignore` contains only its exact historical
+commit/path/rule/line fingerprint. No source directory, credential type or
+future content is exempted. The supplemental credential-pattern check remains.
