@@ -47,6 +47,7 @@ jobs:
           .venv/bin/python tools/generate_language_grammar.py
           .venv/bin/python tools/generate_schemas.py
           .venv/bin/python tools/generate_protocol_vectors.py
+          .venv/bin/python tools/generate_membership_vectors.py
           .venv/bin/python tools/generate_browser_dataset.py
           npm --prefix web-local-search-client run schemas:build
           git diff --exit-code -- protocol/registries node-php/src/Domain/CategoryId.php node-php/src/Domain/LanguageGrammar.php validator-python/category_ids.py validator-python/language_grammar.py web-local-search-client/src/protocol/category-id.ts web-local-search-client/src/protocol/language-grammar.ts protocol/schemas protocol/test-vectors web-local-search-client/generated web-local-search-client/public/demo.json

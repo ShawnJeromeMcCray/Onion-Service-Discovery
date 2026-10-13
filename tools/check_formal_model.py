@@ -14,6 +14,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--jar', type=Path)
     parser.add_argument('--report', type=Path)
+    parser.add_argument('--membership-only', action='store_true', help='Check only the isolated offline membership model and its assertion mutation')
     args = parser.parse_args()
     pin = json.loads((ROOT / 'formal/toolchain.json').read_text())
     jar = args.jar or ROOT / '.tools/tla2tools.jar'
@@ -29,15 +30,23 @@ def main():
     results = []
     (ROOT / '.tools').mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='osd-formal-', dir=ROOT / '.tools') as temp:
-        for name in ['OnionServiceDiscovery', 'TransportFailure', 'UnsafeRollbackMutation']:
+        names = ['SnapshotMembership', 'UnsafeAssertionMutation']
+        if not args.membership_only:
+            names = ['OnionServiceDiscovery', 'TransportFailure', 'UnsafeRollbackMutation'] + names
+        for name in names:
             config = ROOT / 'formal' / (name + '.cfg')
+            module = 'SnapshotMembership' if name in ['SnapshotMembership', 'UnsafeAssertionMutation'] else 'OnionServiceDiscovery'
+            invariant = 'NoUnprovedInclusion' if name == 'UnsafeAssertionMutation' else 'NoRevisionDowngrade'
             if name == 'UnsafeRollbackMutation':
                 config = Path(temp) / (name + '.cfg')
                 config.write_text((ROOT / 'formal/OnionServiceDiscovery.cfg').read_text().replace('UnsafeRollback = FALSE', 'UnsafeRollback = TRUE'))
-            process = subprocess.run(['java', '-XX:+UseParallelGC', '-Xmx1536m', '-cp', str(jar.resolve()), 'tlc2.TLC', '-seed', '8785', '-fp', '0', '-workers', '2', '-metadir', str(Path(temp) / name), '-config', str(config), 'formal/OnionServiceDiscovery.tla'], cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=900)
-            expected_failure = name == 'UnsafeRollbackMutation'
-            passed = (process.returncode == 12 and 'Invariant NoRevisionDowngrade is violated' in process.stdout) if expected_failure else (process.returncode == 0 and 'Model checking completed. No error has been found.' in process.stdout)
-            results.append({'model': name, 'expected': 'rollback invariant rejection' if expected_failure else 'all invariants hold', 'passed': passed, 'exit_code': process.returncode, 'output': process.stdout})
+            if name == 'UnsafeAssertionMutation':
+                config = Path(temp) / (name + '.cfg')
+                config.write_text((ROOT / 'formal/SnapshotMembership.cfg').read_text().replace('UnsafeAssertion = FALSE', 'UnsafeAssertion = TRUE'))
+            process = subprocess.run(['java', '-XX:+UseParallelGC', '-Xmx1536m', '-cp', str(jar.resolve()), 'tlc2.TLC', '-seed', '8785', '-fp', '0', '-workers', '2', '-metadir', str(Path(temp) / name), '-config', str(config), f'formal/{module}.tla'], cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=900)
+            expected_failure = name in ['UnsafeRollbackMutation', 'UnsafeAssertionMutation']
+            passed = (process.returncode == 12 and f'Invariant {invariant} is violated' in process.stdout) if expected_failure else (process.returncode == 0 and 'Model checking completed. No error has been found.' in process.stdout)
+            results.append({'model': name, 'expected': f'{invariant} rejection' if expected_failure else 'all invariants hold', 'passed': passed, 'exit_code': process.returncode, 'output': process.stdout})
             print(name + ': ' + ('PASS' if passed else 'FAIL'), flush=True)
             if not passed:
                 print(process.stdout)

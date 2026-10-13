@@ -9,6 +9,7 @@ from onion_address import validate_onion_address
 from record_format import message, payload
 from record_verifier import verify_wire, verify_record
 from strict_json import parse_strict_json
+from snapshot_membership import verify_membership
 
 
 def operation(request):
@@ -41,6 +42,14 @@ def operation(request):
             raise ValueError('SCHEMA_INVALID')
         records = [verify_record(record) for record in fixture['records']]
         return {'status': 'PASS', 'state': derive_identities(records, fixture.get('max_records', 100000))}
+    if request.get('operation') == 'snapshot-membership':
+        fixture = parse_strict_json(data, 1048576)
+        if (type(fixture.get('local_records')) is not list or type(fixture.get('chunks')) is not list
+                or type(fixture.get('checkpoint_wire')) is not list or type(fixture.get('expected_node_key')) is not str
+                or any(type(wire) is not str for wire in fixture['chunks'] + fixture['checkpoint_wire'])):
+            raise ValueError('SCHEMA_INVALID')
+        return {'status': 'PASS', 'result': verify_membership(''.join(fixture['checkpoint_wire']).encode(),
+                (wire.encode() for wire in fixture['chunks']), fixture['expected_node_key'], [verify_record(r) for r in fixture['local_records']])}
     raise ValueError('USAGE_ERROR')
 
 

@@ -6,6 +6,7 @@ import { validateOnionAddress } from '../src/protocol/onion-address.ts';
 import { signablePayload, signedMessage } from '../src/protocol/record-format.ts';
 import { verifyWire, verifyRecord } from '../src/protocol/record-verifier.ts';
 import { parseStrictJson } from '../src/protocol/strict-json.ts';
+import { verifySnapshotMembership } from '../src/protocol/snapshot-membership.ts';
 
 const crypto = browserCryptoProviders();
 const input = createInterface({ input: process.stdin, crlfDelay: Infinity });
@@ -43,6 +44,11 @@ for await (const line of input) {
       if (!Array.isArray(sequence.records)) throw new Error('SCHEMA_INVALID');
       const records = await Promise.all(sequence.records.map(record => verifyRecord(record, crypto)));
       output = { status: 'PASS', state: deriveIdentities(records, sequence.max_records ?? 100000) };
+    } else if (request.operation === 'snapshot-membership') {
+      const fixture = parseStrictJson(bytes, 1048576);
+      if (!Array.isArray(fixture.local_records) || !Array.isArray(fixture.chunks) || !Array.isArray(fixture.checkpoint_wire) || typeof fixture.expected_node_key !== 'string' || fixture.chunks.some(wire => typeof wire !== 'string') || fixture.checkpoint_wire.some(wire => typeof wire !== 'string')) throw new Error('SCHEMA_INVALID');
+      const history = await Promise.all(fixture.local_records.map(record => verifyRecord(record, crypto)));
+      output = { status: 'PASS', result: await verifySnapshotMembership(new TextEncoder().encode(fixture.checkpoint_wire.join('')), fixture.chunks.map(wire => new TextEncoder().encode(wire)), fixture.expected_node_key, history, crypto) };
     } else throw new Error('USAGE_ERROR');
     console.log(JSON.stringify(output));
   } catch (error) {

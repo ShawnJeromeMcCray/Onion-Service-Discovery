@@ -25,6 +25,7 @@ $cases['cli-valid'] = ["HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCon
 $cases['cli-invalid'] = [$cases['valid'][0], ['status'=>'FAIL','error'=>'PROTOCOL_UNSUPPORTED']];
 $cases['cli-redirect'] = [$cases['redirect'][0], ['status'=>'FAIL','error'=>'HTTP_STATUS_REJECTED']];
 $checks = 0;
+$isolationParameters = [];
 foreach ($cases as $name => [$response, $expected]) {
     $server = stream_socket_server('tcp://127.0.0.1:0', $errno, $error);
     if ($server === false) { throw new RuntimeException('local fixture unavailable'); }
@@ -47,7 +48,8 @@ foreach ($cases as $name => [$response, $expected]) {
     if (ord($greeting[0]) !== 5 || !str_contains($methods, "\x02")) { throw new RuntimeException('SOCKS authentication unavailable'); }
     fwrite($socket, "\x05\x02");
     $auth = readExact($socket, 2); $username = readExact($socket, ord($auth[1])); $password = readExact($socket, ord(readExact($socket, 1)));
-    if (strlen($username) !== 32 || strlen($password) !== 32) { throw new RuntimeException('isolation credentials missing'); }
+    if ($auth[0] !== "\x01" || $username !== '<torS0X>0' || preg_match('/\A[0-9a-f]{32}\z/D', $password) !== 1 || isset($isolationParameters[$password])) { throw new RuntimeException('Tor format-0 isolation parameter invalid or reused'); }
+    $isolationParameters[$password] = true;
     fwrite($socket, "\x01\x00");
     $request = readExact($socket, 4);
     if ($request !== "\x05\x01\x00\x03") { throw new RuntimeException('hostname was not resolved through SOCKS'); }

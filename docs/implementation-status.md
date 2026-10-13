@@ -7,6 +7,15 @@ an executable development Node, offline Service signer, separate Client Host,
 locally verifying/searching browser client and mature offline release verifier.
 There is no approved production release.
 
+The next continuation adds offline exact-state membership in complete signed
+draft snapshots in PHP/TypeScript/independent Python, including a split-view fork
+against the owner's known history. The 24 new shared cases bring the black-box
+suite to 226 cases per language. It does not evaluate freshness/checkpoint ancestry
+or complete the new active-index checkpoint/onboarding workflow. Local peer
+source grouping now exposes concentration without identity-count trust; gradual
+learned-source admission remains open. Tor transport uses explicit format-zero
+SOCKS isolation. See [continuation evidence](production-completion-review.md).
+
 The 2026-10-13 refresh found 55 active sources: 43 updated, five added, seven
 unchanged. The full updated corpus has been read in the mandatory order.
 Implementation alignment remains partial. Historical reports describe the earlier draft. Current reports cover specific

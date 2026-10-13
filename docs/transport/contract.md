@@ -6,7 +6,8 @@ hostname resolution is mandatory. Only local loopback proxy addresses may be
 configured; an unavailable proxy causes failure without direct fallback.
 `CURLOPT_NOPROXY` is explicitly empty so ambient `NO_PROXY=*` cannot bypass Tor.
 Redirects, URL credentials, netrc, compressed responses and arbitrary paths are
-unsupported. Each request uses random SOCKS isolation credentials unrelated to
+unsupported. Each request uses Tor extension format zero (`<torS0X>0`) with a fresh
+random SOCKS isolation parameter unrelated to
 users. Configure Tor's SOCKSPort with `IsolateSOCKSAuth`.
 
 Headers are limited to 8 KiB total and 2 KiB per line. Responses use the endpoint

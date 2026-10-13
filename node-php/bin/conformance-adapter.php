@@ -63,6 +63,17 @@ while (($line = fgets(STDIN, 262146)) !== false) {
                 return $verifier->verify($record);
             }, $sequence->records);
             $output = ['status' => 'PASS', 'state' => IdentityDeriver::derive($records, $sequence->max_records ?? 100000)];
+        } elseif (($request->operation ?? null) === 'snapshot-membership') {
+            $fixture = StrictJson::parse($bytes, 1048576);
+            if (!is_array($fixture->local_records ?? null) || !is_array($fixture->chunks ?? null) || !is_array($fixture->checkpoint_wire ?? null) || !is_string($fixture->expected_node_key ?? null)) { throw new ProtocolException('SCHEMA_INVALID'); }
+            $history = [];
+            foreach ($fixture->local_records as $record) {
+                if (!$record instanceof stdClass) { throw new ProtocolException('SCHEMA_INVALID'); }
+                $history[] = $verifier->verify($record);
+            }
+            foreach ($fixture->chunks as $wire) { if (!is_string($wire)) { throw new ProtocolException('SCHEMA_INVALID'); } }
+            foreach ($fixture->checkpoint_wire as $part) { if (!is_string($part)) { throw new ProtocolException('SCHEMA_INVALID'); } }
+            $output = ['status' => 'PASS', 'result' => (new \OnionServiceDiscovery\Protocol\SnapshotMembership($verifier))->verify(implode('', $fixture->checkpoint_wire), $fixture->chunks, $fixture->expected_node_key, $history)];
         } else {
             throw new ProtocolException('USAGE_ERROR');
         }

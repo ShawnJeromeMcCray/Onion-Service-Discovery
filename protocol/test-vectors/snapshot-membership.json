@@ -1,0 +1,1963 @@
+{
+  "status": "DRAFT_OFFLINE_MEMBERSHIP",
+  "scope": "Existing complete draft snapshot bytes; no active-index checkpoint freeze, freshness, ancestry or production approval",
+  "cases": [
+    {
+      "id": "membership-genesis",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":774,\"hash\":\"sha256:4158c9cb16c8d693c8756520950703d94ef5a0682c6e30fdbedd5a7861657d7e\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295\",\"signature\":\"ed25519sig:3UrOHEqv8rLOQlZQ84FdDx1pp1ay0Q9EpKR82xesxFTr_Gf438IDdLpcAwH0Cv33jyQoVmLCgwn8fXXQzl4hAg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "expected": {
+        "status": "CURRENT_STATE_INCLUDED",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 1,
+          "manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 1,
+          "manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "protocol_version": 1,
+          "active": true
+        },
+        "checkpoint_hash": "sha256:9803f896d396cb5001fbe2fb8c6596ce53ad9b52f9fadbe83ff1bf9d2f74319b",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-valid-successor",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":1600,\"hash\":\"sha256:543e3c9c65354d4f79b168b9eb616e936fe9a2d8581e179d332cd5c1860514b7\",\"record_count\":2}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":2,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:51947066cac15e7da9f8e9b4eedeb091142daee7721fbdb7e3e4a059116660e2\",\"signature\":\"ed25519sig:4Oc7tbJxkWoBwO7I1tu2mZssSNJihWUPi1onn9vGSJImyWxXBilg4U0AhswzcfjtV63ggHP6oqoGsVW2kURgCg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"},{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+          }
+        ]
+      },
+      "expected": {
+        "status": "CURRENT_STATE_INCLUDED",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+          "protocol_version": 1,
+          "active": true
+        },
+        "checkpoint_hash": "sha256:4fa7a03951b11a21fbf37c3005a15684552f3765efd00b137e64fdd771c4f428",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:51947066cac15e7da9f8e9b4eedeb091142daee7721fbdb7e3e4a059116660e2",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-valid-rotation",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":2283,\"hash\":\"sha256:895ae3234e95dd8453c69ed592145a2dd6d0addbed72451702ef15f1bc20f654\",\"record_count\":3}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":3,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:d1a059c9af8470c4ade23503309d72c9bc02f7ad025cfc27e3d0787e6ca8ee00\",\"signature\":\"ed25519sig:Kk0-72puGl5ciHRF64wu7zOk-wQj13zXGerGuRGGD6-cbk11HYuRXEnDf71lTzjLlr6yM3Q52qULp-gMK3Q4Aw\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg\",\"signature\":\"ed25519sig:K4xDV7DMqh2KenLW4KYIuFrsCE89Rn4sRVssYOLFP9cV6ywcGpqR8R4d5oQFBCyAorDJRRXALU55nRiawd_VCQ\"},{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"},{\"effective_revision\":2,\"new_key_confirmation\":\"ed25519sig:RS7yU_cDM_aPg4vXHgHYJ7JOljBqH0uwEuxk5rdg9BbRRbMRyIc2MF06qIgDJDTxE9VxRSnIICIv-b0hz2kVBw\",\"new_public_key\":\"ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg\",\"old_key_signature\":\"ed25519sig:XkLZpCc15yL2aahXWzo174YdQu0RouWxJNDb6HDc--FIQ0Zaen5OLubxNbwoS0pc_S2MK-OAKbCjM6h1JeJDBA\",\"old_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_state_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_type\":\"service_identity_key_rotation\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_identity_key_rotation",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "old_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "new_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+            "effective_revision": 2,
+            "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "old_key_signature": "ed25519sig:XkLZpCc15yL2aahXWzo174YdQu0RouWxJNDb6HDc--FIQ0Zaen5OLubxNbwoS0pc_S2MK-OAKbCjM6h1JeJDBA",
+            "new_key_confirmation": "ed25519sig:RS7yU_cDM_aPg4vXHgHYJ7JOljBqH0uwEuxk5rdg9BbRRbMRyIc2MF06qIgDJDTxE9VxRSnIICIv-b0hz2kVBw"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:K4xDV7DMqh2KenLW4KYIuFrsCE89Rn4sRVssYOLFP9cV6ywcGpqR8R4d5oQFBCyAorDJRRXALU55nRiawd_VCQ"
+          }
+        ]
+      },
+      "expected": {
+        "status": "CURRENT_STATE_INCLUDED",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "key_epoch": 2,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:834b1bac0622e52e3304cc2b0d6aa6b1e8157b873aa8fa5be029a6d3cac02ad5",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "key_epoch": 2,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:834b1bac0622e52e3304cc2b0d6aa6b1e8157b873aa8fa5be029a6d3cac02ad5",
+          "protocol_version": 1,
+          "active": true
+        },
+        "checkpoint_hash": "sha256:765dbaa3b59adc7f46bf8bb64e7013e765d8b8e372fe1b2622e9cfd0af033481",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:d1a059c9af8470c4ade23503309d72c9bc02f7ad025cfc27e3d0787e6ca8ee00",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-valid-migration",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":2186,\"hash\":\"sha256:91de40985b3fd422182c8c02b66839aa1d5d05ac6060044fc7ec8c3f9d490559\",\"record_count\":3}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":3,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:11cbb7af1ae2fe13d6489b12c192ee7eb00de3d55c3702275eed18ed7cf55bec\",\"signature\":\"ed25519sig:MXilFWq1amLtNcEcXw2uwPUmhrSAlyzzROVVi1vbiVcsAwnrKqg-16e-nymTuj4NN90_GwSuXVcKX_JX--0HAQ\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:XjT-dTWsf4FrsaX79LKzog1jg54an-VlfWAF-1c_A1NB18qOYi_fQEO41Qy2bAPjvuLtQPLLwRKzKbwgLnosAQ\"},{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"},{\"effective_revision\":2,\"from_onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_state_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_type\":\"onion_service_migration\",\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"service_identity_signature\":\"ed25519sig:tGwyXVavILFgMg3Gjg_T6CK-5v8KxC4nSGj2irMetreMwflfx9szKOiwDDVooHvXAVN5pc2Tib9_MZhkTcTNDw\",\"to_onion\":\"bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "onion_service_migration",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "from_onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "to_onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+            "effective_revision": 2,
+            "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "service_identity_signature": "ed25519sig:tGwyXVavILFgMg3Gjg_T6CK-5v8KxC4nSGj2irMetreMwflfx9szKOiwDDVooHvXAVN5pc2Tib9_MZhkTcTNDw"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:XjT-dTWsf4FrsaX79LKzog1jg54an-VlfWAF-1c_A1NB18qOYi_fQEO41Qy2bAPjvuLtQPLLwRKzKbwgLnosAQ"
+          }
+        ]
+      },
+      "expected": {
+        "status": "CURRENT_STATE_INCLUDED",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:710cd85aa6702c2dafad16b5a0c389683b0e299ff28763f3b9263ae8efb6cc88",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:710cd85aa6702c2dafad16b5a0c389683b0e299ff28763f3b9263ae8efb6cc88",
+          "protocol_version": 1,
+          "active": true
+        },
+        "checkpoint_hash": "sha256:7c7ac36eb512ec1f96dde6222d186804cfb01e0fa1a84adb7cf88196fe5c2b18",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:11cbb7af1ae2fe13d6489b12c192ee7eb00de3d55c3702275eed18ed7cf55bec",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-combined-transition-atomic",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":2869,\"hash\":\"sha256:1dfd28708b1a9a6f93368864410af00111962c73368d9c3afcc9330a0eec3ee0\",\"record_count\":4}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":4,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:c1093c9c1a2d51a4ceb5e05e78b7ef78d3b604fdb818077bcb08652884cc163a\",\"signature\":\"ed25519sig:_dpp4qAbAIwO0EKIa0dycCuuBRRE8uplhCJEiYqIE0ElZY19Rb16aodh7ylYoObvmc2CzCQd9ehHR-xMXzQrAg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"},{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg\",\"signature\":\"ed25519sig:ZPCAYMP_Cg-t_fREDPDETd4Ij80SOslkjZDnXulVxaITwnMGTng3vODJLkanQ6H9Nbue6udtJSJAjzT6fyBuDg\"},{\"effective_revision\":2,\"new_key_confirmation\":\"ed25519sig:RS7yU_cDM_aPg4vXHgHYJ7JOljBqH0uwEuxk5rdg9BbRRbMRyIc2MF06qIgDJDTxE9VxRSnIICIv-b0hz2kVBw\",\"new_public_key\":\"ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg\",\"old_key_signature\":\"ed25519sig:XkLZpCc15yL2aahXWzo174YdQu0RouWxJNDb6HDc--FIQ0Zaen5OLubxNbwoS0pc_S2MK-OAKbCjM6h1JeJDBA\",\"old_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_state_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_type\":\"service_identity_key_rotation\"},{\"effective_revision\":2,\"from_onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_state_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_type\":\"onion_service_migration\",\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"service_identity_signature\":\"ed25519sig:tGwyXVavILFgMg3Gjg_T6CK-5v8KxC4nSGj2irMetreMwflfx9szKOiwDDVooHvXAVN5pc2Tib9_MZhkTcTNDw\",\"to_onion\":\"bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_identity_key_rotation",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "old_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "new_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+            "effective_revision": 2,
+            "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "old_key_signature": "ed25519sig:XkLZpCc15yL2aahXWzo174YdQu0RouWxJNDb6HDc--FIQ0Zaen5OLubxNbwoS0pc_S2MK-OAKbCjM6h1JeJDBA",
+            "new_key_confirmation": "ed25519sig:RS7yU_cDM_aPg4vXHgHYJ7JOljBqH0uwEuxk5rdg9BbRRbMRyIc2MF06qIgDJDTxE9VxRSnIICIv-b0hz2kVBw"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "onion_service_migration",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "from_onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "to_onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+            "effective_revision": 2,
+            "previous_state_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "service_identity_signature": "ed25519sig:tGwyXVavILFgMg3Gjg_T6CK-5v8KxC4nSGj2irMetreMwflfx9szKOiwDDVooHvXAVN5pc2Tib9_MZhkTcTNDw"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+            "service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:ZPCAYMP_Cg-t_fREDPDETd4Ij80SOslkjZDnXulVxaITwnMGTng3vODJLkanQ6H9Nbue6udtJSJAjzT6fyBuDg"
+          }
+        ]
+      },
+      "expected": {
+        "status": "CURRENT_STATE_INCLUDED",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "key_epoch": 2,
+          "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:d13b391736ee1d813e3045e93d5760e0bcf902e4e7c8684569e50636abfff9a0",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+          "key_epoch": 2,
+          "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:d13b391736ee1d813e3045e93d5760e0bcf902e4e7c8684569e50636abfff9a0",
+          "protocol_version": 1,
+          "active": true
+        },
+        "checkpoint_hash": "sha256:a8178c20d385cf41df0225d381d43bc53c0206279b8c58140240e7ccf0e16c68",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:c1093c9c1a2d51a4ceb5e05e78b7ef78d3b604fdb818077bcb08652884cc163a",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-withdrawal",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":1601,\"hash\":\"sha256:f3ff995d0afed7af4555d0b509797dc4c724caf323c46f09463218eb3fcab979\",\"record_count\":2}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":2,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:93c7d8d77c68a618c51c154d02427dce4260bea1c8db8481a1d52ec536bd3db5\",\"signature\":\"ed25519sig:dELkfdwZFKxufFCPORG01IGEW8rb1IEHQeM-2SzPAhG8PcBfl8TbeRlDB1DtBAzRZ6ZWN7l5-YXnBUctsp4-BA\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":false,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:sTR8sY-LTWErg0H_yA0oSAqfCKlA60KM_R-Qo00o5cGKODH7cjKjJPl4IoOD8rqzP6ECqElXu_49gzB2J75PCA\"},{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": false,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:sTR8sY-LTWErg0H_yA0oSAqfCKlA60KM_R-Qo00o5cGKODH7cjKjJPl4IoOD8rqzP6ECqElXu_49gzB2J75PCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "expected": {
+        "status": "WITHDRAWN_IN_SNAPSHOT",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:a4ede6c5bae8cebf605d61b75da74cf3c651879f4efedc3b5f2a854076b69346",
+          "protocol_version": 1,
+          "active": false
+        },
+        "snapshot_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:a4ede6c5bae8cebf605d61b75da74cf3c651879f4efedc3b5f2a854076b69346",
+          "protocol_version": 1,
+          "active": false
+        },
+        "checkpoint_hash": "sha256:7b91b0a3cbbd7d0175226b87cf8ae5c67de9e91983e6b7ed963e22ff539dc372",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:93c7d8d77c68a618c51c154d02427dce4260bea1c8db8481a1d52ec536bd3db5",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-stale",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":774,\"hash\":\"sha256:4158c9cb16c8d693c8756520950703d94ef5a0682c6e30fdbedd5a7861657d7e\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295\",\"signature\":\"ed25519sig:3UrOHEqv8rLOQlZQ84FdDx1pp1ay0Q9EpKR82xesxFTr_Gf438IDdLpcAwH0Cv33jyQoVmLCgwn8fXXQzl4hAg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+          }
+        ]
+      },
+      "expected": {
+        "status": "STALE_REVISION_INCLUDED",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 1,
+          "manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "protocol_version": 1,
+          "active": true
+        },
+        "checkpoint_hash": "sha256:9803f896d396cb5001fbe2fb8c6596ce53ad9b52f9fadbe83ff1bf9d2f74319b",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-historical-is-not-active",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":1600,\"hash\":\"sha256:543e3c9c65354d4f79b168b9eb616e936fe9a2d8581e179d332cd5c1860514b7\",\"record_count\":2}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":2,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:51947066cac15e7da9f8e9b4eedeb091142daee7721fbdb7e3e4a059116660e2\",\"signature\":\"ed25519sig:4Oc7tbJxkWoBwO7I1tu2mZssSNJihWUPi1onn9vGSJImyWxXBilg4U0AhswzcfjtV63ggHP6oqoGsVW2kURgCg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"},{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "expected": {
+        "status": "DIFFERENT_SERVICE_STATE",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 1,
+          "manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+          "protocol_version": 1,
+          "active": true
+        },
+        "checkpoint_hash": "sha256:4fa7a03951b11a21fbf37c3005a15684552f3765efd00b137e64fdd771c4f428",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:51947066cac15e7da9f8e9b4eedeb091142daee7721fbdb7e3e4a059116660e2",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-fork",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":2436,\"hash\":\"sha256:8e2724bbe7b0d1de5019202afc89011bc1280d03e32e3f9590657a74e9e2c7dd\",\"record_count\":3}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":3,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:0703002d9ee131894f3635881c69714a31bd40a9935b0ca8808b9771558d2d40\",\"signature\":\"ed25519sig:w_eAOk3KC_RkH7PN3I3BegHpbCCrRQUlshKuIa744xWm01qUaw-8Tw0hX_m41p0k4ev1QvjuXK0XvGHWc6uVBA\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Conflicting second revision\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:u0WXgI1GPkfO_5Qjz_DgtqFRVoOaqgbPCiKr_lOH6uZk6cbFHDWK6PCJJ3_YzXzNl-VxQhv_gPx7cRjnTNy6CQ\"},{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"},{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "expected": {
+        "status": "CONFLICTING_SERVICE_STATE",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 1,
+          "manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": null,
+          "key_epoch": null,
+          "onion": null,
+          "revision": 2,
+          "manifest_hash": null,
+          "protocol_version": 1,
+          "active": false
+        },
+        "checkpoint_hash": "sha256:46714ec1f341a5de98631225338cd9361650a3c83fee2c21d8526ba85c877743",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:0703002d9ee131894f3635881c69714a31bd40a9935b0ca8808b9771558d2d40",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-split-view-fork",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":1610,\"hash\":\"sha256:e0c2d435994854a811397513841622ad1474531a8280f903bf9c182738859832\",\"record_count\":2}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":2,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:c8812eed2cfbb39be43612030d5ea13bcd746888af0d2870e85f088a822da09e\",\"signature\":\"ed25519sig:lXbO2NM0LcVBtC7TxVK8IZEonfhbBP58vm5ijY5EKH7s2LtsXTA81KS25DIo05hOOf8JcEXjMfTQ5UdwHNkKDQ\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Conflicting second revision\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:u0WXgI1GPkfO_5Qjz_DgtqFRVoOaqgbPCiKr_lOH6uZk6cbFHDWK6PCJJ3_YzXzNl-VxQhv_gPx7cRjnTNy6CQ\"},{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+          }
+        ]
+      },
+      "expected": {
+        "status": "CONFLICTING_SERVICE_STATE",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:1929f7d21d0c50ef5425c6087e18499d1119d52fef829129f8e4475c317a421f",
+          "protocol_version": 1,
+          "active": true
+        },
+        "checkpoint_hash": "sha256:8e24f858b38e359c6ae9ccdd48acac1bd1fd8a65746d47d7260c7bb69c64bf68",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:c8812eed2cfbb39be43612030d5ea13bcd746888af0d2870e85f088a822da09e",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-omission",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":0,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:449e225a3ab22d56c13d7680bbf097088a9997136eb80caabc3f41d9a4ef6024\",\"signature\":\"ed25519sig:RSdPanyXED48cL1Up0ULB95AZXNcnF790s_xwg2m1RubA2eSEIecuk0Wb-ejq_98b6BnvGuzJz-Ym8RPTt_nAA\"}"
+        ],
+        "chunks": [],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "expected": {
+        "status": "IDENTITY_NOT_PRESENT",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 1,
+          "manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": null,
+        "checkpoint_hash": "sha256:833a58c48a3241fb90ca9378a9ab8e3ce8d85417ccb89fc2f22ce1a948b7f04e",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:449e225a3ab22d56c13d7680bbf097088a9997136eb80caabc3f41d9a4ef6024",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-orphan-is-not-logical-identity",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":827,\"hash\":\"sha256:d58907ee2ea84f35269fbd70f1eb068d267cc9ca7774b8b66a4aad147dea4f04\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:e84177e11584f4dbf1b1adbcf18efa069cb7abd3da138029e1bf32db60aa55f4\",\"signature\":\"ed25519sig:308roEsl2QctLYY_nTybalcdiACQND20oaMFXemP12kKYnB7fN_W4HokW6XFF3l0hgf4Kx1TADv6ma28m5yaBA\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+          }
+        ]
+      },
+      "expected": {
+        "status": "IDENTITY_NOT_PRESENT",
+        "expected_state": {
+          "logical_service_id": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "current_service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+          "key_epoch": 1,
+          "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+          "revision": 2,
+          "manifest_hash": "sha256:b8816d0ca3dca6d383498a9245995369f940ace6b628bb53359c98f8f633c583",
+          "protocol_version": 1,
+          "active": true
+        },
+        "snapshot_state": null,
+        "checkpoint_hash": "sha256:9f814e63500801fa60fee3b511a9838ed76c5f3597ab19efba2a722d023efdba",
+        "node_identity_public_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "checkpoint_generation": 1,
+        "checkpoint_created_at": "2026-10-13T00:00:00Z",
+        "checkpoint_root": "sha256:e84177e11584f4dbf1b1adbcf18efa069cb7abd3da138029e1bf32db60aa55f4",
+        "evidence_type": "COMPLETE_SIGNED_DRAFT_SNAPSHOT",
+        "node_claimed_direct_observation_at": null,
+        "checkpoint_consistency": "NOT_EVALUATED",
+        "freshness": "NOT_EVALUATED",
+        "network_side_effects": false
+      }
+    },
+    {
+      "id": "membership-local-fork",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":774,\"hash\":\"sha256:4158c9cb16c8d693c8756520950703d94ef5a0682c6e30fdbedd5a7861657d7e\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295\",\"signature\":\"ed25519sig:3UrOHEqv8rLOQlZQ84FdDx1pp1ay0Q9EpKR82xesxFTr_Gf438IDdLpcAwH0Cv33jyQoVmLCgwn8fXXQzl4hAg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Conflicting second revision",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:u0WXgI1GPkfO_5Qjz_DgtqFRVoOaqgbPCiKr_lOH6uZk6cbFHDWK6PCJJ3_YzXzNl-VxQhv_gPx7cRjnTNy6CQ"
+          }
+        ]
+      },
+      "error": "LOCAL_IDENTITY_CONFLICT"
+    },
+    {
+      "id": "membership-local-orphan",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":774,\"hash\":\"sha256:4158c9cb16c8d693c8756520950703d94ef5a0682c6e30fdbedd5a7861657d7e\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295\",\"signature\":\"ed25519sig:3UrOHEqv8rLOQlZQ84FdDx1pp1ay0Q9EpKR82xesxFTr_Gf438IDdLpcAwH0Cv33jyQoVmLCgwn8fXXQzl4hAg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 2,
+            "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "A revised fictional collection.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+          }
+        ]
+      },
+      "error": "LOCAL_CONTINUITY_INCOMPLETE"
+    },
+    {
+      "id": "membership-local-ambiguous",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":774,\"hash\":\"sha256:4158c9cb16c8d693c8756520950703d94ef5a0682c6e30fdbedd5a7861657d7e\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295\",\"signature\":\"ed25519sig:3UrOHEqv8rLOQlZQ84FdDx1pp1ay0Q9EpKR82xesxFTr_Gf438IDdLpcAwH0Cv33jyQoVmLCgwn8fXXQzl4hAg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          },
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:q_kdDi-teuFe1i7AI9akMBkqsaKFViLxncj5sLDPxlM",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:jAdrOiVmCsbwAulvPPxHhnRUN03iW-utQv-u0Xj2ClbwAC0iFXsMuvmnBM4GDhTI_FXbsDHs8OgH2mLXpxa9Dg"
+          }
+        ]
+      },
+      "error": "LOCAL_CONTINUITY_INCOMPLETE"
+    },
+    {
+      "id": "membership-missing-chunk",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":774,\"hash\":\"sha256:4158c9cb16c8d693c8756520950703d94ef5a0682c6e30fdbedd5a7861657d7e\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295\",\"signature\":\"ed25519sig:3UrOHEqv8rLOQlZQ84FdDx1pp1ay0Q9EpKR82xesxFTr_Gf438IDdLpcAwH0Cv33jyQoVmLCgwn8fXXQzl4hAg\"}"
+        ],
+        "chunks": [],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "error": "SNAPSHOT_INCOMPLETE"
+    },
+    {
+      "id": "membership-extra-chunk",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":774,\"hash\":\"sha256:4158c9cb16c8d693c8756520950703d94ef5a0682c6e30fdbedd5a7861657d7e\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295\",\"signature\":\"ed25519sig:3UrOHEqv8rLOQlZQ84FdDx1pp1ay0Q9EpKR82xesxFTr_Gf438IDdLpcAwH0Cv33jyQoVmLCgwn8fXXQzl4hAg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]",
+          "[]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "error": "SNAPSHOT_INCOMPLETE"
+    },
+    {
+      "id": "membership-corrupt-chunk",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":774,\"hash\":\"sha256:4158c9cb16c8d693c8756520950703d94ef5a0682c6e30fdbedd5a7861657d7e\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295\",\"signature\":\"ed25519sig:3UrOHEqv8rLOQlZQ84FdDx1pp1ay0Q9EpKR82xesxFTr_Gf438IDdLpcAwH0Cv33jyQoVmLCgwn8fXXQzl4hAg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}] "
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "error": "SNAPSHOT_CHUNK_HASH_INVALID"
+    },
+    {
+      "id": "membership-wrong-node",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":774,\"hash\":\"sha256:4158c9cb16c8d693c8756520950703d94ef5a0682c6e30fdbedd5a7861657d7e\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:d7437dab5cba888db42703e03bab6ce0ebc9231185695ba9d8227d15e72cc295\",\"signature\":\"ed25519sig:3UrOHEqv8rLOQlZQ84FdDx1pp1ay0Q9EpKR82xesxFTr_Gf438IDdLpcAwH0Cv33jyQoVmLCgwn8fXXQzl4hAg\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "error": "CHECKPOINT_NODE_MISMATCH"
+    },
+    {
+      "id": "membership-boolean-is-not-proof",
+      "input": {
+        "checkpoint_wire": [
+          "{\"listed\":true}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "error": "PROTOCOL_UNSUPPORTED"
+    },
+    {
+      "id": "membership-record-order",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":1600,\"hash\":\"sha256:951fd1a3f83682ac26f5f5fd0f4455fa659554bd2c2433e24bdfd4850a33c019\",\"record_count\":2}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":2,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:0ee8ef8f7485df51cd5bf328f89720db7b4434217550f8d0c396806120a7a4dd\",\"signature\":\"ed25519sig:2JbyDZTfRdZ9qgbVlVaJGD_prUX5hmzqnhyDKoao8YcyS-68VjY4vUWEojvh80ZRyIGi9T80JHcuebvdj3y6CA\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"},{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "error": "SNAPSHOT_RECORD_ORDER_INVALID"
+    },
+    {
+      "id": "membership-service-signature",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":787,\"hash\":\"sha256:df3c25d47a9954c4c25595cb6893c17e93052fb3ac0c281819cd3eb7b5e23404\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":1,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:731a72487135020d492c85269af34a25f58cc8b15cba52282ee5adfe40f4708e\",\"signature\":\"ed25519sig:bsUkiTpuv9v4utS5k4QW4ZOXJW3X7Ravn28GzfdEFplcM12UlP8WlJoghFE-As99FhxAHB0J9IrRmcunz8l1BA\"}"
+        ],
+        "chunks": [
+          "[{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Unsigned attacker substitution\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}]"
+        ],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "error": "SIGNATURE_INVALID"
+    },
+    {
+      "id": "membership-byte-budget-before-chunk-read",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":524288,\"hash\":\"sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:e7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:19581e27de7ced00ff1ce50b2047e7a567c76b1cbaebabe5ef03f7c3017bb5b7\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:4fc82b26aecb47d2868c4efbe3581732a3e7cbcc6c2efb32062c08170a05eeb8\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:8527a891e224136950ff32ca212b45bc93f69fbb801c3b1ebedac52775f99e61\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:e629fa6598d732768f7c726b4b621285f9c3b85303900aa912017db7617d8bdb\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:4523540f1504cd17100c4835e85b7eefd49911580f8efff0599a8f283be6b9e3\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:9400f1b21cb527d7fa3d3eabba93557a18ebe7a2ca4e471cfe5e4c5b4ca7f767\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:f5ca38f748a1d6eaf726b8a42fb575c3c71f1864a8143301782de13da2d9202b\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:6f4b6612125fb3a0daecd2799dfd6c9c299424fd920f9b308110a2c1fbd8f443\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:785f3ec7eb32f30b90cd0fcf3657d388b5ff4297f2f9716ff66e9b69c05ddd09\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:c2356069e9d1e79ca924378153cfbbfb4d4416b1f99d41a2940bfdb66c5319db\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:5f9c4ab08cac7457e9111a30e4664920607ea2c1",
+          "15a1433d7be98e97e64244ca\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:59e19706d51d39f66711c2653cd7eb1291c94d9b55eb14bda74ce4dc636d015a\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:35135aaa6cc23891b40cb3f378c53a17a1127210ce60e125ccf03efcfdaec458\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:eb1e33e8a81b697b75855af6bfcdbcbf7cbbde9f94962ceaec1ed8af21f5a50f\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:e29c9c180c6279b0b02abd6a1801c7c04082cf486ec027aa13515e4f3884bb6b\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:86e50149658661312a9e0b35558d84f6c6d3da797f552a9657fe0558ca40cdef\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:9f14025af0065b30e47e23ebb3b491d39ae8ed17d33739e5ff3827ffb3634953\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:76a50887d8f1c2e9301755428990ad81479ee21c25b43215cf524541e0503269\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:7a61b53701befdae0eeeffaecc73f14e20b537bb0f8b91ad7c2936dc63562b25\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:aea92132c4cbeb263e6ac2bf6c183b5d81737f179f21efdc5863739672f0f470\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:0b918943df0962bc7a1824c0555a389347b4febdc7cf9d1254406d80ce44e3f9\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:d59eced1ded07f84c145592f65bdf854358e009c5cd705f5215bf18697fed103\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:3d914f9348c9cc0ff8a79716700b9fcd4d2f3e711608004eb8f138bcba7f14d9\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:44cb730c420480a0477b505ae68af508fb90f96cf0ec54c6ad16949dd427f13a\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:71ee45a3c0db9a9865f7313dd3372cf60dca6479d46261f3542eb9346e4a04d6\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:811786ad1ae74adfdd20dd0372abaaebc6246e343aebd01da0bfc4c02bf0106c\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:25fc0e7096fc653718202dc30b0c580b8ab87eac11a700cba03a7c021bc35b0c\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:31489056e0916d59fe3add79e63f095af3ffb81604691f21cad442a85c7be617\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:98010bd9270f9b100b6214a21754fd33bdc8d41b2bc9f9dd16ff54d3c34ffd71\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:0e17daca5f3e175f448bacace3bc0da47d0655a74c8dd0dc497a3afbdad95f1f\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:1a6562590ef19d1045d06c4055742d38288e9e6dcd71ccde5cee80f1d5a774eb\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:031b4af5197ec30a926f48cf40e11a7dbc470048a21e4003b7a3c07c5dab1baa\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:41cfc0d1f2d127b04555b7246d84019b4d27710a3f3aff6e7764375b1e06e05d\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:2858dcd",
+          "1057d3eae7f7d5f782167e24b61153c01551450a628cee722509f6529\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:2fca346db656187102ce806ac732e06a62df0dbb2829e511a770556d398e1a6e\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:02d20bbd7e394ad5999a4cebabac9619732c343a4cac99470c03e23ba2bdc2bc\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:7688b6ef52555962d008fff894223582c484517cea7da49ee67800adc7fc8866\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:c837649cce43f2729138e72cc315207057ac82599a59be72765a477f22d14a54\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:6208ef0f7750c111548cf90b6ea1d0d0a66f6bff40dbef07cb45ec436263c7d6\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:3e1e967e9b793e908f8eae83c74dba9bcccce6a5535b4b462bd9994537bfe15c\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:39fa9ec190eee7b6f4dff1100d6343e10918d044c75eac8f9e9a2596173f80c9\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:d029fa3a95e174a19934857f535eb9427d967218a36ea014b70ad704bc6c8d1c\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:81b8a03f97e8787c53fe1a86bda042b6f0de9b0ec9c09357e107c99ba4d6948a\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:da4ea2a5506f2693eae190d9360a1f31793c98a1adade51d93533a6f520ace1c\",\"record_count\":1},{\"bytes\":524288,\"hash\":\"sha256:a68b412c4282555f15546cf6e1fc42893b7e07f271557ceb021821098dd66c1b\",\"record_count\":1}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":65,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:52bad718ef9aebfc10dc711c2551b3cd982fe8f22fb3151c7f598ab407260b6b\",\"signature\":\"ed25519sig:myc-eREs3oApXIBV48fsWSDC7YOoCHROAc_t_BUUkJ-S88ZJWen23mfQXHUMWFk_qSzDMHLYWFQ3qyjD3T1hDg\"}"
+        ],
+        "chunks": [],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "error": "WORK_BUDGET_EXHAUSTED"
+    },
+    {
+      "id": "membership-record-budget-before-chunk-read",
+      "input": {
+        "checkpoint_wire": [
+          "{\"chunks\":[{\"bytes\":524288,\"hash\":\"sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:e7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:19581e27de7ced00ff1ce50b2047e7a567c76b1cbaebabe5ef03f7c3017bb5b7\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:4fc82b26aecb47d2868c4efbe3581732a3e7cbcc6c2efb32062c08170a05eeb8\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:8527a891e224136950ff32ca212b45bc93f69fbb801c3b1ebedac52775f99e61\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:e629fa6598d732768f7c726b4b621285f9c3b85303900aa912017db7617d8bdb\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:4523540f1504cd17100c4835e85b7eefd49911580f8efff0599a8f283be6b9e3\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:9400f1b21cb527d7fa3d3eabba93557a18ebe7a2ca4e471cfe5e4c5b4ca7f767\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:f5ca38f748a1d6eaf726b8a42fb575c3c71f1864a8143301782de13da2d9202b\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:6f4b6612125fb3a0daecd2799dfd6c9c299424fd920f9b308110a2c1fbd8f443\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:785f3ec7eb32f30b90cd0fcf3657d388b5ff4297f2f9716ff66e9b69c05ddd09\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:c2356069e9d1e79ca924378153cfbbfb4d4416b1f99d41a2940bfdb66c5319db\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569\",\"record_count\":256},{\"bytes\":524288,\"ha",
+          "sh\":\"sha256:5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e64244ca\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:59e19706d51d39f66711c2653cd7eb1291c94d9b55eb14bda74ce4dc636d015a\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:35135aaa6cc23891b40cb3f378c53a17a1127210ce60e125ccf03efcfdaec458\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:eb1e33e8a81b697b75855af6bfcdbcbf7cbbde9f94962ceaec1ed8af21f5a50f\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:e29c9c180c6279b0b02abd6a1801c7c04082cf486ec027aa13515e4f3884bb6b\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:86e50149658661312a9e0b35558d84f6c6d3da797f552a9657fe0558ca40cdef\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:9f14025af0065b30e47e23ebb3b491d39ae8ed17d33739e5ff3827ffb3634953\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:76a50887d8f1c2e9301755428990ad81479ee21c25b43215cf524541e0503269\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:7a61b53701befdae0eeeffaecc73f14e20b537bb0f8b91ad7c2936dc63562b25\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:aea92132c4cbeb263e6ac2bf6c183b5d81737f179f21efdc5863739672f0f470\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:0b918943df0962bc7a1824c0555a389347b4febdc7cf9d1254406d80ce44e3f9\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:d59eced1ded07f84c145592f65bdf854358e009c5cd705f5215bf18697fed103\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:3d914f9348c9cc0ff8a79716700b9fcd4d2f3e711608004eb8f138bcba7f14d9\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:44cb730c420480a0477b505ae68af508fb90f96cf0ec54c6ad16949dd427f13a\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:71ee45a3c0db9a9865f7313dd3372cf60dca6479d46261f3542eb9346e4a04d6\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:811786ad1ae74adfdd20dd0372abaaebc6246e343aebd01da0bfc4c02bf0106c\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:25fc0e7096fc653718202dc30b0c580b8ab87eac11a700cba03a7c021bc35b0c\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:31489056e0916d59fe3add79e63f095af3ffb81604691f21cad442a85c7be617\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:98010bd9270f9b100b6214a21754fd33bdc8d41b2bc9f9dd16ff54d3c34ffd71\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:0e17daca5f3e175f448bacace3bc0da47d0655a74c8dd0dc497a3afbdad95f1f\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:1a6562590ef19d1045d06c4055742d38288e9e6dcd71ccde5cee80f1d5a774eb\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:031b4af5197ec30a926f48cf40e11a7dbc470048a21e4003b7a3c07c5dab1baa\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:41cfc0d1f2d127b045",
+          "55b7246d84019b4d27710a3f3aff6e7764375b1e06e05d\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:2858dcd1057d3eae7f7d5f782167e24b61153c01551450a628cee722509f6529\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:2fca346db656187102ce806ac732e06a62df0dbb2829e511a770556d398e1a6e\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:02d20bbd7e394ad5999a4cebabac9619732c343a4cac99470c03e23ba2bdc2bc\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:7688b6ef52555962d008fff894223582c484517cea7da49ee67800adc7fc8866\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:c837649cce43f2729138e72cc315207057ac82599a59be72765a477f22d14a54\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:6208ef0f7750c111548cf90b6ea1d0d0a66f6bff40dbef07cb45ec436263c7d6\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:3e1e967e9b793e908f8eae83c74dba9bcccce6a5535b4b462bd9994537bfe15c\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:39fa9ec190eee7b6f4dff1100d6343e10918d044c75eac8f9e9a2596173f80c9\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:d029fa3a95e174a19934857f535eb9427d967218a36ea014b70ad704bc6c8d1c\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:81b8a03f97e8787c53fe1a86bda042b6f0de9b0ec9c09357e107c99ba4d6948a\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:da4ea2a5506f2693eae190d9360a1f31793c98a1adade51d93533a6f520ace1c\",\"record_count\":256},{\"bytes\":524288,\"hash\":\"sha256:a68b412c4282555f15546cf6e1fc42893b7e07f271557ceb021821098dd66c1b\",\"record_count\":256}],\"created_at\":\"2026-10-13T00:00:00Z\",\"cursor\":\"0\",\"generation\":1,\"node_identity_public_key\":\"ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY\",\"previous_checkpoint_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"record_count\":16640,\"record_type\":\"snapshot_descriptor\",\"root_hash\":\"sha256:c5ea22503d3c2d74794ea71b46b037f721980f11e5b01ac9ff169744c007123a\",\"signature\":\"ed25519sig:A6D48DV1kd0B0qbdAQO0ZWP3wuWc7rUm86bOayF0UA9QWGVcsMl6qgptCDgPcmEDGiCLBvB-dsod6IjjbItiCg\"}"
+        ],
+        "chunks": [],
+        "expected_node_key": "ed25519:ZRWCUUYvCuwX4jxbSumEyKwuVXt-ZirdVawkBNmVzJY",
+        "local_records": [
+          {
+            "protocol": "Onion Service Discovery",
+            "protocol_version": 1,
+            "record_type": "service_manifest",
+            "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+            "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+            "revision": 1,
+            "previous_manifest_hash": null,
+            "discovery": {
+              "publish_service": true,
+              "mirror_directory": false,
+              "discover_services": false,
+              "sync_with_peers": false
+            },
+            "service": {
+              "name": "Synthetic Library",
+              "description": "Fictional books and multilingual documentation.",
+              "languages": [
+                "de",
+                "en"
+              ],
+              "categories": [
+                "books",
+                "documentation"
+              ]
+            },
+            "links": {
+              "related_onion_services": [],
+              "clearnet": []
+            },
+            "published_at": "2026-10-12T00:00:00Z",
+            "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+          }
+        ]
+      },
+      "error": "WORK_BUDGET_EXHAUSTED"
+    }
+  ]
+}

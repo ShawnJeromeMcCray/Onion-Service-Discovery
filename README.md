@@ -22,6 +22,11 @@ Technical identity evidence must not be presented as an assurance about content 
 - Bundled local-search client, query-independent Client Host relay, explicit source allowlist and origin-local pins.
 - Shared draft category/language rules, local category/adult filters and paginated duplicate-result groups.
 - Publisher-only initialization and a read-only status page that keeps untested external discoverability unconfirmed.
+- Offline exact-state membership verification in a complete signed development
+  snapshot, independently implemented in PHP/TypeScript/Python; see
+  [the scope and CLI](docs/operations/snapshot-membership.md).
+- Local peer source groups and concentration diagnostics without inferred
+  operator independence or key-count trust.
 - Persistent candidate admission/work budgets shared by enqueue and PeerSync, with a bounded pinned-peer pool.
 - Finite TLA+ models, PHPStan Level 8, syntax sink checks and controlled browser/privacy tests.
 

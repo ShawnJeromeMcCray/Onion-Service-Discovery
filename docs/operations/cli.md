@@ -88,3 +88,12 @@ Stop workers and make a tested backup with the historical release before migrati
 Legacy HEAD-published transactions retain their old interpretation; new writes
 are refused until migration. Logical storage schema remains 1 and signed records
 are not rewritten. `storage:migrate sqlite PATH` checks the unchanged schema.
+
+`index:verify-inclusion CHECKPOINT CHUNKS_DIRECTORY OWN_HISTORY EXPECTED_NODE_KEY`
+verifies exact current owner-state membership offline in a complete signed draft
+snapshot, including genesis continuity through rotation/migration. It evaluates
+neither freshness nor checkpoint ancestry. See [the contract](snapshot-membership.md).
+
+`peers:group CONFIG ONION GROUP|--clear` records local source-family policy.
+Diagnostics expose concentration and unknown/inconsistent grouping without
+inferring independent operators or trust from key count. See [source groups](source-groups.md).
