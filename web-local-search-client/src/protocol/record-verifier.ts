@@ -1,3 +1,4 @@
+import { validateLanguageTag } from './language-tag.ts';
 import { snapshotRootHash } from './snapshot-format.ts';
 import * as schemas from '../../generated/validators.mjs';
 import { canonicalJson } from './canonical-json.ts';
@@ -70,6 +71,7 @@ export async function verifyRecord(input: WireRecord, crypto: CryptoProviders, e
   const sets: JsonValue[][] = [];
   if (record.service !== undefined) {
     const service = requiredObject(record.service);
+    for(const language of requiredArray(service.languages))validateLanguageTag(requiredString(language));
     sets.push(requiredArray(service.languages), requiredArray(service.categories));
   }
   if (record.links !== undefined) {

@@ -79,9 +79,13 @@ export function pinIdentity(identity:ServiceRow,label=identity.name):LocalPin {
   if(identity.status!=='PUBLISHED'||identity.onion===null||identity.currentHash===null) throw new Error('PIN_CONTEXT_UNAVAILABLE');
   return {genesisKey:identity.genesisKey,contextOnion:identity.onion,anchorHash:identity.currentHash,latestHash:identity.currentHash,highestRevision:identity.revision,label:label.slice(0,128),conflicted:false};
 }
-export function localSearch(services:readonly ServiceRow[],query:string,language=''):ServiceRow[] {
+export type AdultVisibility = 'show' | 'de-emphasize' | 'hide';
+export function localSearch(services:readonly ServiceRow[],query:string,language='',category='',adult:AdultVisibility='show'):ServiceRow[] {
   const terms=query.slice(0,256).normalize('NFKC').toLowerCase().split(/\s+/u).filter(Boolean).slice(0,16);
-  return services.filter(row=>{if(row.status==='WITHDRAWN'||(language!==''&&!row.languages.includes(language)))return false;const haystack=[row.name,row.description,row.onion??'',row.genesisKey,...row.categories,...row.languages].join(' ').normalize('NFKC').toLowerCase();return terms.every(term=>haystack.includes(term));}).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:a.genesisKey<b.genesisKey?-1:1);
+  return services.filter(row=>{if(row.status==='WITHDRAWN'||(language!==''&&!row.languages.includes(language))||(category!==''&&!row.categories.includes(category))||(adult==='hide'&&row.categories.includes('adult')))return false;const haystack=[row.name,row.description,row.onion??'',row.genesisKey,...row.categories,...row.languages].join(' ').normalize('NFKC').toLowerCase();return terms.every(term=>haystack.includes(term));}).sort((a,b)=>{
+    if(adult==='de-emphasize') { const difference=Number(a.categories.includes('adult'))-Number(b.categories.includes('adult'));if(difference!==0)return difference; }
+    return a.name<b.name?-1:a.name>b.name?1:a.genesisKey<b.genesisKey?-1:a.genesisKey>b.genesisKey?1:0;
+  });
 }
 
 /** Presentation hints only: signed Unicode remains unchanged and identity never depends on these. */

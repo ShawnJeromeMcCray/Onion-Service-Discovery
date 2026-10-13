@@ -1,6 +1,6 @@
 # Specification understanding
 
-Status: earlier draft implementation baseline; current 55-source review/alignment pending; not production approval
+Status: complete ordered reading of the current 55-source snapshot on 2026-10-13; implementation alignment remains partial; no Protocol Freeze or production approval
 
 Onion Service Discovery enables opt-in public metadata discovery through self-published signed manifests, independent mirrors and a browser-local index. It modifies no Tor code and reads no Tor private keys. It is not a content-safety service, central naming authority, general website crawler or global Sybil solution.
 
@@ -10,7 +10,7 @@ Trust boundaries: Service-signed metadata; Node-signed claimed observations; loc
 
 Required invariants: no Tor private key access; exact direct host binding; no peer-to-local-observation upgrade; no revision downgrade; preserved forks; proof-required rotation/migration; zero local-query network effects; moderation separate from identity; finite resource use; no Node majority truth; withdrawal separate from outage.
 
-The earlier 50-source corpus was read. The updated 55-source snapshot is retained with integrity hashes, but complete ordered review remains pending. Earlier ADR conclusions must be checked against that revision before affected productive paths change. `docs/requirements.json` extracts candidate normative blocks; manual mapping is needed and extraction alone is not complete traceability. All engineering decisions are draft proposals until their required review exists, except owner-authorized CC0 licensing.
+The updated Workspace Index and all 54 required-reading documents have been read in order and retained with integrity hashes. `docs/requirements.json` now inventories the current source sections with line ranges and hashes; individual requirement-to-code/test assessment remains open. Earlier passing tests apply to their documented draft behavior and do not certify every new requirement. All engineering decisions are draft proposals until their required review exists, except owner-authorized CC0 licensing.
 
 Release gates include exact schemas/bytes and three-language core, formal checks/review, Node/client interoperability, parser/crypto/network/privacy security tests, storage crash/recovery, multi-node chaos, measured scale/low-end behavior, Tor Browser desktop/Android tests, manual accessibility and comprehension, clean installs/upgrades/restores/rollback, locked supply chain/SBOM/provenance and mature update trust, independent review status and final human release approval.
 

@@ -10,7 +10,7 @@
   "removed": 0,
   "previous_manifest_sha256": "a6300404717bdc88822dadf37853563a94f009a17afb4f107f9a0f328bd66490",
   "mandatory_reading_order_verified": true,
-  "full_updated_corpus_review": "PENDING; imported text does not constitute completed reading or human approval",
+  "full_updated_corpus_review": "COMPLETED 2026-10-13: index then required-reading entries 1 through 54. Source understanding does not constitute implementation completion or human approval.",
   "existing_conformance_scope": "Earlier draft implementation; not conformance to the refreshed source corpus",
   "changes": [
     {

@@ -151,8 +151,10 @@ FULL/IOERR; the adapter avoids issuing another rollback when no transaction is
 active. This does not replace deployed disk/controller/power-loss drills.
 
 The ENOSPC matrix additionally fills storage after immutable-object writes,
-journal PREPARE, atomic HEAD publication and SQLite's pre-cursor commit phase.
-After HEAD, a failed final journal append recovers the new committed state;
-earlier failures recover the old state. The test aligns the journal across a
+journal PREPARE, journal COMMIT before HEAD publication and SQLite's pre-cursor commit phase.
+For filesystem format 2, a failed COMMIT leaves the old state; a durable COMMIT
+followed by failed HEAD publication recovers the entire new state, including
+its cursor. A transaction error after COMMIT does not promise rollback; perform
+explicit recovery and retry idempotently. The test aligns the journal across a
 page boundary because a full filesystem can still permit writes inside already
 allocated blocks. Record and cursor must agree in every recovered state.

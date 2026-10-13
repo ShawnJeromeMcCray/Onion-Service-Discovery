@@ -42,8 +42,8 @@ foreach(['filesystem','sqlite']as $backend){
  $iterator=new RecursiveIteratorIterator(new RecursiveDirectoryIterator('/fault',FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST);
  foreach($iterator as $file){$file->isDir()?rmdir($file->getPathname()):unlink($file->getPathname());}
 }
-// Exhaust space after durable transaction phases, including HEAD publication.
-foreach (['filesystem'=>['after_objects','after_prepare','after_head'], 'sqlite'=>['before_cursor_commit']] as $backend=>$points) {
+// Exhaust space at durable phases, including a journal COMMIT before HEAD publication.
+foreach (['filesystem'=>['after_objects','after_prepare','after_commit'], 'sqlite'=>['before_cursor_commit']] as $backend=>$points) {
  foreach ($points as $point) {
   $armed=false;
   $hook=static function(string $stage)use(&$armed,$point):void {
@@ -57,9 +57,9 @@ foreach (['filesystem'=>['after_objects','after_prepare','after_head'], 'sqlite'
   $store=$backend==='filesystem'?new FilesystemStore($path,create:true,faultHook:$hook):new SQLiteStore($path,create:true,faultHook:$hook);
   $store->transaction(static function(StorageTransaction $tx)use($first):void{$tx->putRecord($first);$tx->set('sync','disk-full',['cursor'=>1]);});
   if($store instanceof SQLiteStore)$store->checkpoint();
-  if ($point==='after_head') {
-   // Place the next COMMIT across a page boundary: appending inside an already
-   // allocated page can legitimately succeed even when free bytes are zero.
+  if ($point==='after_prepare') {
+   // A COMMIT fitting inside an already allocated page could succeed on a full
+   // filesystem. Force its bytes across a page boundary to test failed COMMIT.
    $aligned=false;
    for($step=0;$step<64;++$step){
     $journal=file_get_contents($path.'/journal.log');$lines=explode("\n",rtrim($journal,"\n"));$entry=json_decode($lines[count($lines)-1],true,16,JSON_THROW_ON_ERROR);$entry['generation']=$store->snapshot()['generation']+1;
@@ -76,10 +76,10 @@ foreach (['filesystem'=>['after_objects','after_prepare','after_head'], 'sqlite'
   if($error===null)throw new RuntimeException('full-disk phase failure missing '.$backend.'/'.$point);
   unlink('/fault/padding');unset($store);
   $store=$backend==='filesystem'?new FilesystemStore($path):new SQLiteStore($path);
-  $state=$store->snapshot();$expected=$point==='after_head'?2:1;
-  if(count($state['records'])!==$expected||$state['last_sequence']!==$expected||$state['tables']['sync']['key:disk-full']['cursor']!==$expected)throw new RuntimeException('disk-full phase record/cursor atomicity lost');
+  $state=$store->snapshot();$expected=$point==='after_commit'?2:1;
+  if(count($state['records'])!==$expected||$state['last_sequence']!==$expected||$state['tables']['sync']['key:disk-full']['cursor']!==$expected)throw new RuntimeException('disk-full phase record/cursor atomicity lost '.$backend.'/'.$point);
   $store->integrityCheck();unset($store);
-  $results[]=['backend'=>$backend,'phase'=>$point,'status'=>'PASS','error'=>$error,'recovered_record_count'=>$expected,'recovered_cursor'=>$expected,'head_is_filesystem_commit_point'=>$point==='after_head'];
+  $results[]=['backend'=>$backend,'phase'=>$point,'status'=>'PASS','error'=>$error,'recovered_record_count'=>$expected,'recovered_cursor'=>$expected,'journal_commit_precedes_head'=>$point==='after_commit'];
   $iterator=new RecursiveIteratorIterator(new RecursiveDirectoryIterator('/fault',FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST);
   foreach($iterator as $file){$file->isDir()?rmdir($file->getPathname()):unlink($file->getPathname());}
  }

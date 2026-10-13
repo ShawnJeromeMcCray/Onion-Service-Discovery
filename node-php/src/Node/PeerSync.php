@@ -90,9 +90,7 @@ final class PeerSync
                         $tx->set('assertions', $record->contentHash, $assertion);
                         if ($this->discoverServices && $queued < 32 && $record->type === 'service_manifest' && $record->document()->discovery->publish_service === true) {
                             $candidateOnion = OnionAddress::parse($record->document()->onion);
-                            if ($tx->get('candidates', $candidateOnion->hostname) === null) {
-                                $tx->set('candidates', $candidateOnion->hostname, ['state' => 'QUEUED', 'attempts' => 0, 'next_attempt' => 0, 'lease_until' => 0, 'claim' => null, 'sources' => [$onion->hostname], 'error' => null]); ++$queued;
-                            }
+                            if (CandidateAdmission::enqueue($tx, $candidateOnion, $onion->hostname, $now)) { ++$queued; }
                         }
                         $sources = $tx->get('candidate_sources', $record->contentHash)['sources'] ?? [];
                         if (!in_array($onion->hostname, $sources, true) && count($sources) < 8) { $sources[] = $onion->hostname; sort($sources,SORT_STRING); $tx->set('candidate_sources', $record->contentHash, ['sources' => $sources]); }

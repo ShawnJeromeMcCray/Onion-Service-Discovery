@@ -1,0 +1,431 @@
+{
+  "format_version": 1,
+  "production_ready": false,
+  "unknown_and_skipped_count_as_failure": true,
+  "scope": "All 47 current Definition-of-Done sections; no inferred human/audit approval",
+  "gates": [
+    {
+      "id": "DOD-01",
+      "requirement": "RELEASE-KLASSEN",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 17,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-02",
+      "requirement": "BLOCKIERENDE GATES",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 25,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-03",
+      "requirement": "FUNKTIONALE ABNAHME",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 42,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-04",
+      "requirement": "PROTOKOLL-GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 68,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-05",
+      "requirement": "KRYPTOGRAPHIE-GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 83,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-06",
+      "requirement": "INPUT-VALIDATION-GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 97,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-07",
+      "requirement": "NETZWERK-GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 120,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-08",
+      "requirement": "STORAGE-GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 137,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-09",
+      "requirement": "WEB CLIENT GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 154,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-10",
+      "requirement": "SECURITY-TEST-GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 175,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-11",
+      "requirement": "PERFORMANCE-GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 196,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-12",
+      "requirement": "OPERATIONS-GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 209,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-13",
+      "requirement": "SUPPLY-CHAIN-GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 227,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-14",
+      "requirement": "DOKUMENTATIONS-GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 239,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-15",
+      "requirement": "HUMAN REVIEW",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 244,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-16",
+      "requirement": "FINALER RELEASE-BEFEHL F\u00dcR DEN CODING-AGENTEN",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 255,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-17",
+      "requirement": "FORMAL ASSURANCE GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 259,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-18",
+      "requirement": "INDEPENDENT CONFORMANCE GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 268,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-19",
+      "requirement": "CHAOS / FAILURE-INJECTION GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 279,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-20",
+      "requirement": "INTERNET-STANDARDS GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 292,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-21",
+      "requirement": "ACCESSIBILITY / HUMAN-FACTORS GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 306,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-22",
+      "requirement": "OPERATOR EXPERIENCE GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 316,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-23",
+      "requirement": "PERFORMANCE / CAPACITY GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 328,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-24",
+      "requirement": "SYNTHETIC DATA GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 339,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-25",
+      "requirement": "PROTOCOL ARCHAEOLOGY GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 345,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-26",
+      "requirement": "MULTI-LANGUAGE / ADOPTION GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 354,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-27",
+      "requirement": "FINAL CLAIM RULE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 366,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-28",
+      "requirement": "SELECTED STORAGE BACKEND RUNTIME GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 374,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-29",
+      "requirement": "WEB LOCAL SEARCH GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 391,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-30",
+      "requirement": "NO-JAVASCRIPT SERVER SEARCH GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 401,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-31",
+      "requirement": "STORAGE BACKEND FREEDOM GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 414,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-32",
+      "requirement": "MALICIOUS NODE ISOLATION GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 429,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-33",
+      "requirement": "CLIENT HOST TRUST GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 441,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-34",
+      "requirement": "SEPARATED BROWSER PRIVACY GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 450,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-35",
+      "requirement": "HIGH-ASSURANCE KEY CUSTODY GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 462,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-36",
+      "requirement": "SECURE RELEASE TRUST GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 473,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-37",
+      "requirement": "FUTURE TOR/CRYPTO COMPATIBILITY GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 483,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-38",
+      "requirement": "PRE-IMPLEMENTATION FREEZE GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 493,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-39",
+      "requirement": "PLUG-AND-PLAY OPERATOR EXPERIENCE GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 507,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-40",
+      "requirement": "DISCOVERABILITY TRUTH GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 523,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-41",
+      "requirement": "VERIFIABLE DISCOVERABILITY GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 534,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-42",
+      "requirement": "MERKLE PROOF GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 554,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-43",
+      "requirement": "SYBIL-RESISTANCE GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 568,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-44",
+      "requirement": "ECLIPSE-RESISTANCE GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 582,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-45",
+      "requirement": "CATEGORY REGISTRY GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 594,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-46",
+      "requirement": "SECURE CODING / EXPLOIT RESISTANCE GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 606,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    },
+    {
+      "id": "DOD-47",
+      "requirement": "DEFENSIVE PROGRAMMING GATE",
+      "source": "docs/specification-source/01---Definition-of-Done-and-Production-Readiness-Gates.md",
+      "source_line": 623,
+      "source_sha256": "cb8241682562af904ffdc5583030869620095e456697e05cb6b1784b6e20ffe5",
+      "status": "FAIL",
+      "reason": "Complete gate evidence and required human approvals have not been established. Development test successes are scoped separately."
+    }
+  ]
+}

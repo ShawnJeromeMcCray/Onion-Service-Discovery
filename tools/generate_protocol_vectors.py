@@ -39,6 +39,15 @@ def add(ident,rec,error=None,expected_onion=None,raw=None):
  cases.append(entry)
 for ident,rec in [('genesis',genesis),('revision-2',revision),('rotation',rotation),('rotated-manifest',rotated),('migration',migration),('migrated-manifest',migrated),('node-descriptor',node_record),('direct-observation',observation),('snapshot-descriptor',snapshot)]:add(ident,rec)
 minimal=copy.deepcopy(genesis);del minimal['service']['description'];del minimal['links'];del minimal['published_at'];add('manifest-optional-fields-absent',signed(minimal,service))
+category_ids=sorted(entry['id'] for entry in json.loads((ROOT/'protocol/registries/categories-v1.json').read_text())['categories'])
+for category in category_ids:
+ mut=copy.deepcopy(genesis);mut['service']['categories']=[category];add('category-valid-'+category,signed(mut,service))
+for ident,categories in [('unknown',['unregistered-category']),('case',['Adult']),('duplicate',['adult','adult']),('unicode',['аdult']),('long',['a'*65]),('overflow',category_ids[:33]),('order',['software','adult'])]:
+ mut=copy.deepcopy(genesis);mut['service']['categories']=categories;add('category-invalid-'+ident,signed(mut,service),'SCHEMA_INVALID')
+for ident,tag in [('private','x-example'),('grandfathered','i-klingon'),('script-region','zh-hant-tw'),('numeric-region','es-419'),('variant','de-1901'),('extension','en-u-ca-gregory'),('extensions','en-a-foo-b-bar'),('private-tail','en-x-a-a'),('reserved','abcd'),('extlang','zh-cmn')]:
+ mut=copy.deepcopy(genesis);mut['service']['languages']=[tag];add('language-valid-'+ident,signed(mut,service))
+for ident,tag in [('case','en-US'),('short','e'),('long-primary','abcdefghi'),('variant-duplicate','de-1901-1901'),('extension-duplicate','en-a-foo-a-bar'),('empty-extension','en-a'),('empty-private','x'),('trailing','en-'),('newline','en\n'),('unicode','еn'),('numeric-primary','123'),('too-many-extlangs','en-abc-def-ghi-jkl'),('overlong','en-x-abcdefgh-abcdefgh-abcdefgh-abcdefgh')]:
+ mut=copy.deepcopy(genesis);mut['service']['languages']=[tag];add('language-invalid-'+ident,signed(mut,service),'SCHEMA_INVALID')
 chunk_wire=canonical_json(sorted([genesis,revision],key=content_hash)).encode();chunk_metadata={'hash':chunk_hash(chunk_wire),'bytes':len(chunk_wire),'record_count':2}
 nonempty=copy.deepcopy(snapshot);nonempty.update(root_hash=root_hash([chunk_metadata]),record_count=2,chunks=[chunk_metadata]);nonempty=signed(nonempty,node);add('snapshot-with-chunk',nonempty)
 mut=copy.deepcopy(nonempty);mut['root_hash']='sha256:'+'0'*64;add('snapshot-root-mismatch',signed(mut,node),'SCHEMA_INVALID')

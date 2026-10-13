@@ -63,8 +63,11 @@ The refreshed source decision register adds four unresolved release blockers:
 | --- | --- | --- | --- | --- | --- |
 | D-051 | Stable Logical Service Identifier | UNRESOLVED | Human Protocol/Crypto reviewer | YES | Genesis public-key encoding is proposed; claimed identifiers need full continuity evidence. |
 | D-052 | Signed Node Checkpoint Chain | UNRESOLVED | Human Protocol/Security reviewer | YES | Exact successor +1, chained previous hash and non-prefix-compatible-history evidence; exact bytes/genesis representation need freeze. |
-| D-053 | Category Registry v1 Immutability | UNRESOLVED | Human Protocol/Product reviewer | YES | Frozen IDs cannot change or silently expand; extensions need explicit versioning. |
-| D-054 | Language Tag Wire Grammar | UNRESOLVED | Human Protocol/I18N reviewer | YES | One tested RFC 5646 grammar, lowercase ASCII wire form and canonical uniqueness are proposed. |
+| D-053 | Category Registry v1 Immutability | PROPOSED / NEEDS-HUMAN-REVIEW | Human Protocol/Product reviewer | YES | Frozen IDs cannot change or silently expand; extensions need explicit versioning. |
+| D-054 | Language Tag Wire Grammar | PROPOSED / NEEDS-HUMAN-REVIEW | Human Protocol/I18N reviewer | YES | One tested RFC 5646 grammar, lowercase ASCII wire form and canonical uniqueness are proposed. |
 
 These are source recommendations, not implementation-selected wire formats or
 approvals. D-001 remains approved by the owner's earlier explicit CC0 instruction.
+
+PCP-001 records the current category/language implementation experiment and stricter
+draft acceptance. Tests do not approve these freeze decisions.

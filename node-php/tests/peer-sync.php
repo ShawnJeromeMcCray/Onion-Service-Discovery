@@ -54,6 +54,17 @@ $privateState=$target->snapshot();
 if(count($privateState['tables']['assertions'])<3||count($privateState['tables']['candidates'])!==1) { throw new RuntimeException('remote provenance/discovery queue missing'); }
 foreach($privateState['tables']['assertions'] as $assertion) { if($assertion['kind']!=='REMOTE_PROVENANCE'||$assertion['sources'][0]['expires_at']!==1700604800) { throw new RuntimeException('assertion retention/boundary'); } }
 if(IdentityDeriver::derive($identity)['identities'][0]['identity_state']!=='FORKED'||$target->snapshot()['tables']['local_observations']!==[]) { throw new RuntimeException('fork/local boundary'); }
+// A valid snapshot must not bypass exhausted global candidate admission budgets.
+$blocked = new SQLiteStore($root . '/blocked.sqlite', create: true);
+PeerRegistry::add($blocked, OnionAddress::parse($onion), $signer->publicKey());
+$blocked->transaction(static function (StorageTransaction $tx): void {
+    $tx->set('maintenance', 'candidate-admissions', ['start' => 1700000000, 'last_seen' => 1700000000, 'count' => 256, 'sources' => []]);
+});
+$denied = runPeer($api, $root . '/blocked.sqlite', $onion, 1700000000);
+$blockedState = $blocked->snapshot();
+if ($denied['status'] !== 'CURRENT' || $blockedState['tables']['candidates'] !== [] || count($blockedState['tables']['assertions']) < 3 ||
+    ($blockedState['tables']['sync']['key:' . $onion]['generation'] ?? null) !== 1) { throw new RuntimeException('sync bypassed budget or lost committed evidence/cursor'); }
+unset($blocked);
 // A signed higher-generation empty source view must not erase global evidence.
 $base=$verifier->verifyWire($source->readRecord($first['checkpoint_hash']))->document(); $base->generation=2; $base->previous_checkpoint_hash=$first['checkpoint_hash']; $base->root_hash=SnapshotFormat::rootHash([]); $base->record_count=0; $base->chunks=[]; $base->cursor='empty-view';
 $empty=$verifier->verify($signer->signRecord($base)); $source->transaction(static function(StorageTransaction $tx) use($empty): void { $tx->putRecord($empty); $tx->set('node','published-snapshot',['hash'=>$empty->contentHash]); });

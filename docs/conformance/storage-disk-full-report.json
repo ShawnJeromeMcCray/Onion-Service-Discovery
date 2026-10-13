@@ -1,6 +1,7 @@
 {
   "status": "PASS_DEVELOPMENT",
-  "scope": "Real kernel ENOSPC before mutation and at durable phases in disposable 2 MiB tmpfs; old/new records and cursors remain atomic; failed final journal append after HEAD recovers new committed state",
+  "backend_format": 2,
+  "scope": "Journal COMMIT precedes HEAD; failed PREPARE/COMMIT preserves prior state, durable COMMIT with failed HEAD recovers its successor. Actual isolated 2 MiB tmpfs ENOSPC, not physical power-loss. Historical format-1 results remain in Git history.",
   "results": [
     {
       "status": "PASS",
@@ -27,7 +28,7 @@
           "error": "STORAGE_ERROR",
           "recovered_record_count": 1,
           "recovered_cursor": 1,
-          "head_is_filesystem_commit_point": false
+          "journal_commit_precedes_head": false
         },
         {
           "backend": "filesystem",
@@ -36,16 +37,16 @@
           "error": "STORAGE_ERROR",
           "recovered_record_count": 1,
           "recovered_cursor": 1,
-          "head_is_filesystem_commit_point": false
+          "journal_commit_precedes_head": false
         },
         {
           "backend": "filesystem",
-          "phase": "after_head",
+          "phase": "after_commit",
           "status": "PASS",
           "error": "STORAGE_ERROR",
           "recovered_record_count": 2,
           "recovered_cursor": 2,
-          "head_is_filesystem_commit_point": true
+          "journal_commit_precedes_head": true
         },
         {
           "backend": "sqlite",
@@ -54,7 +55,7 @@
           "error": "STORAGE_ERROR",
           "recovered_record_count": 1,
           "recovered_cursor": 1,
-          "head_is_filesystem_commit_point": false
+          "journal_commit_precedes_head": false
         }
       ],
       "php_minor": "84"
@@ -84,7 +85,7 @@
           "error": "STORAGE_ERROR",
           "recovered_record_count": 1,
           "recovered_cursor": 1,
-          "head_is_filesystem_commit_point": false
+          "journal_commit_precedes_head": false
         },
         {
           "backend": "filesystem",
@@ -93,16 +94,16 @@
           "error": "STORAGE_ERROR",
           "recovered_record_count": 1,
           "recovered_cursor": 1,
-          "head_is_filesystem_commit_point": false
+          "journal_commit_precedes_head": false
         },
         {
           "backend": "filesystem",
-          "phase": "after_head",
+          "phase": "after_commit",
           "status": "PASS",
           "error": "STORAGE_ERROR",
           "recovered_record_count": 2,
           "recovered_cursor": 2,
-          "head_is_filesystem_commit_point": true
+          "journal_commit_precedes_head": true
         },
         {
           "backend": "sqlite",
@@ -111,12 +112,10 @@
           "error": "STORAGE_ERROR",
           "recovered_record_count": 1,
           "recovered_cursor": 1,
-          "head_is_filesystem_commit_point": false
+          "journal_commit_precedes_head": false
         }
       ],
       "php_minor": "85"
     }
-  ],
-  "physical_power_loss_verified": false,
-  "production_approved": false
+  ]
 }

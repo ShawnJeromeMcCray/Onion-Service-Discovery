@@ -1,10 +1,10 @@
 {
   "profile": "CONTROLLED_CHROMIUM_DEVELOPMENT",
   "status": "PASS",
-  "tests": 3,
+  "tests": 4,
   "browser": "Chromium 154.0.8037.57 built on Debian GNU/Linux 13 (trixie)",
   "playwright": "1.64.0",
-  "fixture_sha256": "452c59c35b14d9dbc380ee2d1dd06ca054adf7e593e30d2fff2d9426cec36d3c",
+  "fixture_sha256": "a95459b99b24c4c34be336299fdd77fbad75eb8d6f937148bb176d4976028c14",
   "checks": [
     "Three-source signed snapshot import",
     "Local query causes no network requests",
@@ -12,7 +12,8 @@
     "Withdrawal absent from normal results",
     "Pin persistence/restore and explicit forgetting",
     "Unavailable profile storage retains memory mode",
-    "Failed refresh preserves last verified local index and pins"
+    "Failed refresh preserves last verified local index and pins",
+    "Draft category and adult filters cause no network/storage side effects"
   ],
   "limitations": [
     "Not live Tor",
@@ -20,5 +21,6 @@
     "Not independent accessibility/security UX review",
     "No production approval"
   ],
-  "clock": "Fixed synthetic fixture time; browser timers run normally"
+  "clock": "Fixed synthetic fixture time; browser timers run normally",
+  "scope_note": "Current controlled Chromium development behavior, not supported Tor Browser evidence."
 }

@@ -10,8 +10,9 @@ The previous implementation did not incorporate this later source revision.
 All current readable text is now imported with observed modification times and
 SHA-256 hashes. LF/BOM normalization and document-edge trimming are applied;
 internal source whitespace is preserved. Import is not completed reading,
-Protocol Freeze, human approval or acceptance. Changed/new sources are marked
-`IMPORTED_NOT_FULLY_REVIEWED`; the complete ordered review remains pending.
+Protocol Freeze, human approval or acceptance. All 55 sources have now been read in the mandatory order and are marked
+`REVIEWED`. This records implementation-agent reading, not human approval.
+A later metadata recheck found no changed or additional active sources.
 Previous source bytes and manifest remain available in Git history.
 
 See [manifest](specification-manifest.json) and [per-document comparison](specification-refresh-report.json).
@@ -23,22 +24,23 @@ See [manifest](specification-manifest.json) and [per-document comparison](specif
 | Protocol 02, Crypto 13, Decision 24 D-051 | Stable `logical_service_id` across valid rotation/migration, anchored with genesis continuity evidence | Existing internal genesis/key history helps, but current wire schemas and API do not expose the revised identifier; exact representation is not approved. |
 | API 14 and new 48 | Stable `/services/by-id/{logical_service_id}` lookup and verifiable exact active-index inclusion | Current Onion-address shortcut and signed generic snapshots are not the new stable lookup/operator inclusion-proof workflow. |
 | Decision 24 D-052, API 14, security 49 | Exact chained checkpoints and non-prefix-compatible-history evidence | Earlier draft already chains snapshot descriptors and retains conflicts; revised index/checkpoint tuple and exact bytes need alignment and human freeze. |
-| New 47, operator contract 40 and PHP 04 | Plug-and-play status dashboard, self-service onboarding and truthful sampled discoverability | Current CLI/read-only doctor is not the required dashboard or complete self-service workflow. |
+| New 47, operator contract 40 and PHP 04 | Plug-and-play status dashboard, self-service onboarding and truthful sampled discoverability | Publisher-only init and a server-rendered read-only status page are implemented. External checks, announcement and active-index discoverability remain unconfirmed and the complete self-service workflow is missing. |
 | Revised D-018, Protocol/API/security sources | Bounded Candidate Announcement is part of the reference publish workflow | Earlier omission/manual candidate seeding no longer satisfies the revised requirement. Endpoint/default admission semantics still require approval. |
-| New 49 | Identity quantity has zero authority; bounded source admission, diversity/grouping and search-farm handling | Existing no-voting/source-count warnings are partial controls, not full compliance with this new standard. |
-| New 50 and D-053/D-054 | Immutable category registry, separate tags and one precise language-tag grammar across implementations | Earlier bounded category/language strings are insufficient. Do not invent final signed-wire rules. |
-| New 51 | Explicit applicable exploit-class coverage and secure-coding evidence | Existing parser/signature/storage/transport/browser checks cover part of this standard; a full applicability/evidence matrix remains open. |
+| New 49 | Identity quantity has zero authority; bounded source admission, diversity/grouping and search-farm handling | Shared persistent candidate budgets, a bounded pinned-peer pool and local duplicate-result grouping are implemented. Source-family diversity and complete network Sybil controls remain open. |
+| New 50 and D-053/D-054 | Immutable category registry, separate tags and one precise language-tag grammar across implementations | A shared 38-category draft registry and independently checked RFC 5646 grammar are implemented as PCP-001. D-053/D-054 and historical-record compatibility remain unresolved; these are not final frozen wire rules. |
+| New 51 | Explicit applicable exploit-class coverage and secure-coding evidence | Sink checks and current OWASP/ASVS/CWE coverage inventories are added. Applicability, exhaustive evidence and independent security review remain open. |
 
 D-051 through D-054 are expressly unresolved human release blockers. The
 refreshed Closure Audit says implementation may proceed but does not approve
 wire semantics, Protocol Freeze or Production Stable. The owner's earlier
 explicit CC0 instruction remains D-001 approval; other approvals are not inferred.
 
-The 318 old extracted blocks in `requirements.json` are historical partial
-mappings. Each now records its original source hash and whether the source has
-changed. Five new sources are not yet covered by that extraction. Re-extraction,
-ordered review and implementation/test alignment must precede a current-source
-conformance claim. Existing passing cases remain useful earlier-draft evidence.
+The current requirements inventory contains 2,813 source sections with source
+lines and hashes. It supersedes the historical 318-block partial extraction,
+which remains in Git history. Section inventory is not individual MUST-level
+implementation traceability. The production-readiness report enumerates all
+47 current Definition-of-Done sections and records missing complete evidence
+as failure. Neither document certifies production conformance.
 
 ## Actual Tor CLI evidence and limits
 

@@ -177,7 +177,7 @@ final class SQLiteStore implements StorageBackend
             if (!$committed && $this->database->inTransaction()) {
                 $this->database->exec('ROLLBACK');
             }
-            if ($error instanceof StorageException) {
+            if ($error instanceof StorageException || $error instanceof \OnionServiceDiscovery\Protocol\ProtocolException) {
                 throw $error;
             }
             throw new StorageException('STORAGE_ERROR');

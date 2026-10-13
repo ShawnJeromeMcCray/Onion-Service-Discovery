@@ -82,6 +82,16 @@ foreach (['filesystem', 'sqlite'] as $backend) {
             check($error->getMessage() !== 'Expected abort', 'abort propagated');
         }
         check(StorageJson::encode($store->snapshot()) === $before, $backend . ': rollback retains cursor and data');
+        try {
+            $store->transaction(static function (StorageTransaction $transaction): void {
+                $transaction->set('maintenance', 'rejected-policy', ['count' => 1]);
+                throw new \OnionServiceDiscovery\Protocol\ProtocolException('PEER_POOL_FULL');
+            });
+            throw new RuntimeException('Expected policy rejection');
+        } catch (\OnionServiceDiscovery\Protocol\ProtocolException $error) {
+            check($error->errorCode === 'PEER_POOL_FULL', $backend . ': typed application rejection');
+        }
+        check(StorageJson::encode($store->snapshot()) === $before, $backend . ': policy rollback retains state');
         $store->transaction(static function (StorageTransaction $transaction) use ($successor, $fork): void {
             $transaction->putRecord($successor);
             $transaction->putRecord($fork);

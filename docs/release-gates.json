@@ -1,15 +1,15 @@
 {
   "format_version": 1,
-  "scope": "development implementation of earlier draft; refreshed 55-source alignment pending; no production approval",
+  "scope": "Current 55-source reading completed; implementation alignment partial; see all 47 mandatory sections in production-readiness.json; no production approval",
   "production_approved": false,
   "gates": [
     {
       "id": "SOURCE_BASELINE",
-      "status": "PARTIAL",
+      "status": "PASS_DEVELOPMENT",
       "evidence": [
         "docs/specification-manifest.json"
       ],
-      "remaining": "Full review/alignment with refreshed 55-document corpus and required human Protocol/Crypto freeze; historical passing cases are earlier-draft evidence"
+      "remaining": "Snapshot read in mandatory order; ingestion is not implementation conformance or human freeze."
     },
     {
       "id": "CORE_CONFORMANCE",
@@ -19,7 +19,7 @@
         "docs/conformance/core-unit-report.json",
         "docs/conformance/php84-unit-report.json"
       ],
-      "remaining": "Full review/alignment with refreshed 55-document corpus and required human Protocol/Crypto freeze; historical passing cases are earlier-draft evidence"
+      "remaining": "Complete individual requirement traceability, D-051/D-052 active-index alignment, historical category/language transition and human Protocol/Crypto freeze."
     },
     {
       "id": "FINITE_FORMAL_MODEL",
@@ -45,7 +45,9 @@
         "node-php/tests/storage-backup.php",
         "docs/operations/deployment-and-recovery.md",
         "node-php/tests/storage-disk-full.php",
-        "docs/conformance/storage-disk-full-report.json"
+        "docs/conformance/storage-disk-full-report.json",
+        "node-php/tests/storage-format-migration.php",
+        "docs/adr/004-filesystem-journal-commit-before-head.md"
       ],
       "remaining": "Physical power-loss, deployed filesystem/disk-full and authenticated restore drills; isolated tmpfs ENOSPC is development evidence only"
     },
@@ -129,7 +131,7 @@
         "docs/requirements.json",
         "docs/protocol/handbook.md"
       ],
-      "remaining": "283/318 candidate blocks have related evidence pointers; complete detailed MUST-level acceptance is still open."
+      "remaining": "Current 2,813-section inventory has source hashes/locations but is not atomic MUST-level acceptance or complete code/test traceability. Historical 318-block mappings remain in Git history."
     },
     {
       "id": "PRODUCTION_RELEASE",
@@ -142,9 +144,13 @@
       "status": "PARTIAL",
       "evidence": [
         "docs/specification-refresh-report.json",
-        "docs/specification-refresh.md"
+        "docs/specification-refresh.md",
+        "docs/production-readiness.json",
+        "docs/security/SECURITY-COVERAGE.md",
+        "docs/protocol/proposals/PCP-001-current-category-language-draft.md",
+        "docs/operations/candidate-budgets.md"
       ],
-      "remaining": "Review all 54 ordered required-reading sources plus index; update stale requirement mapping, logical identity, registry/language rules, announcement, inclusion proofs and operator dashboard without inventing unfrozen wire semantics"
+      "remaining": "Full source reading completed; public stable-ID/current-index proofs, bounded announcement endpoint, complete external onboarding, source-family diversity, NoJS profile and remaining secure-coding controls are incomplete. Required decisions and external evidence remain open."
     }
   ]
 }

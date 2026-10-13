@@ -1,0 +1,26 @@
+{
+  "scope": "Fetched official published baselines; ASVS tag checked, not an assertion that moving latest tag is stable. Primary Top10 site HTTP unavailable; official project repository used.",
+  "references": [
+    {
+      "label": "asvs",
+      "url": "https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.csv",
+      "checked_at": "2026-10-13",
+      "bytes": 105100,
+      "sha256": "98c8fe911b9edb403af8ee05d3ce8201ecac2659e313b053890a62847cdcf680"
+    },
+    {
+      "label": "cwe-top25",
+      "url": "https://cwe.mitre.org/top25/archive/2025/2025_cwe_top25.html",
+      "checked_at": "2026-10-13",
+      "bytes": 41662,
+      "sha256": "5549e8bdd7b93dfe01f16dd7d646ca79056332564501debccab0026d073c1c87"
+    },
+    {
+      "label": "owasp-top10",
+      "url": "https://raw.githubusercontent.com/OWASP/Top10/master/2025/docs/en/index.md",
+      "checked_at": "2026-10-13",
+      "bytes": 1914,
+      "sha256": "1453d2fdbd268031b13a9e89619fb044b5e92373c3e26c2fb9f633a22df26e65"
+    }
+  ]
+}

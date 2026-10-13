@@ -76,3 +76,24 @@ test('a failed refresh preserves the last verified local index and pins',async({
   await page.locator('#query').fill('climate');await expect(page.locator('.result-card')).toHaveCount(1);
   expect(network).toEqual([]);
 });
+
+test('registry filters and adult preference cause no query-dependent network work',async({page})=>{
+  const network=[];page.on('request',request=>network.push(request.url()));
+  await page.goto(origin+'/onion-service-discovery/');
+  await page.getByRole('button',{name:'Load directory',exact:true}).click();
+  await expect(page.locator('#coverage')).toContainText('3 distinct fresh signing keys');
+  await expect(page.locator('.result-card')).toHaveCount(3);
+  await expect(page.locator('#category option')).toHaveCount(39);
+  const before=network.length;
+  await page.locator('#category').selectOption('research');
+  await expect(page.locator('.result-card')).toHaveCount(1);
+  await expect(page.locator('.result-card')).toContainText('Synthetic Climate Archive');
+  await page.locator('#category').selectOption('adult');
+  await expect(page.locator('.result-card')).toHaveCount(0);
+  await page.locator('#adult-visibility').selectOption('hide');
+  await page.locator('#category').selectOption('');
+  await expect(page.locator('.result-card')).toHaveCount(3);
+  await page.waitForTimeout(150);
+  expect(network.length).toBe(before);
+  await expect(page.locator('img,iframe,video,audio')).toHaveCount(0);
+});
