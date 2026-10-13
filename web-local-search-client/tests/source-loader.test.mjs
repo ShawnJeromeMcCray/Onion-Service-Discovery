@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { ed25519 } from '@noble/curves/ed25519.js';
 import { SourceLoader } from '../src/client/source-loader.ts';
+import { SourceWitnesses } from '../src/client/source-witnesses.ts';
 import { browserCryptoProviders } from '../src/protocol/crypto-providers.ts';
 import { canonicalJson } from '../src/protocol/canonical-json.ts';
 import { recordHash, signedMessage } from '../src/protocol/record-format.ts';
@@ -78,5 +79,29 @@ test('a changed target cannot reuse an unrelated verified cursor to bypass a bro
   fixture.setGeneration(37);
   await assert.rejects(loader.load(selection,ledger,new AbortController().signal,value=>{ledger=structuredClone(value);}),{message:'SOURCE_CHECKPOINT_CHAIN_BROKEN'});
   assert.equal(ledger.generation,1); assert.equal(ledger.checkpointHash,fixture.hashes[0]);
+ }finally{fixture.restore();}
+});
+test('a conflicting signed ancestor is retained and quarantines the source before admission',async()=>{
+ const fixture=await setup(); const loader=new SourceLoader(crypto); const witnesses=new SourceWitnesses(); let ledger;
+ const observe=(value,evidence)=>{
+  const conflict=witnesses.observe(evidence); value.equivocated ||= conflict; ledger=structuredClone(value);
+  if(value.equivocated)throw new Error('SOURCE_CHECKPOINT_EQUIVOCATION');
+ };
+ try{
+  ledger=(await loader.load(selection,undefined,new AbortController().signal,observe)).ledger;
+  fixture.setGeneration(36);
+  await assert.rejects(loader.load(selection,ledger,new AbortController().signal,observe),{message:'SOURCE_HISTORY_PROGRESS'});
+  const fork=structuredClone(fixture.records.get(fixture.hashes[35])); fork.cursor='different-36';
+  fork.signature='ed25519sig:'+Buffer.from(ed25519.sign(signedMessage(fork),seed)).toString('base64url');
+  const forkHash=await recordHash(fork,crypto.subtle); fixture.records.set(forkHash,fork);
+  const next=structuredClone(fixture.records.get(fixture.hashes[36])); next.previous_checkpoint_hash=forkHash;
+  next.signature='ed25519sig:'+Buffer.from(ed25519.sign(signedMessage(next),seed)).toString('base64url');
+  const nextHash=await recordHash(next,crypto.subtle); fixture.records.set(nextHash,next); fixture.hashes[36]=nextHash;
+  fixture.setGeneration(37);
+  await assert.rejects(loader.load(selection,ledger,new AbortController().signal,observe),{message:'SOURCE_CHECKPOINT_EQUIVOCATION'});
+  assert.equal(ledger.generation,1); assert.equal(ledger.equivocated,true);
+  const pair=witnesses.forkEvidence(selection.expectedKey);
+  assert.deepEqual(pair.map(record=>record.contentHash),[fixture.hashes[35],forkHash]);
+  await assert.rejects(loader.load(selection,ledger,new AbortController().signal,observe),{message:'SOURCE_EQUIVOCATION_PRESERVED'});
  }finally{fixture.restore();}
 });

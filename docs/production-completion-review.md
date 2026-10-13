@@ -167,3 +167,11 @@ flags. All 45 suites pass on both pinned PHP minors:
 [PHP 8.4](conformance/browser-catchup-php84-report.json); four Chromium browser
 checks and the TypeScript sink policy pass. No compact research proof is used
 by either runtime, and active-index/onboarding approval remains open.
+
+A signed conflicting ancestor encountered during browser catch-up now quarantines
+the source before admission and retains both authenticated records. A bounded
+fork reserve remains available after ordinary witness saturation; no old proof
+is silently evicted. [Executed scope](conformance/source-witness-report.json)
+includes all 246 Node unit tests, typechecking, four Chromium checks and sink policy.
+The previous browser/baseline commit `dead657f3aeafbefbb3d8f654acae55060da1988`
+passed all hosted jobs in [run 38479421456](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38479421456).

@@ -113,6 +113,9 @@ export class SourceLoader {
         const parent = await verifyWire(await fetchBytes(selection.onion, { snapshot: parentHash }, 65536, signal, deadline,this.delivery), this.crypto);
         const value = parseStrictJson(new TextEncoder().encode(parent.canonicalWire), 65536);
         if (parent.type !== 'snapshot_descriptor' || parent.contentHash !== parentHash || value.node_identity_public_key !== nodeKey || Number(value.generation) !== Number(ancestor.generation) - 1) throw new Error('SOURCE_CHECKPOINT_CHAIN_BROKEN');
+        ledger.equivocated ||= (ledger.observed[String(value.generation)]??[]).some(known=>known!==parent.contentHash);
+        observe(ledger,parent);
+        if(ledger.equivocated) throw new Error('SOURCE_CHECKPOINT_EQUIVOCATION');
         if(!this.#ancestry.has(selection.onion)&&this.#ancestry.size>=16) this.#ancestry.delete(this.#ancestry.keys().next().value!);
         this.#ancestry.set(selection.onion,{nodeKey,targetHash:checkpointHash,anchorHash:ledger.checkpointHash,anchorGeneration:ledger.generation,ancestor:parent});
         ancestor = value;

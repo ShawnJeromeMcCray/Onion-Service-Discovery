@@ -81,3 +81,11 @@ a genesis proof. These are checkpoint-continuity claims, not independent Node
 trust, direct Service presence or the still-unimplemented active-index scheme.
 The session witness/storage caps and withheld/changing history remain availability
 limits; a browser restart loses its session walk progress.
+
+Signed ancestors are compared with session witnesses as well as the current
+checkpoint. Conflicting records at the same Node/type/sequence position quarantine
+the Node and preserve the accepted anchor. The session witness registry retains
+at most 512 ordinary records plus a reserved signed fork pair for at most 16
+Node keys (at most 528 distinct records). Saturation fails closed instead of
+evicting evidence. Clear All Data explicitly erases these witnesses. This is a
+bounded session policy, not unlimited history retention or automatic fork discovery.
