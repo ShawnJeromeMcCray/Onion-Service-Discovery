@@ -28,8 +28,8 @@ its public `hostname` file. The application never provisions or reads Tor keys.
    its own configuration/runtime and no Node or Service signing key.
 5. Copy the appropriate example from `node-php/config`, replace synthetic onions
    and paths, and keep the configuration outside the document root. Set every
-   feature explicitly. `server_search=true` is refused: no optional server-side
-   query implementation is advertised. Source/onion metadata is intentionally
+   feature explicitly. `server_search` defaults to false. Enable it only on a Node/combined role
+   after reviewing the explicit [server-search privacy and deployment contract](server-search.md). Source/onion metadata is intentionally
    public; private paths and credentials are not browser configuration.
 6. Run `php node-php/bin/onion-service-discovery config:validate CONFIG` and
    `doctor CONFIG`. Initialize the selected backend with `storage:init BACKEND

@@ -15,7 +15,8 @@
     "mirror_directory": false,
     "discover_services": false,
     "sync_with_peers": false,
-    "server_search": false
+    "server_search": false,
+    "accept_announcements": false
   },
   "transport": {
     "proxy_host": "127.0.0.1",

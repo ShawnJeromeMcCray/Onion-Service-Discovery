@@ -2,7 +2,7 @@
 
 The baseline repository contained only a one-line README. The implementation is
 on `implementation/repository-foundation`; incremental PRs #1–#6 have been merged
-by the repository owner. Subsequent development continues on that branch. The project now contains
+by the repository owner. Production-completion work continues in draft PR #8 on `implementation/production-completion`. The project now contains
 an executable development Node, offline Service signer, separate Client Host,
 locally verifying/searching browser client and mature offline release verifier.
 There is no approved production release.
@@ -14,7 +14,19 @@ suite to 226 cases per language. It does not evaluate freshness/checkpoint ances
 or complete the new active-index checkpoint/onboarding workflow. Local peer
 source grouping now exposes concentration without identity-count trust; gradual
 learned-source admission remains open. Tor transport uses explicit format-zero
-SOCKS isolation. See [continuation evidence](production-completion-review.md).
+SOCKS isolation. The D-051 owner-approved genesis-key ID now has a complete-history lookup.
+Real private-Tor application traffic and actual headless Tor Browser local tests
+have passed; public Tor, Android and browser security-level profiles remain open.
+A default-off bounded announcement receiver and one-shot Tor operator command
+are implemented as PCP-002; human D-018 freeze and automated multi-Node onboarding
+remain open.
+The optional default-off NoJS profile now serves explicit HTML POST search from a
+prepared local index, with frozen Unicode 17 normalization shared with browser search.
+Queries do not trigger discovery or synchronization. Both storage backends, corrupt-cache
+rejection and explicit reconstruction are tested; actual headless Tor Browser with
+JavaScript disabled has exercised the form. This is development evidence, not a
+public-Tor, browser-security-level or production certification. See
+[server search](operations/server-search.md) and [continuation evidence](production-completion-review.md).
 
 The 2026-10-13 refresh found 55 active sources: 43 updated, five added, seven
 unchanged. The full updated corpus has been read in the mandatory order.

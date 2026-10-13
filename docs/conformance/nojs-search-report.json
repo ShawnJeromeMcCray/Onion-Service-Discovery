@@ -1,0 +1,240 @@
+{
+  "profile": "DRAFT_CORE_UNIT_SUITES",
+  "status": "PASS",
+  "generated_at": "2026-10-13T22:10:52.347271+00:00",
+  "shared_fixture_count": 246,
+  "php_container": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3",
+  "checks": [
+    {
+      "check": "browser-client-build",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "repository-integrity",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "python-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-address-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-json-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-record-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-public-request-budget",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-node-initializer",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-client-relay-controlled",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-client-host",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-public-blobs",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-public-evidence",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-operator-cli",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-read-only-diagnostics",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-configuration",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-publisher-status",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-snapshot-chunks",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-snapshot-producer",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-data-api",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-search-unicode",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-search-ranking",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-server-search",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-server-search-http",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-service-id-api",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-snapshot-membership-cli",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-static-analysis",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-announcement-http",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-candidate-announcement",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-candidate-queue",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-candidate-budgets",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-peer-source-groups",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-direct-verification-controlled",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-storage-contract",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-storage-backup",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-storage-archive",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-storage-crash-recovery",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-storage-format-migration",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-tor-transport-controlled",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-manifest-installer",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-manifest-drafts",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-peer-sync-controlled",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-protected-signer",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "php-identity-sequences",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "typescript-typecheck",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "typescript-vectors",
+      "status": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "limitations": [
+    "Not CORE-V1 conformance",
+    "Not browser compatibility evidence",
+    "Tor transport tested only through controlled loopback SOCKS; not live Tor or actual Tor Browser/Android; physical power-loss not established",
+    "No production release approval"
+  ]
+}

@@ -6,6 +6,15 @@ function command(array $arguments,int $expected=0):array{
  if($exit!==$expected||$err!=='')throw new RuntimeException('CLI failed '.$arguments[0].' exit '.$exit.' '.$out.' '.$err);return json_decode($out,true,32,JSON_THROW_ON_ERROR);
 }
 file_put_contents($root.'/passphrase','TEST ONLY private operator passphrase');chmod($root.'/passphrase',0600);
+// Synthetic filenames only: no Tor identity is created or read in this test.
+foreach (['hs_ed25519_secret_key', 'private_key'] as $forbidden) {
+ file_put_contents($root.'/'.$forbidden, '{}');
+ symlink($root.'/'.$forbidden, $root.'/alias-'.$forbidden.'.json');
+ foreach ([$root.'/'.$forbidden, $root.'/alias-'.$forbidden.'.json'] as $input) {
+  $rejected=command(['protocol:inspect',$input],3);
+  if ($rejected['error']!=='TOR_KEY_ACCESS_FORBIDDEN') throw new RuntimeException('Tor key filename alias was read');
+ }
+}
 $v=json_decode(file_get_contents($project.'/node-php/config/node.example.json'),true,32,JSON_THROW_ON_ERROR);$v['storage']['path']=$root.'/data';$v['export_path']=$root.'/exports';$v['node']['key_path']=$root.'/node.key';$v['features']['mirror_directory']=true;file_put_contents($root.'/config.json',json_encode($v));chmod($root.'/config.json',0600);$config=$root.'/config.json';
 command(['config:validate',$config]);command(['key:node:generate',$root.'/node.key','--passphrase-file',$root.'/passphrase']);command(['node:init',$config,'--passphrase-file',$root.'/passphrase']);command(['doctor',$config],6);
 $published=command(['node:snapshot',$config,'--passphrase-file',$root.'/passphrase']);if($published['status']!=='PUBLISHED')throw new RuntimeException('first snapshot failed');

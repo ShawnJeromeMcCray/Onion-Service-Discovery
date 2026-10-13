@@ -88,10 +88,13 @@ final readonly class DataApi
                 }
                 return $this->response(200, ['protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'after' => $after, 'cursor' => $cursor, 'has_more' => $cursor < max(array_column($entries,'sequence') ?: [0]), 'records' => $records], $headers, $method, 1048576);
             }
-            if (preg_match('~\A/onion-service-discovery/v1/services/([a-z2-7]{56}\.onion)\z~D', $path, $match) === 1 && $query === '') {
-                $onion = OnionAddress::parse($match[1]); $records = [];
-                if (($published['service_index_version'] ?? 0) !== 1) { return $this->response(503, ['error' => 'SERVICE_INDEX_NOT_READY'], $headers, $method); }
-                $prefix = substr(hash('sha256', $onion->hostname), 0, 2);
+            if (preg_match('~\A/onion-service-discovery/v1/services/([a-z2-7]{56}\.onion|ed25519:[A-Za-z0-9_-]{43})\z~D', $path, $match) === 1 && $query === '') {
+                $identifier = $match[1];
+                if (str_starts_with($identifier, 'ed25519:')) { \OnionServiceDiscovery\Crypto\Encoding::publicKey($identifier); }
+                else { OnionAddress::parse($identifier); }
+                $records = []; $validated = [];
+                if (($published['service_index_version'] ?? 0) !== 2) { return $this->response(503, ['error' => 'SERVICE_INDEX_NOT_READY'], $headers, $method); }
+                $prefix = substr(hash('sha256', $identifier), 0, 2);
                 $index = $state['tables']['node']['key:service-index-' . $prefix] ?? null;
                 $hashes = [];
                 if ($index !== null) {
@@ -99,17 +102,20 @@ final readonly class DataApi
                     if ($wire === null || 'sha256:' . hash('sha256', "Onion Service Discovery/service-lookup/v1\0" . $wire) !== $index['hash']) { throw new ProtocolException('STORAGE_CORRUPT'); }
                     $entries = \OnionServiceDiscovery\Storage\StorageJson::decode($wire, 524288);
                     if (($entries['too_large'] ?? false) === true) { throw new ProtocolException('RESPONSE_TOO_LARGE'); }
-                    $hashes = $entries[$onion->hostname] ?? [];
+                    $hashes = $entries[$identifier] ?? [];
                     if (($hashes['too_large'] ?? false) || count($hashes) > 256) { throw new ProtocolException('RESPONSE_TOO_LARGE'); }
                 }
                 foreach ($this->store->readRecords($hashes) as $hash => $wire) {
                     if (!isset($publicHashes[$hash])) { throw new ProtocolException('STORAGE_CORRUPT'); }
                     $record = $this->verifier->verifyWire($wire);
                     if ($record->contentHash !== $hash) { throw new ProtocolException('STORAGE_CORRUPT'); }
-                    $records[] = $record->document();
+                    $records[] = $record->document(); $validated[] = $record;
                 }
                 if (count($records) !== count($hashes)) { throw new ProtocolException('STORAGE_CORRUPT'); }
-                return $this->response(200, ['protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'records' => $records], $headers, $method, 32768);
+                $view = \OnionServiceDiscovery\Protocol\IdentityDeriver::derive($validated, 256);
+                $ids = array_column($view['identities'], 'genesis_key'); sort($ids, SORT_STRING);
+                if (str_starts_with($identifier, 'ed25519:') && $records !== [] && $ids !== [$identifier]) { throw new ProtocolException('STORAGE_CORRUPT'); }
+                return $this->response(200, ['protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'logical_service_ids' => $ids, 'records' => $records], $headers, $method, 32768);
             }
             return $this->response(404, ['error' => 'NOT_FOUND'], $headers);
         } catch (ProtocolException $error) {

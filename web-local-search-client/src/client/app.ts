@@ -108,6 +108,7 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
     const preview=el('pin-preview'); preview.replaceChildren(); for(const pin of message.pins) { const item=text('div','','preview-pin'); item.append(text('strong',pin.label),text('div',pin.genesisKey,'key-value'),text('div',pin.contextOnion,'onion-address')); preview.append(item); }
     el<HTMLDialogElement>('pin-import-dialog').showModal(); return;
   }
+  el('client-startup-notice').hidden=true;
   view=message.view; synthetic=message.synthetic; busy=message.busy; el('synthetic-notice').hidden=!synthetic;
   for(const id of ['load-sources','load-demo','clear-index','forget-all']) el<HTMLButtonElement>(id).disabled=busy;
   el<HTMLButtonElement>('cancel-load').disabled=!busy; el('record-count').textContent=view.recordCount+' signed records';

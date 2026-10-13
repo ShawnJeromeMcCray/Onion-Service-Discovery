@@ -12,7 +12,7 @@ use OnionServiceDiscovery\Storage\PublicBlobStore;
 
 final readonly class SnapshotProducer
 {
-    public function __construct(private StorageBackend $store, private PublicBlobStore $blobs, private RecordVerifier $verifier, private SignerProvider $signer)
+    public function __construct(private StorageBackend $store, private PublicBlobStore $blobs, private RecordVerifier $verifier, private SignerProvider $signer, private bool $serverSearch = false, private bool $forceDerived = false)
     { if ($signer->role() !== 'node') { throw new ProtocolException('SIGNER_ROLE_MISMATCH'); } }
     /**
      * @return array<array-key, mixed>
@@ -44,12 +44,13 @@ final readonly class SnapshotProducer
         if ($previous !== null) {
             $previousWire = $this->store->readRecord($previous['hash']);
             if ($previousWire === null) { throw new ProtocolException('STORAGE_CORRUPT'); }
-            $previousDoc = $this->verifier->verifyWire($previousWire)->document();
+            $previousRecord = $this->verifier->verifyWire($previousWire); $previousDoc = $previousRecord->document();
+            if ($previousRecord->type !== 'snapshot_descriptor' || $previousRecord->contentHash !== $previous['hash'] || $previousDoc->generation !== ($previous['generation'] ?? null) || $previousDoc->root_hash !== ($previous['root_hash'] ?? null) || $previousDoc->cursor !== ($previous['cursor'] ?? null)) { throw new ProtocolException('STORAGE_CORRUPT'); }
             if ($previousDoc->node_identity_public_key !== $this->signer->publicKey()) { throw new ProtocolException('SIGNER_BINDING_MISMATCH'); }
             $previousCreated = strtotime($previousDoc->created_at);
             if ($previousCreated === false || $now < $previousCreated) { throw new ProtocolException('CLOCK_ROLLBACK'); }
         }
-        if ($previous !== null && ($previous['service_index_version'] ?? 0) === 1 && $now - $previousCreated < 86400 && $previous['root_hash'] === SnapshotFormat::rootHash($chunks) && $previous['cursor'] === (string) $publicCursor) { return ['status' => 'UNCHANGED', 'checkpoint_hash' => $previous['hash']]; }
+        if (!$this->forceDerived && $previous !== null && ($previous['service_index_version'] ?? 0) === 2 && (!$this->serverSearch || isset($state['tables']['node']['key:server-search-index'])) && $now - $previousCreated < 86400 && $previous['root_hash'] === SnapshotFormat::rootHash($chunks) && $previous['cursor'] === (string) $publicCursor) { return ['status' => 'UNCHANGED', 'checkpoint_hash' => $previous['hash']]; }
         $generation = ($previous['generation'] ?? 0) + 1;
         $descriptor = $this->verifier->verify($this->signer->signRecord((object) [
             'protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'record_type' => 'snapshot_descriptor',
@@ -66,6 +67,26 @@ final readonly class SnapshotProducer
                 $serviceBuckets[$prefix][$onion][] = $hash;
             }
         }
+        // Stable identifiers only come from complete, independently derived genesis lineages.
+        $publicRecords = array_map(static fn (string $hash) => $byHash[$hash], $hashes);
+        $view = \OnionServiceDiscovery\Protocol\IdentityDeriver::derive($publicRecords, 10000);
+        $observations = [];
+        foreach ($publicRecords as $record) {
+            if ($record->type === 'direct_observation') { $observations[$record->document()->manifest_hash][] = $record->contentHash; }
+        }
+        foreach ($view['identities'] as $identity) {
+            $references = array_merge($identity['history_hashes'], $identity['rotation_hashes'], $identity['migration_hashes']);
+            foreach ($identity['transition_conflicts'] as $conflict) { $references = array_merge($references, $conflict['record_hashes']); }
+            foreach ($identity['history_hashes'] as $hash) { $references = array_merge($references, $observations[$hash] ?? []); }
+            $references = array_values(array_unique($references)); sort($references, SORT_STRING);
+            $id = $identity['genesis_key']; $prefix = substr(hash('sha256', $id), 0, 2);
+            $serviceBuckets[$prefix][$id] = $references;
+            foreach ($identity['history_hashes'] as $hash) {
+                $onion = $byHash[$hash]->document()->onion; $prefix = substr(hash('sha256', $onion), 0, 2);
+                $existing = $serviceBuckets[$prefix][$onion] ?? [];
+                $serviceBuckets[$prefix][$onion] = array_values(array_unique(array_merge($existing, $references)));
+            }
+        }
         $serviceIndexes = [];
         foreach ($serviceBuckets as $prefix => $entries) {
             foreach ($entries as $onion => $references) {
@@ -77,7 +98,8 @@ final readonly class SnapshotProducer
             $hash = 'sha256:' . hash('sha256', "Onion Service Discovery/service-lookup/v1\0" . $wire);
             $this->blobs->put($hash, $wire); $serviceIndexes[(string)$prefix] = $hash;
         }
-        $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor, $hashes, $serviceIndexes): void {
+        $searchIndex = $this->serverSearch ? \OnionServiceDiscovery\Search\SearchIndex::build($this->blobs, \OnionServiceDiscovery\Search\LocalSearch::build($publicRecords), $descriptor) : null;
+        $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor, $hashes, $serviceIndexes, $searchIndex): void {
             if ($tx->state()['generation'] !== $state['generation']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
             $tx->putRecord($descriptor);
             foreach ($tx->state()['tables']['node'] as $key => $_) { if ((str_starts_with($key, 'key:public-index-') || str_starts_with($key, 'key:service-index-'))) { $tx->deleteOperational('node', substr($key,4)); } }
@@ -86,7 +108,9 @@ final readonly class SnapshotProducer
             $publicHashes[] = $descriptor->contentHash;
             foreach (array_chunk(array_values(array_unique($publicHashes)),64) as $index => $part) { $tx->set('node','public-index-' . $index,['hashes'=>$part]); }
             foreach ($serviceIndexes as $prefix => $hash) { $tx->set('node', 'service-index-' . $prefix, ['hash' => $hash]); }
-            $tx->set('node', 'published-snapshot', ['hash' => $descriptor->contentHash, 'root_hash' => SnapshotFormat::rootHash($chunks), 'generation' => $generation, 'cursor' => (string) $publicCursor, 'service_index_version' => 1]);
+            if ($searchIndex !== null) { $tx->set('node', 'server-search-index', ['format_version' => 1, 'hash' => $searchIndex]); }
+            else { $tx->deleteOperational('node', 'server-search-index'); }
+            $tx->set('node', 'published-snapshot', ['hash' => $descriptor->contentHash, 'root_hash' => SnapshotFormat::rootHash($chunks), 'generation' => $generation, 'cursor' => (string) $publicCursor, 'service_index_version' => 2]);
         });
         return ['status' => 'PUBLISHED', 'checkpoint_hash' => $descriptor->contentHash, 'record_count' => $count, 'chunks' => count($chunks)];
     }

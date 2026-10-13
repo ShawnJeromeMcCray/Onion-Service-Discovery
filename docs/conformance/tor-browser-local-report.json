@@ -1,0 +1,22 @@
+{
+  "status": "PASS_DEVELOPMENT",
+  "browser_version": "140.17.0",
+  "checks": [
+    "ACTUAL_TOR_BROWSER_LOCAL_CLIENT_RENDER",
+    "WORKER_SIGNED_DEMO_VERIFICATION",
+    "LOCAL_QUERY_NO_HTTP_REQUEST",
+    "TEXT_ONLY_DEMO_NO_VISIT_LINK",
+    "LOCAL_PIN"
+  ],
+  "profile": "headless local HTTP; external Tor launcher disabled; direct loopback only",
+  "public_tor_verified": false,
+  "privacy_profile_certified": false,
+  "android_verified": false,
+  "production_approved": false,
+  "executed_at": "2026-10-13",
+  "tor_browser_release": "15.0.25",
+  "artifact_sha256": "37432d6f4d9b1f1190ba2cfbbd4ab9dad5ccd52c14aa47a21795d08273f4a165",
+  "signing_primary_fingerprint": "EF6E286DDA85EA2A4BA7DE684E2C6E8793298290",
+  "isolation": "Docker --network none",
+  "signature_verified": true
+}

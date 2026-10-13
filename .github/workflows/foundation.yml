@@ -43,6 +43,7 @@ jobs:
           docker run --rm --user "$(id -u):$(id -g)" -e COMPOSER_HOME=/tmp/composer --mount "type=bind,src=$GITHUB_WORKSPACE/node-php,dst=/app" --workdir /app composer@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac composer install --no-plugins --no-scripts --no-interaction --prefer-dist
       - name: Verify reproducible schemas and vectors
         run: |
+          .venv/bin/python tools/generate_search_unicode.py
           .venv/bin/python tools/generate_categories.py
           .venv/bin/python tools/generate_language_grammar.py
           .venv/bin/python tools/generate_schemas.py
@@ -50,7 +51,7 @@ jobs:
           .venv/bin/python tools/generate_membership_vectors.py
           .venv/bin/python tools/generate_browser_dataset.py
           npm --prefix web-local-search-client run schemas:build
-          git diff --exit-code -- protocol/registries node-php/src/Domain/CategoryId.php node-php/src/Domain/LanguageGrammar.php validator-python/category_ids.py validator-python/language_grammar.py web-local-search-client/src/protocol/category-id.ts web-local-search-client/src/protocol/language-grammar.ts protocol/schemas protocol/test-vectors web-local-search-client/generated web-local-search-client/public/demo.json
+          git diff --exit-code -- protocol/registries node-php/src/Domain/CategoryId.php node-php/src/Domain/LanguageGrammar.php validator-python/category_ids.py validator-python/language_grammar.py web-local-search-client/src/protocol/category-id.ts web-local-search-client/src/protocol/language-grammar.ts protocol/schemas protocol/test-vectors web-local-search-client/generated web-local-search-client/public/demo.json web-local-search-client/src/client/search-unicode-data.ts
       - name: Pull pinned PHP test image
         run: docker pull "${{ matrix.php_image }}"
       - name: Enforce constrained source sink policies

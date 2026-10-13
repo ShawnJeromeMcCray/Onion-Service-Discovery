@@ -11,6 +11,15 @@ final readonly class TorTransport
         if (!extension_loaded('curl') || !in_array($proxyHost, ['127.0.0.1', '::1'], true) || $proxyPort < 1 || $proxyPort > 65535 || $timeoutMilliseconds < 100 || $timeoutMilliseconds > 60000) { throw new TransportException('TRANSPORT_CONFIGURATION_INVALID'); }
     }
     public function get(OnionAddress $onion, ProtocolEndpoint $endpoint): string
+    { return $this->request($onion, $endpoint, null, 200); }
+    public function announce(OnionAddress $node, OnionAddress $service): void
+    {
+        $body = json_encode(['protocol_version' => 1, 'onion' => $service->hostname], JSON_THROW_ON_ERROR);
+        $wire = $this->request($node, ProtocolEndpoint::announcement(), $body, 202);
+        $reply = \OnionServiceDiscovery\Validation\StrictJson::parse($wire, 1024);
+        if (count(get_object_vars($reply)) !== 1 || ($reply->status ?? null) !== 'HINT_RECEIVED_UNCONFIRMED') { throw new TransportException('ANNOUNCEMENT_RESPONSE_INVALID'); }
+    }
+    private function request(OnionAddress $onion, ProtocolEndpoint $endpoint, ?string $requestBody, int $expectedStatus): string
     {
         $handle = curl_init();
         if ($handle === false) { throw new TransportException('TRANSPORT_UNAVAILABLE'); }
@@ -47,6 +56,10 @@ final readonly class TorTransport
                 return strlen($line);
             },
         ];
+        if ($requestBody !== null) {
+            $options[CURLOPT_POST] = true; $options[CURLOPT_POSTFIELDS] = $requestBody;
+            $options[CURLOPT_HTTPHEADER][] = 'Content-Type: application/json';
+        }
         try {
             // @phpstan-ignore argument.type (libcurl documents empty NOPROXY to force proxy use; PHPStan's non-empty-string stub is inaccurate.)
             if (!curl_setopt_array($handle, $options)) { throw new TransportException('TRANSPORT_UNAVAILABLE'); }
@@ -54,7 +67,7 @@ final readonly class TorTransport
             $status = curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
             if ($rejected !== null) { throw new TransportException($rejected); }
             if ($success === false) { throw new TransportException('TOR_REQUEST_FAILED'); }
-            if ($status !== 200) { throw new TransportException('HTTP_STATUS_REJECTED'); }
+            if ($status !== $expectedStatus) { throw new TransportException('HTTP_STATUS_REJECTED'); }
             if (isset($headers['content-encoding']) && strtolower($headers['content-encoding']) !== 'identity') { throw new TransportException('CONTENT_ENCODING_REJECTED'); }
             if (preg_match('/\Aapplication\/json(?:\s*;\s*charset=utf-8)?\z/iD', $headers['content-type'] ?? '') !== 1) { throw new TransportException('CONTENT_TYPE_REJECTED'); }
             return $body;

@@ -58,7 +58,9 @@
       <p class="muted">Clearing the index keeps pins and continuity witnesses. Forgetting local data removes these safeguards.</p>
       <p id="operation-status" role="status" aria-live="polite">Ready. No remote directory requests have been made.</p>
     </section>
-    <noscript><section class="notice"><h2>Local verification and search are unavailable with JavaScript disabled.</h2><p>No search has been sent. You can verify downloaded public records with the offline validator. A separate server search interface is not available in this development build.</p></section></noscript>
+    <p id="client-startup-notice" class="notice" role="status">Local verification has not started. If this message remains, scripting or its verifier is unavailable. No search has been sent. You can use the offline validator or the explicitly disclosed server-search profile if this host offers it.</p>
+    <!--server-search-fallback-->
+    <noscript><section class="notice"><h2>Local verification and search are unavailable with JavaScript disabled.</h2><p>No search has been sent. You can verify downloaded public records with the offline validator. No search terms are sent automatically. A server-search option, if offered above, is a separate profile that sends your query to the serving Node.</p></section></noscript>
   </main>
   <footer><p>Onion Service Discovery · CC0-1.0 · No analytics, cookies or automatic service visits.</p><p>Real Tor Browser compatibility, independent audit and production release approval remain open for this development preview.</p></footer>
   <dialog id="pin-import-dialog" aria-labelledby="pin-import-title"><form method="dialog"><h2 id="pin-import-title">Review imported pins</h2><p>These are local preferences, not cryptographic evidence. Existing conflicting pins will be preserved.</p><div id="pin-preview"></div><div class="actions"><button value="cancel" class="secondary">Cancel</button><button value="confirm">Import reviewed pins</button></div></form></dialog>

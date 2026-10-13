@@ -116,7 +116,7 @@
       "evidence": [
         "docs/governance/decision-register.md"
       ],
-      "remaining": "Only D-001 license approved; required human decisions/reviews remain unresolved"
+      "remaining": "D-001 license and D-051 genesis-key choice owner-approved; independent Crypto review and other required human decisions/reviews remain unresolved."
     },
     {
       "id": "INDEPENDENT_SECURITY_AUDIT",
@@ -150,7 +150,7 @@
         "docs/protocol/proposals/PCP-001-current-category-language-draft.md",
         "docs/operations/candidate-budgets.md"
       ],
-      "remaining": "Full source reading completed; public stable-ID/current-index proofs, bounded announcement endpoint, complete external onboarding, source-family diversity, NoJS profile and remaining secure-coding controls are incomplete. Required decisions and external evidence remain open."
+      "remaining": "Full source reading completed; stable-ID lookup, bounded announcement and optional NoJS have scoped development implementations. Active-index checkpoints, complete external onboarding, learned-source admission and remaining secure-coding controls are incomplete. Required decisions and external evidence remain open."
     },
     {
       "id": "OFFLINE_EXACT_SNAPSHOT_MEMBERSHIP",
@@ -170,6 +170,57 @@
         "docs/operations/source-groups.md"
       ],
       "remaining": "Local group/concentration diagnostics only; learned-source probation, referral-origin limits and gradual replacement remain incomplete."
+    },
+    {
+      "id": "DERIVED_STABLE_ID_LOOKUP",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/operations/service-id-lookup.md",
+        "docs/conformance/service-id-api-report.json",
+        "docs/conformance/service-id-api-php84-report.json"
+      ],
+      "remaining": "Independent Crypto review, final protocol freeze and active-index proof integration."
+    },
+    {
+      "id": "PRIVATE_REAL_TOR_APPLICATION",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/conformance/private-tor-onion-report.json",
+        "lab/real-tor-cli.md"
+      ],
+      "remaining": "Public Tor, deployed operation, capacity and privacy profiles remain separate gates."
+    },
+    {
+      "id": "ACTUAL_TOR_BROWSER_LOCAL_FUNCTIONS",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/conformance/tor-browser-local-report.json",
+        "lab/tor-browser-local.py"
+      ],
+      "remaining": "Headless local direct-loopback profile only; desktop Normal/Safer/Safest, Android and privacy reviews remain open."
+    },
+    {
+      "id": "BOUNDED_ANNOUNCEMENT_EXPERIMENT",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/protocol/proposals/PCP-002-bounded-announcement-draft.md",
+        "docs/conformance/announcement-report.json",
+        "docs/conformance/announcement-php84-report.json",
+        "docs/conformance/private-tor-onion-report.json"
+      ],
+      "remaining": "Human D-018 endpoint/media/numeric budget/retry freeze, deployed framing/overload review and automated multi-Node onboarding."
+    },
+    {
+      "id": "EXPLICIT_NOJS_SEARCH",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/operations/server-search.md",
+        "docs/conformance/nojs-search-report.json",
+        "docs/conformance/nojs-search-php84-report.json",
+        "docs/conformance/tor-browser-nojs-report.json",
+        "docs/performance/s1000-server-search-report.json"
+      ],
+      "remaining": "Optional local headless NoJS functions and bounded synthetic capacity only; deployed isolation, accessibility, desktop security levels, Android, public Tor and independent review remain open."
     }
   ]
 }

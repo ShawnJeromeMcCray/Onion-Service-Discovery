@@ -1,0 +1,19 @@
+{
+  "format_version": 1,
+  "scope": "immutable search presentation only; signed metadata untouched",
+  "unicode_version": "17.0.0",
+  "source_url": "https://www.unicode.org/Public/17.0.0/ucd/UCD.zip",
+  "archive_sha256": "2066d1909b2ea93916ce092da1c0ee4808ea3ef8407c94b4f14f5b7eb263d28e",
+  "source_members": {
+    "UnicodeData.txt": "2e1efc1dcb59c575eedf5ccae60f95229f706ee6d031835247d843c11d96470c",
+    "SpecialCasing.txt": "efc25faf19de21b92c1194c111c932e03d2a5eaf18194e33f1156e96de4c9588",
+    "DerivedCoreProperties.txt": "24c7fed1195c482faaefd5c1e7eb821c5ee1fb6de07ecdbaa64b56a99da22c08",
+    "DerivedNormalizationProps.txt": "71fd6a206a2c0cdd41feb6b7f656aa31091db45e9cedc926985d718397f9e488",
+    "NormalizationTest.txt": "5019ffd530751a741900c849c0e010332f142a3612234639bd200b82138a87db"
+  },
+  "table_sha256": "ed503692c5a3759ddd87daf30707f69b5d56f4c4665b660fb81a24f345a591ea",
+  "normalization_vectors_sha256": "bd271a5f35b1877a062636148fc1e3833abfe0eaf062f7b10b28c2e63493c147",
+  "normalization_case_count": 37671,
+  "license": "Unicode-3.0",
+  "license_file": "third-party/Unicode-3.0.txt"
+}

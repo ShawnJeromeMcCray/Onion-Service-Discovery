@@ -1,0 +1,14 @@
+# Optional staging snippet INSIDE the existing loopback server block.
+# Enable server_search explicitly; arrange a separately isolated FPM worker.
+# This is a configuration example, not validated deployed isolation evidence.
+# Other API routes retain the default 1 KiB body limit.
+location = /onion-service-discovery/search/server {
+    client_max_body_size 8k;
+    client_body_timeout 2s;
+    access_log off;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME /opt/onion-service-discovery/node-php/public/index.php;
+    fastcgi_param ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/node.json;
+    fastcgi_pass unix:/run/php/onion-service-discovery-search.sock;
+    fastcgi_read_timeout 3s;
+}

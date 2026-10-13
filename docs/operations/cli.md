@@ -14,8 +14,10 @@ probes Tor or decrypts keys. Unsupported/unobserved checks are explicitly marked
 Tor connectivity, scheduler, backup freshness, deployed headers and independent
 security/release review are not inferred from local configuration. Use separate
 transport/browser tests and operator acceptance to establish those properties.
-The web front controller also opens a read-only store; an HTTP visit cannot
-trigger operational transactions or journal repair. Filesystem format 2 uses the journal COMMIT as durable authority before HEAD.
+The ordinary data/status web routes open a read-only store and do not repair
+journals. The default-off experimental announcement route alone opens the
+selected writable store for bounded queue admission; it has no signer or
+outbound transport capability. Filesystem format 2 uses the journal COMMIT as durable authority before HEAD.
 Read-only opening refuses unresolved recovery rather than repairing it.
 
 `storage:check` is a separate explicit integrity/recovery command.
@@ -97,3 +99,23 @@ neither freshness nor checkpoint ancestry. See [the contract](snapshot-membershi
 `peers:group CONFIG ONION GROUP|--clear` records local source-family policy.
 Diagnostics expose concentration and unknown/inconsistent grouping without
 inferring independent operators or trust from key count. See [source groups](source-groups.md).
+
+## One-shot untrusted announcement
+
+`service:announce CONFIG SIGNED_MANIFEST_FILE NODE_ONION` requires explicit
+local publication and a signed, opted-in manifest bound to the configured
+Service Onion. It makes one fixed-path Tor POST with fresh SOCKS isolation; it
+reads no signing key and mutates no local store. The exact response is
+`HINT_RECEIVED_UNCONFIRMED`; both direct observation and membership remain
+`NOT_CONFIRMED`. There is no automatic retry loop. Redirect, rate-limit,
+malformed acknowledgement and bare inclusion assertions fail. This is the
+[PCP-002 draft](../protocol/proposals/PCP-002-bounded-announcement-draft.md),
+subject to D-018 human endpoint/limits/retry freeze. Receiving Nodes must
+explicitly enable both discovery and the optional announcement switch.
+
+## Explicit derived-export reconstruction
+
+`node:snapshot CONFIG --passphrase-file PRIVATE_FILE --rebuild-derived`
+reconstructs derived exports from verified records and signs a new generation.
+Ordinary publication fails on corrupted exports. See [server search](server-search.md)
+for cache preparation, limits and query privacy.

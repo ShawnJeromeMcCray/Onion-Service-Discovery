@@ -1,3 +1,4 @@
+import { searchTextV1 } from './search-unicode.ts';
 import { deriveIdentities } from '../protocol/identity-deriver.ts';
 import { parseStrictJson } from '../protocol/strict-json.ts';
 import { requiredObject, requiredString, type VerifiedRecord } from '../protocol/record-verifier.ts';
@@ -81,8 +82,8 @@ export function pinIdentity(identity:ServiceRow,label=identity.name):LocalPin {
 }
 export type AdultVisibility = 'show' | 'de-emphasize' | 'hide';
 export function localSearch(services:readonly ServiceRow[],query:string,language='',category='',adult:AdultVisibility='show'):ServiceRow[] {
-  const terms=query.slice(0,256).normalize('NFKC').toLowerCase().split(/\s+/u).filter(Boolean).slice(0,16);
-  return services.filter(row=>{if(row.status==='WITHDRAWN'||(language!==''&&!row.languages.includes(language))||(category!==''&&!row.categories.includes(category))||(adult==='hide'&&row.categories.includes('adult')))return false;const haystack=[row.name,row.description,row.onion??'',row.genesisKey,...row.categories,...row.languages].join(' ').normalize('NFKC').toLowerCase();return terms.every(term=>haystack.includes(term));}).sort((a,b)=>{
+  const terms=searchTextV1(query.slice(0,256)).split(/\s+/u).filter(Boolean).slice(0,16);
+  return services.filter(row=>{if(row.status==='WITHDRAWN'||(language!==''&&!row.languages.includes(language))||(category!==''&&!row.categories.includes(category))||(adult==='hide'&&row.categories.includes('adult')))return false;const haystack=searchTextV1([row.name,row.description,row.onion??'',row.genesisKey,...row.categories,...row.languages].join(' '));return terms.every(term=>haystack.includes(term));}).sort((a,b)=>{
     if(adult==='de-emphasize') { const difference=Number(a.categories.includes('adult'))-Number(b.categories.includes('adult'));if(difference!==0)return difference; }
     return a.name<b.name?-1:a.name>b.name?1:a.genesisKey<b.genesisKey?-1:a.genesisKey>b.genesisKey?1:0;
   });
