@@ -35,8 +35,11 @@ def check_manifest(root: Path) -> list[str]:
             return ["Unsupported specification manifest"]
     except (OSError, ValueError, KeyError, TypeError):
         return ["Specification manifest unreadable or malformed"]
-    if len(documents) != 50:
-        errors.append("Expected the 50-document initial source corpus")
+    orders = [entry.get('required_reading_order') for entry in documents if isinstance(entry, dict)]
+    if manifest.get('source_document_count') != 55 or manifest.get('mandatory_reading_count') != 54 or len(orders) != 55 or any(type(number) is not int for number in orders) or sorted(orders) != list(range(55)):
+        errors.append('Refreshed corpus count or required reading order invalid')
+    if len(documents) != 55:
+        errors.append("Expected the 55-document refreshed source corpus")
     paths: set[str] = set()
     urls: set[str] = set()
     for entry in documents:
@@ -99,7 +102,7 @@ def main() -> int:
         for error in errors:
             print(f"FAIL: {error}", file=sys.stderr)
         return 1
-    print("PASS: 50 source documents match their manifest; no configured credential pattern found.")
+    print("PASS: 55 source documents match their manifest; no configured credential pattern found.")
     print("Scope: source hashes and supplemental credential patterns only; full release/security gates remain open.")
     return 0
 

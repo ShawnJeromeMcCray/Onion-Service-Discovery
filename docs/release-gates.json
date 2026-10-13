@@ -1,25 +1,25 @@
 {
   "format_version": 1,
-  "scope": "development implementation; no production approval",
+  "scope": "development implementation of earlier draft; refreshed 55-source alignment pending; no production approval",
   "production_approved": false,
   "gates": [
     {
       "id": "SOURCE_BASELINE",
-      "status": "PASS_DEVELOPMENT",
+      "status": "PARTIAL",
       "evidence": [
         "docs/specification-manifest.json"
       ],
-      "remaining": "Human precedence/freeze review"
+      "remaining": "Full review/alignment with refreshed 55-document corpus and required human Protocol/Crypto freeze; historical passing cases are earlier-draft evidence"
     },
     {
       "id": "CORE_CONFORMANCE",
-      "status": "PASS_DEVELOPMENT",
+      "status": "PARTIAL",
       "evidence": [
         "docs/conformance/core-report.json",
         "docs/conformance/core-unit-report.json",
         "docs/conformance/php84-unit-report.json"
       ],
-      "remaining": "Independent human protocol/crypto review and stable profile freeze"
+      "remaining": "Full review/alignment with refreshed 55-document corpus and required human Protocol/Crypto freeze; historical passing cases are earlier-draft evidence"
     },
     {
       "id": "FINITE_FORMAL_MODEL",
@@ -136,6 +136,15 @@
       "status": "BLOCKED",
       "evidence": [],
       "remaining": "Complete all required gates, authenticated provenance/signing and immutable approved tag; no production release exists"
+    },
+    {
+      "id": "UPDATED_SPECIFICATION_ALIGNMENT",
+      "status": "PARTIAL",
+      "evidence": [
+        "docs/specification-refresh-report.json",
+        "docs/specification-refresh.md"
+      ],
+      "remaining": "Review all 54 ordered required-reading sources plus index; update stale requirement mapping, logical identity, registry/language rules, announcement, inclusion proofs and operator dashboard without inventing unfrozen wire semantics"
     }
   ]
 }

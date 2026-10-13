@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1jrJyPDRXFChFXSPe9SgOldeVYOcZ-GTmUzH4WmZW64o/edit?usp=drivesdk
 
-Source modified: 2026-10-11T04:26:04.579Z
+Source modified: 2026-10-12T19:28:58.271Z
 
 ---
 
@@ -177,7 +177,7 @@ languages:
 
 categories:
 - begrenzte Anzahl;
-- versionierter Kategoriensatz oder klar definierte freie Identifier;
+- Protocol v1 uses the frozen Protocol Category Registry v1; free-form category identifiers are not permitted in the normative category field;
 - keine versteckte Vertrauenssemantik.
 
 
@@ -197,12 +197,12 @@ related_onion_services:
 13. Signaturprüfung
 Verifier:
 1. parse mit strengem Parser;
-2. Schema validieren;
-3. Onion-Bindung prüfen;
+Step 2 — Schema validieren;
+Step 3 — Onion-Bindung prüfen;
 4. signierbaren Payload bilden;
 5. kanonisieren;
-6. Signatur mit service_identity_public_key prüfen;
-7. Revision/Hash-Kette gegen bekannten Zustand prüfen;
+Step 6 — Signatur mit service_identity_public_key prüfen;
+Step 7 — Revision/Hash-Kette gegen bekannten Zustand prüfen;
 8. erst danach als direkt verifizierte Manifest-Beobachtung speichern.
 
 
@@ -529,3 +529,35 @@ Bevor PHP-Node und Browser-Client gemeinsam integriert werden, müssen folgende 
 
 
 Änderungen danach benötigen Protocol Change Proposal, Migrationsanalyse und aktualisierte Testvektoren.
+
+
+37. Category Registry v1
+Manifest categories are broad, stable, self-declared content/function identifiers from the frozen Protocol Category Registry v1.
+The registry explicitly includes adult.
+Category assignment is signed operator metadata, not proof of legality, safety, legitimacy, age verification or external classification.
+Moderation/status concepts such as phishing, malware, trusted, verified or official MUST NOT be represented as operator categories.
+Unknown Protocol v1 category IDs are rejected.
+The v1 registry is immutable after Protocol v1 freeze; post-freeze additions require an explicitly versioned compatible extension mechanism or a new Protocol version.
+
+
+38. Logical Service Identifier
+A logical Service continuity lineage requires an identifier that survives valid Service-key rotation and Onion migration.
+Protocol v1 uses logical_service_id anchored to the genesis Service Identity public key, separately from the current Service Identity key/key epoch.
+The exact representation is frozen under D-051.
+A verifier MUST NOT accept a claimed logical_service_id without continuity evidence back to the genesis anchor.
+
+
+39. Signed Index Checkpoints
+Production index-exporting Nodes publish signed checkpoints according to the Node API/checkpoint specification.
+Checkpoint histories are chained and are distinct from Service revision chains.
+Exact checkpoint hash/chain bytes are frozen under D-052.
+
+
+40. Freeze Completeness
+Protocol v1 Freeze additionally requires:
+- Logical Service Identifier representation and vectors;
+- signed checkpoint byte construction and chain semantics;
+- Category Registry v1 immutability;
+- exact language-tag wire grammar;
+- Candidate Announcement endpoint semantics;
+- exact active-index record identity tuple.

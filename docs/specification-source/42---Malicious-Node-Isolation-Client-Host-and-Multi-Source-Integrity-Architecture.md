@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1FtNkCQMShutKcLzRwVA-LBUS7XuCa_GFCPqgRDty4PY/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:36:31.223Z
+Source modified: 2026-10-12T19:29:03.719Z
 
 ---
 
@@ -170,7 +170,7 @@ local-mode query MUST NOT influence:
 
 
 13. Multi-Source Default
-The stronger reference profile SHOULD combine generic index data from multiple independent Discovery Nodes.
+The stronger reference profile SHOULD combine generic index data from multiple distinct selected Discovery Nodes/source groups.
 
 
 Example:
@@ -231,13 +231,13 @@ Older state cannot silently overwrite known newer continuity.
 
 
 19. Node-Signed Snapshots
-Each Node SHOULD sign snapshot/checkpoint metadata:
+Each production index-exporting Node MUST sign snapshot/checkpoint metadata:
 - Node Identity;
 - generation time;
 - Protocol version;
 - record count;
 - root/hash;
-- previous checkpoint hash where defined.
+- previous_checkpoint_hash according to the frozen checkpoint-chain rule.
 
 
 This provides attribution and tamper evidence.
@@ -259,12 +259,12 @@ A malicious Node may serve different validly Node-signed roots to different clie
 
 
 Detection improves if:
-- clients compare checkpoints from several Nodes;
+- clients compare checkpoints/checkpoint-chain ancestry from several selected sources;
 - Nodes gossip observed checkpoints;
-- auditors collect conflicting signed checkpoints.
+- auditors retain conflicting signed histories.
 
 
-Two conflicting signed checkpoints for the same Node/sequence become evidence of equivocation.
+Two different signed checkpoints for the same Node/sequence are direct equivocation evidence. More generally, two signed checkpoint histories from the same Node that are not prefix-compatible are equivocation evidence once both histories can be compared.
 
 
 22. Transparency Witnesses
@@ -457,7 +457,7 @@ Independent Client Host.
 40. Recommended Strong Profile
 For privacy/security-conscious users:
 - trusted/self-hosted Client Host;
-- 3+ independent Discovery Nodes;
+- 3+ distinct selected Discovery Node identities/source groups; actual operator independence is counted only when documented in local source grouping metadata;
 - generic query-independent synchronization;
 - local ranking/search;
 - signed records;
@@ -554,4 +554,50 @@ PASS requires:
 - rollback/equivocation handling;
 - query-independent synchronization;
 - malicious-origin limitation explicit;
-- self-hosted Client Host path documented.
+- self-hosted Client Host path documented
+
+
+49. SYBIL-SAFE MULTI-SOURCE SEMANTICS
+Multi-source operation does not assume one Node key equals one independent operator.
+
+
+Raw source count is never identity truth.
+
+
+The client uses:
+- bounded locally selected sources;
+- source-family grouping where known;
+- no majority decision;
+- cryptographic record verification;
+- objective checkpoint/equivocation evidence.
+
+
+50. WHY MORE HONEST PARTICIPANTS STILL HELP
+More genuinely independent participants improve:
+availability;
+replication;
+checkpoint comparison;
+chance of detecting split views;
+misbehavior-proof propagation.
+
+
+This is a probabilistic/operational benefit, not a count-based trust rule.
+
+
+51. ECLIPSE RESISTANCE
+Active sources are not replaced wholesale by newly advertised Node identities.
+
+
+Use:
+multiple bootstrap origins;
+bounded probation;
+gradual source rotation;
+historically successful sources;
+operator-visible source concentration.
+
+
+52. MISBEHAVIOR NOT VOTING
+A signed contradiction can quarantine a Node locally after independent verification.
+
+
+N accusations without objective proof do not create a global ban.

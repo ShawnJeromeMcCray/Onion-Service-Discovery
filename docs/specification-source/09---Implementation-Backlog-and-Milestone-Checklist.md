@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1Hwzdbl4RUEkUJkTDqkc61nHu-Jjnux5vMJYvGoNhVR0/edit?usp=drivesdk
 
-Source modified: 2026-10-12T12:31:53.593Z
+Source modified: 2026-10-12T19:27:01.953Z
 
 ---
 
@@ -12,6 +12,32 @@ IMPLEMENTATION BACKLOG UND MILESTONE CHECKLIST
 
 Verwendung
 Dieses Dokument ist die operative Arbeitsliste für den Coding-Agenten. Aufgaben werden nicht nur als “done” markiert, sondern erhalten Evidence: Commit/Datei/Test/Report. Ein Milestone ist erst abgeschlossen, wenn alle Exit Criteria erfüllt sind.
+
+
+
+
+NORMATIVE EXECUTION ORDER / DEPENDENCY RULE
+Milestone numbers are stable identifiers for traceability. They are NOT a chronological execution order.
+
+
+The Coding Agent MUST execute by prerequisites:
+- M0 Specification Ingestion is always first and uses the current Workspace Index.
+- M1 Repository Foundation and M2 ADR Foundation precede security-critical implementation.
+- M76 Secure Coding Foundation precedes application feature code that handles untrusted input.
+- M75 Protocol Category Registry v1 precedes freezing the Manifest category schema/vectors in M3/M4.
+- M57 StorageBackend Abstraction precedes M8 storage repositories/adapters.
+- M62 High-Assurance Key Custody/SignerProvider precedes production Service signing paths in M6/M10.
+- Logical Service Identifier D-051 and Signed Checkpoint Chain D-052 must be resolved before Protocol v1 Freeze and before final pin/index/checkpoint semantics are claimed conformant.
+- M59/M61 govern the WEB-SEPARATED-V1 profile and must pass before that profile is called Production-supported.
+- M68/M69 must pass before the dashboard may derive green DISCOVERABLE from signed index evidence.
+- M71/M72 must pass before peer/source counts or source admission can be production-enabled.
+- M63 Secure Release Trust must pass before Production Stable release publication.
+- M65 Final Pre-Implementation Closure is a consistency/freeze gate, not a reason to halt all non-conflicting repository work. While it is REOPENED, unaffected modules may proceed; Protocol Freeze and Production Stable claims are blocked.
+
+
+If a milestone text conflicts with a newer binding architecture/security standard, the milestone is corrected; its numeric ID never grants higher authority.
+
+
 
 
 MILESTONE 0 — SPECIFICATION INGESTION
@@ -55,7 +81,7 @@ MILESTONE 2 — ADR FOUNDATION
 [ ] ADR Duplicate JSON Key Policy.
 [ ] ADR Unknown Fields/Forward Compatibility.
 [ ] ADR Tor Transport.
-[ ] ADR SQLite.
+[ ] ADR StorageBackend contract / FilesystemStore / SQLiteStore / backend selection.
 [ ] ADR Web Local Search client storage/cache/origin trust.
 [ ] ADR Sync Model.
 [ ] ADR Search.
@@ -140,9 +166,9 @@ MILESTONE 7 — PHP VALIDATION
 Exit: keine Netzwerkstruktur gelangt ungeprüft in Domain.
 
 
-MILESTONE 8 — PHP STORAGE
-[ ] migrations framework.
-[ ] schema_migrations.
+MILESTONE 8 — PHP STORAGE DOMAIN / REPOSITORIES (requires M57)
+[ ] backend-neutral storage migration/version framework.
+[ ] storage schema/version tracking; SQL schema_migrations only inside SQL adapters.
 [ ] identity repository.
 [ ] revision repository.
 [ ] manifest repository.
@@ -154,8 +180,8 @@ MILESTONE 8 — PHP STORAGE
 [ ] sync state repository.
 [ ] candidate repository.
 [ ] quarantine repository.
-[ ] transaction coordinator.
-[ ] indexes/constraints.
+[ ] StorageBackend atomic commit coordinator/contract.
+[ ] backend-neutral invariants plus adapter-specific indexes/constraints.
 [ ] recovery tests.
 Exit: Identity-Konflikte können nicht durch Upsert verschwinden.
 
@@ -167,8 +193,8 @@ MILESTONE 9 — LOCAL OPERATOR CLI
 [ ] key generate node.
 [ ] manifest generate.
 [ ] manifest verify.
-[ ] db migrate.
-[ ] db verify.
+[ ] storage:migrate.
+[ ] storage:verify.
 [ ] peer list/add/remove local.
 [ ] quarantine list.
 [ ] snapshot build optional.
@@ -306,7 +332,7 @@ MILESTONE 20 — WEB LOCAL SEARCH FOUNDATION
 [ ] TypeScript strict.
 [ ] static HTML/CSS/JS bundle.
 [ ] no extension manifest.
-[ ] no browser permissions.
+[ ] no browser-extension permission model; Web origin/CSP/network capability surface inventoried and reviewed.
 [ ] strict CSP.
 [ ] local resources only.
 [ ] no remote runtime dependencies.
@@ -439,7 +465,7 @@ MILESTONE 30 — SECURITY HARDENING
 [ ] queue flood simulation.
 [ ] dependency review.
 [ ] secrets review.
-[ ] permissions review.
+[ ] Web Client origin/CSP/network-destination/browser-capability review.
 [ ] endpoint inventory.
 [ ] network destination inventory.
 Exit: Findings triagiert, Critical/High geschlossen oder menschlich akzeptiert.
@@ -487,7 +513,7 @@ Exit: Runbooks reviewed.
 
 MILESTONE 34 — PERFORMANCE
 [ ] realistic small/medium/large fixtures.
-[ ] Node DB benchmarks.
+[ ] Node StorageBackend benchmarks.
 [ ] sync delta.
 [ ] verification budget.
 [ ] client import.
@@ -582,7 +608,7 @@ MILESTONE 39 — STANDARDS REFRESH
 [ ] Tor v3 address spec checked.
 [ ] Tor SOCKS/isolation spec checked.
 [ ] Tor Browser desktop/Android JavaScript and storage behavior checked.
-[ ] Firefox host/optional permission behavior checked.
+[ ] Current Tor Browser desktop/Android origin/CORS/CSP/storage/security-level behavior checked.
 [ ] PHP support window checked.
 [ ] OWASP ASVS stable baseline recorded.
 [ ] SLSA current baseline recorded.
@@ -617,13 +643,13 @@ MILESTONE 41 — PRIVACY AND DATA GOVERNANCE
 Exit: every stored/transmitted field has purpose and retention.
 
 
-MILESTONE 42 — HARDENING AND PERMISSION REVIEW
+MILESTONE 42 — HARDENING AND WEB CLIENT BOUNDARY REVIEW
 [ ] PHP hardening matrix.
 [ ] filesystem permission tests.
 [ ] webroot secret exposure tests.
 [ ] outbound/Tor-only enforcement review.
-[ ] client permission inventory.
-[ ] permission-diff gate.
+[ ] Web Client origin/CSP/network-destination/storage/capability inventory.
+[ ] Web Client origin/CSP/network/capability diff gate.
 [ ] fingerprinting review.
 [ ] no remote resource tests.
 Exit: deployment/browser defaults have explicit security rationale and evidence.
@@ -742,7 +768,7 @@ MILESTONE 51 — CAPACITY AND PERFORMANCE
 [ ] search P50/P95.
 [ ] sync/storage/bandwidth.
 [ ] Tor-aware concurrency.
-[ ] SQLite scale statement.
+[ ] supported-scale statement per Production-supported StorageBackend; SQLiteStore-specific scale statement when SQLiteStore is supported.
 [ ] default limits derived from evidence.
 Exit: supported scale and overload behavior published.
 
@@ -792,15 +818,15 @@ However:
 
 
 
-MILESTONE 55 — SQLITE RUNTIME AND STORAGE PRECHECK
-[ ] PDO available.
-[ ] pdo_sqlite driver available.
-[ ] minimum SQLite capability checked.
+MILESTONE 55 — SQLITESTORE ADAPTER RUNTIME PRECHECK
+[ ] when SQLiteStore selected: PDO available.
+[ ] when SQLiteStore selected: pdo_sqlite driver available.
+[ ] when SQLiteStore selected: required SQLite capability set/version checked.
 [ ] foreign keys/transactions self-test.
 [ ] fail-fast diagnostic when unavailable.
 [ ] no external sqlite3 CLI dependency.
-[ ] publish-only behavior documented when Node DB unavailable.
-Exit: no hidden assumption that every PHP runtime includes SQLite.
+[ ] FilesystemStore and publish-only paths verified without SQLite/PDO-SQLite.
+Exit: SQLite requirements apply only to SQLiteStore; selecting FilesystemStore or publish-only operation has no hidden SQLite dependency.
 
 
 MILESTONE 56 — WEB LOCAL SEARCH AND NO-JAVASCRIPT FALLBACK
@@ -810,7 +836,7 @@ MILESTONE 56 — WEB LOCAL SEARCH AND NO-JAVASCRIPT FALLBACK
 [ ] in-memory search baseline.
 [ ] optional storage failure path.
 [ ] generic snapshot/chunk loading.
-[ ] zero query network side effects in local mode.
+[ ] WEB-LOCAL: zero query-dependent network side effects; SERVER-FALLBACK: explicit POST only to selected serving server, no logs/persistence/remote work.
 [ ] strict CSP/no remote assets.
 [ ] explicit serving-origin trust limitation.
 [ ] No-JavaScript fallback POST.
@@ -927,6 +953,189 @@ MILESTONE 65 — FINAL PRE-IMPLEMENTATION CLOSURE
 [ ] no known normative contradiction.
 [ ] all unresolved security-critical decisions listed in Decision Register.
 [ ] planning-vs-implementation decisions correctly separated.
-[ ] Final Pre-Implementation Closure Audit PASS.
+[ ] Final Pre-Implementation Closure Audit re-PASS after full cross-document contradiction/mechanical-corruption scan.
 Exit: stop general planning and start coding.
-.
+
+
+
+
+MILESTONE 66 — PLUG-AND-PLAY OPERATOR DASHBOARD
+[ ] common publish-only config.
+[ ] ready-to-deploy package.
+[ ] /status/ server-rendered page.
+[ ] role overview.
+[ ] manifest status.
+[ ] Tor self-verification.
+[ ] bootstrap state.
+[ ] bounded self-announcement.
+[ ] external direct-observation check.
+[ ] sampled searchable/export check.
+[ ] truthful overall state.
+[ ] Android/desktop responsive UX.
+[ ] no secret leakage.
+[ ] accessible warning hierarchy.
+Exit: a fresh operator can understand and reach discoverable state from their own Onion Service without undocumented steps.
+
+
+MILESTONE 67 — DISCOVERABILITY PROPAGATION UX
+[ ] initial publication story.
+[ ] pending verification story.
+[ ] stale external revision story.
+[ ] one-source discoverable story.
+[ ] multi-source redundancy story.
+[ ] degraded story.
+[ ] identity conflict story.
+[ ] withdrawal story.
+[ ] migration story.
+[ ] no fake global percentage.
+Exit: every displayed discoverability state is test-fixture-backed and technically truthful.
+
+
+
+
+MILESTONE 68 — VERIFIABLE INDEX INCLUSION
+[ ] exact active Service tuple.
+[ ] canonical active-index record.
+[ ] deterministic record identifier.
+[ ] signed Node checkpoint.
+[ ] deterministic active index root.
+[ ] canonical GET /services/by-id/{logical_service_id} exact stable-identity lookup.
+[ ] GET /services/{onion} remains address convenience and resolves/exposes logical_service_id.
+[ ] valid key rotation and Onion migration do not change the stable lookup identity.
+[ ] local snapshot membership verification.
+[ ] stale revision detection.
+[ ] dashboard wired to actual membership evidence.
+[ ] no listed=true shortcut.
+Exit: operator can independently verify their current revision is actually in a Node's signed active index.
+
+
+MILESTONE 69 — MULTI-SOURCE CHECKPOINT INTEGRITY
+[ ] checkpoint sequence persistence.
+[ ] rollback detection.
+[ ] omission scenario.
+[ ] source disagreement.
+[ ] equivocation fixture.
+[ ] preserve conflicting checkpoints.
+[ ] checkpoint comparison across sources.
+[ ] optional checkpoint gossip capability.
+Exit: a Node cannot silently rewrite its own observed index history without producing detectable signed inconsistency where evidence is compared.
+
+
+MILESTONE 70 — MERKLE INCLUSION PROOFS
+[ ] decide v1 mandatory vs optional capability.
+[ ] leaf construction.
+[ ] branch construction.
+[ ] deterministic ordering.
+[ ] empty/odd tree rules.
+[ ] proof encoding.
+[ ] proof endpoint.
+[ ] PHP vectors.
+[ ] TypeScript vectors.
+[ ] independent validator vectors.
+[ ] invalid-proof fuzz tests.
+Exit: compact proof is cryptographically bound to signed checkpoint, or capability remains disabled until all conditions pass.
+
+
+
+
+MILESTONE 71 — SYBIL IDENTITY QUANTITY NEUTRALITY
+[ ] Service count never increases trust.
+[ ] Node count never resolves identity truth.
+[ ] Witness count never creates trust score.
+[ ] no majority fork resolution.
+[ ] UI wording distinguishes distinct identities from independent operators.
+[ ] objective misbehavior evidence overrides vote count.
+Exit: creating more cryptographic identities alone yields no authority.
+
+
+MILESTONE 72 — BOUNDED PEER AND SOURCE ADMISSION
+[ ] finite active source set.
+[ ] finite probation pool.
+[ ] per-source referral/candidate caps.
+[ ] global work budget.
+[ ] gradual source replacement.
+[ ] source-family grouping.
+[ ] source concentration warning.
+[ ] one source cannot populate all active slots.
+Exit: Sybil peer creation cannot linearly expand local work or eclipse every stable source through simple referral flooding.
+
+
+MILESTONE 73 — SYBIL SERVICE FARM SEARCH DEFENSE
+[ ] 100k distinct matching Service fixture.
+[ ] near-duplicate detection.
+[ ] collapsible similar-result UI.
+[ ] relevance count-neutrality.
+[ ] no backlinks/observers/witness boost.
+[ ] bounded query latency/memory.
+[ ] all records remain inspectable.
+Exit: automated Service farms cannot monopolize ordinary search solely through quantity.
+
+
+MILESTONE 74 — ANNOUNCEMENT FLOOD RESILIENCE
+[ ] rotating Service identities.
+[ ] rotating Node/source identities.
+[ ] same-target duplicate flood.
+[ ] global admission budget.
+[ ] target-centric backoff.
+[ ] no synchronous verification storm.
+[ ] optional PoW prototype only if benchmark-justified.
+Exit: generating fresh identities does not reset the system's global resource controls.
+
+
+
+
+MILESTONE 75 — PROTOCOL CATEGORY REGISTRY v1
+[ ] categories-v1.json.
+[ ] adult included.
+[ ] all registry IDs frozen.
+[ ] schema enum/generated constants.
+[ ] PHP/TypeScript same source.
+[ ] localization scaffold.
+[ ] category filter.
+[ ] adult local visibility preference.
+[ ] category-count ranking neutrality.
+[ ] invalid/unknown/duplicate/max fixtures.
+Exit: category semantics are stable, interoperable and not mixed with trust/moderation.
+
+
+MILESTONE 76 — SECURE CODING FOUNDATION (EARLY PREREQUISITE)
+[ ] SECURITY-COVERAGE.md.
+[ ] SECURITY-ATTACK-CLASS-REGISTRY.md.
+[ ] typed validator/domain layer.
+[ ] SafeJsonDecoder.
+[ ] approved TorHttpClient.
+[ ] safe renderer pattern.
+[ ] strict PHP comparison/type policy.
+[ ] dangerous API lint rules.
+[ ] hard resource ceilings.
+Exit: application feature code is built on constrained safe primitives rather than raw attacker-controlled strings.
+
+
+MILESTONE 77 — APPLICATION EXPLOIT RESISTANCE
+[ ] XSS/DOM XSS suite.
+[ ] SQL injection suite.
+[ ] command/code injection guard.
+[ ] path traversal/symlink suite.
+[ ] SSRF/destination suite.
+[ ] CSRF/authz suite if admin enabled.
+[ ] CRLF/header/open redirect suite.
+[ ] deserialization/template/prototype pollution review.
+[ ] ReDoS.
+[ ] request/cache ambiguity review.
+[ ] archive/decompression tests where applicable.
+Exit: applicable common exploit classes have prevention controls and regression tests.
+
+
+MILESTONE 78 — SECURITY STANDARDS AND FUZZ CLOSURE
+[ ] ASVS 5.0.0 map.
+[ ] OWASP Top 10 current map.
+[ ] CWE Top 25 current map.
+[ ] SAST.
+[ ] dependency/SCA.
+[ ] secret scanning.
+[ ] Protocol fuzz targets.
+[ ] property-based boundary tests.
+[ ] differential parser fuzz.
+[ ] mutation testing for critical validators/state machines.
+[ ] exceptional-condition/fault injection.
+Exit: security claims are backed by automated evidence and current standards mapping.

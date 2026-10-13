@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1UH4HobtYVGVG10nTY8De4C7X-uFIGha1-Cc4XgMigtw/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:37:48.531Z
+Source modified: 2026-10-12T19:30:22.337Z
 
 ---
 
@@ -37,17 +37,17 @@ http://<discovery-node>.onion/onion-service-discovery/
 
 
 The page:
-1. loads static local Web Client assets from that same Onion origin;
-2. retrieves a generic Onion Service Discovery index/snapshot from the same Node;
-3. verifies Protocol records and integrity according to the client capability profile;
-4. builds a search index in browser memory and/or origin-local browser storage;
-5. executes search queries locally in the browser;
-6. opens a selected Onion Service only after explicit user action.
+Step 1 — loads static Web Client assets from the selected Client Host/combined Node according to the active deployment profile;
+Step 2 — retrieves generic Onion Service Discovery index/snapshot data from the configured data source(s) according to the active deployment profile;
+Step 3 — verifies Protocol records and integrity according to the client capability profile;
+Step 4 — builds a search index in browser memory and optionally origin-local browser storage;
+Step 5 — executes WEB-LOCAL search queries locally in the browser;
+Step 6 — opens a selected Onion Service only after explicit user action.
 
 
 3. No Extension Dependency
 The project MUST NOT require:
-- WebExtension installation;
+- any separate browser-extension installation;
 - browser extension permissions;
 - Native Messaging;
 - Tor Control Port access;
@@ -86,21 +86,26 @@ No remote JavaScript.
 No executable code fetched from non-local origins.
 
 
-6. Same-Origin Baseline
-The preferred architecture downloads index data from the same Onion origin that served the Web Client.
+6. Web Deployment Profiles
+Protocol v1 reference software supports two explicit Web deployment profiles.
 
 
-Reasons:
-- avoids browser extension host permissions;
-- avoids cross-origin complexity;
-- works in mobile Tor Browser;
-- reduces CORS surface;
-- gives every participating Node a self-contained searchable interface.
+WEB-COMBINED-V1:
+- one Onion origin serves the static Web Client and generic index/snapshot data;
+- no broad CORS is required;
+- simplest plug-and-play deployment;
+- serving origin is also executable-code trust boundary.
 
 
-Multi-Node browser fetches are OPTIONAL and not required for v1.
+WEB-SEPARATED-V1:
+- a Client Host serves the static Web Client;
+- one or more selected Discovery Nodes/source groups provide Protocol data only;
+- data Nodes cannot provide active client code;
+- transport is either reviewed credentialless cross-origin reads to configured data-node origins or a query-independent Client Host proxy/cache, as frozen by D-004/D-044.
 
 
+Neither profile may make search requests dependent on the user's query in WEB-LOCAL mode.
+The project MUST state which profile is active.
 7. Local Search Privacy
 In honest-reference-client operation:
 - query text is processed locally;
@@ -358,8 +363,8 @@ Stale / long unseen.
 No generic SAFE/TRUSTED/LEGIT badges.
 
 
-30. Pinning Without Extension
-Because the client is origin-local web content, durable cross-Node user pinning is NOT a guaranteed v1 Web feature.
+30. Pinning in a Web Client
+Because browser persistence is origin-local and best-effort, durable cross-origin/cross-Client-Host pin portability is NOT guaranteed. A pin anchors logical_service_id, not the current rotatable Service Identity key.
 
 
 Possible modes:
@@ -501,11 +506,11 @@ No misleading absolutes.
 
 
 47. Node Branding
-A Node may style surrounding page minimally but MUST NOT alter reference security-label semantics if claiming Reference Web Client conformance.
+A deployment MAY wrap the reference client with clearly separated site chrome, but the versioned reference client bundle, security labels, verification logic, CSP assumptions and privacy behavior MUST remain byte-identical to the released reference assets when claiming unmodified Reference Web Client conformance. A customized client is a separate client implementation and must not inherit unmodified-reference privacy/security claims automatically.
 
 
-48. Client Conformance Profile
-WEB-LOCAL-V1:
+48. Client Conformance Profiles
+WEB-LOCAL-V1 (query behavior common to both deployment profiles):
 - local query instrumentation;
 - snapshot processing;
 - rendering/security semantics;
@@ -586,7 +591,7 @@ serve modified JavaScript.
 
 
 Mitigations:
-independent Nodes;
+distinct selected Nodes/source groups;
 reproducible reference client;
 published hashes;
 source transparency;
@@ -697,7 +702,7 @@ This removes dependence on a third-party Node for executable code while retainin
 
 
 67. MULTI-SOURCE FETCH
-WEB-SEPARATED-V1 SHOULD support several configured Discovery Nodes.
+WEB-SEPARATED-V1 MUST support a bounded set of configured/selected Discovery Node identities or source groups. The UI MUST NOT infer real-world operator independence from key count.
 
 
 The client:
@@ -728,7 +733,7 @@ A Node can omit data, and cryptography cannot prove universal completeness.
 
 
 Mitigations:
-multiple independent Nodes;
+multiple distinct selected Nodes/source groups;
 union of valid records;
 manual source choice;
 checkpoint comparison;
@@ -754,4 +759,45 @@ No self-verifying JavaScript mechanism from that same malicious origin can solve
 
 The strongest v1 mitigation is:
 self-hosted or consciously trusted Client Host + reproducible bundle + multiple independent data Nodes.
-.
+
+
+
+
+72. CATEGORY REGISTRY UI
+Web Local Search MUST render category filters from the generated Protocol Category Registry v1 artifact.
+
+
+Do not maintain an independent handwritten category list.
+
+
+73. ADULT CATEGORY
+adult is a normal category token.
+
+
+Client SHOULD provide a local preference:
+SHOW
+DE-EMPHASIZE
+HIDE
+
+
+This preference is local and MUST NOT be sent to a Discovery Node in local-search mode.
+
+
+74. ADULT SECURITY EQUALITY
+adult-category results receive the same strict rendering/security isolation as every other Service.
+
+
+No:
+remote thumbnails;
+automatic media loading;
+relaxed CSP;
+special HTML parser;
+different navigation safety.
+
+
+75. CATEGORY COUNT NEUTRALITY
+Selecting more categories cannot improve trust or ranking solely by count.
+
+
+76. TAG DISPLAY
+If tags are supported, render as plain text with the project's Unicode/control/confusable rules.

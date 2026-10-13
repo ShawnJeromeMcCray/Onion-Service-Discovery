@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1_B5uqXfbpNJ73JY1qY7ysIUfQjB5Hy66k7TqkY_f61o/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:17:05.918Z
+Source modified: 2026-10-12T19:25:34.446Z
 
 ---
 
@@ -22,6 +22,25 @@ NEEDS-HUMAN-REVIEW
 APPROVED
 REJECTED
 SUPERSEDED
+
+
+
+
+CURRENT APPROVAL-STATE RULE — 2026-10-12
+No D-XXX decision is APPROVED merely because this document contains a recommendation, baseline or proposed rule.
+
+
+For the Coding Agent:
+- any entry requiring a Human gate/review remains NEEDS-HUMAN-REVIEW until a linked approval record names the decision ID, approver, date and accepted option;
+- an entry presenting undecided alternatives with no accepted option is UNRESOLVED;
+- “recommended”, “preferred”, “proposed” or “architecture direction” is not approval;
+- non-release-blocking means the feature/decision may be absent where specified; it does not mean an unapproved implementation choice is silently authorized;
+- repository decision-register state MUST match the evidence/approval record, never inference.
+
+
+This rule prevents the specification text itself from fabricating Human approval.
+
+
 
 
 D-001 Project License
@@ -64,7 +83,8 @@ yes.
 
 D-004 Web Local Search Origin Trust and Server-Fallback Policy
 Decisions to freeze:
-- same-origin generic index download;
+- WEB-COMBINED-V1 same-origin generic index download;
+- WEB-SEPARATED-V1 direct credentialless CORS versus query-independent Client Host proxy reference path;
 - no separate extension;
 - browser storage optional;
 - local-mode query network behavior;
@@ -225,14 +245,28 @@ yes.
 
 
 D-018 Public Candidate Announcement Endpoint
-Decision:
-include in Protocol v1 or omit initially?
-Recommended:
-omit from first core release unless strong need; manual/out-of-band candidate seeding plus service graph/peer propagation can work.
-If included, new abuse spec/limits.
-Human product/security approval.
+Architecture direction:
+included in the Protocol v1 reference/operator profile as a bounded self-announcement mechanism for explicitly opted-in publishing.
+
+
+Security semantics:
+announcement creates only an untrusted Candidate hint;
+remote Node MUST independently fetch and verify the canonical Onion Service Manifest over Tor before Direct Observation/index inclusion.
+
+
+Required:
+strict request limits;
+global work budget;
+target-centric duplicate suppression/backoff;
+per-source caps;
+no arbitrary URL;
+no synchronous expensive fetch;
+Sybil identity rotation must not bypass global limits.
+
+
+Human product/security approval remains required for final endpoint, limits and default retry policy.
 Release blocker:
-only if feature included.
+yes for the plug-and-play publish workflow.
 
 
 D-019 Automated Crawler
@@ -245,11 +279,24 @@ Human product/privacy review.
 
 
 D-020 Proof of Work
-Recommended:
-not Protocol v1 core.
-Only reconsider after measured abuse pressure.
-Human approval for future.
-Not release blocker if absent.
+Architecture direction:
+not a Protocol identity/trust primitive.
+
+
+Optional use:
+adaptive admission/work prioritization for candidate-announcement overload only if stress evidence justifies it.
+
+
+Hard rules:
+PoW never proves unique person/operator;
+never increases Service trust;
+never affects identity/fork truth;
+never boosts search ranking;
+must include replay protection and bounded verification cost.
+
+
+Human approval required before enabling any production PoW admission scheme.
+Not a release blocker if absent when non-PoW bounded admission passes the abuse gates.
 
 
 D-021 Moderation in Initial Release
@@ -419,7 +466,7 @@ CLI/docs should make lack of backup visible without exposing private key.
 Human ops/security review.
 
 
-D-040 Database Retention Defaults
+D-040 Storage Retention Defaults
 Exact durations/budgets derived from benchmarks.
 Human operations/security review before production.
 
@@ -526,6 +573,86 @@ ADR/proposal
 human reviewer
 date
 release blocker yes/no.
+
+
+D-051 Stable Logical Service Identifier
+Problem:
+The current Service Identity signing key changes during a valid key rotation, so the current key fingerprint cannot be the stable lookup/pin/index identity.
+
+
+Proposed Protocol v1 rule:
+logical_service_id is anchored to the genesis Service Identity public key and remains stable across valid Service-key rotations and Onion migrations.
+Recommended wire representation:
+the canonical genesis Service Identity public-key encoding (ed25519:<base64url-no-padding>) reused as a logical identity anchor; active records also carry the current key/epoch separately.
+A fresh verifier MUST NOT accept a claimed logical_service_id without continuity evidence back to the genesis anchor.
+
+
+Human Protocol/Crypto review:
+required.
+Release blocker:
+yes.
+
+
+D-052 Signed Node Checkpoint Chain
+Problem:
+“same sequence, different root” detects only one equivocation shape. A malicious Node can maintain divergent signed histories unless checkpoints are chained.
+
+
+Proposed Protocol v1 rule:
+production index-exporting Nodes sign checkpoints containing:
+Node Identity;
+checkpoint sequence;
+previous_checkpoint_hash;
+active index root;
+record count;
+Protocol/index format version;
+generated timestamp.
+Successor sequence is exact +1.
+Checkpoint histories are valid only when previous hash links exactly.
+Two signed histories from the same Node that are not prefix-compatible are equivocation evidence once both are available.
+
+
+Genesis previous_checkpoint_hash representation and exact checkpoint-hash byte construction require Protocol/Crypto freeze.
+
+
+Human Protocol/Security review:
+required.
+Release blocker:
+yes.
+
+
+D-053 Category Registry v1 Immutability
+Problem:
+Protocol v1 rejects unknown category IDs. Adding new category IDs later under the same unversioned Manifest field would therefore break old v1 validators.
+
+
+Proposed rule:
+the Protocol Category Registry v1 is immutable after Protocol v1 freeze.
+Existing IDs are never repurposed.
+A new category after freeze requires an explicitly versioned compatible extension mechanism accepted by old implementations, or a new Protocol version.
+No silent additions to categories-v1.json.
+
+
+Human Protocol/Product review:
+required before freeze.
+Release blocker:
+yes.
+
+
+D-054 Language Tag Wire Grammar
+Problem:
+“BCP47-style” is insufficient for interoperable signed bytes and duplicate detection.
+
+
+Proposed v1 rule:
+language values MUST be well-formed RFC 5646/BCP 47 language tags, ASCII only, serialized in lowercase for the Protocol wire form, unique after lowercase canonicalization, and remain within the Protocol length/count limits.
+The implementation MUST use one tested grammar/library policy across PHP, TypeScript and the independent validator.
+
+
+Human Protocol/I18N review:
+required before freeze.
+Release blocker:
+yes.
 
 
 Release Rule

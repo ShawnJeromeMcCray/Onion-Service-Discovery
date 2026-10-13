@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1rkfhjdiLlpoHDKmhtJCaq_pbxuXSflGZPkdFARNsTqI/edit?usp=drivesdk
 
-Source modified: 2026-10-11T06:19:38.568Z
+Source modified: 2026-10-12T19:19:08.262Z
 
 ---
 
@@ -29,7 +29,7 @@ restore
 upgrade
 rotate keys
 diagnose failures
-using documented commands and without editing database rows manually.
+using documented commands and without editing StorageBackend internals manually.
 
 
 3. CLI Design
@@ -57,8 +57,8 @@ sync:run
 sync:status
 candidate:list
 quarantine:list
-db:migrate
-db:verify
+storage:migrate
+storage:verify
 backup:create
 backup:verify
 restore:verify
@@ -170,7 +170,7 @@ No private data.
 11. status
 Fast, non-invasive:
 roles
-current Service identity fingerprint
+stable Logical Service Identifier plus current Service Identity key/fingerprint and key epoch
 current Onion
 current revision
 known Services count
@@ -239,7 +239,7 @@ Detailed export explicit.
 
 19. backup:create
 If project implements helper:
-produce consistent SQLite backup plus metadata.
+produce a consistent backup/export for the selected StorageBackend plus verification metadata.
 Private key backup should be separately protected and never casually bundled into unencrypted archive.
 
 
@@ -263,7 +263,7 @@ Display:
 software version
 source revision/build ID
 Protocol versions
-DB schema
+storage schema/backend version
 SBOM reference/hash
 release manifest hash
 build provenance availability.
@@ -307,7 +307,7 @@ Safe commands like:
 config:validate
 doctor
 status
-db:verify
+storage:verify
 manifest:verify
 are repeatable without mutation.
 
@@ -428,7 +428,7 @@ Manifest not discovered
 Tor unavailable
 Signature invalid
 Revision conflict
-DB locked
+selected StorageBackend locked/unavailable
 disk full
 peer stale
 client not updating
@@ -460,7 +460,7 @@ restore backup
 rotate Node key
 simulate peer outage
 rebuild cache
-recover from failed DB migration.
+recover from failed StorageBackend/schema migration.
 
 
 44. Documentation Quality Gate
@@ -481,4 +481,71 @@ fresh developer walkthrough completed;
 doctor/security:check machine-readable;
 all dangerous actions protected;
 support bundle privacy tested;
-no undocumented mandatory manual database editing.
+no undocumented mandatory manual StorageBackend editing
+
+
+46. PLUG-AND-PLAY STATUS DASHBOARD
+The operator experience MUST include a mobile-friendly, safe read-only page at /onion-service-discovery/status/ or the frozen equivalent.
+
+
+It shows:
+installation;
+configuration;
+Service Identity;
+Manifest validity;
+self-verification through the operator's own Onion Service;
+bootstrap reachability;
+announcement state;
+external direct observations;
+sampled searchability on checked Nodes;
+role status;
+storage health;
+last sync/announcement;
+clear next action.
+
+
+A vague “connected” light is forbidden.
+
+
+47. DISCOVERABILITY STATE
+The dashboard may say DISCOVERABLE only when the current Service revision has external evidence from at least one checked independent Discovery Node and is present in that Node's current active/searchable export.
+
+
+Preferred wording:
+“Current revision is searchable on 2 of 3 checked Discovery Nodes.”
+
+
+This is sampled evidence, not a global guarantee.
+
+
+48. SIMPLE CONFIGURATION
+The common publish-only case SHOULD require only:
+- one clear PHP config file;
+- signed Manifest;
+- normal Onion Service route integration.
+
+
+No SQL, mirror role, scheduler or browser extension is required merely to be discoverable.
+
+
+49. AUTOMATIC BOUNDED ANNOUNCEMENT
+When publish is explicitly enabled and the Manifest passes self-verification, the implementation SHOULD announce the Service's canonical Onion address to a small bounded set of bootstrap/learned Nodes.
+
+
+Remote Nodes treat the message only as a Candidate and MUST directly verify the Well-Known Manifest over Tor.
+
+
+50. PUBLIC VS PRIVILEGED STATUS
+The normal status page is read-only and safe.
+Privileged state-changing web administration is optional and disabled by default.
+Configuration file + CLI remains the preferred mutation path.
+
+
+51. OPERATOR WALKTHROUGH
+Fresh-operator acceptance test:
+install package;
+edit common config;
+install signed Manifest;
+open own Onion /status/ in Tor Browser;
+observe each status transition;
+reach externally observed/searchable state without undocumented action.

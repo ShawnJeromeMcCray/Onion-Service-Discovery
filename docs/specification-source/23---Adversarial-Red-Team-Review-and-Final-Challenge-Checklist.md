@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/17A6V9fEYKNRMeS7beT7a7yMt6wbpBsjIDWzWhZzAMjE/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:13:13.126Z
+Source modified: 2026-10-12T19:18:00.863Z
 
 ---
 
@@ -526,4 +526,24 @@ The top answers become blocking issues or explicitly accepted limitations before
 
 
 Final Rule
-A reviewer saying “I found no obvious issue” is insufficient. Every major claim must survive an explicit attempt to falsify it with reproducible evidence.
+A reviewer saying “I found no obvious issue” is insufficient. Every major claim must survive an explicit attempt to falsify it with reproducible evidence
+
+
+SYBIL FARM CHALLENGE
+[ ] Create 100,000 distinct valid Service identities matching one query.
+[ ] Create 10,000 Node identities.
+[ ] Rotate announcement identities to attempt quota bypass.
+[ ] Have one Sybil peer advertise thousands of other Sybil peers.
+[ ] Have 10,000 Nodes assert an invalid Service state.
+[ ] Have 10,000 witnesses deny an objective equivocation proof.
+[ ] Attempt to monopolize search results using near-identical metadata.
+[ ] Attempt to replace all stable peers through referral volume.
+
+
+Expected:
+- raw identity count never changes cryptographic truth;
+- work remains bounded;
+- objective evidence remains decisive;
+- stable source set is not wholesale eclipsed;
+- search stays usable;
+- no false independent-operator claim.

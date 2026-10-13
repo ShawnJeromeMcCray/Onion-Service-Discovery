@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/11YY3OH0OnJtRHf3JkTgidTDigN2GgdSybtmBFjTx7Gs/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:38:59.963Z
+Source modified: 2026-10-12T14:34:39.730Z
 
 ---
 
@@ -221,7 +221,7 @@ the serving Node controls the executable Web code and could violate reference qu
 
 
 Chosen mitigation:
-reproducible static client bundle, strict CSP, published hashes/provenance, independent Nodes, explicit public limitation, and no false claim that a remote page can prove its own honesty.
+reproducible static client bundle, strict CSP, published hashes/provenance, optional separated/self-hosted Client Host, multiple distinct selected data sources/source groups, explicit public limitation, and no false claim that a remote page can prove its own honesty.
 
 
 15. Why the Web Page Is Now the Primary Client
@@ -367,7 +367,7 @@ privacy;
 gaming;
 central telemetry.
 Chosen:
-local textual relevance and explicit technical signals.
+local textual relevance for ranking; technical identity/observation/moderation evidence is displayed and filterable separately and MUST NOT receive hidden relevance/trust boosts merely from observer/witness/source counts.
 
 
 28. Why No Auto-Delete on Downtime

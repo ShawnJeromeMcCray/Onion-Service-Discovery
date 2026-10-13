@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1UEeaBpx6Wnnjujk5dzELF3rxYgDc0Ci2eLomxzc6_10/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:12:50.162Z
+Source modified: 2026-10-12T19:31:07.710Z
 
 ---
 
@@ -483,4 +483,47 @@ IANA registration drafts
 RFC-style publications
 standards-body discussion material
 but MUST NOT call Onion Service Discovery an IETF standard, RFC, IANA-approved protocol or Tor Project standard until the corresponding external process actually produces that status.
-.
+
+
+
+
+37. OWASP TOP 10 — CURRENT BASELINE
+Current refreshed baseline:
+OWASP Top 10:2025.
+
+
+The project maps controls/tests for:
+A01 Broken Access Control
+A02 Security Misconfiguration
+A03 Software Supply Chain Failures
+A04 Cryptographic Failures
+A05 Injection
+A06 Insecure Design
+A07 Authentication Failures
+A08 Software or Data Integrity Failures
+A09 Security Logging and Alerting Failures
+A10 Mishandling of Exceptional Conditions.
+
+
+Official source:
+https://top10.owasp.org/2025/
+
+
+38. CWE TOP 25 — CURRENT BASELINE
+Current refreshed baseline:
+2025 CWE Top 25 Most Dangerous Software Weaknesses.
+
+
+Use it as vulnerability-class coverage input, not as a complete list of every possible weakness.
+
+
+Official source:
+https://cwe.mitre.org/top25/
+
+
+39. SECURE CODING REFERENCE POLICY
+OWASP ASVS 5.0.0 remains the detailed application-verification baseline.
+Relevant OWASP Cheat Sheets are implementation guidance for input validation, XSS prevention, SSRF prevention, CSP and other implemented features.
+
+
+Reference baselines MUST be refreshed before RC/major releases rather than relying indefinitely on this dated snapshot.

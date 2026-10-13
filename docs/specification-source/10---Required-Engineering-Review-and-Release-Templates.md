@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1gQrpvdulg1TMiiAHo6TPGQvhNdH5Qw99ByS-SA-3sLg/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:17:08.415Z
+Source modified: 2026-10-12T18:12:59.759Z
 
 ---
 
@@ -160,7 +160,7 @@ New persistent data? yes/no
 New secret? yes/no
 New log/telemetry field? yes/no
 Protocol/Wire change? yes/no
-DB schema change? yes/no
+Storage schema/backend format change? yes/no
 IndexedDB change? yes/no
 Performance/resource limit changed? yes/no
 
@@ -406,7 +406,7 @@ Contract tests:
 Abuse cases:
 
 
-TEMPLATE M — DATABASE MIGRATION REVIEW
+TEMPLATE M — STORAGE MIGRATION REVIEW
 
 
 Migration:
@@ -481,7 +481,7 @@ Version:
 Build environment:
 Toolchain:
 Protocol:
-DB schema:
+Storage schema/backend/version:
 Client storage schema:
 
 
@@ -556,7 +556,8 @@ Never paste private key material into this report.
 TEMPLATE R — ONION MIGRATION RUN REPORT
 
 
-Service Identity fingerprint:
+Logical Service Identifier:
+Current Service Identity key/fingerprint + key epoch:
 Old Onion:
 New Onion:
 Reason:
@@ -581,7 +582,7 @@ New inputs:
 New outputs:
 New trust boundaries:
 New persistence:
-New permissions:
+New browser origins/network destinations/capabilities or privilege changes:
 Spoofing risks:
 Tampering risks:
 Repudiation/audit:

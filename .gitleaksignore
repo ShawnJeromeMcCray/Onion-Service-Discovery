@@ -1,0 +1,5 @@
+# Verified false positive: plain-English required-reading description at this
+# exact historical reading-order description of secure-coding test coverage.
+# No credential is present. The fingerprint binds commit/path/rule/line;
+# changed content or another commit is not covered by this exception.
+da343f4762a16cc3f23fd804e7e5c1fcd1358f1d:docs/specification-source/00---Workspace-Index-and-Required-Reading-Order.md:generic-api-key:641

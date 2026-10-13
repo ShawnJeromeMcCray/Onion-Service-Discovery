@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1Kg3MOLH7urZ3i6UHTa0Hte3AnZOC8BwgvFBOJHhj7P8/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:14:33.885Z
+Source modified: 2026-10-12T19:29:11.452Z
 
 ---
 
@@ -79,14 +79,14 @@ All work enters:
 
 4. Admission Pipeline
 Incoming Candidate:
-1. source allowed?
-2. source quota?
-3. total admission quota?
-4. exact Onion parse/checksum?
-5. dedup?
-6. already rejected/backoff?
-7. store minimal Candidate only.
-8. schedule later according to budget.
+Step 1 — source allowed?
+Step 2 — source quota?
+Step 3 — total admission quota?
+Step 4 — exact Onion parse/checksum?
+Step 5 — dedup?
+Step 6 — already rejected/backoff?
+Step 7 — store minimal Candidate only.
+Step 8 — schedule later according to budget.
 
 
 No direct network verification in the same untrusted ingestion call unless a tightly bounded manual operator command explicitly requests it.
@@ -98,7 +98,7 @@ configured seed
 learned peer
 service related link
 manual operator
-public announcement if implemented
+bounded Protocol v1 public Candidate Announcement
 crawler if implemented
 
 
@@ -264,16 +264,19 @@ If implemented:
 Crawler cannot be prerequisite for core network.
 
 
-20. Public Announcement Endpoint
-If implemented:
-- separate feature flag;
-- canonical Onion only;
-- request body tiny;
+20. Public Candidate Announcement Endpoint
+Protocol v1 reference/operator profile includes bounded self-announcement for explicitly opted-in publishing.
+Required controls:
+- explicit operator/publish enablement;
+- canonical Onion only; no arbitrary URL/port/path;
+- request body tiny and schema-bounded;
 - IP-level limits are complicated behind Tor and must not be sole control;
 - global token bucket/work queue limits;
 - duplicate suppression;
 - optional proof-of-work only after separate review;
-- no synchronous expensive fetch.
+- no synchronous expensive fetch;
+- accepted announcement creates only an untrusted Candidate hint;
+- independent direct Manifest verification over Tor is required before Direct Observation or active index inclusion.
 
 
 21. Proof of Work
@@ -456,7 +459,7 @@ queue counts
 top error classes
 work budget exhaustion
 peer churn
-DB size
+selected StorageBackend size
 cache size
 quarantine counts
 without exposing user search activity.
@@ -586,4 +589,76 @@ disk
 CPU/work
 network attempts
 queue sizes
-and valid existing search/index operation degrades gracefully under attack.
+and valid existing search/index operation degrades gracefully under attack
+
+
+51. IDENTITY QUANTITY NEUTRALITY — HARD RULE
+One attacker may create arbitrarily many Onion addresses, Service keys and Node keys.
+
+
+Therefore:
+- one key is NOT one person;
+- one Onion is NOT one organization;
+- one Node identity is NOT one independent operator;
+- raw counts never become trust authority.
+
+
+52. SYBIL FARM WORK CONTAINMENT
+A farm of new identities cannot linearly multiply expensive verification work.
+
+
+Required:
+- bounded active peer set;
+- bounded probation pool;
+- per-source contribution caps;
+- global verification budget;
+- target-centric duplicate collapse/backoff;
+- no synchronous verification on announcement.
+
+
+53. SEARCH FARM CONTAINMENT
+Thousands of cryptographically valid near-identical Services can still be spam.
+
+
+Client MAY locally cluster/collapse similar result entries for presentation while preserving access to each distinct identity.
+
+
+Creating more Services MUST NOT boost another Service's relevance/trust through backlinks, observation count or witness count.
+
+
+54. WITNESS INFLATION
+Witness/observer counts are propagation evidence only.
+
+
+A valid objective misbehavior proof remains valid regardless of how many Sybil identities deny it.
+
+
+55. SOURCE DIVERSITY
+Different Node keys are called “distinct Node identities,” not “independent operators,” unless a local/human-reviewed source grouping provides that operational assumption.
+
+
+Known/declared related Nodes count as one source group for redundancy displays.
+
+
+56. OPTIONAL ADMISSION EFFORT
+Adaptive proof-of-work MAY be evaluated for candidate-announcement overload.
+
+
+It is an admission/work-scheduling mechanism only.
+It MUST NOT:
+- increase Service trust;
+- increase search ranking;
+- prove unique identity;
+- resolve forks.
+
+
+57. SYBIL STRESS
+Required stress profiles include:
+100,000 Service identities;
+10,000 Node identities;
+rotating announcement identities;
+same-target repeated advertisements;
+near-duplicate search flooding.
+
+
+Existing verified state and search usability must survive within documented resource bounds.

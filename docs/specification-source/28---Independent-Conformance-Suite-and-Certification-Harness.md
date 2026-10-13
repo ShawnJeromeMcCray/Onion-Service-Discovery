@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1fasTLWHCM9T2D2EiwUBf8iyzYUxGoT84pjI0Ed6lnHA/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:13:16.631Z
+Source modified: 2026-10-12T19:21:10.482Z
 
 ---
 
@@ -162,9 +162,11 @@ runner tests:
 GET /node
 GET /state
 GET /peers
-service endpoint
+GET /services/by-id/{logical_service_id} stable logical-service identity lookup plus GET /services/{onion} address convenience lookup
 changes
 snapshot/chunk
+signed checkpoint/checkpoint-history retrieval
+bounded Candidate Announcement POST
 method restrictions
 pagination
 error format
@@ -219,7 +221,7 @@ Exact interface frozen before first public suite.
 
 
 14. Third-Language Oracle
-At least one minimal independent implementation in a third language should execute core vectors.
+At least one minimal independent implementation in a third language MUST execute the CORE-V1 vectors before Protocol v1 Stable.
 Purpose:
 reduce risk that PHP and TypeScript share same misunderstanding.
 
@@ -401,4 +403,137 @@ Conformance framework PASS requires:
 - third-language core validator passes CORE;
 - negative vectors reject identically at semantic level;
 - reports reproducible;
-- no skipped required tests.
+- no skipped required tests
+
+
+35. INDEX-INCLUSION CONFORMANCE
+Add mandatory categories:
+
+
+CONF-INDEX-RECORD
+canonical active-index record bytes and record ID.
+
+
+CONF-CHECKPOINT
+checkpoint byte construction, signature and root.
+
+
+CONF-INCLUSION
+valid membership verification against signed checkpoint.
+
+
+CONF-INCLUSION-INVALID
+corrupted record/path/root rejected.
+
+
+CONF-CHECKPOINT-ROLLBACK
+older checkpoint not accepted as new current state.
+
+
+CONF-EQUIVOCATION
+conflicting signed checkpoint evidence preserved.
+
+
+CONF-SEARCH-EXPORT-EQUIVALENCE
+the active search export matches the signed checkpoint record set.
+
+
+36. CROSS-LANGUAGE ROOT VECTORS
+PHP, TypeScript and the independent third-language validator MUST compute identical:
+- canonical active record;
+- record hash/ID;
+- complete index root or Merkle root;
+- proof verification result.
+
+
+37. OPERATOR END-TO-END VECTOR
+Synthetic Service revision 4:
+A/B/C verify it;
+A/B current index contains revision 4;
+C contains revision 3.
+
+
+Expected dashboard semantic result:
+current discoverability = 2 of 3 checked Nodes;
+C = stale revision.
+
+
+38. NODE OMISSION VECTOR
+One malicious Node omits the record while two include it.
+
+
+Expected:
+valid inclusion from the two remains valid;
+omission is source-specific;
+no global non-existence conclusion.
+
+
+39. NODE EQUIVOCATION VECTOR
+One Node signs two roots for the same checkpoint sequence. A second fixture provides two non-prefix-compatible signed checkpoint histories from a common predecessor.
+Expected:
+equivocation detected and reported;
+both signed artifacts retained.
+
+
+40. SYBIL CONFORMANCE PROFILE
+Required black-box tests:
+CONF-SYBIL-IDENTITY-COUNT-NEUTRAL
+CONF-SYBIL-OBSERVER-COUNT-NEUTRAL
+CONF-SYBIL-WITNESS-COUNT-NEUTRAL
+CONF-SYBIL-CANDIDATE-DEDUP
+CONF-SYBIL-GLOBAL-WORK-BUDGET
+CONF-SYBIL-PEER-POOL-BOUNDED
+CONF-SYBIL-REFERRAL-ECLIPSE
+CONF-SYBIL-RESULT-FLOOD
+CONF-SYBIL-MISBEHAVIOR-PROOF
+
+
+41. ADVERSARIAL IDENTITY MULTIPLICATION
+Harness creates:
+- 100,000 Service identities;
+- 10,000 Node identities;
+- 10,000 witness identities;
+without treating them as independent operators.
+
+
+Expected results are invariant under identity multiplication except for bounded operational load.
+
+
+42. COUNT-NEUTRAL DIFFERENTIAL TEST
+Run the same cryptographic evidence set with:
+A. one malicious asserting Node;
+B. 10,000 malicious asserting Node identities.
+
+
+Service identity/fork/migration result MUST be identical.
+
+
+43. RESOURCE BOUND TEST
+Multiply candidate/referral identity count while holding configured budgets fixed.
+
+
+CPU, network jobs, active peer set and persisted attribution MUST remain within documented bounded envelopes rather than scaling linearly without limit.
+
+
+
+
+44. LOGICAL SERVICE ID CONFORMANCE
+Required:
+CONF-LOGICAL-ID-GENESIS
+CONF-LOGICAL-ID-ROTATION-STABLE
+CONF-LOGICAL-ID-MIGRATION-STABLE
+CONF-LOGICAL-ID-CLAIM-WITHOUT-CHAIN-REJECT
+
+
+The same logical_service_id MUST survive valid rotation/migration in PHP, TypeScript and the independent validator.
+
+
+45. CHECKPOINT CHAIN CONFORMANCE
+Required:
+CONF-CHECKPOINT-SUCCESSOR
+CONF-CHECKPOINT-PREVIOUS-HASH
+CONF-CHECKPOINT-NONPREFIX-EQUIVOCATION
+CONF-CHECKPOINT-MISSING-ANCESTRY
+
+
+A larger sequence number without valid ancestry is not sufficient current-state evidence.

@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1qjIhv8nJyBeQbhKJpSxoxpuC-T7QE_4uLYU4UNjvjXc/edit?usp=drivesdk
 
-Source modified: 2026-10-12T12:30:51.198Z
+Source modified: 2026-10-12T19:35:10.569Z
 
 ---
 
@@ -11,7 +11,16 @@ FINAL PRE-IMPLEMENTATION CLOSURE AUDIT AND SPECIFICATION FREEZE
 
 
 Status
-This is the final planning gate. Its purpose is to stop infinite architecture work and authorize implementation once all blocking specification questions are either resolved or deliberately assigned to evidence-producing implementation milestones.
+CONSISTENCY RE-AUDIT PASS — IMPLEMENTATION MAY PROCEED; PROTOCOL FREEZE/HUMAN GATES REMAIN OPEN.
+
+
+A forensic line-by-line audit on 2026-10-12 found and remediated real normative contradictions, stale superseded requirements and mechanically split text caused by later architecture revisions being appended without fully replacing old requirements. The active specification set was then re-read/scanned for the same contradiction and corruption classes.
+
+
+Repository implementation MAY proceed according to the current dependency order. Protocol v1 Freeze, final crypto-byte/state semantics, Production Stable claims and any semantics controlled by open D-XXX Human Gates remain BLOCKED until those gates are actually approved. This consistency PASS does not approve any Human Gate.
+
+
+This document is the final planning/consistency gate. Its purpose is to stop infinite speculative architecture work only after all blocking contradictions are actually removed or explicitly assigned to evidence-producing implementation/Human Gate decisions.
 
 
 1. Principle
@@ -118,7 +127,7 @@ Known and accepted for v1:
 
 
 11. Stop-Planning Rule
-After this gate is PASS:
+After this gate is re-PASSed following the current consistency remediation:
 new planning documents are created only when implementation reveals:
 - contradiction;
 - new threat;
@@ -218,6 +227,89 @@ It does NOT mean:
 
 
 18. Final Direction to Coding Agent
-When this closure gate is PASS:
+When this closure gate is explicitly re-PASSed after the forensic consistency audit:
 START IMPLEMENTATION.
-Do not create more speculative architecture documents unless a concrete blocker or new finding requires one.
+
+
+
+
+19. 2026-10-12 FORENSIC CONSISTENCY REMEDIATION RESULT
+Scope:
+- 55 active Google Docs total: the Workspace Index plus 54 required-reading specification documents;
+- archived/superseded drafts excluded from normative authority;
+- line-by-line/manual review plus repeated targeted machine scans;
+- Drive-root hygiene rechecked.
+
+
+Material corrections completed:
+- Workspace reading order corrected to unique 1–54 and current titles.
+- Source-authority/conflict rule corrected: the Coding Agent may not invent normative Wire/Crypto/State semantics.
+- SQLite changed from global requirement to selected StorageBackend dependency; FilesystemStore remains SQL-free and first-class.
+- PHP, DoD, tests, operations, DX, performance, supply-chain and governance language made backend-neutral.
+- Service Identity private-key custody made offline/SignerProvider-first; ordinary Web runtime does not require the Service private key.
+- stable logical_service_id separated from current rotatable Service Identity key/key epoch.
+- pinning, exact identity lookup, index membership and operator discoverability updated to use logical_service_id.
+- valid key rotation/migration preserves logical identity while updating key epoch/Onion context only with valid evidence.
+- signed Node checkpoint histories changed from same-sequence-only checks to chained previous_checkpoint_hash semantics and non-prefix-compatible-history equivocation detection.
+- Category Registry v1 made immutable after Protocol Freeze; post-freeze categories require an explicit compatible versioning mechanism or new Protocol version.
+- language-tag wire grammar moved behind explicit D-054 freeze instead of vague “BCP47-style” behavior.
+- Candidate Announcement made an explicit bounded candidate-hint flow rather than an optional contradictory afterthought.
+- WEB-COMBINED-V1 and WEB-SEPARATED-V1 separated; CORS/CSP/network behavior is profile-specific.
+- WEB-LOCAL and SERVER-FALLBACK privacy semantics separated; only WEB-LOCAL has zero query-dependent network traffic.
+- browser persistence/pins/cache treated as optional/best-effort rather than guaranteed IndexedDB durability.
+- Sybil/source wording corrected so distinct Node keys do not imply distinct human/operators.
+- release/audit/browser review changed from obsolete extension-permission language to origin/CSP/network-capability review.
+- milestone IDs decoupled from execution order; prerequisite/dependency order added so secure coding, category registry, storage abstraction and key custody precede dependent implementation.
+- mechanically corrupted insertions and duplicate appended sections repaired, including split Protocol/Crypto/API/Index-Proof/PHP fragments.
+
+
+Verification evidence:
+- Workspace Index currently contains exactly 54 ordered required-reading entries, 1 through 54, with no missing/duplicate reading-order number; together with the Workspace Index itself this yields 55 active Google Docs.
+- My Drive root currently contains only one project-related item: the Onion Service Discovery main folder. No project file/archive draft is outside it.
+- repeated stale-pattern scans found no remaining known active requirement that globally mandates SQLite/PDO-SQLite, browser-extension permissions, same-origin-only Web architecture, same-sequence-only checkpoint equivocation, or operator independence from Node key count.
+- targeted corruption scan no longer finds the previously observed split fragments such as “Node equi”/“vocation”, “signed c”/“heckpoint root”, “ice opt-in”, “u48. CORS”, or the orphaned PHP acceptance fragment.
+
+
+AI consistency conclusion:
+PASS for the audited cross-document consistency/corruption classes as of 2026-10-12.
+
+
+Non-claim / remaining gates:
+- this is NOT Human Protocol approval;
+- this is NOT Human Crypto approval;
+- this is NOT an external security audit;
+- this is NOT Protocol v1 Freeze;
+- this is NOT Production Stable approval;
+- all D-XXX states in the Decision Register remain authoritative and none were auto-approved by this remediation;
+- D-051 through D-054 and every other release-blocking Human Gate must still be resolved before the corresponding freeze/release claim.
+Do not create more speculative architecture documents unless a concrete blocker or new finding requires one
+
+
+20. POST-PASS FINAL RECONCILIATION — 2026-10-12
+After the initial consistency PASS, an additional full mechanical/content reconciliation found and corrected a small number of residual issues.
+
+
+Additional material corrections:
+- stable identity lookup is now explicitly GET /onion-service-discovery/v1/services/by-id/{logical_service_id};
+- GET /services/{onion} is explicitly address convenience and resolves/exposes logical_service_id rather than acting as the persistent identity key;
+- index inclusion/discoverability, PHP Node, dashboard, conformance tests, Test Strategy and backlog all use the same stable lookup semantics;
+- Candidate Announcement was removed from the last remaining “if implemented” abuse-language and is consistently a bounded Protocol v1 candidate-hint flow;
+- Decision Register corruption around “release blocker yes/no” was repaired;
+- Decision Register now states explicitly that proposed/recommended text never constitutes Human approval;
+- residual isolated punctuation/character artifacts introduced by historical Google Docs inserts were removed across the active set;
+- remaining Extension-era lifecycle “permission inventory” terminology was replaced with Web Client origin/CSP/network-capability inventory;
+- Master Brief Web Client wording was updated so WEB-COMBINED-V1 and WEB-SEPARATED-V1 are both first-class and no longer imply that executable client code must come from a Discovery Node.
+
+
+Final structural verification:
+- actual required-reading Google Docs excluding the Workspace Index: 54;
+- Workspace Index required-reading entries: 54;
+- reading-order numbers: exactly 1 through 54, no duplicates or gaps;
+- every indexed document title exactly matches one active Drive document title;
+- project main folder contains the expected active subfolders, including “05 - Web Local Search Client”;
+- My Drive root project search returns only the Onion Service Discovery main folder.
+
+
+Final status:
+CONSISTENCY RE-AUDIT PASS remains valid for continued implementation.
+This still does NOT approve any D-XXX Human Gate, Protocol v1 Freeze, external audit, Production Stable release, actual production seed set, license, release signing mechanism or final cryptographic byte construction.

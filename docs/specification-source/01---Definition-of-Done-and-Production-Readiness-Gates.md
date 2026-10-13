@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1TBZrr-vBQMdKnz43x06yyx38PoSU1ocKaG5OqxrVWfg/edit?usp=drivesdk
 
-Source modified: 2026-10-12T12:31:48.166Z
+Source modified: 2026-10-12T19:34:20.687Z
 
 ---
 
@@ -135,36 +135,41 @@ Tests müssen abdecken:
 
 
 8. STORAGE-GATE
-- parametrisiertes SQL;
-- Migrationen versionsgeführt;
-- WAL/Locking-Verhalten getestet;
-- Crash während Write getestet;
-- beschädigte DB erkannt;
-- Backup dokumentiert;
-- Restore praktisch getestet;
-- Retention- und Size-Limits;
-- Quarantine getrennt vom aktiven Index;
-- Indizes für häufige Abfragen;
-- keine Secrets in DB, sofern nicht explizit verschlüsselt und begründet.
+- backend-neutral StorageBackend contract implemented;
+- FilesystemStore and SQLiteStore pass the same black-box atomicity/invariant suite;
+- SQL adapters use parameterized statements/prepared statements;
+- FilesystemStore uses stable logical_service_id-derived paths, bounded filenames and crash-safe journal/generation recovery;
+- storage schema/version migrations are versioned and tested;
+- crash/fault injection across every durable commit stage;
+- corruption/integrity failure detected for every Production-supported backend;
+- backup/export documented;
+- restore/import practically tested;
+- retention/size/disk limits;
+- Quarantine separated from active current/search state;
+- backend-specific indexes/constraints tested without becoming Protocol semantics;
+- private keys are not stored inside ordinary discovery storage by default;
+- missing an unused backend driver is not an error.
 
 
-9. BROWSER-GATE
-- minimale Permissions;
-- keine WebRTC-Abhängigkeit;
-- keine native EXE;
-- keine Suche über Remote-API;
-- Web-Client Cache/Storage Schema versioniert, falls persistenter Browser-Speicher verwendet wird; In-Memory-Baseline bleibt funktionsfähig;
-- Storage Migration getestet;
-- CSP;
-- keine Remote Scripts;
-- keine Third-Party Analytics;
-- kein externer Font/CDN-Zwang;
-- sichere URL-Darstellung;
-- kopierbare vollständige Onion-Adresse;
-- Punycode/Unicode-verwechslungsrelevante Darstellung berücksichtigt;
-- technische Trust-Labels semantisch korrekt;
-- klare Warnung: Verifikation bedeutet Identität/Kontinuität, nicht Vertrauenswürdigkeit des Inhalts;
-- dokumentierter Hinweis auf Risiken zusätzlicher Tor-Browser-Erweiterungen.
+9. WEB CLIENT GATE
+- no browser-extension permission model;
+- no WebRTC dependency;
+- no native executable;
+- WEB-LOCAL search has zero query-dependent network traffic;
+- optional SERVER-FALLBACK is separately disclosed and tested;
+- WEB-COMBINED-V1 / WEB-SEPARATED-V1 origin/CORS/CSP behavior is explicit;
+- browser persistence is optional/best-effort; in-memory baseline remains functional;
+- persistent cache migration tested only if that feature is enabled;
+- strict CSP;
+- no remote scripts;
+- no third-party analytics;
+- no external font/CDN dependency;
+- safe URL/address rendering;
+- full copyable Onion address;
+- Unicode/confusable/bidi handling reviewed;
+- technical trust/evidence labels semantically correct;
+- warning states distinguish identity evidence from content safety/legitimacy;
+- no false claim of operator independence from Node key count.
 
 
 10. SECURITY-TEST-GATE
@@ -317,7 +322,7 @@ Required:
 - privacy-safe diagnostics export;
 - clean operator walkthrough;
 - clean developer bootstrap walkthrough;
-- no undocumented database surgery.
+- no undocumented manual StorageBackend surgery.
 
 
 23. PERFORMANCE / CAPACITY GATE
@@ -327,7 +332,7 @@ Required:
 - stress/1m modeling where feasible;
 - low-end client test;
 - search/sync/storage/network reports;
-- supported SQLite scale statement;
+- supported-scale statement for each Production-supported StorageBackend; SQLiteStore receives an explicit scale statement when enabled;
 - safe limits derived from measurement.
 
 
@@ -366,20 +371,21 @@ Required:
 
 
 
-28. SQLITE RUNTIME GATE
-The PHP reference node MUST explicitly verify PDO SQLite availability.
+28. SELECTED STORAGE BACKEND RUNTIME GATE
+The PHP reference node MUST verify only the selected StorageBackend's required runtime capabilities.
 
 
 PASS evidence:
-- PDO available;
-- sqlite appears in PDO::getAvailableDrivers();
-- configured SQLite database can open;
-- foreign keys/transactions validated;
-- missing SQLite produces clear fail-fast diagnostics;
-- external sqlite3 CLI is not required.
+- FilesystemStore operates without PDO/SQLite and validates filesystem permissions/atomicity/locking;
+- SQLiteStore, when selected, verifies PDO + pdo_sqlite, the documented SQLite capability/version floor, open/transaction/foreign-key behavior;
+- any other selected adapter verifies only its own driver/capabilities;
+- a missing UNUSED adapter/driver is not an error;
+- no silent backend substitution;
+- external sqlite3 CLI is not a runtime requirement for SQLiteStore;
+- doctor/status reports the selected backend and exact remediation.
 
 
-Production documentation MUST NOT state or imply that SQLite support is guaranteed to exist in every PHP installation.
+Production documentation MUST NOT imply that any database driver is universally present in PHP.
 
 
 29. WEB LOCAL SEARCH GATE
@@ -494,4 +500,132 @@ external standard change;
 benchmark result;
 audit finding;
 real operator/user evidence.
-.
+
+
+
+
+39. PLUG-AND-PLAY OPERATOR EXPERIENCE GATE
+Production Stable requires:
+- ready-to-deploy package;
+- common publish-only setup with one clear config file plus signed Manifest;
+- safe /status/ page;
+- Tor Browser Android and desktop usability;
+- no SQL requirement for publish-only/default FilesystemStore path;
+- exact self-verification;
+- bounded automatic announcement;
+- external observation check;
+- sampled searchability confirmation;
+- truthful non-global wording;
+- no secret leakage;
+- no undocumented registration step.
+
+
+40. DISCOVERABILITY TRUTH GATE
+A green DISCOVERABLE state is forbidden unless backed by external evidence for the current revision.
+
+
+Peer reachability alone is insufficient.
+Local Manifest validity alone is insufficient.
+Announcement acceptance alone is insufficient.
+
+
+
+
+41. VERIFIABLE DISCOVERABILITY GATE
+Production Stable requires:
+- stable logical_service_id frozen under D-051;
+- canonical GET /services/by-id/{logical_service_id} lookup plus address convenience lookup resolving logical_service_id;
+- valid Service-key rotation and Onion migration preserve logical_service_id;
+- exact active Service-state tuple separates stable logical identity from current key epoch/Onion;
+- deterministic active index representation;
+- Node-signed active-index checkpoint;
+- operator/client local membership verification;
+- stale revision detection;
+- comparison across multiple distinct selected Node identities/source groups without assuming operator independence;
+- omission handling;
+- checkpoint-chain ancestry/rollback detection under D-052;
+- same-sequence and non-prefix-compatible-history equivocation evidence;
+- search-export equivalence test.
+
+
+A simple remote “listed=true” response is not sufficient for the green DISCOVERABLE state.
+
+
+42. MERKLE PROOF GATE
+If compact Merkle inclusion proofs are shipped as a Production Stable capability:
+- tree construction is normatively frozen;
+- leaf/branch domain separation frozen;
+- sort/order/odd-node rules frozen;
+- PHP/TypeScript/third-language vectors pass;
+- invalid proof fuzzing passes.
+
+
+If not ready, Protocol v1 may use signed deterministic complete snapshots for membership verification and advertise Merkle proof support only later as an explicit capability.
+
+
+
+
+43. SYBIL-RESISTANCE GATE
+Production Stable requires:
+- raw Service/Node/witness identity count has zero trust authority;
+- bounded active peer/probation sets;
+- global and per-source work budgets;
+- duplicate-target verification collapse;
+- source concentration diagnostics;
+- no majority identity/fork decision;
+- no observer-count ranking boost;
+- valid Sybil-farm stress fixtures;
+- search result-flood mitigation without deleting distinct identities;
+- objective misbehavior proofs, not accusation voting.
+
+
+44. ECLIPSE-RESISTANCE GATE
+Required:
+- multiple bootstrap origins;
+- no wholesale peer-table replacement from one source;
+- gradual bounded source rotation;
+- selected-source persistence;
+- one peer cannot fill every source slot via referrals;
+- source concentration visible to operator.
+
+
+
+
+45. CATEGORY REGISTRY GATE
+Protocol Stable requires:
+- one machine-readable Category Registry v1;
+- schema/generated constants use the same source;
+- adult included;
+- categories separated from moderation/trust;
+- localization outside signed IDs;
+- unknown category behavior frozen;
+- category-count rank neutrality;
+- conformance vectors.
+
+
+46. SECURE CODING / EXPLOIT RESISTANCE GATE
+Production Stable requires:
+- document 51 implemented;
+- security coverage matrix;
+- ASVS applicability matrix;
+- OWASP Top 10 current mapping;
+- CWE Top 25 current mapping;
+- strict input/range/type/encoding limits;
+- context-safe output encoding;
+- SSRF/path/SQL/XSS/command-injection controls;
+- dangerous API lint/review;
+- static analysis/SCA/secret scan;
+- fuzz/property/negative tests;
+- exceptional-condition/fault injection;
+- zero unresolved Critical/High security findings for Production Stable subject to existing audit policy.
+
+
+47. DEFENSIVE PROGRAMMING GATE
+Required:
+- typed validated domain boundaries;
+- no security-critical PHP loose comparisons;
+- no untrusted native deserialization;
+- no remote/runtime executable code;
+- hard ceilings not operator-disableable;
+- fail-closed unsupported versions/ambiguous records;
+- verified state survives rejected malicious input.

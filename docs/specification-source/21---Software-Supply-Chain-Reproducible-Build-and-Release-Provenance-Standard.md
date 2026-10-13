@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1xG4VpHZZhoW_pbdNipxqTXT4OUb9oJ20P7OqPeFyoj8/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:12:00.377Z
+Source modified: 2026-10-12T18:13:09.009Z
 
 ---
 
@@ -110,7 +110,7 @@ Automated update tools may create proposals, but:
 tests
 security review for major updates
 lockfile diff
-release note when behavior/permissions changes.
+release note when behavior, network/origin/capability or privilege surface changes.
 
 
 14. Vulnerability Scanning
@@ -236,7 +236,7 @@ manifest
 lockfile
 SBOM
 checksums
-permission inventory
+client-origin/CSP/network-capability inventory
 provenance.
 
 
@@ -283,8 +283,8 @@ build tool versions
 artifact filenames/hashes
 SBOM filenames/hashes
 schema version
-DB schema
-client storage schema
+storage schema/backend format
+optional browser-cache schema/version
 release date
 known exceptions IDs.
 
@@ -298,9 +298,9 @@ Server and client display/report build version derived deterministically.
 No conflicting manually edited version files.
 
 
-35. Permission Inventory
+35. Client Origin/CSP/Network Capability Inventory
 Client release includes static-asset, CSP and network-destination diff against the previous release.
-Added permission blocks release until human review.
+Any new browser origin, network destination, executable capability, storage privilege or relaxation of CSP blocks release until the required security/privacy review is complete.
 
 
 36. Dependency Diff
@@ -313,9 +313,9 @@ Protocol JSON Schemas compared.
 Any normative difference maps to accepted Protocol Change Proposal/version analysis.
 
 
-38. Database Migration Diff
-Release notes list migrations.
-Migration files immutable after release.
+38. Storage Migration Diff
+Release notes list StorageBackend/schema/browser-cache migrations that actually exist for the release.
+Released migration artifacts are immutable.
 Checksums validated.
 
 

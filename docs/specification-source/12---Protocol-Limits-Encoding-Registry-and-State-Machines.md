@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1-IqYDKd5RLl3bVUA5BjKoe94bUohVXpGBKtFQIn_Rec/edit?usp=drivesdk
 
-Source modified: 2026-10-11T04:38:51.083Z
+Source modified: 2026-10-12T14:29:16.326Z
 
 ---
 
@@ -163,7 +163,7 @@ Each category ID:
 1..64 ASCII characters.
 Recommended restricted grammar:
 lowercase letters, digits and hyphen, starting/ending alphanumeric.
-Free-form human labels belong in future localized metadata, not category identifiers.
+Category identifiers come from the frozen Protocol Category Registry v1. Human-facing labels are localized outside the signed identifier. Unknown category identifiers are rejected in Protocol v1 unless a future explicit extension mechanism says otherwise.
 
 
 14. Related Onion Services
@@ -444,7 +444,7 @@ max concurrent Tor requests
 max bytes per peer sync run
 max records applied per transaction
 max learned peers retained
-max database growth warning/hard thresholds
+max storage growth warning/hard thresholds
 
 
 These local values belong in the operator/security configuration and test matrix.
@@ -487,13 +487,29 @@ Any change that increases network/resource exposure:
 - human Security Review.
 
 
-42. Final Acceptance
-Protocol v1 limit/encoding layer is frozen only when PHP and TypeScript implementations pass the same:
+42. Category Registry Linkage
+The normative category source for Protocol v1 is:
+protocol/registries/categories-v1.json
+
+
+The Manifest schema and generated constants MUST derive from that single artifact.
+Registry v1 is immutable after Protocol v1 freeze.
+Category count cannot increase trust or ranking solely by selecting more categories.
+
+
+43. Final Acceptance
+Protocol v1 limit/encoding layer is frozen only when PHP, TypeScript and the independent validator pass the same:
 - address vectors;
 - key/signature encoding vectors;
 - hash vectors;
 - JSON boundary vectors;
 - integer vectors;
-- Unicode vectors;
+- Unicode/language-tag vectors;
+- category-registry vectors;
 - state-machine properties;
-- exact error classification fixtures.
+- exact error-classification fixtures;
+- Logical Service Identifier vectors;
+- signed checkpoint-chain vectors.
+
+
+No wire rule described as “preferred”, “recommended” or “BCP47-style” may remain ambiguous at Protocol Freeze.

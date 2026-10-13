@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1_1LTqsSS_402Jyb0IUvZo4y8ZG5geePELgeaJdDwx2I/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:10:12.022Z
+Source modified: 2026-10-12T19:30:19.236Z
 
 ---
 
@@ -84,14 +84,19 @@ network instrumentation MUST prove that a local-mode query causes no:
 whose URL/body/header depends on query text.
 
 
-7. Same-Origin Index
-Preferred:
-Web Client downloads a generic current index/snapshot from same Onion origin.
+7. Web Data-Origin Profiles
+WEB-COMBINED-V1:
+Web Client and generic current index/snapshot are same-origin.
 
 
-The query never changes which records are downloaded.
+WEB-SEPARATED-V1:
+Client code and Discovery data originate from different roles.
+The frozen implementation uses either:
+- credentialless reads from explicitly configured data-node origins with reviewed CORS/CSP; or
+- a Client Host proxy/cache whose upstream work is generic and query-independent.
 
 
+In both profiles the user's WEB-LOCAL query never changes which remote records are requested.
 8. Remote Assets
 Prohibited:
 external fonts
@@ -111,7 +116,7 @@ script-src restricted to packaged assets/hashes/nonces;
 object-src 'none';
 base-uri 'none' or 'self' as required;
 frame-ancestors restrictive;
-connect-src same-origin protocol endpoints only;
+connect-src is profile-specific: 'self' for WEB-COMBINED-V1/proxy mode; only the explicitly configured data-node origins required by a reviewed WEB-SEPARATED-V1 direct-fetch profile may be added.
 img-src self/data only if needed;
 font-src self;
 form-action self.
@@ -409,34 +414,39 @@ versioned immutable cache allowed.
 
 
 Index data:
-cache policy chosen for freshness/privacy and no user-specific variation.
+cache policy is chosen for freshness/privacy and MUST NOT become query-dependent in WEB-LOCAL mode.
 
 
-45. Server Search HTML
-Do not include query in:
-page title if avoidable;
-external link parameters;
-analytics;
-hidden tracking fields.
-
-
-Displaying query back in input/result heading is allowed with proper escaping.
+45. Query Rendering
+If the No-JavaScript Server Search redisplays the submitted query, it MUST render it as escaped plain text in the HTML context.
+The query MUST NOT appear in the URL, headers, logs, executable markup, inline script or cache key that can leak it.
 
 
 46. Cookies
-No cookie needed.
-Reference search UI MUST NOT create session cookies.
+Public search/status requires no cookie.
+The reference search UI MUST NOT create session cookies solely for search.
 
 
 47. CSRF
-Server search has no persistent state change.
-No session introduced solely for CSRF.
-If future stateful web settings appear, separate threat model.
+Server Search changes no persistent state and does not create a session merely for CSRF.
+Any future stateful web setting/admin feature receives its own authentication/CSRF threat model.
 
 
 48. CORS
-Same-origin design means broad CORS is unnecessary for Web Local Search.
-Default deny/no CORS for browser search endpoints unless a separate interoperability need is approved.
+WEB-COMBINED-V1/proxy mode requires no broad browser CORS.
+
+
+WEB-SEPARATED-V1 direct-fetch mode permits only public credentialless Protocol-data access under the D-044 reviewed policy:
+- no cookies/Authorization/credentials;
+- fixed methods/content types;
+- no arbitrary user-supplied destination;
+- no query-bearing requests;
+- current Tor Browser desktop/Android behavior verified.
+
+
+Credentialed wildcard CORS is forbidden.
+
+
 
 
 49. API vs Web Routes
@@ -453,7 +463,7 @@ This distinction belongs in public Known Limitations.
 
 
 51. Comparing Nodes
-Users may choose another independent Node if one appears suspicious or stale.
+Users may choose another distinct Node/source group if one appears suspicious or stale; different Node keys are not automatically independent operators.
 No single Node is mandatory.
 
 
@@ -516,9 +526,9 @@ Release pipeline MUST NOT build or publish a browser extension package as an Oni
 59. Removed Gates
 Delete/replace all previous requirements for:
 extension manifest version;
-host permissions;
-optional permissions;
-permission-diff gate;
+Web-origin/network destination inventory;
+CSP changes;
+browser storage/capability changes;
 extension signing/distribution;
 content scripts;
 Native Messaging;
@@ -547,4 +557,3 @@ PASS only when:
 - static asset supply chain is reproducible;
 - malicious-origin limitation appears in threat model and Known Limitations;
 - Android/Desktop compatibility is tested.
-.

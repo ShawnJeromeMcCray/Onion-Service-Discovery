@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1i5kPoX4xFZ2eGyoGGmNl6GGy_jCaB8VS1KiR4pvEH8A/edit?usp=drivesdk
 
-Source modified: 2026-10-11T06:21:16.273Z
+Source modified: 2026-10-12T19:31:50.627Z
 
 ---
 
@@ -158,6 +158,8 @@ Expires as synchronization convenience, not as Service identity evidence.
 
 13. Pin Lifecycle
 Created by explicit user action.
+Anchors the stable logical_service_id, with remembered current key epoch/Onion context.
+A valid key rotation does not create a new logical pin identity.
 Local/private.
 Never peer-controlled.
 Survives cache rebuild.
@@ -178,8 +180,8 @@ the project should be able to reproduce or explain the historical semantic outco
 Release manifest records:
 software version
 supported Protocol versions
-DB schema
-client storage schema
+storage schema/backend format
+optional browser-cache schema/version
 Unicode/confusable data version
 search ranking version
 limits registry version
@@ -192,7 +194,7 @@ accepted ADR index
 Protocol proposals
 Security exceptions
 seed list
-permission inventory
+Web Client origin/CSP/network-capability inventory
 external-standard baseline.
 
 
@@ -216,7 +218,7 @@ known deprecations.
 
 
 19. Migration Preservation
-DB migration must not erase original Protocol record version/hash needed for forensic reconstruction.
+Storage migration must not erase original Protocol record version/hash needed for forensic reconstruction.
 
 
 20. Client Storage Migration
@@ -242,7 +244,7 @@ artifact hashes
 SBOM
 provenance
 config schema
-DB migrations
+storage migrations
 known limitations.
 
 
@@ -304,9 +306,9 @@ Release archive records built-in seed set.
 Useful to reconstruct bootstrap behavior, not trust truth.
 
 
-32. Permission History
-Extension release archive records manifest permissions.
-Allows reviewers to detect historical privilege expansion.
+32. Web Client Capability/Origin History
+Release archive records Web Client network destinations, CSP, browser-storage/service-worker status and other privacy-relevant browser capabilities.
+Allows reviewers to detect historical network/origin privilege expansion.
 
 
 33. External Standards History
@@ -326,7 +328,7 @@ actual result.
 35. Protocol Archaeology CI
 Run:
 old stable golden corpus through matching historical interpreter where available;
-current migration path against old DB/client fixtures;
+current migration path against old supported StorageBackend/optional browser-cache fixtures;
 ensure archived schemas/vectors remain readable.
 
 

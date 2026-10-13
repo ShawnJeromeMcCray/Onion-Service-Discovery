@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1NbPjqAkr5s0MiM5lCU98zgFDwaa30PoUlpiM5OodmiE/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:13:14.985Z
+Source modified: 2026-10-12T18:15:16.950Z
 
 ---
 
@@ -362,7 +362,7 @@ If sponsorship exists, clearly separate from search/identity.
 
 41. Metrics of Success
 Technical:
-multiple independent Nodes
+multiple distinct Node identities/source groups, with operator independence claimed only when actually known/documented
 multiple implementations
 conformance pass
 no central runtime dependency

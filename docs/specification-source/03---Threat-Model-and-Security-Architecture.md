@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/12wZrysCvp9G7pzYsHw8w8rHQ_bxLxGEpQ-58SjaitDo/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:37:51.943Z
+Source modified: 2026-10-12T19:29:06.451Z
 
 ---
 
@@ -264,7 +264,7 @@ Gefahren:
 
 Pflicht-UX:
 - vollständige Onion-Adresse zugänglich;
-- Service Identity Fingerprint zugänglich;
+- stable Logical Service Identifier and current Service Identity fingerprint/key-epoch details zugänglich;
 - gepinnte bekannte Identität sichtbar;
 - Abweichung von Pin deutlich warnen;
 - technische Labels präzise, z.B. “Manifest direkt von dieser Onion-Adresse geprüft”;
@@ -358,7 +358,7 @@ CLIENT_PRIVACY_BUG
 SYNC_INTEGRITY_BUG
 SUPPLY_CHAIN_INCIDENT
 MALICIOUS_RELEASE
-DATABASE_CORRUPTION
+STORAGE_CORRUPTION
 SEED_OUTAGE
 MASS_SPAM_EVENT
 
@@ -414,7 +414,7 @@ Sicherheitsarchitektur gilt erst als umgesetzt, wenn jede Invariante mindestens 
 
 
 31. WEB LOCAL SEARCH TRUST BOUNDARY — ARCHITECTURE REVISION
-The separate browser extension has been removed from Onion Service Discovery.
+The separate Web Local Search client has been removed from Onion Service Discovery.
 
 
 Primary client:
@@ -425,7 +425,7 @@ Security benefit:
 - no browser-extension permissions;
 - no content scripts;
 - no Native Messaging;
-- no extension-specific fingerprinting delta;
+- no extra browser-extension fingerprinting delta; Web-origin/browser-feature differences are separately reviewed;
 - no extension update/signing channel.
 
 
@@ -440,7 +440,7 @@ Mandatory mitigations:
 - published asset hashes/provenance;
 - operator self-check verifies deployed assets;
 - local-mode query instrumentation proves the reference build emits no query network traffic;
-- multiple independent Nodes can serve the same reference client;
+- multiple distinct Nodes/source groups can serve/reference the client or data; distinct keys do not prove independent operators;
 - public documentation states that the serving origin is a trust boundary.
 
 
@@ -567,4 +567,47 @@ circuit/isolation implications.
 
 
 Do not assume generic Firefox behavior equals current Tor Browser behavior.
-.
+
+
+
+
+40. SECURE CODING ATTACK-CLASS COVERAGE
+The threat model is implemented through document 51 and a maintained attack-class coverage registry.
+
+
+Explicit classes include:
+XSS/DOM XSS
+SQL/command/code injection
+path traversal/symlink/TOCTOU
+CSRF/authz/IDOR
+SSRF/destination confusion
+open redirect/header injection
+request ambiguity/cache poisoning
+deserialization/template injection
+prototype pollution/ReDoS
+zip/decompression/resource bombs
+parser differential/Unicode spoofing
+key theft/algorithm confusion/replay/downgrade
+supply-chain/update compromise
+Sybil/eclipse/equivocation.
+
+
+41. VALIDATION IS NOT SANITIZATION
+Security design uses field-specific positive validation plus context-specific output encoding.
+
+
+“Remove suspicious characters” is not an accepted general security control.
+
+
+42. FAIL-CLOSED PARSERS
+Malformed, oversized, ambiguous, duplicate-key, unsupported-version or type-confused Protocol input is rejected before it can mutate current state.
+
+
+43. ADULT CONTENT THREAT SEPARATION
+adult is a content category, not a separate trust zone.
+
+
+No adult-category record may enable richer/less-safe rendering or remote active content.
+
+
+External content classification/moderation remains separate from Service self-declaration.

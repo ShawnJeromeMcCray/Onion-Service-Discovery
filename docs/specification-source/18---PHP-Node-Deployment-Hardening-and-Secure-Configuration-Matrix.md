@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1p07E8Y31GQY-_LQQon8f1mmXthZVVkmYDDsWji13CLA/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:38:56.735Z
+Source modified: 2026-10-12T14:43:46.437Z
 
 ---
 
@@ -34,7 +34,7 @@ Code: read-only to runtime wherever practical.
 public/: only public front controller/static assets.
 config/: outside public webroot.
 keys/: outside public webroot, restricted.
-var/database/: writable app state.
+var/storage/: writable app state for the selected StorageBackend.
 var/cache/: writable rebuildable.
 var/quarantine/: bounded.
 logs/: system-managed or bounded.
@@ -44,7 +44,7 @@ backups/: not under webroot.
 5. Ownership
 Document exact owner/group matrix.
 Web process needs read config/public key and only the minimal write access required by the selected storage/cache backend.
-Private key write required only for controlled rotation/generation path; consider split permission so ordinary web request path does not need write.
+Preferred Service profile: ordinary web/PHP request handling has no access to the Service Identity private key at all. Node signing and any explicitly selected online Service SignerProvider use separate least-privilege access. Key generation/rotation/write capability is restricted to dedicated controlled workflows.
 
 
 6. Private Key Permissions
@@ -59,7 +59,7 @@ Automated deployment test MUST request likely secret paths and assert inaccessib
 config files
 key files
 composer files if not intended
-database
+storage
 backup
 logs
 .git
@@ -106,7 +106,7 @@ Access logs minimized per privacy spec.
 
 
 11. API Request Body
-Reference Protocol public API is GET/HEAD; reject unexpected request bodies/methods.
+Reference machine Protocol API is read-oriented GET/HEAD except the explicitly specified bounded Candidate Announcement POST. The optional human No-JavaScript Server Search is a separate POST Web route. Reject every other unexpected method/body before expensive processing.
 This reduces attack surface.
 
 
@@ -178,7 +178,7 @@ in CI logs.
 
 
 21. Environment Variables
-May be used for deployment secrets but:
+May be used for low/medium-value deployment settings/secrets only under explicit deployment policy, but high-value Service/release keys or their unlock passphrases are not placed in ordinary environment variables by default:
 do not dump $_ENV in diagnostics.
 Document process inheritance.
 Prefer secret files/manager where appropriate for long-lived keys.
@@ -201,7 +201,7 @@ If future web admin exists, separate product/security spec required; not a quick
 24. CLI Safety
 Commands that:
 rotate keys
-reset DB
+reset/reinitialize storage
 delete data
 change peer pins
 require explicit flags/confirmation.
@@ -222,7 +222,7 @@ no overlapping runs.
 
 
 26. Job Locking
-Use robust file/DB advisory lock.
+Use the selected StorageBackend's tested concurrency/locking primitive (FilesystemStore process-safe writer lock; SQL adapter transaction/advisory semantics as specified).
 Stale lock recovery documented.
 Lock name per job.
 
@@ -354,7 +354,7 @@ Application logs technical error ID.
 42. Health
 Public health optional and minimal.
 Detailed diagnostics local CLI.
-Do not expose DB path, keys, seed details or environment.
+Do not expose storage paths, keys, detailed seed/peer internals or environment.
 
 
 43. Metrics
@@ -367,7 +367,7 @@ Not required for core.
 
 
 44. Backups
-Private key backup separated from public index backup.
+Key backups are separated by key class from public index/storage backup. The preferred offline Service Identity key is never automatically bundled by the Node backup helper.
 Backup encryption.
 Restore drill.
 No backup file in webroot.
@@ -383,7 +383,7 @@ Security incidents may preserve selected evidence explicitly.
 46. Fail-Safe Startup
 Startup self-check can block write jobs when:
 key permissions unsafe
-DB migration pending/failed
+selected StorageBackend migration pending/failed
 config invalid
 Onion/key mismatch
 unsupported PHP version
@@ -414,7 +414,7 @@ Canonicalization must be locale-independent regardless.
 
 50. Character Encoding
 UTF-8 end-to-end.
-DB/string functions tested.
+StorageBackend/string/encoding functions tested.
 No implicit ISO-8859 fallback.
 
 
@@ -446,7 +446,7 @@ runtime/version
 extensions
 file permissions
 webroot exposure config where observable
-key/db consistency
+key/public-identity/storage consistency
 Tor proxy connectivity
 direct-fallback prohibition test in controlled form
 schema migrations
@@ -458,7 +458,7 @@ Clean server test:
 install docs only
 non-root
 key generation
-DB migrate
+StorageBackend migrate/import
 manifest publish
 Tor SOCKS connectivity
 peer read API

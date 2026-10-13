@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1ACK4gDp3EB-f8wROvB5tspAzdlEyk4mwF6HcuNHX5dQ/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:38:54.325Z
+Source modified: 2026-10-12T18:17:13.397Z
 
 ---
 
@@ -528,7 +528,7 @@ snapshot chunks, derived search index.
 Rebuildable.
 
 
-38. Database Size Budget
+38. Storage Size Budget
 Operator config:
 soft warning bytes
 hard operational budget
@@ -598,7 +598,7 @@ Client local index handles search.
 If node has admin diagnostics search, separate from public API.
 
 
-46. Client IndexedDB Mapping
+46. Optional Browser Persistence Mapping
 Client stores a subset/derived model:
 services current
 identity history required for pin/migration
@@ -668,7 +668,7 @@ Mismatch => fail safe and operator error.
 
 
 55. Migration Dry Run
-Before destructive/large DB migration:
+Before destructive/large StorageBackend/schema migration:
 backup
 preflight disk
 version check
@@ -720,4 +720,45 @@ forks/conflicts persist;
 rotations/migrations are atomic;
 transient abuse cannot force deletion of continuity evidence;
 restore reproduces same current view and hashes;
-PHP and client derived models agree on Protocol v1 states.
+PHP and client derived models agree on Protoco
+
+
+67. LOGICAL SERVICE IDENTIFIER INVARIANT
+The backend-local row identifier is never a Protocol identity.
+
+
+All continuity-bearing entities MUST reference logical_service_id separately from the current Service Identity key.
+
+
+A valid key rotation:
+- keeps logical_service_id unchanged;
+- changes key_epoch/current Service Identity key only after valid transition evidence.
+
+
+A valid Onion migration:
+- keeps logical_service_id unchanged;
+- changes current Onion only after valid migration evidence.
+
+
+68. DERIVED STATE AUTHORITY
+Immutable validated Protocol evidence is authoritative.
+Derived current views, search indexes and backend-specific indexes are rebuildable materializations.
+
+
+A backend import MUST validate/recompute derived Protocol-relevant state rather than trusting exported derived rows blindly.
+
+
+69. PUBLICATION VS DISCOVERABILITY
+Do not overload one state variable.
+
+
+PublicationState describes Service-signed intent:
+PUBLISHED | WITHDRAWN.
+
+
+DiscoverabilityEvidence describes sampled external evidence:
+UNKNOWN | EXTERNALLY_OBSERVED | INDEX_INCLUDED | MULTI_SOURCE_INCLUDED | DEGRADED.
+
+
+Liveness remains orthogonal.
+l v1 states.

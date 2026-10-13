@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1e9oZYaeJIP8SzlMrXk7f5G6YVvmFSQucQd3lvZx3aj8/edit?usp=drivesdk
 
-Source modified: 2026-10-11T04:45:14.543Z
+Source modified: 2026-10-12T18:13:15.823Z
 
 ---
 
@@ -128,7 +128,7 @@ Server/client release version independent from protocol.
 Support matrix lists:
 software version
 supported protocol versions
-DB schema
+storage schema/backend format
 browser storage schema.
 
 
@@ -369,8 +369,8 @@ new-version readiness.
 
 
 35. Data Migration Governance
-DB schema changes are software concern.
-Wire/history meaning must not change silently during DB migration.
+storage schema/backend format changes are software concern.
+Wire/history meaning must not change silently during StorageBackend/schema migration.
 Migration checksum and review.
 
 

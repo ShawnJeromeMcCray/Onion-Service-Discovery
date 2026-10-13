@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1t4pj8ohdbf9nAi9JwFuFxkVQK6IsSHCcjIC7VVTcFsg/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:14:39.366Z
+Source modified: 2026-10-12T14:45:14.714Z
 
 ---
 
@@ -21,7 +21,7 @@ Referenznode:
 - nginx oder Apache;
 - PHP-FPM;
 - lokaler Tor-SOCKS-Zugang;
-- SQLite;
+- ausgewählter StorageBackend + dessen Laufzeitabhängigkeiten;
 - optional cron/systemd timer für kurze PHP-CLI-Jobs.
 
 
@@ -57,7 +57,7 @@ application code: read-only für Webprozess soweit möglich
 public/: Webroot
 config/: außerhalb public
 keys/: außerhalb public, restriktiv
-var/database/: schreibbar nur notwendiger Serviceuser
+var/storage/: schreibbar nur für den minimal erforderlichen Service-/Maintenance-Kontext des ausgewählten StorageBackends
 var/cache/: begrenzt
 var/quarantine/: begrenzt
 logs/: nach Systempolicy
@@ -80,7 +80,7 @@ Schlüssel dürfen nicht für unnötige Benutzer lesbar sein.
 
 
 7. Key Operations
-Service Identity Key und Node Identity Key getrennt.
+Service Identity, Node Identity und Release-Trust keys are separate trust domains. Preferred Service Identity key custody is offline/isolated; Node key is normally online.
 
 
 Runbooks:
@@ -98,9 +98,9 @@ Key Generation darf bestehende Schlüssel nicht still überschreiben.
 
 8. Backup Scope
 Mindestens bewerten:
-A. Service Identity Private Key — kritisch für Identitätskontinuität.
+A. Service Identity Private Key — kritisch für Identitätskontinuität; im bevorzugten Profil offline/SignerProvider-verwaltet und NICHT Teil eines normalen Node-/Storage-Backups.
 B. Node Identity Private Key — wichtig für Node-Kontinuität, aber getrennt.
-C. SQLite DB — Discovery-Historie und State.
+C. StorageBackend — Discovery-Evidenz/State; konsistenter adapter-spezifischer Backup oder backend-neutraler Export.
 D. produktive Konfiguration.
 E. lokale Seed-/Peer-Konfiguration.
 F. Logs nur soweit Betriebsanforderung, nicht als kritisches Restore-Gut.
@@ -125,7 +125,7 @@ Ein Backup ohne getesteten Restore zählt nicht als Backup-Gate PASS.
 - Backup-Integrität prüfen;
 - Schlüssel und Datenbank getrennt korrekt zurückspielen;
 - Dateirechte setzen;
-- DB integrity check;
+- ausgewählten StorageBackend-Integritätscheck;
 - config validate;
 - manifest/key consistency check;
 - health;
@@ -189,7 +189,7 @@ Standard:
 
 15. Monitoring
 Empfohlene lokale Metriken:
-- DB size;
+- StorageBackend size/disk/journal state;
 - candidate queue;
 - verification result counters;
 - sync age;
@@ -209,14 +209,14 @@ Vor Upgrade:
 - Version Compatibility;
 - Backup;
 - aktuelle health erfassen;
-- DB migration plan.
+- StorageBackend migration/import plan.
 
 
 Upgrade:
 - Maintenance/controlled state;
 - deploy;
 - dependency install aus Lockfile;
-- DB migrate;
+- StorageBackend migrate/import;
 - config validate;
 - self tests;
 - health;
@@ -233,7 +233,7 @@ Nach Upgrade:
 17. Rollback
 Für jeden Release muss klar sein:
 - Code rollback möglich?
-- DB migration backward compatible?
+- StorageBackend migration/format backward/rollback behavior understood?
 - Datenformat downgrade möglich?
 - wenn nicht: restore path.
 
@@ -251,7 +251,7 @@ Breaking Protocol Change erhöht protocol_version nach Change Process.
 19. Release Branch/Tag Policy
 - geschützte Hauptlinie soweit Hosting unterstützt;
 - Review für sicherheitskritische Änderungen;
-- signierte Tags soweit verfügbar;
+- immutable source tag/revision plus the Production release trust-root/update-metadata signatures required by the Secure Release standard; Git tag signing alone is supplementary, not the sole trust anchor;
 - Changelog;
 - Release Notes;
 - Checksums;
@@ -287,7 +287,7 @@ Client:
 - manifest;
 - checksums;
 - SBOM;
-- permissions diff.
+- Web Client origin/CSP/network-destination/browser-capability diff.
 
 
 22. Release Notes
@@ -297,7 +297,7 @@ MUSS nennen:
 - unterstützte Protokollversion;
 - Security-relevante Änderungen;
 - Datenbankmigrationen;
-- Browser-Permissionsänderungen;
+- Web Client Origin-/CSP-/Netzwerkziel-/Browser-Capability-Änderungen;
 - Configänderungen;
 - Breaking Changes;
 - Upgrade Steps;
@@ -408,7 +408,7 @@ Keine improvisierte Änderung von Identitätsregeln während Incident.
 32. Mass Spam Event
 - keine spontanen globalen Sperrlisten als einzige Lösung;
 - Rate Limits/Budgets verschärfen innerhalb spezifizierter Grenzen;
-- Queue/DB beobachten;
+- Queue/StorageBackend health beobachten;
 - neue Regeln nur mit Tests/ADR, wenn semantisch relevant;
 - legitime kleine Services nicht pauschal entfernen.
 
@@ -427,9 +427,9 @@ Recovery:
 - neues System;
 - Tor Onion Service entsprechend Betreiberstrategie;
 - Anwendung;
-- Service Identity Backup;
+- separater, getesteter Offline/SignerProvider Service-Identity-Recoverypfad;
 - Node Identity Backup optional;
-- DB Backup oder Neu-Sync;
+- konsistenter StorageBackend Backup/Export oder verifizierter Neu-Sync soweit Kontinuitätsevidenz nicht ausschließlich lokal ist;
 - Config;
 - Manifest;
 - health;
@@ -460,7 +460,7 @@ Pflege:
 - unterstützte Browser-/Tor-Browser-Basis;
 - OS-Testmatrix;
 - Protokollversionen;
-- DB Schema.
+- StorageBackend schema/format version(s);
 
 
 38. End-of-Life

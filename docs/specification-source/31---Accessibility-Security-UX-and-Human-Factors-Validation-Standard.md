@@ -2,7 +2,7 @@
 
 Source: https://docs.google.com/document/d/1p4czVA3MQXFxkOjSCejdA6xam_U7S78NmkDu41b3Smw/edit?usp=drivesdk
 
-Source modified: 2026-10-11T07:14:37.812Z
+Source modified: 2026-10-12T19:19:16.163Z
 
 ---
 
@@ -97,8 +97,8 @@ without qualification.
 Prefer:
 “Manifest signature valid”
 “Manifest directly checked at this Onion address”
-“Same Service Identity as your saved pin”
-“Different Service Identity than your saved pin”
+“Same logical Service identity as your saved pin”
+“Different logical Service identity than your saved pin”
 “Conflicting signed revisions detected”.
 
 
@@ -218,7 +218,7 @@ Security state changes use appropriate live-region/announcement behavior without
 
 
 20. Mobile/Small Window
-Extension popup/page must remain usable on compact viewport.
+Web Local Search and operator/status pages must remain usable on compact/mobile viewports.
 Long Onion/fingerprint content cannot overflow controls.
 
 
@@ -411,4 +411,52 @@ security-copy registry;
 human comprehension study for critical identity flows;
 no color-only warnings;
 translation semantic controls;
-documented Web-serving-origin and local-vs-server-search privacy caveat.
+documented Web-serving-origin and local-vs-server-search privacy caveat
+
+
+41. OPERATOR STATUS UX
+The status dashboard is a first-class accessibility target.
+
+
+Top-of-page question:
+“Can this Service currently be found through Onion Service Discovery?”
+
+
+Answers use text + icon, never color only:
+Not configured
+Publishing disabled
+Waiting for verification
+Discoverable on checked Nodes
+Degraded
+Identity conflict
+
+
+42. PROGRESS WITHOUT FAKE PRECISION
+Do not show a fake global percentage.
+
+
+Use truthful milestones:
+Configured
+Manifest valid
+Self-verified
+Announced
+Externally observed
+Searchable on checked Nodes
+
+
+43. MOBILE OPERATOR EXPERIENCE
+/status/ MUST work well in Tor Browser Android:
+single-column layout;
+large touch targets;
+long Onion/fingerprint wrapping/copy;
+no hover-only controls;
+clear remediation.
+
+
+44. WARNING SEVERITY
+Propagation delay is informational.
+Tor outage is operational.
+Identity fork/key conflict is security-critical.
+
+
+The visual hierarchy MUST keep those meanings distinct.
