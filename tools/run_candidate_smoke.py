@@ -20,14 +20,19 @@ def run(artifact,commit):
     path.chmod(0o755 if entry.name.endswith('/node-php/bin/onion-service-discovery')else 0o644)
   root=destination/'onion-service-discovery'
   command=['docker','run','--rm','--user',f'{os.getuid()}:{os.getgid()}','--mount',f'type=bind,src={root / "node-php"},dst=/app','--mount','type=bind,src=/etc/ssl/certs/ca-certificates.crt,dst=/run/ca-bundle.crt,readonly','-e','COMPOSER_CAFILE=/run/ca-bundle.crt','-e','SSL_CERT_FILE=/run/ca-bundle.crt','-e','COMPOSER_HOME=/tmp/composer','--workdir','/app',COMPOSER,'composer','install','--no-dev','--no-plugins','--no-scripts','--no-interaction','--prefer-dist']
-  commands=[('locked-runtime-provisioning',command)]
   php=['docker','run','--rm','--network','none','--mount',f'type=bind,src={root},dst=/app,readonly','--workdir','/app',PHP,'php']
+  commands=[('pinned-php-runtime-pull',['docker','pull',PHP]),('unprovisioned-package-diagnostic',php+['node-php/bin/onion-service-discovery','help']),('locked-runtime-provisioning',command)]
   commands +=[(name,php+['node-php/tests/'+script])for name,script in [('packaged-protocol','protocol-core.php'),('packaged-client-host','client-host.php'),('packaged-operator-workflow','operator-cli.php')]]
   for name,command in commands:
    result=subprocess.run(command,capture_output=True,timeout=180)
-   results.append({'check':name,'status':'PASS'if result.returncode==0 else 'FAIL','exit_code':result.returncode})
-   if result.returncode:break
- return {'status':'PASS'if len(results)==4 and all(r['status']=='PASS'for r in results)else 'FAIL','source_commit':commit,'checks':results,'scope':'Explicitly trusted development package; synthetic identities; no live Tor/deployment or production approval','authentication':'NOT_PERFORMED'}
+   expected=3 if name=='unprovisioned-package-diagnostic'else 0
+   passed=result.returncode==expected
+   if name=='unprovisioned-package-diagnostic':passed=passed and result.stderr==b'' and json.loads(result.stdout)=={'status':'FAIL','error':'RUNTIME_DEPENDENCIES_MISSING'}
+   results.append({'check':name,'status':'PASS'if passed else 'FAIL','exit_code':result.returncode})
+   if not passed:
+    if os.environ.get('GITHUB_ACTIONS')=='true':print('::error title=Candidate smoke::'+name+' failed; exit='+str(result.returncode)+'; stderr_present='+str(bool(result.stderr)))
+    break
+ return {'status':'PASS'if len(results)==6 and all(r['status']=='PASS'for r in results)else 'FAIL','source_commit':commit,'checks':results,'scope':'Explicitly trusted development package; synthetic identities; no live Tor/deployment or production approval','authentication':'NOT_PERFORMED'}
 if __name__=='__main__':
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('artifact',type=Path);p.add_argument('--expected-source',required=True);p.add_argument('--execute-trusted-local-development-candidate',action='store_true',required=True);p.add_argument('--report',type=Path);a=p.parse_args()
  try:result=run(a.artifact,a.expected_source)

@@ -149,3 +149,10 @@ raw warnings, verifies prior records/cursors after reopening, and admits records
 after releasing the synthetic padding. SQLite may automatically roll back on
 FULL/IOERR; the adapter avoids issuing another rollback when no transaction is
 active. This does not replace deployed disk/controller/power-loss drills.
+
+The ENOSPC matrix additionally fills storage after immutable-object writes,
+journal PREPARE, atomic HEAD publication and SQLite's pre-cursor commit phase.
+After HEAD, a failed final journal append recovers the new committed state;
+earlier failures recover the old state. The test aligns the journal across a
+page boundary because a full filesystem can still permit writes inside already
+allocated blocks. Record and cursor must agree in every recovered state.

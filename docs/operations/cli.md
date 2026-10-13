@@ -73,3 +73,7 @@ binding. It neither opens/mutates the store nor loads a signing key. Its explici
 `NOT_DERIVED` identity state means it does not establish continuity or replace a
 pin. `SIGNATURE_AND_BINDING_VALID` is not a safety/content or lasting uptime claim.
 Use the normal candidate worker for stored continuity checks and observations.
+
+An unprovisioned source package returns typed `RUNTIME_DEPENDENCIES_MISSING`
+with exit 3 and no raw include warning. Install the locked Composer runtime
+dependencies before invoking application commands.
