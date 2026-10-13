@@ -170,6 +170,34 @@
         "docs/operations/source-groups.md"
       ],
       "remaining": "Local group/concentration diagnostics only; learned-source probation, referral-origin limits and gradual replacement remain incomplete."
+    },
+    {
+      "id": "DERIVED_STABLE_ID_LOOKUP",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/operations/service-id-lookup.md",
+        "docs/conformance/service-id-api-report.json",
+        "docs/conformance/service-id-api-php84-report.json"
+      ],
+      "remaining": "Independent Crypto review, final protocol freeze and active-index proof integration."
+    },
+    {
+      "id": "PRIVATE_REAL_TOR_APPLICATION",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/conformance/private-tor-onion-report.json",
+        "lab/real-tor-cli.md"
+      ],
+      "remaining": "Public Tor, deployed operation, capacity and privacy profiles remain separate gates."
+    },
+    {
+      "id": "ACTUAL_TOR_BROWSER_LOCAL_FUNCTIONS",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/conformance/tor-browser-local-report.json",
+        "lab/tor-browser-local.py"
+      ],
+      "remaining": "Headless local direct-loopback profile only; desktop Normal/Safer/Safest, Android and privacy reviews remain open."
     }
   ]
 }

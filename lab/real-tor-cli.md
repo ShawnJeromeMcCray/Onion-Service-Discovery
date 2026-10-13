@@ -42,3 +42,66 @@ A Tor CLI can perform future real Onion fetch and peer-sync tests without Tor
 Browser once approved network access exists. Browser privacy/rendering/mobile
 checks remain separate. Do not relabel these isolated tests as successful live
 Tor or actual Tor Browser/Android evidence.
+
+## Successful private Onion application traffic
+
+The continuation tested Tor 0.4.9.11 from Debian's signed APT metadata (package
+SHA-256 `2381888dc083316fa59a675434decdf94e3869c34eb1e17a6b54fc9d5a041b98`),
+with reviewed upstream Chutney commit
+`ae3a33c63a10ab29453225242c9c5985e6f2cf1c` and locked PHP 8.5 image above.
+The private `hs-v3-min` network has four authorities, three relays, one client
+and one v3 Onion Service. Its virtual HTTP port is changed from Chutney's test
+5858 to 80, forwarded to a loopback-only temporary HTTP server on 4747.
+Run the checked-in driver inside Docker `--network none`:
+
+```sh
+CHUTNEY_PATH=/path/to/reviewed/chutney \
+CHUTNEY_TOR=/path/to/trusted/tor \
+CHUTNEY_TOR_GENCERT=/path/to/trusted/tor-gencert \
+sh lab/private-tor-network.sh
+```
+
+Provision trusted Tor, Chutney and its reviewed Python dependencies before
+entering the isolated container. `PYTHON` can select Chutney's dedicated Python
+environment. The driver uses a fresh private temporary network, finite bootstrap
+windows, loopback listeners and cleanup traps. These are lab dependencies, not
+new application runtime dependencies. Do not run this private topology as a
+public relay network. The Docker network namespace is the isolation boundary;
+the additional route checks are defense in depth, not an alternative to it.
+
+`private-tor-onion.php` reads only Tor's **public hostname**, never its private
+key. It creates separate temporary Service/Node keys and tests successful signed
+manifest retrieval, transport-backed direct observation, a pinned complete signed
+snapshot, exact owner-state membership and PeerSync on both backends. Imported
+observations never become local observations. Application and Tor fixture state
+are removed on exit. No production root or live seed is created.
+
+See [executed private-network report](../docs/conformance/private-tor-onion-report.json).
+It proves successful application traffic through real local Tor circuits, not
+public Tor access or production deployment. This workspace's public TCP grants
+remain empty; no unsupported tunnel or network-policy bypass was used.
+
+## Actual Tor Browser local functional checks
+
+Official Tor Browser 15.0.25 Linux x86_64 and matching geckodriver were fetched
+from `https://dist.torproject.org/torbrowser/15.0.25/`. Both detached signatures
+were verified against the Tor Browser Developers primary fingerprint
+`EF6E286DDA85EA2A4BA7DE684E2C6E8793298290`, independently matched against Tor's
+[verification instructions](https://support.torproject.org/tor-browser/getting-started/verifying-tor-browser/).
+The exact browser digest is in the [report](../docs/conformance/tor-browser-local-report.json).
+No unverified archive was executed.
+
+```sh
+python lab/tor-browser-local.py \
+  --browser /path/to/verified/tor-browser/Browser/firefox \
+  --driver /path/to/verified/geckodriver
+```
+
+The executed run used Docker `--network none`, a temporary WebDriver profile,
+headless actual Tor Browser, a loopback-only HTTP harness, disabled external Tor
+launcher and direct **local** connections. It verifies the real browser renders
+the app, its worker validates signed demo records, search creates no additional
+HTTP requests, synthetic content has no active visit/media links and pins work.
+It does not test public Onion navigation, the installed user's profile,
+Normal/Safer/Safest privacy behavior, mobile UI or Android. WebDriver preferences
+are test harness choices and must not be copied into deployment browser guidance.

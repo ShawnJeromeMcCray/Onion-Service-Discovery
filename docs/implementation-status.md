@@ -2,7 +2,7 @@
 
 The baseline repository contained only a one-line README. The implementation is
 on `implementation/repository-foundation`; incremental PRs #1–#6 have been merged
-by the repository owner. Subsequent development continues on that branch. The project now contains
+by the repository owner. Production-completion work continues in draft PR #8 on `implementation/production-completion`. The project now contains
 an executable development Node, offline Service signer, separate Client Host,
 locally verifying/searching browser client and mature offline release verifier.
 There is no approved production release.
@@ -14,7 +14,10 @@ suite to 226 cases per language. It does not evaluate freshness/checkpoint ances
 or complete the new active-index checkpoint/onboarding workflow. Local peer
 source grouping now exposes concentration without identity-count trust; gradual
 learned-source admission remains open. Tor transport uses explicit format-zero
-SOCKS isolation. See [continuation evidence](production-completion-review.md).
+SOCKS isolation. The D-051 owner-approved genesis-key ID now has a complete-history lookup.
+Real private-Tor application traffic and actual headless Tor Browser local tests
+have passed; public Tor, Android and browser security-level profiles remain open.
+See [continuation evidence](production-completion-review.md).
 
 The 2026-10-13 refresh found 55 active sources: 43 updated, five added, seven
 unchanged. The full updated corpus has been read in the mandatory order.

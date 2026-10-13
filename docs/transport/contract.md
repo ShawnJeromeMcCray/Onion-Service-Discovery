@@ -59,3 +59,11 @@ The service-history endpoint uses a derived immutable lookup index, with a
 snapshots. Bounded reference-preserving export cleanup is operator-only while
 workers are stopped. Actual live Tor/desktop Android profiles, long-running
 retention and deployed hardening remain release gates. No production approval is implied by this draft runtime.
+
+Canonical genesis-key and historical-address lookups are described in
+[service-ID lookup](../operations/service-id-lookup.md). Successful real-Tor
+application tests use a private isolated network; the official signature-verified
+Tor Browser also passes scoped local headless checks. See
+[executed evidence](../conformance/private-tor-onion-report.json) and
+[browser evidence](../conformance/tor-browser-local-report.json). These do not
+complete the deployed public-Tor/browser privacy gates above.

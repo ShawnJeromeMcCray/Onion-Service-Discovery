@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add owner-approved genesis-key service lookup with complete rotation/migration,
+  persistent fork and withdrawal evidence on both storage backends.
+- Add successful real private-Tor application tests and signature-verified
+  actual Tor Browser local headless checks, with explicit certification limits.
+
 - Add exact-state offline complete-snapshot membership in PHP, TypeScript and
   independent Python, shared adversarial vectors and an operator CLI.
 - Add local peer source groups and concentration diagnostics without key-count trust.

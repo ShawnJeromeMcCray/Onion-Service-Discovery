@@ -61,20 +61,23 @@ The refreshed source decision register adds four unresolved release blockers:
 
 | ID | Decision | State | Owner | Release blocker | Source recommendation |
 | --- | --- | --- | --- | --- | --- |
-| D-051 | Stable Logical Service Identifier | UNRESOLVED | Human Protocol/Crypto reviewer | YES | Genesis public-key encoding is proposed; claimed identifiers need full continuity evidence. |
+| D-051 | Stable Logical Service Identifier | OWNER-APPROVED / CRYPTO-REVIEW-OPEN | Human Protocol/Crypto reviewer | YES (independent review) | Owner approved canonical genesis public-key encoding on 2026-10-13; claimed identifiers need full continuity evidence. |
 | D-052 | Signed Node Checkpoint Chain | UNRESOLVED | Human Protocol/Security reviewer | YES | Exact successor +1, chained previous hash and non-prefix-compatible-history evidence; exact bytes/genesis representation need freeze. |
 | D-053 | Category Registry v1 Immutability | PROPOSED / NEEDS-HUMAN-REVIEW | Human Protocol/Product reviewer | YES | Frozen IDs cannot change or silently expand; extensions need explicit versioning. |
 | D-054 | Language Tag Wire Grammar | PROPOSED / NEEDS-HUMAN-REVIEW | Human Protocol/I18N reviewer | YES | One tested RFC 5646 grammar, lowercase ASCII wire form and canonical uniqueness are proposed. |
 
-These are source recommendations, not implementation-selected wire formats or
-approvals. D-001 remains approved by the owner's earlier explicit CC0 instruction.
+D-052 through D-054 remain source recommendations, not approvals. D-001 remains approved by the owner's earlier explicit CC0 instruction.
 
 PCP-001 records the current category/language implementation experiment and stricter
 draft acceptance. Tests do not approve these freeze decisions.
 
 Continuation evidence: D-051 has executable genesis-anchor/current-key/key-epoch
 comparison in the offline complete-snapshot verifier, with shared rotation and
-migration fixtures. This is concrete development evidence for review, not wire
-freeze approval. D-042 now has the format-zero transport implementation and
+migration fixtures. The owner approved this proposed D-051 choice in the continuation conversation on
+2026-10-13 ("Ja, dann mach weiter"). This approval accepts the canonical
+`ed25519:<base64url-no-padding>` genesis key as the immutable logical service ID;
+the current signing key and epoch remain separate. It does not attest to an
+independent cryptographic review. The derived by-ID endpoint now preserves
+rotation, migration, withdrawal and fork evidence on both storage backends. D-042 now has the format-zero transport implementation and
 [ADR 005](../adr/005-tor-socks-format-zero.md); actual deployed Tor and human
-review remain open. No decision approval is inferred.
+review remain open. No other decision approval is inferred.

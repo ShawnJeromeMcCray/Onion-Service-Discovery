@@ -1,0 +1,24 @@
+{
+  "status": "PASS_DEVELOPMENT",
+  "network": "private Tor network in Docker network none",
+  "checks": [
+    "SIGNED_ONION_MANIFEST_FETCH",
+    "REAL_TOR_DIRECT_OBSERVATION",
+    "PINNED_SIGNED_SNAPSHOT_FETCH",
+    "EXACT_OWNER_STATE_MEMBERSHIP",
+    "FILESYSTEM_PEER_SYNC",
+    "SQLITE_PEER_SYNC",
+    "IMPORTED_OBSERVATION_NOT_LOCAL"
+  ],
+  "public_tor_verified": false,
+  "browser_verified": false,
+  "production_approved": false,
+  "executed_at": "2026-10-13",
+  "tor_version": "0.4.9.11",
+  "tor_debian_package_sha256": "2381888dc083316fa59a675434decdf94e3869c34eb1e17a6b54fc9d5a041b98",
+  "chutney_commit": "ae3a33c63a10ab29453225242c9c5985e6f2cf1c",
+  "php_image": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3",
+  "reproduction_driver": "lab/private-tor-network.sh",
+  "fresh_network_reproduction_passed": true,
+  "cleanup": "temporary application/network fixture state removed; Docker --rm container stopped"
+}
