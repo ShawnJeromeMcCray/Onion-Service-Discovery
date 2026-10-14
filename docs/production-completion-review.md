@@ -198,3 +198,15 @@ invalidate reuse and an empty query avoids normalization. All 247 client tests,
 type checking, source sink policy and four controlled browser tests pass. The
 first-query cost is recorded explicitly. Node execution without DOM/Tor/mobile
 does not close the browser capacity gates.
+
+### Local storage failure attribution (2026-10-14)
+
+Peer sync now backs off on local StorageException without increasing the remote
+failure counter or quarantining the source. Protocol violations still quarantine
+and transient transport failures retain their finite retry threshold. The
+controlled SQLite test exhausts a real one-record quota nine times, checks no
+anchor advance and released leases, preserves an existing seven-failure counter,
+and completes import after capacity is restored without manual peer readmission.
+The peer-sync integration and PHPStan level 8 pass on pinned PHP 8.4/8.5. A disk
+failure that also prevents the backoff transaction from persisting can still
+surface a local error; lease expiry remains the existing recovery bound.

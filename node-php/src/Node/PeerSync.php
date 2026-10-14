@@ -115,10 +115,15 @@ final class PeerSync
             $this->finish($onion, $claim, $now, 'CANDIDATE'); return ['status' => 'PROGRESS', 'phase' => 'CHUNKS', 'next_chunk' => $sync['chunk_index']];
         } catch (TransportException | \InvalidArgumentException | StorageException $error) {
             if ($error->getMessage() === 'PEER_CLAIM_LOST') { return ['status' => 'CLAIM_LOST']; }
-            $transient = $error instanceof StorageException || in_array($error->getMessage(), ['TOR_REQUEST_FAILED','HTTP_STATUS_REJECTED'], true);
-            $failureState = $this->store->transaction(function (StorageTransaction $tx) use ($onion,$claim,$now,$error,$transient): string {
-                $row = $this->claimed($tx,$onion,$claim); ++$row['failures']; $row['state'] = !$transient || $row['failures'] >= 8 ? 'QUARANTINED' : 'BACKOFF';
-                $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $now + min(86400,3600 * (2 ** min(5,$row['failures'] - 1))) + random_int(0,300); $row['error'] = $error->getMessage(); $tx->set('peers',$onion->hostname,$row); return $row['state'];
+            $localFailure = $error instanceof StorageException;
+            $transient = $localFailure || in_array($error->getMessage(), ['TOR_REQUEST_FAILED','HTTP_STATUS_REJECTED'], true);
+            $failureState = $this->store->transaction(function (StorageTransaction $tx) use ($onion,$claim,$now,$error,$transient,$localFailure): string {
+                $row = $this->claimed($tx,$onion,$claim);
+                // Local quota/disk failures are not authenticated peer misconduct.
+                if (!$localFailure) { ++$row['failures']; }
+                $row['state'] = !$localFailure && (!$transient || $row['failures'] >= 8) ? 'QUARANTINED' : 'BACKOFF';
+                $delay = $localFailure ? 3600 : min(86400,3600 * (2 ** min(5,$row['failures'] - 1)));
+                $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $now + $delay + random_int(0,300); $row['error'] = $error->getMessage(); $tx->set('peers',$onion->hostname,$row); return $row['state'];
             });
             return ['status' => $failureState,'error' => $error->getMessage()];
         }

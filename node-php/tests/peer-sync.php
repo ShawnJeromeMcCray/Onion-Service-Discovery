@@ -17,10 +17,11 @@ use OnionServiceDiscovery\Storage\SQLiteStore;
 use OnionServiceDiscovery\Storage\PublicBlobStore;
 use OnionServiceDiscovery\Storage\StorageTransaction;
 function exactPeer($socket,int $length): string { $bytes=''; while(strlen($bytes)<$length) { $part=fread($socket,$length-strlen($bytes)); if($part===false||$part==='') { throw new RuntimeException('short SOCKS'); } $bytes.=$part; } return $bytes; }
-function runPeer(DataApi $api,string $path,string $onion,int $now,bool $tamper=false): array {
+function runPeer(DataApi $api,string $path,string $onion,int $now,bool $tamper=false,?int $maxRecords=null): array {
     $server=stream_socket_server('tcp://127.0.0.1:0',$errno,$error); if($server===false) { throw new RuntimeException('fixture unavailable'); }
     $port=substr(strrchr(stream_socket_get_name($server,false),':'),1);
-    $process=proc_open([PHP_BINARY,__DIR__.'/peer-sync-worker.php',$path,$onion,$port,(string)$now],[['pipe','r'],['pipe','w'],['pipe','w']],$pipes); fclose($pipes[0]); $requests=0; $exit=null; $deadline=microtime(true)+20;
+    $command=[PHP_BINARY,__DIR__.'/peer-sync-worker.php',$path,$onion,$port,(string)$now]; if($maxRecords!==null)$command[]=(string)$maxRecords;
+    $process=proc_open($command,[['pipe','r'],['pipe','w'],['pipe','w']],$pipes); fclose($pipes[0]); $requests=0; $exit=null; $deadline=microtime(true)+20;
     while(microtime(true)<$deadline) {
         $status=proc_get_status($process); if(!$status['running']) { $exit=$status['exitcode']; break; }
         $socket=@stream_socket_accept($server,0.1); if($socket===false) { continue; } stream_set_timeout($socket,3);
@@ -47,6 +48,17 @@ $v=json_decode(file_get_contents($project.'/node-php/config/example.json'),true)
 file_put_contents($root.'/config.json',json_encode($v,JSON_THROW_ON_ERROR)); $config=NodeConfig::load($root.'/config.json'); NodeInitializer::initialize($config,$signer,$verifier);
 $source=$config->store(); $blobs=new PublicBlobStore($root.'/exports'); $source->transaction(static function(StorageTransaction $tx) use($records): void { foreach($records as $record) { $tx->putRecord($record); } });
 $producer=new SnapshotProducer($source,$blobs,$verifier,$signer); $first=$producer->publish(1700000000); $api=new DataApi($source,$blobs,$verifier,true);
+// Real local admission saturation must not accumulate remote failure penalties.
+$limited=new SQLiteStore($root.'/limited.sqlite',create:true); PeerRegistry::add($limited,OnionAddress::parse($onion),$signer->publicKey());
+for($attempt=0;$attempt<9;++$attempt){
+ if($attempt===8)$limited->transaction(static function(StorageTransaction $tx) use($onion): void { $row=$tx->get('peers',$onion);$row['failures']=7;$tx->set('peers',$onion,$row); });
+ $blocked=runPeer($api,$root.'/limited.sqlite',$onion,1699900000+$attempt*4000,false,1);
+ $state=$limited->snapshot(); $peer=$state['tables']['peers']['key:'.$onion];
+ if($blocked['status']!=='BACKOFF'||$blocked['error']!=='STORAGE_BUDGET_EXHAUSTED'||$peer['failures']!==($attempt===8?7:0)||$peer['claim']!==null||isset($state['tables']['sync']['key:'.$onion]['generation']))throw new RuntimeException('local saturation blamed peer or advanced anchor');
+}
+$recovered=runPeer($api,$root.'/limited.sqlite',$onion,1700000000);
+if($recovered['status']!=='CURRENT'||$recovered['generation']!==1)throw new RuntimeException('local capacity recovery required peer readmission');
+$limited->integrityCheck();unset($limited);
 $target=new SQLiteStore($root.'/target.sqlite',create:true); PeerRegistry::add($target,OnionAddress::parse($onion),$signer->publicKey());
 $result=runPeer($api,$root.'/target.sqlite',$onion,1700000000); if($result['status']!=='CURRENT'||$result['generation']!==1) { throw new RuntimeException('initial sync: '.json_encode($result)); }
 $identity=[]; foreach($target->snapshot()['records'] as $hash=>$metadata) { $identity[]=$verifier->verifyWire($target->readRecord($hash)); }
