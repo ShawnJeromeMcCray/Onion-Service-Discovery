@@ -27,6 +27,8 @@ $address = OnionAddress::parse(trim(file_get_contents($argv[1])));
 $project = dirname(__DIR__); $verifier = new RecordVerifier($project . '/protocol/schemas');
 $root = sys_get_temp_dir() . '/osd-private-tor-' . bin2hex(random_bytes(12)); mkdir($root, 0700);
 $server = null;
+$browserBinary = getenv('OSD_PRIVATE_TOR_BROWSER_BINARY');
+$withBrowser = is_string($browserBinary) && $browserBinary !== '';
 try {
     // Fresh Service and Node keys are separate from Tor's ephemeral lab keys.
     $service = ProtectedFileSigner::create($root . '/service.key', 'service', 'TEST ONLY private Tor service passphrase', $verifier);
@@ -37,6 +39,7 @@ try {
     $manifest = $verifier->verify($service->signRecord($doc));
     file_put_contents($root . '/manifest.json', $manifest->canonicalWire); chmod($root . '/manifest.json', 0600);
     $config = json_decode(file_get_contents($project . '/node-php/config/node.example.json'), true);
+    if ($withBrowser) { $config['role'] = 'combined'; $config['sources'] = [$address->hostname]; $config['features']['server_search'] = true; }
     $config['node'] = ['onion' => $address->hostname, 'key_path' => $root . '/node.key'];
     $config['storage']['path'] = $root . '/source'; $config['export_path'] = $root . '/exports';
     $config['features']['mirror_directory'] = true; $config['features']['discover_services'] = true; $config['features']['accept_announcements'] = true; $config['transport']['proxy_port'] = (int)$argv[2];
@@ -58,7 +61,7 @@ try {
     if ((new DirectVerifier($source, $verifier, $transport, $node))->runOne(time())['status'] !== 'VERIFIED') { throw new RuntimeException('real Tor direct verification failed'); }
     if (count($source->snapshot()['tables']['local_observations']) !== 1) { throw new RuntimeException('missing real direct observation'); }
     $blobs = new PublicBlobStore($root . '/exports');
-    (new SnapshotProducer($source, $blobs, $verifier, $node))->publish(time());
+    (new SnapshotProducer($source, $blobs, $verifier, $node, $withBrowser))->publish(time());
     $state = json_decode($transport->get($address, ProtocolEndpoint::state()));
     $wire = $transport->get($address, ProtocolEndpoint::snapshot($state->checkpoint_hash));
     $checkpoint = $verifier->verifyWire($wire)->document(); $chunks = [];
@@ -73,7 +76,28 @@ try {
         if ($receiver->snapshot()['tables']['local_observations'] !== []) { throw new RuntimeException('imported claim elevated to local observation'); }
         $receiver->integrityCheck(); unset($receiver);
     }
-    echo json_encode(['status'=>'PASS_DEVELOPMENT', 'network'=>'private Tor network in Docker network none', 'checks'=>['SIGNED_ONION_MANIFEST_FETCH','BOUNDED_TOR_ANNOUNCEMENT_UNCONFIRMED','PRODUCTION_HTTP_ENTRYPOINT','REAL_TOR_DIRECT_OBSERVATION','PINNED_SIGNED_SNAPSHOT_FETCH','EXACT_OWNER_STATE_MEMBERSHIP','FILESYSTEM_PEER_SYNC','SQLITE_PEER_SYNC','IMPORTED_OBSERVATION_NOT_LOCAL'], 'public_tor_verified'=>false, 'browser_verified'=>false, 'production_approved'=>false], JSON_THROW_ON_ERROR), PHP_EOL;
+    if ($withBrowser) {
+        $python = getenv('OSD_PRIVATE_TOR_BROWSER_PYTHON'); $driver = getenv('OSD_PRIVATE_TOR_BROWSER_DRIVER');
+        if (!is_string($python) || !is_executable($python) || !is_string($driver) || !is_executable($driver) || !is_executable($browserBinary)) { throw new RuntimeException('trusted browser lab tools missing'); }
+        $process = proc_open([$python, $project . '/lab/tor-browser-private-onion.py', '--browser', $browserBinary, '--driver', $driver, '--onion', $address->hostname, '--socks-port', $argv[2], '--expected-node-key', $node->publicKey(), '--server-log', $root . '/server.log'], [['pipe','r'],['pipe','w'],['pipe','w']], $browserPipes);
+        if (!is_resource($process)) { throw new RuntimeException('private Tor Browser driver unavailable'); }
+        fclose($browserPipes[0]); stream_set_blocking($browserPipes[1], false); stream_set_blocking($browserPipes[2], false);
+        $output = ''; $errors = ''; $end = microtime(true) + 240; $exit = null;
+        do {
+            $output .= stream_get_contents($browserPipes[1]); $errors .= stream_get_contents($browserPipes[2]);
+            if (strlen($output) > 65536 || strlen($errors) > 65536) { break; }
+            $status = proc_get_status($process); if (!$status['running']) { $exit = $status['exitcode']; break; }
+            usleep(100000);
+        } while (microtime(true) < $end);
+        if ($exit === null) { proc_terminate($process); }
+        $output .= stream_get_contents($browserPipes[1]); $errors .= stream_get_contents($browserPipes[2]);
+        fclose($browserPipes[1]); fclose($browserPipes[2]); proc_close($process);
+        if ($exit !== 0 || $errors !== '') { throw new RuntimeException('private Tor Browser test failed: ' . substr($errors, 0, 2000)); }
+        $report = json_decode($output, true, 32, JSON_THROW_ON_ERROR);
+        if (($report['status'] ?? null) !== 'PASS_DEVELOPMENT') { throw new RuntimeException('private Tor Browser assertions failed'); }
+        echo json_encode($report, JSON_THROW_ON_ERROR), PHP_EOL;
+    }
+    echo json_encode(['status'=>'PASS_DEVELOPMENT', 'network'=>'private Tor network in Docker network none', 'checks'=>['SIGNED_ONION_MANIFEST_FETCH','BOUNDED_TOR_ANNOUNCEMENT_UNCONFIRMED','PRODUCTION_HTTP_ENTRYPOINT','REAL_TOR_DIRECT_OBSERVATION','PINNED_SIGNED_SNAPSHOT_FETCH','EXACT_OWNER_STATE_MEMBERSHIP','FILESYSTEM_PEER_SYNC','SQLITE_PEER_SYNC','IMPORTED_OBSERVATION_NOT_LOCAL'], 'public_tor_verified'=>false, 'browser_verified'=>$withBrowser, 'production_approved'=>false], JSON_THROW_ON_ERROR), PHP_EOL;
 } finally {
     if (is_resource($server)) { proc_terminate($server); proc_close($server); }
     putenv('OSD_PRIVATE_TOR_LAB_ROOT'); unset($source, $blobs, $service, $node);

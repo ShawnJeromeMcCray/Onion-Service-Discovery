@@ -17,10 +17,11 @@ use OnionServiceDiscovery\Storage\SQLiteStore;
 use OnionServiceDiscovery\Storage\PublicBlobStore;
 use OnionServiceDiscovery\Storage\StorageTransaction;
 function exactPeer($socket,int $length): string { $bytes=''; while(strlen($bytes)<$length) { $part=fread($socket,$length-strlen($bytes)); if($part===false||$part==='') { throw new RuntimeException('short SOCKS'); } $bytes.=$part; } return $bytes; }
-function runPeer(DataApi $api,string $path,string $onion,int $now,bool $tamper=false): array {
+function runPeer(DataApi $api,string $path,string $onion,int $now,bool $tamper=false,?int $maxRecords=null): array {
     $server=stream_socket_server('tcp://127.0.0.1:0',$errno,$error); if($server===false) { throw new RuntimeException('fixture unavailable'); }
     $port=substr(strrchr(stream_socket_get_name($server,false),':'),1);
-    $process=proc_open([PHP_BINARY,__DIR__.'/peer-sync-worker.php',$path,$onion,$port,(string)$now],[['pipe','r'],['pipe','w'],['pipe','w']],$pipes); fclose($pipes[0]); $requests=0; $exit=null; $deadline=microtime(true)+20;
+    $command=[PHP_BINARY,__DIR__.'/peer-sync-worker.php',$path,$onion,$port,(string)$now]; if($maxRecords!==null)$command[]=(string)$maxRecords;
+    $process=proc_open($command,[['pipe','r'],['pipe','w'],['pipe','w']],$pipes); fclose($pipes[0]); $requests=0; $exit=null; $deadline=microtime(true)+20;
     while(microtime(true)<$deadline) {
         $status=proc_get_status($process); if(!$status['running']) { $exit=$status['exitcode']; break; }
         $socket=@stream_socket_accept($server,0.1); if($socket===false) { continue; } stream_set_timeout($socket,3);
@@ -47,6 +48,17 @@ $v=json_decode(file_get_contents($project.'/node-php/config/example.json'),true)
 file_put_contents($root.'/config.json',json_encode($v,JSON_THROW_ON_ERROR)); $config=NodeConfig::load($root.'/config.json'); NodeInitializer::initialize($config,$signer,$verifier);
 $source=$config->store(); $blobs=new PublicBlobStore($root.'/exports'); $source->transaction(static function(StorageTransaction $tx) use($records): void { foreach($records as $record) { $tx->putRecord($record); } });
 $producer=new SnapshotProducer($source,$blobs,$verifier,$signer); $first=$producer->publish(1700000000); $api=new DataApi($source,$blobs,$verifier,true);
+// Real local admission saturation must not accumulate remote failure penalties.
+$limited=new SQLiteStore($root.'/limited.sqlite',create:true); PeerRegistry::add($limited,OnionAddress::parse($onion),$signer->publicKey());
+for($attempt=0;$attempt<9;++$attempt){
+ if($attempt===8)$limited->transaction(static function(StorageTransaction $tx) use($onion): void { $row=$tx->get('peers',$onion);$row['failures']=7;$tx->set('peers',$onion,$row); });
+ $blocked=runPeer($api,$root.'/limited.sqlite',$onion,1699900000+$attempt*4000,false,1);
+ $state=$limited->snapshot(); $peer=$state['tables']['peers']['key:'.$onion];
+ if($blocked['status']!=='BACKOFF'||$blocked['error']!=='STORAGE_BUDGET_EXHAUSTED'||$peer['failures']!==($attempt===8?7:0)||$peer['claim']!==null||isset($state['tables']['sync']['key:'.$onion]['generation']))throw new RuntimeException('local saturation blamed peer or advanced anchor');
+}
+$recovered=runPeer($api,$root.'/limited.sqlite',$onion,1700000000);
+if($recovered['status']!=='CURRENT'||$recovered['generation']!==1)throw new RuntimeException('local capacity recovery required peer readmission');
+$limited->integrityCheck();unset($limited);
 $target=new SQLiteStore($root.'/target.sqlite',create:true); PeerRegistry::add($target,OnionAddress::parse($onion),$signer->publicKey());
 $result=runPeer($api,$root.'/target.sqlite',$onion,1700000000); if($result['status']!=='CURRENT'||$result['generation']!==1) { throw new RuntimeException('initial sync: '.json_encode($result)); }
 $identity=[]; foreach($target->snapshot()['records'] as $hash=>$metadata) { $identity[]=$verifier->verifyWire($target->readRecord($hash)); }
@@ -88,6 +100,51 @@ $result=runPeer($api,$root.'/partial.sqlite',$onion,1700040010,true); if($result
 $beforeMaintenance=count($target->snapshot()['records']);
 $maintenance=(new \OnionServiceDiscovery\Node\LocalMaintenance($target))->run(1700700000);
 if($maintenance['assertions_removed']<3||$target->snapshot()['tables']['assertions']!==[]||count($target->snapshot()['records'])!==$beforeMaintenance) { throw new RuntimeException('assertion cleanup removed identity evidence or failed expiry'); }
-$target->integrityCheck(); $staging->integrityCheck(); unset($target,$staging,$source,$api,$producer,$blobs,$signer,$config);
+// A long absence must be catchable in finite steps without resetting trust.
+$source->transaction(static function(StorageTransaction $tx) use($first): void { $tx->set('node','published-snapshot',['hash'=>$first['checkpoint_hash']]); });
+$long=new SQLiteStore($root.'/long.sqlite',create:true); PeerRegistry::add($long,OnionAddress::parse($onion),$signer->publicKey());
+$baseline=runPeer($api,$root.'/long.sqlite',$onion,1700800000);
+if($baseline['status']!=='CURRENT'||$baseline['generation']!==1)throw new RuntimeException('long-history baseline');
+$parent=$first['checkpoint_hash']; $longRecords=[];
+for($generation=2;$generation<=36;++$generation){
+ $next=clone $base; $next->generation=$generation; $next->previous_checkpoint_hash=$parent; $next->cursor='long-'.$generation;
+ $next=$verifier->verify($signer->signRecord($next));
+ $source->transaction(static function(StorageTransaction $tx) use($next): void { $tx->putRecord($next); $tx->set('node','published-snapshot',['hash'=>$next->contentHash]); });
+ $parent=$next->contentHash;
+ $longRecords[]=$next;
+}
+$progress=0;
+for($step=1;$step<=20;++$step){
+ $caught=runPeer($api,$root.'/long.sqlite',$onion,1700800000+$step*4000);
+ if($caught['status']==='CURRENT')break;
+ if($caught['status']!=='PROGRESS'||$caught['phase']!=='CHECKPOINT_CHAIN'||$long->snapshot()['tables']['sync']['key:'.$onion]['generation']!==1)throw new RuntimeException('long catch-up discarded or activated unverified anchor: '.json_encode($caught));
+ ++$progress;
+}
+if($caught['status']!=='CURRENT'||$caught['generation']!==36||$progress<2)throw new RuntimeException('long catch-up failed bounded progress');
+$source->transaction(static function(StorageTransaction $tx) use($first): void { $tx->set('node','published-snapshot',['hash'=>$first['checkpoint_hash']]); });
+$cached=new SQLiteStore($root.'/cached-long.sqlite',create:true); PeerRegistry::add($cached,OnionAddress::parse($onion),$signer->publicKey());
+runPeer($api,$root.'/cached-long.sqlite',$onion,1700900000);
+$cached->transaction(static function(StorageTransaction $tx) use($longRecords): void { foreach($longRecords as $record)$tx->putRecord($record); });
+$source->transaction(static function(StorageTransaction $tx) use($parent): void { $tx->set('node','published-snapshot',['hash'=>$parent]); });
+$bounded=runPeer($api,$root.'/cached-long.sqlite',$onion,1700904000);
+if($bounded['status']!=='PROGRESS'||$bounded['phase']!=='CHECKPOINT_CHAIN'||$cached->snapshot()['tables']['sync']['key:'.$onion]['generation']!==1)throw new RuntimeException('cached chain bypassed per-step work bound');
+$completed=runPeer($api,$root.'/cached-long.sqlite',$onion,1700908000);
+if($completed['status']!=='CURRENT'||$completed['generation']!==36)throw new RuntimeException('cached chain failed resume');
+$cached->integrityCheck();
+// Continuity after late first contact must not invent proof back to genesis.
+$late=new SQLiteStore($root.'/late.sqlite',create:true); PeerRegistry::add($late,OnionAddress::parse($onion),$signer->publicKey());
+runPeer($api,$root.'/late.sqlite',$onion,1701000000);
+if($late->snapshot()['tables']['sync']['key:'.$onion]['baseline_history_proven']!==false)throw new RuntimeException('late baseline invented genesis history');
+$late->transaction(static function(StorageTransaction $tx) use($onion): void { $row=$tx->get('sync',$onion); $row['baseline_history_proven']=true; unset($row['baseline_history_proven_version']); $tx->set('sync',$onion,$row); });
+$legacy=runPeer($api,$root.'/late.sqlite',$onion,1701004000);
+if($legacy['status']!=='CURRENT'||$late->snapshot()['tables']['sync']['key:'.$onion]['baseline_history_proven']!==false)throw new RuntimeException('legacy overclaimed baseline was retained');
+$later=clone $base; $later->generation=37; $later->previous_checkpoint_hash=$parent; $later->cursor='long-37';
+$later=$verifier->verify($signer->signRecord($later));
+$source->transaction(static function(StorageTransaction $tx) use($later): void { $tx->putRecord($later); $tx->set('node','published-snapshot',['hash'=>$later->contentHash]); });
+$followed=runPeer($api,$root.'/late.sqlite',$onion,1701008000);
+if($followed['status']!=='CURRENT'||$late->snapshot()['tables']['sync']['key:'.$onion]['baseline_history_proven']!==false)throw new RuntimeException('one successor invented unavailable genesis ancestry');
+$late->integrityCheck();
+$long->integrityCheck();
+$target->integrityCheck(); $staging->integrityCheck(); unset($target,$staging,$cached,$late,$long,$source,$api,$producer,$blobs,$signer,$config);
 $it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST); foreach($it as $file) { $file->isDir()?rmdir($file->getPathname()):unlink($file->getPathname()); } rmdir($root);
-echo "PASS: controlled peer sync, fork union, omission, rollback, equivocation and partial-chunk cursor safety\n";
+echo "PASS: controlled peer sync, fork union, omission, rollback, equivocation partial-chunk cursor safety and bounded long-absence catch-up\n";

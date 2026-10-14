@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "source_commit": "96213ab52e3a3513d3cd1afd4f1de0657e9f2023",
+  "checks": [
+    {
+      "check": "pinned-php-runtime-pull",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "unprovisioned-package-diagnostic",
+      "status": "PASS",
+      "exit_code": 3
+    },
+    {
+      "check": "locked-runtime-provisioning",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "packaged-protocol",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "packaged-client-host",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "check": "packaged-operator-workflow",
+      "status": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "scope": "Explicitly trusted development package; synthetic identities; no live Tor/deployment or production approval",
+  "authentication": "NOT_PERFORMED",
+  "artifact_sha256": "3e1fec5f984c21bdcb08232bd15621b4fd448c3835855a1e077bc7975ed15e61",
+  "two_clean_builds_byte_identical": true,
+  "files": 474,
+  "uncompressed_bytes": 6256220,
+  "sbom_schema": "CycloneDX 1.6 PASS",
+  "production_approved": false
+}

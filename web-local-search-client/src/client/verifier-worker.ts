@@ -4,13 +4,14 @@ import { verifyRecord, requiredObject, type VerifiedRecord } from '../protocol/r
 import { SourceLoader, type SourceSelection, type SourceLedger, type DeliveryProfile } from './source-loader.ts';
 import { buildView, pinIdentity, type LocalPin } from './view-model.ts';
 import { parsePinBackup } from './pins.ts';
+import { SourceWitnesses } from './source-witnesses.ts';
 
 type Command = {op:'configure';allowedSources:string[];deliveryProfile:DeliveryProfile}|{op:'load';sources:SourceSelection[]}|{op:'cancel'}|{op:'import-records';bytes:ArrayBuffer;synthetic?:boolean}|{op:'pin';genesisKey:string}|{op:'unpin';genesisKey:string}|{op:'restore-pins';bytes:ArrayBuffer}|{op:'preview-pins';bytes:ArrayBuffer}|{op:'clear-index'}|{op:'clear-all'};
 const scope=globalThis as unknown as {onmessage:((event:MessageEvent<Command>)=>void)|null;postMessage:(data:unknown)=>void};
 const crypto=browserCryptoProviders(); let loader=new SourceLoader(crypto);
-const records=new Map<string,VerifiedRecord>(); const ledgers=new Map<string,SourceLedger>(); const witnesses=new Map<string,VerifiedRecord>();
+const records=new Map<string,VerifiedRecord>(); const ledgers=new Map<string,SourceLedger>(); const witnesses=new SourceWitnesses();
 let pins:LocalPin[]=[]; let allowed=new Set<string>(); let controller:AbortController|null=null; let busy=false; let synthetic=false;
-interface SourceStatus {onion:string;status:'LOADING'|'COMPLETE'|'STALE'|'FAILED'|'QUARANTINED';nodeKey:string|null;generation:number|null;error:string|null;baselineHistoryProven:boolean;}
+interface SourceStatus {onion:string;status:'LOADING'|'PARTIAL'|'COMPLETE'|'STALE'|'FAILED'|'QUARANTINED';nodeKey:string|null;generation:number|null;error:string|null;baselineHistoryProven:boolean;}
 let statuses:SourceStatus[]=[];
 function code(error:unknown):string { return error instanceof Error&&/^[A-Z_]{1,80}$/.test(error.message)?error.message:'CLIENT_OPERATION_FAILED'; }
 function publish():void {
@@ -48,7 +49,7 @@ async function command(message:Command):Promise<void> {
     if(merged.size>256) throw new Error('PIN_BUDGET_EXHAUSTED'); pins=[...merged.values()]; publish(); return;
   }
   if(busy) throw new Error('CLIENT_BUSY');
-  if(message.op==='clear-all') { records.clear(); ledgers.clear(); witnesses.clear(); pins=[]; statuses=[]; synthetic=false; publish(); return; }
+  if(message.op==='clear-all') { records.clear(); ledgers.clear(); witnesses.clear(); loader.clear(); pins=[]; statuses=[]; synthetic=false; publish(); return; }
   if(message.op==='clear-index') { records.clear(); statuses=[]; synthetic=false; publish(); return; }
   busy=true; publish();
   try {
@@ -69,10 +70,10 @@ async function command(message:Command):Promise<void> {
       for(let index=0;index<message.sources.length;++index) {
         const selection=message.sources[index]!; const status=statuses[index]!;
         try {
-          const result=await loader.load(selection,ledgers.get(selection.onion),controller.signal,(ledger,evidence)=>{if(!witnesses.has(evidence.contentHash)&&witnesses.size>=512) throw new Error('WITNESS_BUDGET_EXHAUSTED');ledgers.set(selection.onion,structuredClone(ledger));witnesses.set(evidence.contentHash,evidence);});
+          const result=await loader.load(selection,ledgers.get(selection.onion),controller.signal,(ledger,evidence)=>{const fork=witnesses.observe(evidence);ledger.equivocated ||= fork;ledgers.set(selection.onion,structuredClone(ledger));if(ledger.equivocated)throw new Error(evidence.type==='node_descriptor'?'SOURCE_DESCRIPTOR_EQUIVOCATION':'SOURCE_CHECKPOINT_EQUIVOCATION');});
           admit(result.records); ledgers.set(selection.onion,result.ledger);
           const age=Date.now()-Date.parse(result.createdAt); status.status=age>604800000||age< -300000?'STALE':'COMPLETE'; status.nodeKey=result.ledger.nodeKey; status.generation=result.ledger.generation; status.baselineHistoryProven=result.baselineHistoryProven;
-        } catch(error) { status.error=code(error); status.status=/EQUIVOCATION|ROLLBACK|FORK|KEY_CHANGED/.test(status.error)?'QUARANTINED':'FAILED'; }
+        } catch(error) { status.error=code(error); status.status=status.error==='SOURCE_HISTORY_PROGRESS'?'PARTIAL':/EQUIVOCATION|ROLLBACK|FORK|KEY_CHANGED/.test(status.error)?'QUARANTINED':'FAILED'; }
         publish(); if(controller.signal.aborted) break;
       }
     }

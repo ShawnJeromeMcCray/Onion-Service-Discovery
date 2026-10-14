@@ -81,9 +81,20 @@ export function pinIdentity(identity:ServiceRow,label=identity.name):LocalPin {
   return {genesisKey:identity.genesisKey,contextOnion:identity.onion,anchorHash:identity.currentHash,latestHash:identity.currentHash,highestRevision:identity.revision,label:label.slice(0,128),conflicted:false};
 }
 export type AdultVisibility = 'show' | 'de-emphasize' | 'hide';
+// Derived presentation data only. Weak keys release old views; comparing the
+// complete input also keeps callers that mutate row metadata correct.
+const searchTexts = new WeakMap<ServiceRow, {input:string; normalized:string}>();
+function searchHaystack(row:ServiceRow):string {
+  const input=[row.name,row.description,row.onion??'',row.genesisKey,...row.categories,...row.languages].join(' ');
+  const cached=searchTexts.get(row);
+  if(cached?.input===input)return cached.normalized;
+  const normalized=searchTextV1(input);
+  searchTexts.set(row,{input,normalized});
+  return normalized;
+}
 export function localSearch(services:readonly ServiceRow[],query:string,language='',category='',adult:AdultVisibility='show'):ServiceRow[] {
   const terms=searchTextV1(query.slice(0,256)).split(/\s+/u).filter(Boolean).slice(0,16);
-  return services.filter(row=>{if(row.status==='WITHDRAWN'||(language!==''&&!row.languages.includes(language))||(category!==''&&!row.categories.includes(category))||(adult==='hide'&&row.categories.includes('adult')))return false;const haystack=searchTextV1([row.name,row.description,row.onion??'',row.genesisKey,...row.categories,...row.languages].join(' '));return terms.every(term=>haystack.includes(term));}).sort((a,b)=>{
+  return services.filter(row=>{if(row.status==='WITHDRAWN'||(language!==''&&!row.languages.includes(language))||(category!==''&&!row.categories.includes(category))||(adult==='hide'&&row.categories.includes('adult')))return false;const haystack=terms.length===0?'':searchHaystack(row);return terms.every(term=>haystack.includes(term));}).sort((a,b)=>{
     if(adult==='de-emphasize') { const difference=Number(a.categories.includes('adult'))-Number(b.categories.includes('adult'));if(difference!==0)return difference; }
     return a.name<b.name?-1:a.name>b.name?1:a.genesisKey<b.genesisKey?-1:a.genesisKey>b.genesisKey?1:0;
   });

@@ -1,0 +1,21 @@
+{
+  "status": "PASS_DEVELOPMENT",
+  "network": "private Tor network in Docker network none",
+  "checks": [
+    "SIGNED_ONION_MANIFEST_FETCH",
+    "BOUNDED_TOR_ANNOUNCEMENT_UNCONFIRMED",
+    "PRODUCTION_HTTP_ENTRYPOINT",
+    "REAL_TOR_DIRECT_OBSERVATION",
+    "PINNED_SIGNED_SNAPSHOT_FETCH",
+    "EXACT_OWNER_STATE_MEMBERSHIP",
+    "FILESYSTEM_PEER_SYNC",
+    "SQLITE_PEER_SYNC",
+    "IMPORTED_OBSERVATION_NOT_LOCAL"
+  ],
+  "public_tor_verified": false,
+  "browser_verified": true,
+  "production_approved": false,
+  "executed_at": "2026-10-13",
+  "tor_version": "0.4.9.11",
+  "browser_report": "docs/conformance/tor-browser-private-onion-report.json"
+}

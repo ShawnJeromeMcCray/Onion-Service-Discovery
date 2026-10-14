@@ -97,6 +97,7 @@ function renderSources(sources:SourceStatus[]):void {
     if(source.error!==null) card.append(text('div',source.error,'problem'));
     if(source.status==='COMPLETE'&&!source.baselineHistoryProven) card.append(text('div','First-contact baseline; earlier Node checkpoint history is not proven.','problem'));
     if(source.status==='STALE') card.append(text('div','Old checkpoint or clock discrepancy. Historical signatures remain evidence, not freshness.','problem'));
+    if(source.status==='PARTIAL') card.append(text('div','History verification is incomplete. Refresh again to continue; the last verified local index remains available.'));
     container.append(card);
   }
   if(sources.length>0&&keys.size<3) container.append(text('p','Limited source coverage. Multiple keys still do not guarantee independent operators. Identity pins do not depend on a vote.','conflict'));

@@ -1,0 +1,86 @@
+{
+  "profile": "S1000-typical-5-node-claims",
+  "execution": "Node.js runs browser crypto/view code; no DOM, Tor or network",
+  "node": "v24.19.0",
+  "record_count": 7005,
+  "verification_total_ms": 32273.325507999998,
+  "verification": {
+    "samples": 7005,
+    "p50_ms": 3.675046000000293,
+    "p95_ms": 8.859097999999904,
+    "p99_ms": 12.438389999999345
+  },
+  "derive": {
+    "samples": 10,
+    "p50_ms": 336.39586099999724,
+    "p95_ms": 402.4424269999945,
+    "p99_ms": 402.4424269999945
+  },
+  "local_search": {
+    "samples": 100,
+    "p50_ms": 0.8587819999956992,
+    "p95_ms": 1.6505319999996573,
+    "p99_ms": 3.699273999998695,
+    "first_query_ms": 241.57228600000235,
+    "max_ms": 241.57228600000235
+  },
+  "memory_bytes": {
+    "rss": 366358528,
+    "heapTotal": 290406400,
+    "heapUsed": 158524912,
+    "external": 14465068,
+    "arrayBuffers": 171894
+  },
+  "cpu_microseconds": {
+    "user": 36724033,
+    "system": 610600
+  },
+  "executed_at": "2026-10-14",
+  "status": "PASS_DEVELOPMENT",
+  "production_approved": false,
+  "dataset_sha256": "eec98bcfff59da3dbc3d4222a48569537fb98db2131a7647ac7a3ab0ebaba323",
+  "baseline_code_commit": "eccffece3bdf477b2eb4b048b37271fee08fb353",
+  "cache_policy": "Weak per-row keys; complete search input compared before reuse; empty query skips normalization",
+  "before_cache": {
+    "profile": "S1000-typical-5-node-claims",
+    "execution": "Node.js runs browser crypto/view code; no DOM, Tor or network",
+    "node": "v24.19.0",
+    "record_count": 7005,
+    "verification_total_ms": 32141.480155,
+    "verification": {
+      "samples": 7005,
+      "p50_ms": 3.8480179999996835,
+      "p95_ms": 7.930075999998735,
+      "p99_ms": 13.248321000000033
+    },
+    "derive": {
+      "samples": 10,
+      "p50_ms": 325.1472589999976,
+      "p95_ms": 356.67752199999813,
+      "p99_ms": 356.67752199999813
+    },
+    "local_search": {
+      "samples": 100,
+      "p50_ms": 220.6166219999941,
+      "p95_ms": 295.45021899999847,
+      "p99_ms": 342.4441200000001
+    },
+    "memory_bytes": {
+      "rss": 359612416,
+      "heapTotal": 280735744,
+      "heapUsed": 200901352,
+      "external": 14471591,
+      "arrayBuffers": 178417
+    },
+    "cpu_microseconds": {
+      "user": 58951771,
+      "system": 712550
+    }
+  },
+  "limitations": [
+    "Synthetic local Node execution, no browser DOM, Tor or mobile measurements",
+    "Sequential host runs; absolute times depend on load",
+    "First nonempty query retains the one-time full metadata normalization cost",
+    "Whole verifier RSS remains substantial; no mobile capacity claim"
+  ]
+}

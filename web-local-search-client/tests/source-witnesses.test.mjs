@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { ed25519 } from '@noble/curves/ed25519.js';
+import { SourceWitnesses } from '../src/client/source-witnesses.ts';
+import { browserCryptoProviders } from '../src/protocol/crypto-providers.ts';
+import { canonicalJson } from '../src/protocol/canonical-json.ts';
+import { signedMessage } from '../src/protocol/record-format.ts';
+import { verifyWire } from '../src/protocol/record-verifier.ts';
+const sources=JSON.parse(readFileSync(new URL('../../protocol/test-vectors/browser-dataset.json',import.meta.url),'utf8')).sources;
+const crypto=browserCryptoProviders();
+const verified=record=>verifyWire(new TextEncoder().encode(canonicalJson(record)),crypto);
+async function fork(index){
+ const record=structuredClone(sources[index].checkpoint); record.cursor+='-different';
+ const seed=createHash('sha256').update('Onion Service Discovery TEST ONLY browser-source-'+(index+1)).digest();
+ record.signature='ed25519sig:'+Buffer.from(ed25519.sign(signedMessage(record),seed)).toString('base64url');
+ return verified(record);
+}
+test('normal capacity cannot prevent retention of a signed fork pair',async()=>{
+ const store=new SourceWitnesses(2,1);
+ const first=await verified(sources[0].checkpoint); const second=await verified(sources[1].checkpoint);
+ assert.equal(store.observe(first),false); assert.equal(store.observe(first),false);
+ assert.equal(store.observe(second),false); assert.equal(store.size,2);
+ assert.throws(()=>store.observe({...first}),{message:'UNVERIFIED_RECORD'});
+ assert.throws(()=>store.observe(forgedRecord),{message:'UNVERIFIED_RECORD'});
+ const conflict=await fork(0);
+ assert.equal(store.observe(conflict),true); assert.equal(store.size,3);
+ const pair=store.forkEvidence(sources[0].node_descriptor.node_identity_public_key);
+ assert.deepEqual(pair.map(record=>record.contentHash),[first.contentHash,conflict.contentHash]);
+ pair.pop(); assert.equal(store.forkEvidence(sources[0].node_descriptor.node_identity_public_key).length,2);
+ assert.equal(store.observe(first),true);
+ const other=await verified(sources[2].checkpoint);
+ assert.throws(()=>store.observe(other),{message:'WITNESS_BUDGET_EXHAUSTED'});
+ const otherFork=await fork(1);
+ assert.throws(()=>store.observe(otherFork),{message:'WITNESS_BUDGET_EXHAUSTED'});
+ assert.equal(store.size,3);
+ store.clear(); assert.equal(store.size,0); assert.equal(store.observe(other),false);
+});
+const forgedRecord={type:'snapshot_descriptor',contentHash:'sha256:'+'0'.repeat(64),canonicalWire:'{}'};

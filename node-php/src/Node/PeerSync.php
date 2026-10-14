@@ -52,12 +52,15 @@ final class PeerSync
             $this->observe($onion, $claim, $checkpoint);
             $sync = $this->store->snapshot()['tables']['sync']['key:' . $onion->hostname] ?? [];
             $anchorGeneration = $sync['generation'] ?? 0; $anchorHash = $sync['checkpoint_hash'] ?? null;
+            $legacyBaseline = ($sync['baseline_history_proven_version'] ?? 0) !== 2;
+            $sync['baseline_history_proven'] = (!$legacyBaseline && ($sync['baseline_history_proven'] ?? false) === true) || $anchorGeneration === 1;
+            $sync['baseline_history_proven_version'] = 2;
             if ($document->generation < ($sync['seen_generation'] ?? 0) || $document->generation < $anchorGeneration) { throw new ProtocolException('SOURCE_CHECKPOINT_ROLLBACK'); }
             if ($document->generation === $anchorGeneration) {
                 if ($checkpoint->contentHash !== $anchorHash) { throw new ProtocolException('SOURCE_CHECKPOINT_EQUIVOCATION'); }
+                if ($legacyBaseline) { $this->saveSync($onion, $claim, $sync); }
                 $this->finish($onion, $claim, $now, 'ACTIVE'); return ['status' => 'CURRENT', 'generation' => $anchorGeneration];
             }
-            if ($anchorGeneration > 0 && $document->generation - $anchorGeneration > 32) { throw new ProtocolException('SOURCE_CHECKPOINT_HISTORY_TOO_LARGE'); }
             if (($sync['pending_hash'] ?? null) !== $checkpoint->contentHash) {
                 $sync = array_merge($sync, ['seen_generation' => $document->generation, 'pending_hash' => $checkpoint->contentHash, 'walk_hash' => $document->previous_checkpoint_hash, 'walk_generation' => $document->generation - 1, 'chain_complete' => $anchorGeneration === 0, 'chunk_index' => 0, 'received' => 0, 'transfer_bytes' => 0, 'last_record_hash' => null]);
                 $this->saveSync($onion, $claim, $sync);
@@ -65,7 +68,8 @@ final class PeerSync
             $walks = 0;
             while (!$sync['chain_complete']) {
                 if ($sync['walk_hash'] === $anchorHash && $sync['walk_generation'] === $anchorGeneration) { $sync['chain_complete'] = true; $this->saveSync($onion, $claim, $sync); break; }
-                if (++$walks > 32 || $sync['walk_generation'] <= $anchorGeneration) { throw new ProtocolException('SOURCE_CHECKPOINT_CHAIN_BROKEN'); }
+                if ($sync['walk_generation'] <= $anchorGeneration) { throw new ProtocolException('SOURCE_CHECKPOINT_CHAIN_BROKEN'); }
+                if (++$walks > 32) { $this->finish($onion, $claim, $now, 'CANDIDATE'); return ['status' => 'PROGRESS', 'phase' => 'CHECKPOINT_CHAIN']; }
                 $cached = $this->store->readRecord($sync['walk_hash']);
                 if ($cached === null && $this->requests >= 6) { $this->finish($onion, $claim, $now, 'CANDIDATE'); return ['status' => 'PROGRESS', 'phase' => 'CHECKPOINT_CHAIN']; }
                 $parent = $this->verifier->verifyWire($cached ?? $this->fetch($onion, ProtocolEndpoint::snapshot($sync['walk_hash']))); $p = $parent->document();
@@ -101,7 +105,7 @@ final class PeerSync
             }
             if ($sync['chunk_index'] === count($document->chunks)) {
                 if ($sync['received'] !== $document->record_count) { throw new ProtocolException('SOURCE_RECORD_COUNT_INVALID'); }
-                $sync['checkpoint_hash'] = $checkpoint->contentHash; $sync['generation'] = $document->generation; $sync['cursor'] = $document->cursor; $sync['last_sync'] = $now; $sync['baseline_history_proven'] = $anchorGeneration > 0 || $document->generation === 1;
+                $sync['checkpoint_hash'] = $checkpoint->contentHash; $sync['generation'] = $document->generation; $sync['cursor'] = $document->cursor; $sync['last_sync'] = $now; $sync['baseline_history_proven'] = ($sync['baseline_history_proven'] ?? false) || $document->generation === 1;
                 $this->store->transaction(function (StorageTransaction $tx) use ($onion, $claim, $sync, $now): void {
                     $row = $this->claimed($tx, $onion, $claim); $tx->set('sync', $onion->hostname, $sync);
                     $row['state'] = 'ACTIVE'; $row['failures'] = 0; $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $now + 3600 + random_int(0,300); $row['error'] = null; $tx->set('peers', $onion->hostname, $row);
@@ -111,10 +115,15 @@ final class PeerSync
             $this->finish($onion, $claim, $now, 'CANDIDATE'); return ['status' => 'PROGRESS', 'phase' => 'CHUNKS', 'next_chunk' => $sync['chunk_index']];
         } catch (TransportException | \InvalidArgumentException | StorageException $error) {
             if ($error->getMessage() === 'PEER_CLAIM_LOST') { return ['status' => 'CLAIM_LOST']; }
-            $transient = $error instanceof StorageException || in_array($error->getMessage(), ['TOR_REQUEST_FAILED','HTTP_STATUS_REJECTED'], true);
-            $failureState = $this->store->transaction(function (StorageTransaction $tx) use ($onion,$claim,$now,$error,$transient): string {
-                $row = $this->claimed($tx,$onion,$claim); ++$row['failures']; $row['state'] = !$transient || $row['failures'] >= 8 ? 'QUARANTINED' : 'BACKOFF';
-                $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $now + min(86400,3600 * (2 ** min(5,$row['failures'] - 1))) + random_int(0,300); $row['error'] = $error->getMessage(); $tx->set('peers',$onion->hostname,$row); return $row['state'];
+            $localFailure = $error instanceof StorageException;
+            $transient = $localFailure || in_array($error->getMessage(), ['TOR_REQUEST_FAILED','HTTP_STATUS_REJECTED'], true);
+            $failureState = $this->store->transaction(function (StorageTransaction $tx) use ($onion,$claim,$now,$error,$transient,$localFailure): string {
+                $row = $this->claimed($tx,$onion,$claim);
+                // Local quota/disk failures are not authenticated peer misconduct.
+                if (!$localFailure) { ++$row['failures']; }
+                $row['state'] = !$localFailure && (!$transient || $row['failures'] >= 8) ? 'QUARANTINED' : 'BACKOFF';
+                $delay = $localFailure ? 3600 : min(86400,3600 * (2 ** min(5,$row['failures'] - 1)));
+                $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $now + $delay + random_int(0,300); $row['error'] = $error->getMessage(); $tx->set('peers',$onion->hostname,$row); return $row['state'];
             });
             return ['status' => $failureState,'error' => $error->getMessage()];
         }

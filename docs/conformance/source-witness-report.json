@@ -1,0 +1,20 @@
+{
+  "status": "PASS_DEVELOPMENT",
+  "scope": "session-only signed checkpoint ancestry and equivocation evidence; synthetic authenticated Node records, no public Tor or independent audit",
+  "checks": [
+    "35-generation browser resume",
+    "late first-contact and failed-first-import confidence",
+    "changed target broken-link rejection",
+    "conflicting signed ancestor quarantine with both records retained",
+    "fork-pair reserve after normal witness saturation",
+    "unverified/copied witness rejection",
+    "bounded reserve exhaustion and explicit erase"
+  ],
+  "normal_witness_limit": 512,
+  "reserved_fork_pairs": 16,
+  "npm_unit_tests_passed": 246,
+  "chromium_integration_tests_passed": 4,
+  "typescript_check": "PASS",
+  "source_sink_policy": "PASS",
+  "production_approved": false
+}

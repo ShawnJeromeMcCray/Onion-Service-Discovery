@@ -139,3 +139,74 @@ passes two-build byte reproducibility, structure/hash/SBOM validation and all si
 packaged runtime smoke checks. See [candidate report](conformance/nojs-candidate-report.json).
 A subsequent CLI guard also rejects aliases resolving to known Tor-private-key
 filenames before opening input; tests use synthetic files only.
+
+Checkpoint longevity research is recorded in [PCP-003](protocol/proposals/PCP-003-checkpoint-longevity-research.md).
+Its isolated RFC 6962 experiment checks 8,515 prefix pairs through 129 opaque leaves
+and adversarial proof mutations. This does not validate hidden signed checkpoint
+links, establish active-index freshness, or implement an accepted OSD wire format.
+[Research scope](conformance/checkpoint-consistency-research-report.json) is separate
+from production conformance.
+
+The implemented NoJS/private-key-alias commit `04e5328c49fc0f3102f1ca7148c11558f3194b33`
+passes all eight hosted jobs in [run 38476299383](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38476299383),
+including both PHP minors, formal models, controlled browser, dependency/secret
+checks and packaged-candidate validation. The later bounded PHP chain catch-up
+passes all 45 local suites on both pinned minors:
+[PHP 8.5](conformance/checkpoint-catchup-report.json),
+[PHP 8.4](conformance/checkpoint-catchup-php84-report.json). Its accepted anchor
+remains unchanged while verifying 35 missed generations; cached ancestors also
+obey the per-step 32-record work limit. Browser catch-up remains bounded separately.
+
+The browser now resumes a 35-generation checkpoint gap across explicit bounded
+refreshes, using at most 16 session-only verified cursors. Partial work admits no
+new source records or anchor. Tests reject a changed target with a skipped link
+and keep late first-contact/failed-first-import history claims unproven. PHP
+likewise preserves genesis confidence and conservatively normalizes old unversioned
+flags. All 45 suites pass on both pinned PHP minors:
+[PHP 8.5](conformance/browser-catchup-report.json),
+[PHP 8.4](conformance/browser-catchup-php84-report.json); four Chromium browser
+checks and the TypeScript sink policy pass. No compact research proof is used
+by either runtime, and active-index/onboarding approval remains open.
+
+A signed conflicting ancestor encountered during browser catch-up now quarantines
+the source before admission and retains both authenticated records. A bounded
+fork reserve remains available after ordinary witness saturation; no old proof
+is silently evicted. [Executed scope](conformance/source-witness-report.json)
+includes all 246 Node unit tests, typechecking, four Chromium checks and sink policy.
+The previous browser/baseline commit `dead657f3aeafbefbb3d8f654acae55060da1988`
+passed all hosted jobs in [run 38479421456](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38479421456).
+
+Actual Tor Browser 15.0.25 now passes the signed-worker/expected-Node-key/local
+search/pin workflow over a real private Onion address, plus a separate JavaScript-
+disabled disclosed form POST workflow. No query appears in a URL, response or
+reference server log; local search emits no HTTP request. The private-network
+CLI/snapshot/membership/sync assertions also pass on both backends.
+[Browser scope](conformance/tor-browser-private-onion-report.json) explicitly
+records the lab direct-source config override, headless profiles and public-Tor/
+security-level/Android/production limitations.
+The signed-witness commit `96213ab52e3a3513d3cd1afd4f1de0657e9f2023` passes all
+eight hosted jobs in [run 38480981250](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38480981250)
+and two byte-identical clean packages with all six packaged runtime smoke checks:
+[candidate scope](conformance/witness-candidate-report.json).
+
+### Current client Unicode search capacity (2026-10-14)
+
+`docs/performance/s1000-client-search-cache-report.json` records a current signed
+S1000 run and its pre-cache baseline. Frozen Unicode metadata normalization is
+reused through weak row keys with full input comparison; metadata changes
+invalidate reuse and an empty query avoids normalization. All 247 client tests,
+type checking, source sink policy and four controlled browser tests pass. The
+first-query cost is recorded explicitly. Node execution without DOM/Tor/mobile
+does not close the browser capacity gates.
+
+### Local storage failure attribution (2026-10-14)
+
+Peer sync now backs off on local StorageException without increasing the remote
+failure counter or quarantining the source. Protocol violations still quarantine
+and transient transport failures retain their finite retry threshold. The
+controlled SQLite test exhausts a real one-record quota nine times, checks no
+anchor advance and released leases, preserves an existing seven-failure counter,
+and completes import after capacity is restored without manual peer readmission.
+The peer-sync integration and PHPStan level 8 pass on pinned PHP 8.4/8.5. A disk
+failure that also prevents the backoff transaction from persisting can still
+surface a local error; lease expiry remains the existing recovery bound.
