@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 use OnionServiceDiscovery\Configuration\NodeConfig;
+use OnionServiceDiscovery\Configuration\PublisherEvidence;
 use OnionServiceDiscovery\Configuration\PublisherMembership;
 use OnionServiceDiscovery\Domain\OnionAddress;
 use OnionServiceDiscovery\Http\DataApi;
@@ -55,8 +56,8 @@ try {
         $config = NodeConfig::load($dir . '/config.json'); NodeInitializer::initialize($config, $signer, $verifier);
         $store = $config->store(); $blobs = new PublicBlobStore($dir . '/exports');
         $store->transaction(static function (StorageTransaction $tx) use ($records): void { foreach ($records as $record) { $tx->putRecord($record); } });
-        (new SnapshotProducer($store, $blobs, $verifier, $signer))->publish(1700000000);
-        $nodes[$name] = ['onion' => $onion, 'key' => $signer->publicKey(), 'api' => new DataApi($store, $blobs, $verifier, true)];
+        $producer = new SnapshotProducer($store, $blobs, $verifier, $signer); $producer->publish(1700000000);
+        $nodes[$name] = ['onion' => $onion, 'key' => $signer->publicKey(), 'api' => new DataApi($store, $blobs, $verifier, true), 'producer' => $producer];
     }
     $unreachable = testOnion(99); $requests = [];
     $fetch = static function (OnionAddress $onion, ProtocolEndpoint $endpoint) use (&$nodes, &$requests): string {
@@ -103,7 +104,8 @@ try {
     $assert($included['snapshot_state']['manifest_hash'] === $current->contentHash && $included['checkpoint_age_seconds'] === 100, 'included evidence'); ++$checks;
     $assert($result['status'] === 'CURRENT_STATE_INCLUDED_AT_SOME_SELECTED' && $result['counts'] === ['included' => 1, 'stale' => 1, 'not_present' => 1, 'contradictory' => 1, 'unavailable' => 1, 'rejected' => 2], 'summary ' . json_encode($result['counts'])); ++$checks;
     $assert($result['expected_state']['manifest_hash'] === $current->contentHash && $result['expected_state']['revision'] === 2, 'expected state'); ++$checks;
-    $assert($result['operator_independence'] === 'NOT_ESTABLISHED' && $result['freshness'] === 'NOT_EVALUATED' && $result['checkpoint_consistency'] === 'NOT_EVALUATED' && $result['state_mutated'] === false, 'scope boundaries'); ++$checks;
+    $assert($result['operator_independence'] === 'NOT_ESTABLISHED' && $result['freshness'] === 'NOT_EVALUATED' && $result['state_mutated'] === false, 'scope boundaries'); ++$checks;
+    $assert($result['checkpoint_consistency'] === ['consistent' => 0, 'baseline' => 4, 'not_evaluated' => 0], 'first check is a baseline ' . json_encode($result['checkpoint_consistency'])); ++$checks;
     $assert($result['selected_sources'] === 7 && $result['distinct_node_keys'] === 5, 'key count is reported, not trusted'); ++$checks;
 
     $all = $checker->check($own, [[$nodes['included']['onion'], $nodes['included']['key']]], 1700000100);
@@ -112,6 +114,50 @@ try {
     $assert($none['status'] === 'CURRENT_STATE_NOT_CONFIRMED', 'none confirmed'); ++$checks;
     try { $checker->check([$genesis, $current, $fork], [[$nodes['included']['onion'], $nodes['included']['key']]], 1700000100); $assert(false, 'forked own history accepted'); }
     catch (InvalidArgumentException $error) { $assert($error->getMessage() === 'LOCAL_IDENTITY_CONFLICT', 'own fork code ' . $error->getMessage()); } ++$checks;
+
+    // D-052 ancestry: the checkpoint saved at the previous check anchors the next one.
+    $one = [[$nodes['included']['onion'], $nodes['included']['key']]];
+    $slot = PublisherEvidence::nodeKey(OnionAddress::parse($nodes['included']['onion']));
+    $snapshots = static fn (array $log): int => count(array_filter($log, static fn (string $r): bool => str_contains($r, '/snapshots/')));
+    $chunks = static fn (array $log): int => count(array_filter($log, static fn (string $r): bool => str_contains($r, '/chunks/')));
+    $first = $checker->check($own, $one, 1700000100); $anchor = $first['sources'][0]['anchor'];
+    $assert($first['sources'][0]['checkpoint_consistency'] === 'BASELINE' && $anchor['generation'] === 1 && $anchor['node_key'] === hash('sha256', $nodes['included']['key']), 'baseline anchor'); ++$checks;
+    $assert($checker->check($own, $one, 1700000200, [$slot => $anchor])['sources'][0]['checkpoint_consistency'] === 'CONSISTENT', 'same checkpoint'); ++$checks;
+    foreach ([1, 2, 3] as $day) { $nodes['included']['producer']->publish(1700000000 + $day * 86401); }
+    $requests = [];
+    $later = $checker->check($own, $one, 1700400000, [$slot => $anchor]); $latest = $later['sources'][0]['anchor'];
+    $assert($later['sources'][0]['checkpoint_consistency'] === 'CONSISTENT' && $later['sources'][0]['category'] === 'included' && $latest['generation'] === 4
+        && $snapshots($requests) === 3 && $later['checkpoint_consistency'] === ['consistent' => 1, 'baseline' => 0, 'not_evaluated' => 0], 'walk two intermediate checkpoints'); ++$checks;
+    $forged = [
+        'SOURCE_CHECKPOINT_ROLLBACK' => ['generation' => 5] + $latest,
+        'SOURCE_CHECKPOINT_EQUIVOCATION' => ['checkpoint_hash' => 'sha256:' . str_repeat('0', 64)] + $latest,
+        'SOURCE_CHECKPOINT_CHAIN_BROKEN' => ['checkpoint_hash' => 'sha256:' . str_repeat('0', 64)] + $anchor,
+    ];
+    foreach ($forged as $error => $saved) {
+        $requests = [];
+        $row = $checker->check($own, $one, 1700400000, [$slot => $saved])['sources'][0];
+        $assert($row['category'] === 'rejected' && $row['error'] === $error && !isset($row['anchor']) && $chunks($requests) === 0, 'ancestry ' . $error . ' ' . json_encode($row)); ++$checks;
+    }
+    $assert($checker->check($own, $one, 1700400000, [$slot => ['node_key' => hash('sha256', $nodes['stale']['key'])] + $latest])['sources'][0]['checkpoint_consistency'] === 'BASELINE', 'another expected key starts a new baseline'); ++$checks;
+    // An unreachable predecessor or a gap beyond the fetch budget is not evaluated, never rejected.
+    $latestHash = $latest['checkpoint_hash'];
+    $failing = new PublisherMembership($verifier, static function (OnionAddress $onion, ProtocolEndpoint $endpoint) use ($fetch, &$latestHash): string {
+        if (str_contains($endpoint->path, '/snapshots/') && !str_ends_with($endpoint->path, substr($latestHash, 7))) { throw new TransportException('TOR_REQUEST_FAILED'); }
+        return $fetch($onion, $endpoint);
+    });
+    $assert($failing->check($own, $one, 1700400000, [$slot => $anchor])['sources'][0]['checkpoint_consistency'] === 'NOT_EVALUATED', 'unreachable predecessor'); ++$checks;
+    for ($day = 4; $day <= 37; ++$day) { $nodes['included']['producer']->publish(1700000000 + $day * 86401); }
+    $requests = [];
+    $far = $checker->check($own, $one, 1704000000, [$slot => $latest]);
+    $assert($far['sources'][0]['checkpoint_consistency'] === 'NOT_EVALUATED' && $far['sources'][0]['category'] === 'included' && $far['sources'][0]['anchor']['generation'] === 38
+        && $snapshots($requests) === 1 + PublisherMembership::MAX_ANCESTRY_FETCHES, 'bounded walk'); ++$checks;
+    // Saved anchors: a rejected Node keeps its previous anchor, so the inconsistency stays visible.
+    $evidenceConfig = $root . '/anchors.json'; file_put_contents($evidenceConfig, '{}'); chmod($evidenceConfig, 0600);
+    PublisherEvidence::recordMembership($later, $evidenceConfig, 1700400000);
+    $assert(PublisherEvidence::checkpoints($evidenceConfig) === [$slot => $latest], 'anchor saved'); ++$checks;
+    PublisherEvidence::recordMembership($checker->check($own, $one, 1700400000, [$slot => $forged['SOURCE_CHECKPOINT_ROLLBACK']]), $evidenceConfig, 1700400100);
+    $assert(PublisherEvidence::checkpoints($evidenceConfig) === [$slot => $latest] && !str_contains((string) file_get_contents(PublisherEvidence::path($evidenceConfig)), $nodes['included']['onion'])
+        && !str_contains((string) file_get_contents(PublisherEvidence::path($evidenceConfig)), $nodes['included']['key']), 'rejected Node keeps its anchor; no address or key saved'); ++$checks;
 
     // CLI wiring: unreachable local SOCKS port means unavailable, never included; no network beyond loopback.
     $v = json_decode(file_get_contents($project . '/node-php/config/example.json'), true, 32, JSON_THROW_ON_ERROR);

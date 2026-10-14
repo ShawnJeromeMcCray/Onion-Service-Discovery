@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Checkpoint ancestry in the publisher's Node checks (owner-approved D-052):
+  `network:discoverability-check` compares each Node's checkpoint with the one
+  saved at the previous `--save-status` check and rejects rollback, equivocation
+  and broken chains before downloading chunks (at most 32 predecessors per Node;
+  an unreachable predecessor or longer gap is not evaluated). Saved anchors are
+  keyed by hashes; a rejected Node keeps its anchor.
 - Development runtime package (owner decision D-029): CI builds
   `onion-service-discovery-development-runtime.tar.gz` with the locked PHP runtime
   dependencies and the built client twice from independent installs, compares
@@ -40,7 +46,8 @@
 - Add `service:membership`: a publisher checks over Tor whether explicitly
   selected Nodes' complete signed snapshots include its exact current state, with
   one category per Node (included, stale, not present, contradictory, unavailable,
-  rejected); freshness, ancestry and operator independence stay unevaluated.
+  rejected); freshness and operator independence stay unevaluated (ancestry:
+  see the D-052 entry above).
 - Let the publisher status page answer “Can this Service be found?” from saved
   `network:discoverability-check --save-status` evidence: DISCOVERABLE needs the
   exact installed revision plus the checked Node's own direct observation;

@@ -49,7 +49,9 @@ counterexample. Primitive soundness/complete-validation/state-derivation are
 assumptions. The model does not establish freshness or unbounded correctness.
 
 The signed snapshot format itself is the existing development format. The
-membership result explicitly reports freshness/ancestry as not evaluated. No
+offline membership result explicitly reports freshness/ancestry as not
+evaluated; the online publisher check now evaluates ancestry against the
+previously seen checkpoint (D-052), freshness still not. No
 new stable signed wire type, production root, seed set or green external status
 is fabricated. Existing historical reports/requirements remain preserved.
 
@@ -75,12 +77,14 @@ Human review: Protocol/Crypto, Tor transport and final release gates remain open
 
 The machine-readable [47-section production matrix](production-readiness.json)
 still has no complete production acceptance. The [decision register](governance/decision-register.md)
-records owner approval for D-001 and the proposed D-051 genesis-key choice;
-independent cryptographic review remains open.
+records owner approval for D-001, protocol v1 (D-005 to D-017 and D-052), D-018,
+D-029, the D-051 genesis-key choice and part of D-036; independent cryptographic
+review remains open.
 
 The D-051 owner-approved logical-ID choice has a tested derived lookup endpoint.
-Independent D-051 crypto review and D-052 signed active-index checkpoint freeze
-remain open before Production Stable. Current tested choice derives the logical anchor from canonical
+Independent D-051/D-052 crypto review and the active-index checkpoint design
+remain open before Production Stable; the D-052 checkpoint chain itself is
+owner-approved as protocol v1. Current tested choice derives the logical anchor from canonical
 genesis `ed25519:` encoding and computes the authorized key epoch from complete
 continuity evidence. The owner approved that choice on 2026-10-13; independent review is not implied.
 The existing complete-snapshot diagnostic is not the missing active-root scheme.
@@ -124,7 +128,9 @@ PHP minors: [8.5](conformance/announcement-report.json) and
 [8.4](conformance/announcement-php84-report.json). This includes actual public
 HTTP routing and controlled SOCKS/CLI assertions; the fresh real-Tor lab also
 passes announcement followed by independent verification. The hints alone
-produce no signed record or local observation. No D-018 approval is inferred.
+produce no signed record or local observation. These results predate the
+owner's D-018 approval of 2026-10-14, which the decision register records; it is
+not inferred from them.
 
 ## Optional NoJS search continuation
 

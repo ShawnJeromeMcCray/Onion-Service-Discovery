@@ -1,8 +1,9 @@
 # Implementation and release status
 
-The baseline repository contained only a one-line README. The implementation is
-on `implementation/repository-foundation`; incremental PRs #1–#6 have been merged
-by the repository owner. Production-completion work from `implementation/production-completion` has been merged into `main` through PR #11. The project now contains
+The baseline repository contained only a one-line README. The implementation
+started on `implementation/repository-foundation` (PRs #1–#6) and
+`implementation/production-completion` (PR #11); later work is merged into `main`
+through PRs #12 and #13. The project now contains
 an executable development Node, offline Service signer, separate Client Host,
 locally verifying/searching browser client and mature offline release verifier.
 There is no approved production release.
@@ -10,8 +11,10 @@ There is no approved production release.
 The next continuation adds offline exact-state membership in complete signed
 draft snapshots in PHP/TypeScript/independent Python, including a split-view fork
 against the owner's known history. The 24 new shared cases bring the black-box
-suite to 226 cases per language. It does not evaluate freshness/checkpoint ancestry
-or complete the new active-index checkpoint/onboarding workflow. Local peer
+suite to 226 cases per language (248 since the PCP-004 history cases). The
+offline check evaluates neither freshness nor checkpoint ancestry; the online
+publisher check now evaluates ancestry (D-052), and the active-index
+checkpoint/onboarding workflow is not complete. Local peer
 source grouping now exposes concentration without identity-count trust; gradual
 learned-source admission remains open. Tor transport uses explicit format-zero
 SOCKS isolation. The D-051 owner-approved genesis-key ID now has a complete-history lookup.
@@ -41,12 +44,15 @@ observed links, source modification times and SHA-256 hashes. REVIEWED means
 implementation-agent review, not human approval. Later specifications require
 FilesystemStore alongside optional SQLite, separate executable hosting roles,
 offline Service signing and established release trust-root verification.
-D-001 CC0-1.0 is approved under the owner's unrestricted-use instruction; other
-required decisions/reviews remain unresolved.
+D-001 CC0-1.0 is approved under the owner's unrestricted-use instruction. The
+owner also approved D-005 to D-018, D-029, D-051, D-052 and, in part, D-036 (see
+the [decision register](governance/decision-register.md)); independent reviews
+and the other decisions remain open.
 
 ## Executed development evidence
 
-- 202 independent black-box cases pass per PHP/TypeScript/Python, no failures or
+- 202 independent black-box cases passed per PHP/TypeScript/Python in this report
+  (226 in the later production-completion report; CI now runs 248), no failures or
   skips, including exact signed bytes, absent optional metadata, strict Ed25519
   edge cases and identity conflict/rotation/migration sequences.
 - The shared unit/integration harness has 36 passing checks on digest-pinned
@@ -119,7 +125,11 @@ maintenance, export pruning and staged restore have separate commands. Staging
 systemd/nginx/FPM templates and operator runbooks are included.
 
 Reproducible unsigned source/browser candidates include a dependency inventory,
-file manifest, checksums and explicitly unattested source/hash provenance. The
+file manifest, checksums and explicitly unattested source/hash provenance. For
+each merge to `main`, CI also builds the owner-approved (D-029) development
+runtime package with the PHP dependencies and the built client, twice from
+independent installs, runs it as shipped and attests its provenance and SBOM
+([release candidate](operations/release-candidate.md#development-runtime-package-d-029)). The
 established TUF verifier never executes artifacts. Authenticated GitHub provenance and SBOM bundles were locally verified against
 the exact workflow, commit and development ref, including wrong-ref/commit
 rejection. The local build hash matches the distinct GitHub-hosted builder; see

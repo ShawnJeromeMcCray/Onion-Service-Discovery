@@ -1,8 +1,9 @@
 # Local candidate and peer resource policy
 
 The development implementation applies one transactional admission helper to
-manual candidate enqueue and candidates found by PeerSync. Announcements have
-not yet acquired a frozen public endpoint or final policy.
+manual candidate enqueue, candidates found by PeerSync and the owner-approved
+(D-018) bounded announcement endpoint, which shares the global budgets below
+through the fixed anonymous source `announcement`.
 
 Current provisional local defaults, requiring D-041 sizing/review:
 

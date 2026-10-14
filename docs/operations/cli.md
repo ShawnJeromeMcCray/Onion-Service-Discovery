@@ -3,7 +3,8 @@
 Entry point: `php node-php/bin/onion-service-discovery help`. All output is JSON;
 `--json` and `--no-interaction` are accepted. No command waits for an interactive
 confirmation. Explicit commands/flags choose side effects, roles and trusted
-backup handling; publication/discovery/sync flags default false. Private signing
+backup handling; publication, sync, server search and announcement acceptance
+default false (`init --role node|combined` enables mirroring and direct checks). Private signing
 passphrases come only from owner-private files or service-manager credentials.
 Do not send passphrases in command arguments or ordinary environment variables.
 
@@ -49,8 +50,18 @@ that initialized Node key/Onion binding, rejecting an unnoticed key replacement.
 Changing a Node identity means a new explicitly pinned source; the v1 protocol
 has no Service-style Node key-rotation proof. Do not simulate one by editing rows.
 
-List commands show at most 256 entries and indicate truncation. Quarantine is
-explicit and source high-water marks/conflicts are not erased by retry.
+List commands show at most 256 entries and indicate truncation. `peers:list
+CONFIG` shows every configured peer with its state, failures and next attempt.
+`peers:retry CONFIG ONION --acknowledge-quarantine` returns a quarantined or
+disabled peer to `CANDIDATE` for the next sync step; quarantine is explicit and
+source high-water marks/conflicts are not erased by retry.
+
+Protocol tools for implementers, all offline: `protocol:inspect FILE
+[--expected-onion ONION]` and `protocol:hash FILE` verify any signed record
+(optionally its Onion binding) and print its type and content hash;
+`protocol:canonicalize FILE` prints the RFC 8785 canonical bytes of a JSON
+document as hex; `protocol:apply-sequence FILE` derives the identity state of a
+`{"records": [...]}` sequence (at most 256 records) exactly as a Node would.
 `node:maintain` expires bounded remote hints and checkpoints SQLite WAL.
 `exports:prune --workers-stopped` is an operator-only quiescent action; it removes
 at most 256 unreferenced derived blobs, not signed identity/fork records.
@@ -69,16 +80,19 @@ privilege separation, automatic authenticated backup custody and incident drills
 remain release gates. The reference systemd/nginx/FPM files are staging templates;
 no installer silently enables them or modifies the operator's Tor service.
 
-`service:verify CONFIG ONION` makes one bounded fixed-path request through the
-configured Tor SOCKS transport and checks the manifest signature and exact Onion
-binding. It neither opens/mutates the store nor loads a signing key. Its explicit
+`service:verify CONFIG ONION` makes two bounded fixed-path requests through the
+configured Tor SOCKS transport: it checks the manifest signature and exact Onion
+binding, then reports the served PCP-004 history bundle as `history_bundle`
+(`CONNECTED`, `INCOMPLETE`, `MISSING`, `NOT_SERVED_GENESIS_NEEDS_NONE` or
+`INVALID_<code>`). It neither opens/mutates the store nor loads a signing key. Its explicit
 `NOT_DERIVED` identity state means it does not establish continuity or replace a
 pin. `SIGNATURE_AND_BINDING_VALID` is not a safety/content or lasting uptime claim.
 Use the normal candidate worker for stored continuity checks and observations.
 
 An unprovisioned source package returns typed `RUNTIME_DEPENDENCIES_MISSING`
-with exit 3 and no raw include warning. Install the locked Composer runtime
-dependencies before invoking application commands.
+with exit 3 and no raw include warning. Use the development runtime package,
+which bundles them, or install the locked Composer runtime dependencies before
+invoking application commands.
 
 `init CONFIG [ONION] --role node|combined|client-host [--sqlite] [--source ONION]... [--visitor-sources]`
 writes the other roles the same way: all private paths inside the configuration's
@@ -111,11 +125,17 @@ in the webroot) or a single signed record; several files may be given. Each
 source is reported once as included, stale, not_present, contradictory,
 unavailable or rejected; mere acknowledgements are never counted. It mutates no
 store and loads no signing key. Exit 0 only when every selected Node includes the
-current state, otherwise 6. Freshness and checkpoint ancestry stay `NOT_EVALUATED`;
-operator independence stays `NOT_ESTABLISHED`. Not usable with the client-host role.
+current state, otherwise 6. Checkpoint ancestry (D-052) is compared with the
+checkpoints saved at the previous `--save-status` check: rollback, equivocation
+or a broken chain rejects that Node (`SOURCE_CHECKPOINT_*`) before any chunk is
+downloaded; at most 32 predecessors are fetched per Node, and an unreachable
+predecessor or longer gap is `NOT_EVALUATED`, never a rejection. Freshness stays
+`NOT_EVALUATED`; operator independence stays `NOT_ESTABLISHED`. Not usable with
+the client-host role.
 `network:discoverability-check` is the specification's name for the same command.
-With `--save-status` it also writes aggregate counts and each Node's category
-under a SHA-256 hash of its address (never addresses or keys)
+With `--save-status` it also writes aggregate counts, each Node's category and
+the checkpoint hash and generation it served, under SHA-256 hashes of the Node
+address and key (never addresses or keys)
 atomically to `CONFIG_NAME.discoverability.json` beside the configuration, with
 the configuration file's group and at most its read permissions, so the web
 runtime that reads the configuration can also read the evidence.
@@ -168,7 +188,8 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
   write `rotation-draft.json`/`migration-draft.json` and `successor-draft.json`
   as owner-private files (never overwriting) instead of one combined JSON object.
 - `network:discoverability-check` accepts several history files before the first
-  `--node`: each is a `{"records": [...]}` bundle or a single signed record.
+  `--node`: each is a `{"records": [...]}` file, the served PCP-004 history bundle
+  or a single signed record.
 - `diagnostics:export CONFIG` prints a privacy-reviewed support bundle: versions,
   extensions, role/features and `doctor` results. Paths, Onion addresses, keys,
   passphrases, sources, pins and queries are excluded and additionally redacted.

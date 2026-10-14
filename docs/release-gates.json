@@ -19,7 +19,7 @@
         "docs/conformance/core-unit-report.json",
         "docs/conformance/php84-unit-report.json"
       ],
-      "remaining": "Complete individual requirement traceability, D-051/D-052 active-index alignment, historical category/language transition and human Protocol/Crypto freeze."
+      "remaining": "Complete individual requirement traceability, active-index checkpoint alignment, historical category/language transition (D-053/D-054) and independent Protocol/Crypto review. Protocol v1 itself is owner-frozen (D-005..D-017, D-052)."
     },
     {
       "id": "FINITE_FORMAL_MODEL",
@@ -97,9 +97,11 @@
         "docs/conformance/reproducible-candidate-report.json",
         "docs/conformance/ci-attestation-report.json",
         "docs/conformance/ci-attestation-bundles.jsonl",
-        "docs/conformance/candidate-smoke-report.json"
+        "docs/conformance/candidate-smoke-report.json",
+        "tools/verify_candidate.py",
+        "tools/run_candidate_smoke.py"
       ],
-      "remaining": "Production hardened-builder/provenance acceptance, independent release review and approved TUF authority; development branch is not release authorization"
+      "remaining": "Owner-approved D-029 development runtime package (vendor/ and built client) is built twice, smoke-tested and attested for each merge to main; production hardened-builder/provenance acceptance, independent release review and approved TUF authority (D-030/D-031) remain open; a development branch is not release authorization."
     },
     {
       "id": "RELEASE_VERIFIER",
@@ -116,7 +118,7 @@
       "evidence": [
         "docs/governance/decision-register.md"
       ],
-      "remaining": "D-001 license and D-051 genesis-key choice owner-approved; independent Crypto review and other required human decisions/reviews remain unresolved."
+      "remaining": "Owner-approved: D-001, D-005..D-018, D-029, D-051, D-052 and D-036 (7-day publisher evidence). Independent Crypto/security review and the remaining decisions in the register (for example D-002, D-026, D-030, D-031, D-053, D-054) are open."
     },
     {
       "id": "INDEPENDENT_SECURITY_AUDIT",
@@ -160,7 +162,7 @@
         "docs/conformance/membership-formal-report.json",
         "docs/operations/snapshot-membership.md"
       ],
-      "remaining": "Existing draft complete snapshot only; active-index checkpoint freeze, freshness, ancestry, online onboarding and required human reviews remain open."
+      "remaining": "Existing draft complete snapshot only; the offline command evaluates neither freshness nor ancestry (the online network:discoverability-check evaluates D-052 ancestry); active-index checkpoint design and independent review remain open."
     },
     {
       "id": "LOCAL_SOURCE_GROUP_DIAGNOSTICS",
@@ -179,7 +181,7 @@
         "docs/conformance/service-id-api-report.json",
         "docs/conformance/service-id-api-php84-report.json"
       ],
-      "remaining": "Independent Crypto review, final protocol freeze and active-index proof integration."
+      "remaining": "Independent Crypto review and active-index proof integration; the D-051 representation is owner-approved and protocol v1 is owner-frozen."
     },
     {
       "id": "PRIVATE_REAL_TOR_APPLICATION",
@@ -208,7 +210,7 @@
         "docs/conformance/announcement-php84-report.json",
         "docs/conformance/private-tor-onion-report.json"
       ],
-      "remaining": "Human D-018 endpoint/media/numeric budget/retry freeze, deployed framing/overload review and automated multi-Node onboarding."
+      "remaining": "D-018 endpoint, limits and bounded automatic re-announcement are owner-approved and implemented; independent security review, deployed framing/overload review and automatic Node selection remain open."
     },
     {
       "id": "EXPLICIT_NOJS_SEARCH",

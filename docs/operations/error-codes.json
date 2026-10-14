@@ -569,11 +569,13 @@
    "meaning": null
   },
   "INTERNAL_ERROR": {
-   "cli_exit": [],
+   "cli_exit": [
+    "8"
+   ],
    "components": [
     "CLI"
    ],
-   "meaning": null
+   "meaning": "An unexpected internal failure; details are withheld on purpose. Run storage:check if a store was involved and attach the reviewed diagnostics:export output when reporting it."
   },
   "JSON_DEPTH_EXCEEDED": {
    "cli_exit": [
@@ -1139,12 +1141,14 @@
    "meaning": "The command or feature is not available for this configuration role."
   },
   "RUNTIME_DEPENDENCIES_MISSING": {
-   "cli_exit": [],
+   "cli_exit": [
+    "3"
+   ],
    "components": [
     "CLI",
     "front controller"
    ],
-   "meaning": "Install the locked Composer runtime dependencies first."
+   "meaning": "PHP dependencies are missing: use the development runtime package, which bundles them, or run the locked Composer install."
   },
   "RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX": {
    "cli_exit": [
@@ -1399,7 +1403,7 @@
     "browser client",
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "The Node's state and its signed checkpoint disagree (hash, generation or cursor); nothing from it was used."
   },
   "SOURCE_CHECKPOINT_CHAIN_BROKEN": {
    "cli_exit": [
@@ -1407,9 +1411,10 @@
    ],
    "components": [
     "Node worker",
-    "browser client"
+    "browser client",
+    "configuration and status"
    ],
-   "meaning": null
+   "meaning": "The Node's checkpoints do not form one chain back to the one seen before (D-052); its evidence is not used."
   },
   "SOURCE_CHECKPOINT_EQUIVOCATION": {
    "cli_exit": [
@@ -1417,9 +1422,10 @@
    ],
    "components": [
     "Node worker",
-    "browser client"
+    "browser client",
+    "configuration and status"
    ],
-   "meaning": "The Node signed two different checkpoints for the same generation; the source is quarantined."
+   "meaning": "The Node signed two different checkpoints for the same generation; a peer is quarantined, a publisher check rejects that Node."
   },
   "SOURCE_CHECKPOINT_ROLLBACK": {
    "cli_exit": [
@@ -1427,9 +1433,10 @@
    ],
    "components": [
     "Node worker",
-    "browser client"
+    "browser client",
+    "configuration and status"
    ],
-   "meaning": "The Node served an older checkpoint than already seen; the source is quarantined."
+   "meaning": "The Node served an older checkpoint than already seen; a peer is quarantined, a publisher check rejects that Node."
   },
   "SOURCE_DESCRIPTOR_EQUIVOCATION": {
    "cli_exit": [],

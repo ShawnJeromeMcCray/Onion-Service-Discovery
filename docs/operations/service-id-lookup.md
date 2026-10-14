@@ -6,7 +6,7 @@ part of the identifier. Rotation changes the current signing key; migration
 changes the Onion address. Neither changes this genesis identifier. An orphan
 manifest cannot establish a stable identity without its signed genesis chain.
 Owner approval is recorded in the [decision register](../governance/decision-register.md);
-independent cryptographic review and the overall protocol freeze remain open.
+protocol v1 is owner-frozen; independent cryptographic review remains open.
 
 The read-only mirror endpoint accepts either canonical identifier:
 

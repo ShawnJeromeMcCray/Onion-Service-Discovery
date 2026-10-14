@@ -2,8 +2,8 @@
 
 Status: RESEARCH / NOT APPROVED. No production wire format, record schema,
 endpoint, signature domain or runtime behavior is changed by this proposal.
-D-052 explicitly requires human Protocol/Security review; its genesis hash
-representation and exact signed bytes remain unresolved.
+D-052 required human Protocol/Security review of its genesis hash
+representation and exact signed bytes; see the update below.
 
 Update 2026-10-14: the owner approved D-052 as implemented (generation +1,
 `previous_checkpoint_hash` chain, `null` for generation 1) as part of protocol

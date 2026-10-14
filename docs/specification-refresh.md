@@ -1,5 +1,11 @@
 # Specification refresh — 2026-10-13
 
+Update 2026-10-14: this page records the state of 2026-10-13. Since then the
+owner approved D-051 and D-052 (protocol v1), D-018 (bounded announcement,
+implemented) and D-029; the `/services/by-id/{logical_service_id}` lookup is
+served. D-053 and D-054 remain unresolved. The
+[decision register](governance/decision-register.md) is authoritative.
+
 The connected Google Drive folder now contains **55 active Google Docs**:
 54 required-reading documents plus the Workspace Index. The index lists exactly
 1–54, with unique matching document titles/IDs. Archive folder 99 was excluded.

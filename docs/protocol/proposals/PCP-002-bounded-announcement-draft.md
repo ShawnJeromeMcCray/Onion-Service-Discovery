@@ -8,8 +8,9 @@ not a Protocol Freeze or production approval.
 The source requires an untrusted candidate hint followed by the Node's own Tor
 fetch and independent validation. It requires bounded request/admission/work,
 target suppression/backoff and global resistance to rotated Sybil identities.
-The final endpoint, limits and retry policy require human approval in source
-[decision register](../../specification-source/24---Pre-Freeze-Decision-Register-and-Human-Approval-Gates.md).
+The source [decision register](../../specification-source/24---Pre-Freeze-Decision-Register-and-Human-Approval-Gates.md)
+required human approval of the endpoint, limits and retry policy; the owner gave
+it as D-018 on 2026-10-14.
 
 ## Exact implemented draft
 
@@ -108,8 +109,8 @@ confirms no manifest/observation exists immediately afterward, then performs
 independent scheduled verification and snapshot/peer workflows.
 
 The anonymous shared budget is deliberately conservative and may cause capacity
-starvation; admission is not fairness or Sybil identity proof. Human reviewers
-must approve endpoint/media/numeric limits, deployment request framing and
-worker/retry policy before production freeze. This experiment does not complete
-automated multi-Node publishing/onboarding, source selection, active-index proofs,
-source-independent observability or the overall Production Stable checklist.
+starvation; admission is not fairness or Sybil identity proof. The owner
+approved the endpoint, limits and retry policy (D-018); independent security
+review of them and of deployment request framing remains open. This does not
+complete automatic Node selection, active-index proofs, source-independent
+observability or the overall Production Stable checklist.

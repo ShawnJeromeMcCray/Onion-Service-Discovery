@@ -98,9 +98,18 @@ final class SQLiteStore implements StorageBackend
             $this->database->exec('PRAGMA user_version=1');
             $this->database->exec('COMMIT');
         } catch (\Throwable $error) {
-            if ($this->database->inTransaction()) { $this->database->exec('ROLLBACK'); }
+            $this->rollbackQuietly();
             throw $error;
         }
+    }
+
+    /**
+     * Ends a transaction this store began with SQL. PDO::inTransaction() does not report such
+     * transactions before PHP 8.4, and SQLITE_FULL/IOERR may already have rolled one back.
+     */
+    private function rollbackQuietly(): void
+    {
+        try { $this->database->exec('ROLLBACK'); } catch (\PDOException) {}
     }
 
     public function transaction(callable $mutation): mixed
@@ -173,10 +182,7 @@ final class SQLiteStore implements StorageBackend
             $this->fault('after_commit');
             return $result;
         } catch (\Throwable $error) {
-            // SQLITE_FULL/IOERR may already have rolled back the transaction.
-            if (!$committed && $this->database->inTransaction()) {
-                $this->database->exec('ROLLBACK');
-            }
+            if (!$committed) { $this->rollbackQuietly(); }
             if ($error instanceof StorageException || $error instanceof \OnionServiceDiscovery\Protocol\ProtocolException) {
                 throw $error;
             }
@@ -189,13 +195,16 @@ final class SQLiteStore implements StorageBackend
      */
     public function snapshot(): array
     {
+        $begun = false;
         try {
             $this->database->exec('BEGIN');
+            $begun = true;
             $state = $this->readState();
             $this->database->exec('COMMIT');
             return $state;
         } catch (\Throwable $error) {
-            if ($this->database->inTransaction()) { $this->database->exec('ROLLBACK'); }
+            // Never roll back a transaction this call did not begin.
+            if ($begun) { $this->rollbackQuietly(); }
             if ($error instanceof StorageException) {
                 throw $error;
             }

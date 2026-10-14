@@ -24,12 +24,12 @@ and a normal operator completing external onboarding. Some evidence has advanced
 
 | Assessment item | Current implementation/evidence | Still open |
 | --- | --- | --- |
-| 202 core black-box cases | [Expanded report](../conformance/production-completion-core-report.json): 226 exact-output cases per language, including membership cases | Full revised-spec conformance and independent review |
+| Core black-box cases | [Expanded report](../conformance/production-completion-core-report.json): 226 exact-output cases per language, including membership cases; CI now runs 248 per language, including the PCP-004 history cases | Full revised-spec conformance and independent review |
 | Tor tests only local/offline | [Real private-Tor application](../conformance/private-tor-onion-report.json) and [actual Tor Browser on a private Onion](../conformance/tor-browser-private-onion-report.json) | Public Tor, Android, desktop Normal/Safer/Safest, slow-network matrix |
 | Restricted JavaScript unsupported | [JavaScript-disabled actual-browser check](../conformance/tor-browser-nojs-report.json), private-Onion NoJS form tests, [optional server-search contract](../operations/server-search.md) | Full security-level/platform certification and accessibility review |
 | Snapshot membership | Exact-current-state verification in PHP/TypeScript/Python; wrong key, stale state, omissions, forks and corrupt chunks reject | Frozen active-index checkpoint type and automated fresh multi-Node workflow |
 | Long absence / contradictory histories | Bounded resumed checkpoint ancestry and authenticated conflicting-witness retention | Longer operational soak, changing-head stress and broader chaos evidence |
-| Installation incomplete | One-command loopback demo, role-specific walkthroughs, development source/browser package and packaged runtime smoke tests | Authenticated stable release, host-specific isolation and operator acceptance |
+| Installation incomplete | One-command loopback demo, role-specific walkthroughs, development source/browser package, and for each merge to `main` an attested development runtime package that needs neither Composer nor npm | Authenticated stable release, host-specific isolation and operator acceptance |
 | Recovery unproven | Controlled crash/ENOSPC tests, both backend contracts, private staged restore | Physical hardware/power-loss and deployed restore acceptance |
 | Audit / production approval absent | Explicitly remains absent | Independent crypto/security/privacy/accessibility reviews and human release approval |
 
@@ -62,14 +62,14 @@ once per day per Node. Rotation and migration proofs reach Nodes through the
 served PCP-004 history bundle, so no Node operator has to admit them by hand.
 With `--save-status` (also for `service:verify` and `service:announce`), the read-only status page now answers YES/NOT YET/NO/DEGRADED/PROBLEM with the ten-step pipeline and derives DISCOVERABLE,
 DISCOVERABLE_DEGRADED or IDENTITY_CONFLICT from those saved aggregate counts.
-It still does not evaluate freshness, checkpoint ancestry or operator
-independence, so it does not establish “current revision in 2 of 3 fresh
-independent Nodes.” Existing complete-snapshot evidence is not silently
+Checkpoint ancestry across the publisher's checks is now evaluated (D-052);
+freshness and operator independence are not, so it does not establish “current
+revision in 2 of 3 fresh independent Nodes.” Existing complete-snapshot evidence is not silently
 renamed to the pending active-index checkpoint protocol.
 
 ## Remaining engineering that can be developed
 
-- Freshness and checkpoint-ancestry evaluation for the publisher's discoverability evidence. Collection (`network:discoverability-check`), the read-only status summary and Node/visitor tooling exist; the 7-day evidence age is owner-approved, the ancestry rule awaits D-052.
+- Freshness evaluation for the publisher's discoverability evidence: collection, checkpoint ancestry (D-052), the status summary and Node/visitor tooling exist; the 7-day evidence age is owner-approved, a checkpoint-age threshold is not.
 - Final active-index checkpoint semantics, exact wire bytes and continuity design, then implementation/adversarial vectors after the required protocol decisions are reviewed.
 - Learned-source admission and independent-source bootstrap policy; current peers are explicitly pinned and bounded.
 - Long-lived record growth/retention, larger applicable tiers, operational-state-heavy sync, concurrency and degraded-network/low-end-browser measurements.

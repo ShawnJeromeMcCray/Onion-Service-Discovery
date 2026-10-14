@@ -16,10 +16,14 @@ its public `hostname` file. The application never provisions or reads Tor keys.
    checkout must be identified as such. Never install an artifact on the basis
    of its bundled bootstrap root alone.
 3. Put application source at `/opt/onion-service-discovery`, outside the public
-   document root. Run `composer install --no-dev --no-plugins --no-scripts
-   --no-interaction --prefer-dist` in `node-php` with a supported Composer. Build
-   browser assets using the locked Node toolchain: `npm ci --ignore-scripts`
-   and `npm run build` in `web-local-search-client`. Preserve bundled notices.
+   document root. Either extract the verified
+   [development runtime package](release-candidate.md#development-runtime-package-d-029),
+   which already contains the PHP dependencies and the built browser assets, or
+   provision a source checkout: run `composer install --no-dev --no-plugins
+   --no-scripts --no-interaction --prefer-dist` in `node-php` with a supported
+   Composer and build browser assets using the locked Node toolchain:
+   `npm ci --ignore-scripts` and `npm run build` in `web-local-search-client`.
+   Preserve bundled notices.
 4. Create a dedicated `osd-worker` Node identity and a private
    writable runtime directory. Reference stores require 0700 directories and
    0600 files; give these processes access through the same service UID, never world permissions. Separate web/worker

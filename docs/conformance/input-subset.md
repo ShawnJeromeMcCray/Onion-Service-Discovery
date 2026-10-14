@@ -7,7 +7,8 @@ check groups. Controlled SOCKS fixtures are not live Tor evidence.
 
 ## Shared vectors
 
-202 black-box cases run independently against PHP, TypeScript and Python,
+202 black-box cases ran independently against PHP, TypeScript and Python for
+this report (CI now runs 248, including the PCP-004 history cases),
 including strict Onion/JSON validation, six signed record types, canonical bytes,
 Ed25519 edge cases, draft category/language rules and identity history. Fixture
 hashes and per-case outcomes are recorded in core-report.json. Valid parsed JSON
