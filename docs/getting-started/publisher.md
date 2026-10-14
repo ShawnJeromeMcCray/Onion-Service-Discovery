@@ -154,20 +154,30 @@ writes nothing locally. Each Node is reported in exactly one category:
 | `not_present` | The complete verified snapshot does not contain your identity |
 | `contradictory` | It contains a conflicting or forked state for your identity |
 | `unavailable` | Tor/HTTP failure; nothing was verified |
-| `rejected` | Wrong Node key, corrupt chunk, broken binding or exhausted work budget |
+| `rejected` | Wrong Node key, corrupt chunk, broken binding, exhausted work budget, or a checkpoint that does not descend from the one saved at your previous check |
 
 Overall status `CURRENT_STATE_INCLUDED_AT_ALL_SELECTED` exits 0; partial or no
-confirmation exits 6 with the same JSON. The checkpoint age is shown for your
-judgement only: `freshness` and `checkpoint_consistency` remain `NOT_EVALUATED`
-because the draft protocol has no frozen freshness rule or active-index ancestry
+confirmation exits 6 with the same JSON.
+
+Checkpoint ancestry is checked across your checks (decision D-052): each Node
+signs its checkpoints as one chain, generation by generation. With
+`--save-status` the command remembers the checkpoint every Node served; at the
+next check the new checkpoint must descend from it, otherwise the Node is
+`rejected` with `SOURCE_CHECKPOINT_ROLLBACK`, `SOURCE_CHECKPOINT_EQUIVOCATION`
+or `SOURCE_CHECKPOINT_CHAIN_BROKEN` and keeps that state until you act. Each
+Node row shows `checkpoint_consistency`: `BASELINE` (first check of this Node
+key), `CONSISTENT`, or `NOT_EVALUATED` when a predecessor was unreachable or the
+gap exceeds 32 checkpoints. The checkpoint age is shown for your judgement only:
+`freshness` remains `NOT_EVALUATED` because no freshness threshold is approved
 yet, and `operator_independence` is always `NOT_ESTABLISHED`: several keys may
 belong to one operator. Membership is evidence about those Nodes' current
 snapshots, not a promise that browsers will load them. See the
 [acceptance scenario and remaining work](project-status.md#end-to-end-acceptance-scenario).
 
 Add `--save-status` to the same command to show the result on your status page
-(`network:discoverability-check` is an equivalent name). Only aggregate counts
-are stored beside your private configuration; Node addresses and keys are not.
+(`network:discoverability-check` is an equivalent name). Aggregate counts, each
+Node's category and the public checkpoint it served are stored beside your
+private configuration, keyed by hashes; Node addresses and keys are not.
 Afterwards `/onion-service-discovery/status/` answers the main question
 directly, for example *DISCOVERABLE — current revision 1 verified in the signed
 snapshots of 2 of 3 checked Discovery Nodes*. DISCOVERABLE requires that a

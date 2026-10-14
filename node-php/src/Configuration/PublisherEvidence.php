@@ -34,10 +34,29 @@ final class PublisherEvidence
         // Per-Node categories let the bounded announcement skip Nodes that already include this revision.
         $nodes = [];
         foreach ($result['sources'] as $source) { $nodes[self::nodeKey(OnionAddress::parse($source['node_onion']))] = $source['category']; }
-        self::update($configPath, 'membership', ['checked_at' => self::time($now), 'manifest_hash' => $expected['manifest_hash'],
-            'logical_service_id' => $expected['logical_service_id'], 'revision' => $expected['revision'], 'key_epoch' => $expected['key_epoch'],
-            'selected_sources' => $result['selected_sources'], 'distinct_node_keys' => $result['distinct_node_keys'],
-            'included_with_node_direct_observation' => $result['included_with_node_direct_observation']] + $result['counts'] + ['nodes' => $nodes]);
+        self::locked($configPath, static function () use ($configPath, $now, $expected, $result, $nodes): void {
+            self::write($configPath, 'membership', ['checked_at' => self::time($now), 'manifest_hash' => $expected['manifest_hash'],
+                'logical_service_id' => $expected['logical_service_id'], 'revision' => $expected['revision'], 'key_epoch' => $expected['key_epoch'],
+                'selected_sources' => $result['selected_sources'], 'distinct_node_keys' => $result['distinct_node_keys'],
+                'included_with_node_direct_observation' => $result['included_with_node_direct_observation']] + $result['counts'] + ['nodes' => $nodes]);
+            // D-052 anchors: the checkpoint each consistent Node served. A rejected or unreachable Node keeps its
+            // previous anchor, so a rollback or equivocation stays visible until the operator acts.
+            $anchors = self::load($configPath)['checkpoints'] ?? [];
+            foreach ($result['sources'] as $source) {
+                if (isset($source['anchor'])) { $anchors[self::nodeKey(OnionAddress::parse($source['node_onion']))] = $source['anchor']; }
+            }
+            uasort($anchors, static fn (array $a, array $b): int => strcmp($b['checked_at'], $a['checked_at']));
+            self::write($configPath, 'checkpoints', array_slice($anchors, 0, PublisherMembership::MAX_SOURCES, true));
+        });
+    }
+
+    /**
+     * Checkpoints saved at the previous membership check, keyed by nodeKey().
+     * @return array<string,array{node_key:string,checkpoint_hash:string,generation:int,checked_at:string}>
+     */
+    public static function checkpoints(string $configPath): array
+    {
+        return self::load($configPath)['checkpoints'] ?? [];
     }
 
     public static function recordSelfVerification(string $configPath, int $now, ?string $manifestHash, string $result): void
@@ -109,6 +128,7 @@ final class PublisherEvidence
         if (is_array($value['membership'] ?? null) && self::validMembership($value['membership'])) { $sections['membership'] = $value['membership']; }
         if (is_array($value['self_verification'] ?? null) && self::validSelfVerification($value['self_verification'])) { $sections['self_verification'] = $value['self_verification']; }
         if (is_array($value['announcement'] ?? null) && self::validAnnouncement($value['announcement'])) { $sections['announcement'] = $value['announcement']; }
+        if (is_array($value['checkpoints'] ?? null) && self::validCheckpoints($value['checkpoints'])) { $sections['checkpoints'] = $value['checkpoints']; }
         return $sections;
     }
 
@@ -196,6 +216,17 @@ final class PublisherEvidence
     private static function validSelfVerification(array $s): bool
     {
         return count($s) === 3 && self::isTime($s['checked_at'] ?? null) && (($s['manifest_hash'] ?? null) === null || self::isHash($s['manifest_hash'])) && self::isCode($s['result'] ?? null);
+    }
+
+    /** @param array<array-key,mixed> $c */
+    private static function validCheckpoints(array $c): bool
+    {
+        if (count($c) > PublisherMembership::MAX_SOURCES) { return false; }
+        foreach ($c as $key => $anchor) {
+            if (!self::isNodeKey($key) || !is_array($anchor) || count($anchor) !== 4 || !self::isNodeKey($anchor['node_key'] ?? null) || !self::isHash($anchor['checkpoint_hash'] ?? null)
+                || !is_int($anchor['generation'] ?? null) || $anchor['generation'] < 1 || $anchor['generation'] > 9007199254740991 || !self::isTime($anchor['checked_at'] ?? null)) { return false; }
+        }
+        return true;
     }
 
     /** @param array<array-key,mixed> $a */

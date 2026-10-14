@@ -62,14 +62,14 @@ once per day per Node. Rotation and migration proofs reach Nodes through the
 served PCP-004 history bundle, so no Node operator has to admit them by hand.
 With `--save-status` (also for `service:verify` and `service:announce`), the read-only status page now answers YES/NOT YET/NO/DEGRADED/PROBLEM with the ten-step pipeline and derives DISCOVERABLE,
 DISCOVERABLE_DEGRADED or IDENTITY_CONFLICT from those saved aggregate counts.
-It still does not evaluate freshness, checkpoint ancestry or operator
-independence, so it does not establish “current revision in 2 of 3 fresh
-independent Nodes.” Existing complete-snapshot evidence is not silently
+Checkpoint ancestry across the publisher's checks is now evaluated (D-052);
+freshness and operator independence are not, so it does not establish “current
+revision in 2 of 3 fresh independent Nodes.” Existing complete-snapshot evidence is not silently
 renamed to the pending active-index checkpoint protocol.
 
 ## Remaining engineering that can be developed
 
-- Freshness and checkpoint-ancestry evaluation for the publisher's discoverability evidence. Collection (`network:discoverability-check`), the read-only status summary and Node/visitor tooling exist; the 7-day evidence age is owner-approved, the ancestry rule awaits D-052.
+- Freshness evaluation for the publisher's discoverability evidence: collection, checkpoint ancestry (D-052), the status summary and Node/visitor tooling exist; the 7-day evidence age is owner-approved, a checkpoint-age threshold is not.
 - Final active-index checkpoint semantics, exact wire bytes and continuity design, then implementation/adversarial vectors after the required protocol decisions are reviewed.
 - Learned-source admission and independent-source bootstrap policy; current peers are explicitly pinned and bounded.
 - Long-lived record growth/retention, larger applicable tiers, operational-state-heavy sync, concurrency and degraded-network/low-end-browser measurements.

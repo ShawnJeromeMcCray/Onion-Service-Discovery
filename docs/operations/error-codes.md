@@ -163,10 +163,10 @@ for remedies.
 | `SOURCE_ALREADY_ADDED` | browser client | – | You already added this Node. |
 | `SOURCE_ALREADY_CONFIGURED` | browser client | – | This Node is already listed by the Client Host. |
 | `SOURCE_CANCELLED` | browser client | – | The code name states the condition; see the raising component. |
-| `SOURCE_CHECKPOINT_BINDING_MISMATCH` | Node worker, browser client, configuration and status | 3 | The code name states the condition; see the raising component. |
-| `SOURCE_CHECKPOINT_CHAIN_BROKEN` | Node worker, browser client | 3 | The code name states the condition; see the raising component. |
-| `SOURCE_CHECKPOINT_EQUIVOCATION` | Node worker, browser client | 3 | The Node signed two different checkpoints for the same generation; the source is quarantined. |
-| `SOURCE_CHECKPOINT_ROLLBACK` | Node worker, browser client | 3 | The Node served an older checkpoint than already seen; the source is quarantined. |
+| `SOURCE_CHECKPOINT_BINDING_MISMATCH` | Node worker, browser client, configuration and status | 3 | The Node's state and its signed checkpoint disagree (hash, generation or cursor); nothing from it was used. |
+| `SOURCE_CHECKPOINT_CHAIN_BROKEN` | Node worker, browser client, configuration and status | 3 | The Node's checkpoints do not form one chain back to the one seen before (D-052); its evidence is not used. |
+| `SOURCE_CHECKPOINT_EQUIVOCATION` | Node worker, browser client, configuration and status | 3 | The Node signed two different checkpoints for the same generation; a peer is quarantined, a publisher check rejects that Node. |
+| `SOURCE_CHECKPOINT_ROLLBACK` | Node worker, browser client, configuration and status | 3 | The Node served an older checkpoint than already seen; a peer is quarantined, a publisher check rejects that Node. |
 | `SOURCE_DESCRIPTOR_EQUIVOCATION` | browser client | – | The code name states the condition; see the raising component. |
 | `SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE` | browser client | – | The code name states the condition; see the raising component. |
 | `SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK` | browser client | – | The code name states the condition; see the raising component. |

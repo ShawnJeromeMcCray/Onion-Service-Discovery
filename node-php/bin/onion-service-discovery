@@ -247,8 +247,12 @@ try {
         }
         $transport = $config->transport();
         $now = time();
-        $output = (new \OnionServiceDiscovery\Configuration\PublisherMembership($verifier, $transport->get(...)))->check($history, $sources, $now);
-        if ($save) { \OnionServiceDiscovery\Configuration\PublisherEvidence::recordMembership($output, $configPath, $now); $output['state_mutated'] = true; $output['saved_status_evidence'] = 'AGGREGATES_ONLY'; }
+        // D-052: compare with the checkpoints saved at the previous check (read even without --save-status).
+        $anchors = \OnionServiceDiscovery\Configuration\PublisherEvidence::checkpoints($configPath);
+        $output = (new \OnionServiceDiscovery\Configuration\PublisherMembership($verifier, $transport->get(...)))->check($history, $sources, $now, $anchors);
+        if ($save) { \OnionServiceDiscovery\Configuration\PublisherEvidence::recordMembership($output, $configPath, $now); $output['state_mutated'] = true; $output['saved_status_evidence'] = 'AGGREGATES_AND_HASHED_PER_NODE_STATE'; }
+        // The next check's anchors are saved state, not part of the report.
+        foreach ($output['sources'] as &$source) { unset($source['anchor']); } unset($source);
         if ($output['status'] !== 'CURRENT_STATE_INCLUDED_AT_ALL_SELECTED') { $exitCode = 6; }
     } elseif ($command === 'history:install' || $command === 'history:verify') {
         // PCP-004 public history bundle beside the installed Manifest in WEBROOT.

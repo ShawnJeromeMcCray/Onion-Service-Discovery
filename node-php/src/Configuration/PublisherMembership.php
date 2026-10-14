@@ -21,6 +21,8 @@ use OnionServiceDiscovery\Validation\StrictJson;
 final readonly class PublisherMembership
 {
     public const MAX_SOURCES = 16;
+    /** Parent checkpoints fetched per Node and check before ancestry counts as not evaluated. */
+    public const MAX_ANCESTRY_FETCHES = 32;
 
     /** @param \Closure(OnionAddress, ProtocolEndpoint): string $fetch */
     public function __construct(private RecordVerifier $verifier, private \Closure $fetch) {}
@@ -28,9 +30,11 @@ final readonly class PublisherMembership
     /**
      * @param list<ValidatedRecord> $ownHistory Independently held owner continuity evidence.
      * @param list<array{0:string,1:string}> $sources Pairs of Node Onion and independently obtained Node key.
+     * @param array<string,array{node_key:string,checkpoint_hash:string,generation:int,checked_at:string}> $anchors
+     *        Checkpoints saved at the previous check, keyed by PublisherEvidence::nodeKey().
      * @return array<string,mixed>
      */
-    public function check(array $ownHistory, array $sources, int $now): array
+    public function check(array $ownHistory, array $sources, int $now, array $anchors = []): array
     {
         if ($sources === [] || count($sources) > self::MAX_SOURCES) { throw new ProtocolException('USAGE_ERROR'); }
         $selected = [];
@@ -56,9 +60,11 @@ final readonly class PublisherMembership
             'active' => $own['discoverability'] === 'PUBLISHED'];
         $results = []; $observed = 0;
         $counts = ['included' => 0, 'stale' => 0, 'not_present' => 0, 'contradictory' => 0, 'unavailable' => 0, 'rejected' => 0];
+        $consistency = ['consistent' => 0, 'baseline' => 0, 'not_evaluated' => 0];
         foreach ($selected as [$address, $key]) {
-            $result = $this->source($address, $key, $ownHistory, $now);
+            $result = $this->source($address, $key, $ownHistory, $now, $anchors[PublisherEvidence::nodeKey($address)] ?? null);
             ++$counts[$result['category']];
+            if (isset($result['checkpoint_consistency'])) { ++$consistency[strtolower($result['checkpoint_consistency'])]; }
             if ($result['category'] === 'included' && $result['node_claimed_direct_observation_at'] !== null) { ++$observed; }
             $results[] = $result;
         }
@@ -79,7 +85,8 @@ final readonly class PublisherMembership
             'evidence_type' => 'COMPLETE_SIGNED_DRAFT_SNAPSHOT',
             'basis' => 'Each count is a locally verified complete signed snapshot from the selected Onion under the independently supplied Node key; acknowledgements and Node booleans are never counted.',
             'operator_independence' => 'NOT_ESTABLISHED',
-            'checkpoint_consistency' => 'NOT_EVALUATED',
+            // D-052: rollback, equivocation and broken chains are rejected above; these count the rest.
+            'checkpoint_consistency' => $consistency,
             'freshness' => 'NOT_EVALUATED',
             'state_mutated' => false,
             'network_side_effects' => true,
@@ -88,9 +95,10 @@ final readonly class PublisherMembership
 
     /**
      * @param list<ValidatedRecord> $ownHistory
+     * @param array{node_key:string,checkpoint_hash:string,generation:int,checked_at:string}|null $anchor
      * @return array<string,mixed>
      */
-    private function source(OnionAddress $node, string $key, array $ownHistory, int $now): array
+    private function source(OnionAddress $node, string $key, array $ownHistory, int $now, ?array $anchor): array
     {
         $base = ['node_onion' => $node->hostname, 'node_identity_public_key' => $key];
         try {
@@ -104,6 +112,8 @@ final readonly class PublisherMembership
                 $descriptor->generation !== ($state->generation ?? null) || $descriptor->cursor !== ($state->cursor ?? null)) {
                 throw new ProtocolException('SOURCE_CHECKPOINT_BINDING_MISMATCH');
             }
+            // Before any chunk download: a Node whose checkpoints do not form one chain is not evidence.
+            $consistency = $this->ancestry($node, $key, $checkpoint, $anchor);
             // Chunks are fetched lazily so SnapshotMembership enforces its work budget before any download.
             $chunks = (function () use ($node, $descriptor): \Generator {
                 foreach ($descriptor->chunks as $chunk) { yield ($this->fetch)($node, ProtocolEndpoint::chunk($chunk->hash)); }
@@ -131,6 +141,41 @@ final readonly class PublisherMembership
             // Informational local-clock difference; no freshness threshold is frozen in the draft protocol.
             'checkpoint_age_seconds' => $created === false ? null : $now - $created,
             'node_claimed_direct_observation_at' => $verified['node_claimed_direct_observation_at'],
+            'checkpoint_consistency' => $consistency,
+            'anchor' => ['node_key' => hash('sha256', $key), 'checkpoint_hash' => $checkpoint->contentHash, 'generation' => $descriptor->generation, 'checked_at' => gmdate('Y-m-d\TH:i:s\Z', $now)],
         ];
+    }
+
+    /**
+     * D-052 (owner-approved v1): each checkpoint has generation +1 and names its predecessor.
+     * Compares the Node's checkpoint with the one saved at the previous check under the same
+     * Node key: an older generation, another checkpoint at the same generation or a chain that
+     * misses the saved one is rejected. An unreachable or too long gap is only not evaluated.
+     * @param array{node_key:string,checkpoint_hash:string,generation:int,checked_at:string}|null $anchor
+     */
+    private function ancestry(OnionAddress $node, string $key, ValidatedRecord $checkpoint, ?array $anchor): string
+    {
+        if ($anchor === null || $anchor['node_key'] !== hash('sha256', $key)) { return 'BASELINE'; }
+        $document = $checkpoint->document();
+        if ($document->generation < $anchor['generation']) { throw new ProtocolException('SOURCE_CHECKPOINT_ROLLBACK'); }
+        if ($document->generation === $anchor['generation']) {
+            if ($checkpoint->contentHash !== $anchor['checkpoint_hash']) { throw new ProtocolException('SOURCE_CHECKPOINT_EQUIVOCATION'); }
+            return 'CONSISTENT';
+        }
+        // $hash names the checkpoint at $generation; walk back until the saved generation.
+        $hash = $document->previous_checkpoint_hash; $generation = $document->generation - 1;
+        for ($fetches = 0; $generation > $anchor['generation']; ++$fetches) {
+            if (!is_string($hash)) { throw new ProtocolException('SOURCE_CHECKPOINT_CHAIN_BROKEN'); }
+            if ($fetches === self::MAX_ANCESTRY_FETCHES) { return 'NOT_EVALUATED'; }
+            try { $parent = $this->verifier->verifyWire(($this->fetch)($node, ProtocolEndpoint::snapshot($hash))); }
+            catch (TransportException) { return 'NOT_EVALUATED'; }
+            $p = $parent->document();
+            if ($parent->type !== 'snapshot_descriptor' || $parent->contentHash !== $hash || $p->node_identity_public_key !== $key || $p->generation !== $generation) {
+                throw new ProtocolException('SOURCE_CHECKPOINT_CHAIN_BROKEN');
+            }
+            $hash = $p->previous_checkpoint_hash; --$generation;
+        }
+        if ($hash !== $anchor['checkpoint_hash']) { throw new ProtocolException('SOURCE_CHECKPOINT_CHAIN_BROKEN'); }
+        return 'CONSISTENT';
     }
 }

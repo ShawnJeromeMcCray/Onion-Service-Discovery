@@ -24,6 +24,7 @@ Keep private keys, passphrases, search history and raw private backups out of re
 | Self-check `SERVED_MANIFEST_DIFFERS` | Your Onion serves another signed Manifest than the one installed here: check web routing and the install directory. |
 | Discoverability check: `stale` | The Node still exposes an older revision. Ordinary propagation delay; recheck after its next snapshot. |
 | Discoverability check: `not_present` | The Node has not admitted your Service. Announce it (`network:announce`) or ask its operator to admit it. |
+| Discoverability check: `rejected` / `SOURCE_CHECKPOINT_ROLLBACK`, `_EQUIVOCATION` or `_CHAIN_BROKEN` | The Node served a checkpoint that does not descend from the one it served at your previous check, and its evidence is ignored. Ask its operator: a Node that lost its chain (for example by restoring an old backup) must start over with a new Node key, which you then use as the expected key. Deleting `CONFIG_NAME.discoverability.json` forgets all saved checkpoints; do that only after you understood the cause. |
 | Discoverability check: `rejected` / `SOURCE_KEY_MISMATCH` | The expected Node key you supplied does not match. Re-obtain it through an independent channel; never copy it from the Node's own response. |
 | **PROBLEM** / `IDENTITY_CONFLICT` | A checked Node holds a conflicting signed state for your identity (fork, unexpected key or migration). Preserve the evidence; do not publish a new genesis to "fix" it. |
 | **DEGRADED** | Saved evidence is older than seven days. Rerun the check or enable `osd-publisher-check.timer`. |

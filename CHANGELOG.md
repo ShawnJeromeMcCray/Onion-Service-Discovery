@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Checkpoint ancestry in the publisher's Node checks (owner-approved D-052):
+  `network:discoverability-check` compares each Node's checkpoint with the one
+  saved at the previous `--save-status` check and rejects rollback, equivocation
+  and broken chains before downloading chunks (at most 32 predecessors per Node;
+  an unreachable predecessor or longer gap is not evaluated). Saved anchors are
+  keyed by hashes; a rejected Node keeps its anchor.
 - Development runtime package (owner decision D-029): CI builds
   `onion-service-discovery-development-runtime.tar.gz` with the locked PHP runtime
   dependencies and the built client twice from independent installs, compares
