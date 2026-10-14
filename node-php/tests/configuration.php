@@ -23,6 +23,18 @@ foreach (['server-search', 'unknown', 'flag', 'role', 'path', 'proxy', 'source',
     file_put_contents($path, json_encode($v, JSON_THROW_ON_ERROR));
     try { NodeConfig::load($path); throw new RuntimeException('accepted ' . $case); } catch (InvalidArgumentException) { ++$checks; }
 }
+// visitor_sources: absent means off; only Client Host/combined roles may enable it; strictly boolean.
+file_put_contents($path, json_encode($original, JSON_THROW_ON_ERROR));
+if (NodeConfig::load($path)->features['visitor_sources'] !== false) { throw new RuntimeException('visitor sources default'); }
+$v = $original; $v['features']['visitor_sources'] = true; file_put_contents($path, json_encode($v, JSON_THROW_ON_ERROR));
+if (NodeConfig::load($path)->features['visitor_sources'] !== true) { throw new RuntimeException('client host visitor sources'); } ++$checks;
+foreach (['node' => true, 'publisher' => true, 'string' => 'true'] as $role => $value) {
+    $v = $original; $v['features']['visitor_sources'] = $value;
+    if ($role !== 'string') { $v['role'] = $role; $v['node']['onion'] = 'pg6mmjiyjmcrsslvykfwnntlaru7p5svn6y2ymmju6nubxndf4pscryd.onion'; $v['node']['key_path'] = $role === 'node' ? '/var/lib/onion-service-discovery/node.key' : null; }
+    file_put_contents($path, json_encode($v, JSON_THROW_ON_ERROR));
+    try { NodeConfig::load($path); throw new RuntimeException('visitor sources accepted for ' . $role); } catch (InvalidArgumentException) { ++$checks; }
+}
+file_put_contents($path, json_encode($original, JSON_THROW_ON_ERROR));
 $alias = sys_get_temp_dir() . '/osd-public-alias-' . bin2hex(random_bytes(12)); symlink($root . '/node-php/public', $alias);
 foreach ([$root . '/node-php/public/index.php', $alias . '/index.php'] as $publicConfig) {
     try { NodeConfig::load($publicConfig); throw new RuntimeException('public configuration path accepted'); }

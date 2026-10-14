@@ -51,8 +51,11 @@ try {
     }
     elseif ($asset !== null) { $response = $asset; }
     elseif (str_starts_with($target, '/onion-service-discovery/relay/')) {
-        if (!(new PublicRequestBudget($config->exportPath . '/.relay-budget'))->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
-        else { $response = (new ClientHostRelay($config))->handle($method, $target); }
+        $relay = new ClientHostRelay($config);
+        // Visitor-chosen Nodes draw on a separate, smaller budget; abuse cannot starve operator-configured sources.
+        $budget = $relay->isVisitorSource($target) ? new PublicRequestBudget($config->exportPath . '/.visitor-relay-budget', 64, 1.0) : new PublicRequestBudget($config->exportPath . '/.relay-budget');
+        if (!$budget->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
+        else { $response = $relay->handle($method, $target); }
     }
     elseif ($target === CandidateAnnouncement::PATH && $config->features['accept_announcements']) {
         if ($method !== 'POST') { $response = ['status' => 405, 'headers' => ['Allow' => 'POST'], 'body' => '{"error":"METHOD_NOT_ALLOWED"}']; }

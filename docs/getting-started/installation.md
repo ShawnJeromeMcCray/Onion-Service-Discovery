@@ -100,7 +100,7 @@ cp node-php/config/example.json /absolute/private/osd-client/config.json
 Replace `/absolute/private/osd-client` with a real absolute owner-private path.
 Edit this one configuration file:
 
-- Keep `role` as `client-host`, `node.onion` and `node.key_path` null, and all features false.
+- Keep `role` as `client-host`, `node.onion` and `node.key_path` null, and all features false except, optionally, `visitor_sources` (see below).
 - Set `export_path` to `/absolute/private/osd-client/exports` and the unused storage path to `/absolute/private/osd-client/data`.
 - Put independently chosen canonical v3 Node addresses in `sources` (maximum 16).
 - Set the actual loopback Tor SOCKS port, normally 9050. Tor Browser's separate SOCKS listener is not automatically a persistent server runtime.
@@ -129,6 +129,23 @@ proven independent operators. Fewer sources require explicit limited coverage.
 
 An empty source list still allows the synthetic demo but provides no live results.
 No seed addresses or approval are silently supplied by initialization.
+
+#### Let visitors add their own Nodes (optional)
+
+Set `"visitor_sources": true` in `features` to let visitors load Nodes you did
+not list. Visitors then see **Add a Node you chose**, enter the Node's onion
+address and its expected public key (both required), and load it like a listed
+source. The browser verifies everything exactly as for your own sources; a wrong
+key quarantines that source. Visitors may add up to 8 Nodes and keep them only
+in their own browser profile if they choose to.
+
+Consequences for you as host: your relay then fetches the four fixed public
+protocol paths (node, state, snapshot, chunk) from any valid v3 Onion a visitor
+names, through your Tor client. These requests use their own budget (burst 64,
+one per second) so they cannot starve your listed sources, and `doctor` keeps
+showing `VISITOR_SOURCE_RELAY_ENABLED_OUTBOUND_TO_VISITOR_CHOSEN_NODES` as a
+reminder. You learn which Nodes visitors add, never their searches or pins.
+Leave it off if your Tor client must not contact visitor-chosen destinations.
 
 ## Web serving and operations
 

@@ -30,10 +30,13 @@ final readonly class NodeConfig
         if (!$v->features instanceof \stdClass) { throw new ProtocolException('CONFIGURATION_INVALID'); }
         // Backward-compatible optional local receiver switch; disabled for existing configs.
         if (!property_exists($v->features, 'accept_announcements')) { $v->features->accept_announcements = false; }
-        self::shape($v->features, ['publish_service','mirror_directory','discover_services','sync_with_peers','server_search','accept_announcements']);
+        // Backward-compatible optional Client Host switch: relay visitor-chosen Nodes; disabled for existing configs.
+        if (!property_exists($v->features, 'visitor_sources')) { $v->features->visitor_sources = false; }
+        self::shape($v->features, ['publish_service','mirror_directory','discover_services','sync_with_peers','server_search','accept_announcements','visitor_sources']);
         foreach (get_object_vars($v->features) as $flag) { if (!is_bool($flag)) { throw new ProtocolException('CONFIGURATION_INVALID'); } }
         if ($v->features->accept_announcements && (!in_array($v->role, ['node','combined'], true) || !$v->features->discover_services)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         if ($v->features->server_search && !in_array($v->role, ['node','combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        if ($v->features->visitor_sources && !in_array($v->role, ['client-host','combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         if (!in_array($v->storage->backend, ['filesystem','sqlite'], true)) { throw new ProtocolException('STORAGE_BACKEND_INVALID'); }
         self::path($v->storage->path); self::path($v->export_path);
         if (!is_array($v->sources) || !array_is_list($v->sources) || count($v->sources) > 16 || count(array_unique($v->sources, SORT_REGULAR)) !== count($v->sources)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
@@ -45,7 +48,8 @@ final readonly class NodeConfig
         }
         if (count(array_unique($v->allowed_client_origins)) !== count($v->allowed_client_origins)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
         if ($v->role === 'client-host') {
-            if ($v->node->onion !== null || $v->node->key_path !== null || array_filter(get_object_vars($v->features)) !== []) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+            // A Client Host has no Node features; only the visitor-source relay switch may be enabled.
+            if ($v->node->onion !== null || $v->node->key_path !== null || array_keys(array_filter(get_object_vars($v->features))) !== array_keys(array_filter(['visitor_sources' => $v->features->visitor_sources]))) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         } elseif ($v->role === 'publisher') {
             if (!is_string($v->node->onion) || $v->node->key_path !== null || $v->features->mirror_directory || $v->features->discover_services || $v->features->sync_with_peers || $v->allowed_client_origins !== []) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
             OnionAddress::parse($v->node->onion);

@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const fixtures=JSON.parse(await readFile(new URL('../../protocol/test-vectors/browser-dataset.json',import.meta.url),'utf8'));
-let server;let origin;const requests=[];
+let server;let origin;const requests=[];let clientConfig=null;
 const allowed=new Set(['index.html','client.js','verifier-worker.js','client.css','demo.json','config.json']);
 test.beforeAll(async()=>{
   server=createServer(async(req,res)=>{
@@ -22,7 +22,7 @@ test.beforeAll(async()=>{
       res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(body);return;
     }
     if(!allowed.has(suffix)){res.writeHead(404);res.end();return;}
-    if(suffix==='config.json'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({client_config_version:1,mode:'client-host',allowed_sources:fixtures.sources.map(item=>item.onion),minimum_distinct_keys:3,delivery_profile:'client-host-proxy'}));return;}
+    if(suffix==='config.json'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(clientConfig??{client_config_version:1,mode:'client-host',allowed_sources:fixtures.sources.map(item=>item.onion),minimum_distinct_keys:3,delivery_profile:'client-host-proxy'}));return;}
     try{const body=await readFile(root+'dist/'+suffix);res.writeHead(200,{'Content-Type':suffix.endsWith('.js')?'application/javascript':suffix.endsWith('.css')?'text/css':suffix.endsWith('.json')?'application/json':'text/html','X-Frame-Options':'DENY'});res.end(body);}catch{res.writeHead(503);res.end();}
   });
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));origin='http://127.0.0.1:'+server.address().port;
@@ -96,4 +96,41 @@ test('registry filters and adult preference cause no query-dependent network wor
   await page.waitForTimeout(150);
   expect(network.length).toBe(before);
   await expect(page.locator('img,iframe,video,audio')).toHaveCount(0);
+});
+test('visitor-chosen Nodes need the host switch and the expected key, and persist only on request',async({page})=>{
+  const [first,second,third]=fixtures.sources;const keyOf=source=>source.node_descriptor.node_identity_public_key;
+  await page.goto(origin+'/onion-service-discovery/');await page.getByText('Source selection and expected keys').click();
+  await expect(page.locator('#visitor-form')).toBeHidden();await expect(page.locator('#visitor-disabled')).toBeVisible();
+  clientConfig={client_config_version:1,mode:'client-host',allowed_sources:[first.onion,second.onion],minimum_distinct_keys:3,delivery_profile:'client-host-proxy',visitor_sources:true};
+  try{
+    await page.reload();await page.getByText('Source selection and expected keys').click();
+    await expect(page.locator('#visitor-form')).toBeVisible();await expect(page.locator('#visitor-disabled')).toBeHidden();
+    await page.locator('#visitor-onion').fill('not-an-onion.onion');await page.locator('#visitor-key').fill(keyOf(third));await page.getByRole('button',{name:'Add Node',exact:true}).click();
+    await expect(page.locator('#visitor-status')).toContainText('Check the onion address');
+    await page.locator('#visitor-onion').fill(third.onion);await page.locator('#visitor-key').fill('');await page.getByRole('button',{name:'Add Node',exact:true}).click();
+    await expect(page.locator('#visitor-status')).toContainText('expected public key');
+    await page.locator('#visitor-onion').fill(first.onion);await page.locator('#visitor-key').fill(keyOf(first));await page.getByRole('button',{name:'Add Node',exact:true}).click();
+    await expect(page.locator('#visitor-status')).toContainText('already listed');
+    // A wrong expected key is caught by the signed Node descriptor and quarantines that source.
+    await page.locator('#visitor-onion').fill(third.onion);await page.locator('#visitor-key').fill(keyOf(first));await page.getByRole('button',{name:'Add Node',exact:true}).click();
+    await expect(page.locator('#visitor-source-options .source-option')).toHaveCount(1);
+    await page.getByRole('button',{name:'Load directory',exact:true}).click();
+    await expect(page.locator('.source-status').filter({hasText:third.onion})).toContainText('SOURCE_NODE_KEY_CHANGED');
+    await expect(page.locator('.source-status').filter({hasText:third.onion})).toContainText('Check the key you entered');
+    await expect(page.locator('#coverage')).toContainText('2 distinct fresh signing keys');
+    await page.getByRole('button',{name:'Remove this Node',exact:true}).click();await expect(page.locator('#visitor-source-options .source-option')).toHaveCount(0);
+    // The correct key loads the third Node through the same-origin relay.
+    await page.locator('#visitor-key').fill(keyOf(third));await page.getByRole('button',{name:'Add Node',exact:true}).click();
+    await expect(page.locator('#visitor-source-options .source-option')).toContainText('added by you');
+    await page.getByRole('button',{name:'Load directory',exact:true}).click();
+    await expect(page.locator('#coverage')).toContainText('3 distinct fresh signing keys');
+    await expect(page.locator('.result-card')).toHaveCount(3);
+    expect(requests.some(url=>url.startsWith('/onion-service-discovery/relay/'+third.onion+'/node'))).toBe(true);
+    // Persistence is opt-in, survives a reload and is removed by Forget local data.
+    await page.locator('#remember-sources').check();await page.reload();await page.getByText('Source selection and expected keys').click();
+    await expect(page.locator('#visitor-source-options .source-option')).toHaveCount(1);await expect(page.locator('#remember-sources')).toBeChecked();
+    await page.getByRole('button',{name:'Forget local data',exact:true}).click();await page.locator('#forget-dialog').getByRole('button',{name:'Forget local data',exact:true}).click();
+    await expect(page.locator('#visitor-source-options .source-option')).toHaveCount(0);
+    await page.reload();await page.getByText('Source selection and expected keys').click();await expect(page.locator('#visitor-source-options .source-option')).toHaveCount(0);
+  }finally{clientConfig=null;}
 });

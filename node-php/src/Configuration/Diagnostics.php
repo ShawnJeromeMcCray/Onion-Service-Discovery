@@ -20,6 +20,7 @@ final class Diagnostics
         $checks['tor_transport_configuration'] = 'PASS'; // NodeConfig already restricts loopback SOCKS and finite timeout.
         $checks['server_search_disabled'] = $config->features['server_search'] ? 'WARN' : 'PASS';
         if ($config->features['server_search']) { $warnings[] = 'SERVER_SEARCH_ENABLED_QUERIES_SENT_TO_NODE'; }
+        if ($config->features['visitor_sources'] ?? false) { $checks['visitor_source_relay'] = 'WARN'; $warnings[] = 'VISITOR_SOURCE_RELAY_ENABLED_OUTBOUND_TO_VISITOR_CHOSEN_NODES'; }
         if ($config->role !== 'publisher') { $checks['export_directory'] = !is_link($config->exportPath) && is_dir($config->exportPath) && (fileperms($config->exportPath) & 0077) === 0 ? 'PASS' : 'FAIL'; }
         if ($config->nodeKeyPath !== null) {
             $checks['node_key_permissions'] = !is_link($config->nodeKeyPath) && is_file($config->nodeKeyPath) && (fileperms($config->nodeKeyPath) & 0077) === 0 ? 'PASS' : 'WARN';

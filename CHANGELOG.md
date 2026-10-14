@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Let visitors add their own Nodes: an opt-in Client Host `visitor_sources`
+  switch relays visitor-chosen v3 Onions on the four fixed protocol paths under a
+  separate budget; the browser requires the expected Node key, verifies as for
+  listed sources, stores added Nodes only on request and forgets them with
+  Forget local data. Tested in Chromium and through the PHP front controller.
 - Add `service:membership`: a publisher checks over Tor whether explicitly
   selected Nodes' complete signed snapshots include its exact current state, with
   one category per Node (included, stale, not present, contradictory, unavailable,
