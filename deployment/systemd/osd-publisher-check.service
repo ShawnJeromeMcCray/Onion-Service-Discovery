@@ -1,0 +1,33 @@
+[Unit]
+Description=Onion Service Discovery publisher self-check and sampled discoverability evidence
+After=tor.service
+
+[Service]
+Type=oneshot
+# Must own the publisher configuration or share its group; the status page reads
+# the saved aggregate evidence with the configuration's group permissions.
+User=osd-publisher
+Group=osd
+WorkingDirectory=/opt/onion-service-discovery
+# OSD_ONION=<your canonical v3 Onion>
+# OSD_NODES=--node <node.onion> <ed25519:expected-node-key> [--node ...]
+EnvironmentFile=/etc/onion-service-discovery/publisher-check.env
+# A leading "-" keeps the second check running when the first one fails; each
+# check records its own typed result. No announcement is sent automatically.
+ExecStart=-/usr/bin/php node-php/bin/onion-service-discovery service:verify /etc/onion-service-discovery/publisher.json ${OSD_ONION} --save-status
+ExecStart=-/usr/bin/php node-php/bin/onion-service-discovery network:discoverability-check /etc/onion-service-discovery/publisher.json /etc/onion-service-discovery/history.json $OSD_NODES --save-status
+UMask=0027
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/etc/onion-service-discovery
+# Only the loopback Tor SOCKS listener is reachable: no clearnet fallback.
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressDeny=any
+IPAddressAllow=localhost
+MemoryMax=256M
+TasksMax=16
+TimeoutStartSec=15min
+StandardOutput=null
+StandardError=null

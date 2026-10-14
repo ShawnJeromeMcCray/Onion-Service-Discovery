@@ -17,6 +17,23 @@ Keep private keys, passphrases, search history and raw private backups out of re
 | `CONFIGURATION_PATH_UNSAFE` / permission error | Use real absolute directories outside the webroot, owned by the service user, mode 0700; private files 0600. Avoid symlink/private-key filename aliases. Do not fix by making data world-readable. |
 | Synthetic Onion or key rejected | Replace the example with a checksum-valid v3 Onion / canonical `ed25519:` public key; placeholders are not real values. |
 | `MIRROR_DISABLED` / `DISCOVERY_DISABLED` | Enable only the feature needed in the matching Node/combined configuration. Publisher and Client Host roles cannot perform Node jobs. |
+| `PHP 8.4+ required` / Ubuntu 24.04 | Ubuntu 24.04 LTS ships PHP 8.3, which is not supported. Use a release that ships PHP 8.4+ or a PHP build you trust. |
+| Status page answers **NOT YET** | Run `service:verify CONFIG YOUR.onion --save-status`, then `network:discoverability-check … --save-status` against independently selected Nodes; the *Steps* list shows the first step that is still pending. |
+| Self-check `FAIL_TOR_REQUEST_FAILED` | Tor or the SOCKS port is unavailable, or your Onion does not answer. Check Tor first. |
+| Self-check `SERVED_MANIFEST_DIFFERS` | Your Onion serves another signed Manifest than the one installed here: check web routing and the install directory. |
+| Discoverability check: `stale` | The Node still exposes an older revision. Ordinary propagation delay; recheck after its next snapshot. |
+| Discoverability check: `not_present` | The Node has not admitted your Service. Announce it (`network:announce`) or ask its operator to admit it. |
+| Discoverability check: `rejected` / `SOURCE_KEY_MISMATCH` | The expected Node key you supplied does not match. Re-obtain it through an independent channel; never copy it from the Node's own response. |
+| **PROBLEM** / `IDENTITY_CONFLICT` | A checked Node holds a conflicting signed state for your identity (fork, unexpected key or migration). Preserve the evidence; do not publish a new genesis to "fix" it. |
+| **DEGRADED** | Saved evidence is older than seven days. Rerun the check or enable `osd-publisher-check.timer`. |
+| `SIGNATURE_INVALID` / `ONION_BINDING_MISMATCH` | The record was changed after signing or belongs to another Onion. Re-sign the unchanged draft offline; never edit signed JSON. |
+| Revision conflict / fork while signing | Two different revisions with the same number exist. Continue from the one already published; see the update workflow in the publisher guide. |
+| `STORAGE_BUSY` / store locked | Another worker holds the writer lock. Let scheduled jobs finish; do not delete lock files while workers run. |
+| `ENOSPC` / disk full | Free space; the stores resume from the last durable commit. Run `storage:check` afterwards. See [recovery](../operations/deployment-and-recovery.md). |
+| Browser client shows old results | Reload sources explicitly. A failed refresh keeps the last verified view on purpose. |
+| Pin mismatch warning | A loaded identity conflicts with your pin. Treat it as a possible impersonation; keep the pin until you verified the change through the Service's signed rotation/migration evidence. |
+| Status page does not show saved evidence | The web runtime must be able to read `CONFIG_NAME.discoverability.json` beside the configuration; it takes the configuration's group. |
+| Need to report a problem | Attach the reviewed output of `diagnostics:export CONFIG` instead of configuration files or logs. |
 | `READY_LOCALLY`, external status unconfirmed | Your local signed publication is valid. Another Node has not been independently proven to include your fresh current state. Follow the [Publisher verification steps](publisher.md#5-verify-over-tor-and-check-selected-nodes). |
 | `TOR_REQUEST_FAILED` | Check the configured loopback SOCKS listener, its port, Tor bootstrap and actual Onion availability. No direct clearnet or ambient-proxy fallback is provided. |
 | `HINT_RECEIVED_UNCONFIRMED` | Announcement was accepted as an untrusted hint. It is not direct observation, identity continuity or index inclusion. |

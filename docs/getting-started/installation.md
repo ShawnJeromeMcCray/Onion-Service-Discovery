@@ -14,16 +14,19 @@ A public installation needs the remaining [release gates](project-status.md).
 | Composer | Composer 2; respects committed lock | Install PHP runtime dependencies |
 | Node.js/npm | Node 24+ and bundled npm | Build browser assets from source; local demo |
 | Tor | Existing v3 Onion Service and loopback SOCKS listener | Real Onion hosting / outbound Node and relay requests |
-| Web server | PHP-FPM plus reviewed routing, for example nginx | Persistent staging web hosting |
+| Web server | PHP-FPM plus reviewed routing: nginx or Apache httpd 2.4 templates | Persistent staging web hosting |
 | Python | 3.11+ and locked virtual environment | Developer validators; not ordinary PHP operation |
 
 Executed reference versions include PHP 8.4.26/8.5.11, Node 24.19.0 and Tor
 0.4.9.11. These are evidence points, not a guarantee for every Linux distribution.
+Ubuntu 24.04 LTS ships PHP 8.3, which this project does not support; use a
+distribution release that ships PHP 8.4 or newer (for example Debian 13) or a
+PHP build from a source you trust.
 Install supported packages through your OS package manager. Distribution package
 names and FPM socket locations differ. Check PHP before provisioning:
 
 ```sh
-php -r 'foreach (["json","sodium","iconv","curl"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR,"Missing extension: $e\n"); exit(1); } } if (PHP_INT_SIZE !== 8 || PHP_VERSION_ID < 80400) { exit(1); } echo "PHP runtime prerequisites present\n";'
+php -r 'foreach (["json","sodium","iconv","curl"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR,"Missing extension: $e\n"); exit(1); } } if (PHP_INT_SIZE !== 8 || PHP_VERSION_ID < 80400) { fwrite(STDERR,"64-bit PHP 8.4+ required, found ".PHP_VERSION."\n"); exit(1); } echo "PHP runtime prerequisites present\n";'
 composer --version
 ```
 
@@ -129,7 +132,8 @@ No seed addresses or approval are silently supplied by initialization.
 
 ## Web serving and operations
 
-Adapt [nginx routing](../../deployment/nginx/onion-service-discovery.conf) and
+Adapt [nginx routing](../../deployment/nginx/onion-service-discovery.conf) or the
+[Apache httpd equivalent](../../deployment/apache/onion-service-discovery.conf) and
 [the FPM pool](../../deployment/php-fpm-pool.conf) to your service user, paths,
 configuration and socket. These files are templates, not enabled services.
 Disable request/query logging and expose only the front controller. Configure

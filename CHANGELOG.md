@@ -12,6 +12,16 @@
   conflicts, stale revisions and evidence older than seven days are shown.
 - Add the specification's `network:discoverability-check` and `network:announce`
   command names and the canonical `GET /v1/services/by-id/{logical_service_id}` route.
+- Status page: plain answer (YES/NOT YET/NO/DEGRADED/PROBLEM), the ten-step
+  publication pipeline, role explanations, logical service ID and key epoch;
+  `service:verify` and `service:announce` accept `--save-status`. Evidence files
+  take the configuration's group so the web runtime can read them.
+- Add the specification's missing commands: `storage:verify`, `snapshot:build`,
+  `peer:remove`, `key:service:rotate`, an explicit `key:node:rotate` refusal,
+  `storage:migrate-backend` and the redacted `diagnostics:export` support bundle.
+- Add an Apache httpd 2.4 template (tested with PHP-FPM; it refuses bodies over
+  1 KiB because LimitRequestBody does not cover proxied FastCGI requests) and a
+  publisher check timer; document the Ubuntu 24.04 PHP 8.3 limitation.
 - Point clone instructions at the default branch now that production-completion
   work is merged.
 

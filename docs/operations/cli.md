@@ -109,7 +109,12 @@ operator independence stays `NOT_ESTABLISHED`. Not usable with the client-host r
 `network:discoverability-check` is the specification's name for the same command.
 With `--save-status` it also writes aggregate counts (never Node addresses or keys)
 atomically to `CONFIG_NAME.discoverability.json` beside the configuration, with
-the configuration file's owner permissions. `publisher:status` and the public
+the configuration file's group and at most its read permissions, so the web
+runtime that reads the configuration can also read the evidence.
+`service:verify CONFIG OWN_ONION --save-status` records the self-check result
+(also typed failures such as `TOR_REQUEST_FAILED`; another Onion is refused with
+`SELF_VERIFICATION_ONION_MISMATCH`), and `service:announce … --save-status`
+records each Node's acknowledgement under a SHA-256 hash of its address. `publisher:status` and the public
 `/onion-service-discovery/status/` page then report `DISCOVERABLE` only when at
 least one checked Node both includes the exact installed revision and exported
 its own direct observation of it, `IDENTITY_CONFLICT` when a checked Node holds a
@@ -117,6 +122,27 @@ conflicting state, and `DISCOVERABLE_DEGRADED` when that evidence is older than
 seven days. The seven-day age is a proposed local default pending decision D-036;
 evidence for another revision is ignored. `network:announce` is an alias of
 `service:announce`.
+
+The status page derives one plain answer (YES, NOT YET, NO, DEGRADED or PROBLEM)
+and the ten-step pipeline of specification 47 section 11 from these facts only.
+
+## Specification command names and support commands
+
+- `storage:verify` = `storage:check`; `snapshot:build` = `node:snapshot`;
+  `peer:remove` = `peers:disable` (the peer is deactivated, its evidence and
+  high-water marks are preserved); `key:service:rotate` = `manifest:rotate`.
+- `key:node:rotate` always fails with `NODE_KEY_ROTATION_UNSUPPORTED` (exit 3):
+  protocol v1 has no Node key-rotation proof. Create a new Node key and have
+  peers pin the new Node explicitly.
+- `storage:migrate-backend FROM_BACKEND FROM_PATH TO_BACKEND NEW_STAGING_PATH`
+  copies records and operational state through the private backup format into a
+  fresh staging store, opens the source read-only and removes its temporary
+  carrier. Stop workers, run `storage:check` on the new path, then switch the
+  configuration. An existing destination is refused.
+- `diagnostics:export CONFIG` prints a privacy-reviewed support bundle: versions,
+  extensions, role/features and `doctor` results. Paths, Onion addresses, keys,
+  passphrases, sources, pins and queries are excluded and additionally redacted.
+  Review the output before attaching it to a report.
 
 `peers:group CONFIG ONION GROUP|--clear` records local source-family policy.
 Diagnostics expose concentration and unknown/inconsistent grouping without

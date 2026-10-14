@@ -46,7 +46,8 @@ its public `hostname` file. The application never provisions or reads Tor keys.
 8. Publish a snapshot using `node:snapshot CONFIG --passphrase-file PRIVATE_FILE`.
    Add each peer with an independently obtained `--expected-node-key`. There is
    no invented production seed list or implicit trusted peer.
-9. Adapt `deployment/nginx/onion-service-discovery.conf` and the FPM pool to your
+9. Adapt `deployment/nginx/onion-service-discovery.conf` (or the equivalent
+   `deployment/apache/onion-service-discovery.conf`) and the FPM pool to your
    host. Only the front controller is executable. Disable request/query logging.
    The web runtime receives only `ONION_SERVICE_DISCOVERY_CONFIG`, not passwords.
    For a distinct Client Host, configure the allowed sources and use the generic
@@ -54,6 +55,13 @@ its public `hostname` file. The application never provisions or reads Tor keys.
    loopback listener yourself; keep its HiddenServiceDir inaccessible to OSD.
 10. Verify through the actual Onion with the supported Tor Browser profiles before
     public rollout. Local mocked SOCKS/Chromium tests cannot substitute this step.
+
+A publisher can keep its status page current with `osd-publisher-check.timer`:
+every six hours it runs `service:verify --save-status` for the own Onion and
+`network:discoverability-check --save-status` for the Nodes listed in
+`/etc/onion-service-discovery/publisher-check.env`. It reaches only loopback
+(the Tor SOCKS listener) and never announces automatically; decision D-018 on
+automatic announcement is still open.
 
 Scheduler templates are references, not auto-enabled installation. Instantiate
 peer jobs only with explicitly configured onions. Direct worker and snapshot

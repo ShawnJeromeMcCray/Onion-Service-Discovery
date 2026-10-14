@@ -56,7 +56,7 @@ membership unconfirmed. Steps 4–5 are partly automated for the publisher:
 `service:membership` fetches complete signed snapshots from explicitly selected
 Nodes over Tor and reports each as included, stale, not present, contradictory,
 unavailable or rejected (controlled tests only; no public-Tor run is recorded).
-With `--save-status`, the read-only status page now derives DISCOVERABLE,
+With `--save-status` (also for `service:verify` and `service:announce`), the read-only status page now answers YES/NOT YET/NO/DEGRADED/PROBLEM with the ten-step pipeline and derives DISCOVERABLE,
 DISCOVERABLE_DEGRADED or IDENTITY_CONFLICT from those saved aggregate counts.
 It still does not evaluate freshness, checkpoint ancestry or operator
 independence, so it does not establish “current revision in 2 of 3 fresh

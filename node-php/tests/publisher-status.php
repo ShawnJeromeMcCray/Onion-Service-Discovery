@@ -3,7 +3,8 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 use OnionServiceDiscovery\Configuration\NodeConfig;
 use OnionServiceDiscovery\Configuration\PublisherStatus;
-use OnionServiceDiscovery\Configuration\PublisherMembership;
+use OnionServiceDiscovery\Configuration\PublisherEvidence;
+use OnionServiceDiscovery\Domain\OnionAddress;
 use OnionServiceDiscovery\Configuration\Diagnostics;
 use OnionServiceDiscovery\Configuration\PublisherInitializer;
 use OnionServiceDiscovery\Http\StatusPage;
@@ -30,30 +31,50 @@ try {
     $assert($facts['active_index_membership'] === 'NOT_CHECKED'); ++$checks;
     // Saved aggregate evidence drives the dashboard only for the exact installed revision.
     $cfg = $temp . '/config.json'; $now = 1800000000; $hash = $facts['manifest']['hash'];
-    $result = static fn (array $counts, int $observed, ?string $h = null): array => ['expected_state' => ['manifest_hash' => $h ?? $hash, 'revision' => 1],
+    $genesisKey = $facts['manifest']['current_key'];
+    $result = static fn (array $counts, int $observed, ?string $h = null): array => ['expected_state' => ['manifest_hash' => $h ?? $hash, 'revision' => 1, 'logical_service_id' => $genesisKey, 'key_epoch' => 1],
         'selected_sources' => array_sum($counts), 'distinct_node_keys' => array_sum($counts), 'included_with_node_direct_observation' => $observed,
         'counts' => $counts + ['included' => 0, 'stale' => 0, 'not_present' => 0, 'contradictory' => 0, 'unavailable' => 0, 'rejected' => 0]];
     chmod($cfg, 0600);
-    $saved = PublisherMembership::save($result(['included' => 2, 'unavailable' => 1], 2), $cfg, $now);
+    $assert($facts['answer'] === 'NOT YET' && $facts['pipeline']['onion_self_verification'] === 'PENDING' && $facts['pipeline']['manifest'] === 'PASS'); ++$checks;
+    PublisherEvidence::recordMembership($result(['included' => 2, 'unavailable' => 1], 2), $cfg, $now); $saved = PublisherEvidence::path($cfg);
     $assert($saved === $temp . '/config.discoverability.json' && (fileperms($saved) & 0077) === 0); ++$checks;
     $found = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now + 60);
     $assert($found['overall'] === 'DISCOVERABLE' && $found['external_observation'] === 'OBSERVED_CURRENT_REVISION' && str_contains($found['sampled_discoverability'], '2 of 3')
         && $found['active_index_membership'] === 'CURRENT_REVISION_IN_2_OF_3_CHECKED_NODE_SNAPSHOTS'); ++$checks;
+    $assert($found['answer'] === 'YES' && $found['manifest']['logical_service_id'] === $genesisKey && $found['manifest']['key_epoch'] === 1
+        && $found['pipeline']['searchable_state'] === 'PASS' && $found['pipeline']['redundancy_freshness'] === 'PASS' && $found['pipeline']['bootstrap_connectivity'] === 'PASS'); ++$checks;
+    // Self-verification and announcement evidence; Node addresses are stored only as hashes.
+    $nodeA = OnionAddress::parse('pg6mmjiyjmcrsslvykfwnntlaru7p5svn6y2ymmju6nubxndf4pscryd.onion');
+    PublisherEvidence::recordSelfVerification($cfg, $now, $hash, 'SIGNATURE_AND_BINDING_VALID');
+    PublisherEvidence::recordAnnouncement($cfg, $now, $nodeA, 'HINT_RECEIVED_UNCONFIRMED');
+    PublisherEvidence::recordAnnouncement($cfg, $now + 1, OnionAddress::parse($v['node']['onion']), 'TOR_REQUEST_FAILED');
+    $assert(!str_contains((string) file_get_contents($saved), $nodeA->hostname)); ++$checks;
+    $found = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now + 60);
+    $assert($found['self_verification'] === 'PASS' && $found['announcement'] === 'HINT_ACCEPTED_BY_1_OF_2_ATTEMPTED_NODES' && $found['pipeline']['announcement'] === 'PASS'
+        && $found['pipeline']['onion_self_verification'] === 'PASS' && $found['overall'] === 'DISCOVERABLE'); ++$checks;
+    PublisherEvidence::recordSelfVerification($cfg, $now, null, 'TOR_REQUEST_FAILED');
+    $failed = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($failed['self_verification'] === 'FAIL_TOR_REQUEST_FAILED' && $failed['pipeline']['onion_self_verification'] === 'FAIL'); ++$checks;
+    PublisherEvidence::recordSelfVerification($cfg, $now, $hash, 'SIGNATURE_AND_BINDING_VALID');
     $page = StatusPage::render($found)['body'];
-    $assert(str_contains($page, 'DISCOVERABLE') && str_contains($page, '2 of 3 checked Discovery Nodes') && !str_contains($page, '.onion</dd><dt>evidence')); ++$checks;
-    $assert(PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now + PublisherStatus::EVIDENCE_DEGRADED_AFTER_SECONDS + 1)['overall'] === 'DISCOVERABLE_DEGRADED'); ++$checks;
-    PublisherMembership::save($result(['included' => 1], 0), $cfg, $now);
+    $assert(str_contains($page, 'DISCOVERABLE') && str_contains($page, '<strong>YES</strong>') && str_contains($page, '2 of 3 checked Discovery Nodes') && str_contains($page, 'Onion self verification')
+        && !str_contains($page, $nodeA->hostname) && !str_contains($page, $temp)); ++$checks;
+    $old = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now + PublisherStatus::EVIDENCE_DEGRADED_AFTER_SECONDS + 1);
+    $assert($old['overall'] === 'DISCOVERABLE_DEGRADED' && $old['answer'] === 'DEGRADED' && $old['pipeline']['redundancy_freshness'] === 'WARN'); ++$checks;
+    PublisherEvidence::recordMembership($result(['included' => 1], 0), $cfg, $now);
     $unobserved = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
     $assert($unobserved['overall'] === 'READY_LOCALLY' && $unobserved['external_observation'] === 'NO_EXTERNAL_OBSERVATION'); ++$checks;
-    PublisherMembership::save($result(['included' => 1, 'contradictory' => 1], 1), $cfg, $now);
-    $assert(PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now)['overall'] === 'IDENTITY_CONFLICT'); ++$checks;
-    PublisherMembership::save($result(['stale' => 2], 0), $cfg, $now);
+    PublisherEvidence::recordMembership($result(['included' => 1, 'contradictory' => 1], 1), $cfg, $now);
+    $conflict = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($conflict['overall'] === 'IDENTITY_CONFLICT' && $conflict['answer'] === 'PROBLEM' && $conflict['pipeline']['external_direct_observation'] === 'FAIL'); ++$checks;
+    PublisherEvidence::recordMembership($result(['stale' => 2], 0), $cfg, $now);
     $pending = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
     $assert($pending['overall'] === 'READY_LOCALLY' && $pending['external_observation'] === 'OBSERVED_STALE_REVISION'); ++$checks;
-    PublisherMembership::save($result(['included' => 3], 3, 'sha256:' . str_repeat('0', 64)), $cfg, $now);
+    PublisherEvidence::recordMembership($result(['included' => 3], 3, 'sha256:' . str_repeat('0', 64)), $cfg, $now);
     $other = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
     $assert($other['overall'] === 'READY_LOCALLY' && $other['active_index_membership'] === 'NOT_CHECKED'); ++$checks;
-    file_put_contents($saved, '{"evidence_version":1,"included":99}');
+    file_put_contents($saved, '{"evidence_version":1,"membership":{"included":99}}');
     $assert(PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now)['overall'] === 'READY_LOCALLY'); ++$checks;
     unlink($saved);
     $page = StatusPage::render($facts);

@@ -172,6 +172,20 @@ direct observation of it. Rerun the check after every new revision; evidence for
 an older revision is ignored, and evidence older than seven days shows
 `DISCOVERABLE_DEGRADED`.
 
+For a complete status page also save the self-check and announcement results:
+
+```sh
+php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion --save-status
+php node-php/bin/onion-service-discovery network:announce /absolute/private/osd-publisher/config.json /absolute/public-transfer/manifest.json FIRST_NODE.onion --save-status
+```
+
+The page then lists ten steps (installation, configuration, identity, Manifest,
+self-verification, bootstrap connectivity, announcement, external observation,
+searchable state, redundancy/freshness), each PASS, PENDING, WARN, FAIL or
+NOT_APPLICABLE, and answers YES, NOT YET, NO, DEGRADED or PROBLEM at the top.
+To keep it current, adapt `deployment/systemd/osd-publisher-check.service` and
+enable its timer; it rechecks every six hours and never announces automatically.
+
 To verify a snapshot you already downloaded, without network access, use
 [offline exact-state membership](../operations/snapshot-membership.md).
 
