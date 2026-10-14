@@ -1,6 +1,8 @@
 # Well-known registration preparation (not submitted)
 
-Draft suffix: `onion-service-discovery.json`.
+Draft suffixes: `onion-service-discovery.json` (signed Manifest) and
+`onion-service-discovery-history.json` (PCP-004 history bundle of the same
+Service; unsigned container of individually signed public records).
 Purpose: locate an opt-in, self-hosted signed discovery manifest for the exact
 Tor v3 Onion hostname. GET/HEAD returns bounded UTF-8 application/json, with no
 redirect-based identity binding, authentication cookie or search query.

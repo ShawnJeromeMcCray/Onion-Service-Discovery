@@ -38,7 +38,7 @@ foreach (['current', 'incomplete-history'] as $scenario) {
     $output = stream_get_contents($pipes[1]); $stderr = stream_get_contents($pipes[2]); fclose($pipes[1]); fclose($pipes[2]);
     if (proc_close($process) !== 0) { throw new RuntimeException('worker failed: ' . $stderr . $output); }
     $result = json_decode($output, true, 32, JSON_THROW_ON_ERROR);
-    $expected = $scenario === 'current' ? 'VERIFIED' : 'QUARANTINED';
+    $expected = $scenario === 'current' ? 'VERIFIED' : 'BACKOFF';
     if ($result['status'] !== $expected) { throw new RuntimeException('unexpected result: ' . $output); }
     $local = $store->snapshot()['tables']['local_observations'];
     if (($scenario === 'current') !== (count($local) === 1)) { throw new RuntimeException('local evidence boundary failed'); }
@@ -46,4 +46,4 @@ foreach (['current', 'incomplete-history'] as $scenario) {
     $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
     foreach ($iterator as $file) { $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname()); } rmdir($root);
 }
-echo "PASS: controlled direct verification, imported/local separation and incomplete-history quarantine\n";
+echo "PASS: controlled direct verification, imported/local separation and incomplete-history backoff\n";

@@ -21,7 +21,7 @@ $cases = [
 $manifest = $case->records[0];
 $verified = (new \OnionServiceDiscovery\Protocol\RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas'))->verify($manifest);
 $wire = json_encode($manifest, JSON_THROW_ON_ERROR);
-$cases['cli-valid'] = ["HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " . strlen($wire) . "\r\n\r\n" . $wire, ['status'=>'SIGNATURE_AND_BINDING_VALID','onion'=>$onion,'manifest_hash'=>$verified->contentHash,'service_identity_public_key'=>$manifest->service_identity_public_key,'revision'=>$manifest->revision,'publish_service'=>$manifest->discovery->publish_service,'identity_state'=>'NOT_DERIVED','state_mutated'=>false,'network_side_effects'=>true]];
+$cases['cli-valid'] = ["HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " . strlen($wire) . "\r\n\r\n" . $wire, ['status'=>'SIGNATURE_AND_BINDING_VALID','history_bundle'=>'NOT_SERVED_GENESIS_NEEDS_NONE','onion'=>$onion,'manifest_hash'=>$verified->contentHash,'service_identity_public_key'=>$manifest->service_identity_public_key,'revision'=>$manifest->revision,'publish_service'=>$manifest->discovery->publish_service,'identity_state'=>'NOT_DERIVED','state_mutated'=>false,'network_side_effects'=>true]];
 $cases['cli-invalid'] = [$cases['valid'][0], ['status'=>'FAIL','error'=>'PROTOCOL_UNSUPPORTED']];
 $cases['cli-redirect'] = [$cases['redirect'][0], ['status'=>'FAIL','error'=>'HTTP_STATUS_REJECTED']];
 $hintReply = '{"status":"HINT_RECEIVED_UNCONFIRMED"}';

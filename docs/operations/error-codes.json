@@ -485,14 +485,26 @@
    ],
    "meaning": null
   },
+  "HISTORY_BUNDLE_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "protocol",
+    "signing"
+   ],
+   "meaning": "The PCP-004 history bundle is malformed, too large or contains a record type it must not contain."
+  },
   "HISTORY_INCOMPLETE": {
    "cli_exit": [
     "3"
    ],
    "components": [
-    "Node worker"
+    "Node worker",
+    "signing"
    ],
-   "meaning": "The current Manifest cannot be connected to known history yet; a rotation or migration proof is missing (storage:admit)."
+   "meaning": "The current Manifest does not connect to its history: the Service serves no or an incomplete history bundle (history:install), or a proof is missing."
   },
   "HTTP_STATUS_REJECTED": {
    "cli_exit": [
@@ -542,7 +554,8 @@
     "3"
    ],
    "components": [
-    "CLI"
+    "CLI",
+    "signing"
    ],
    "meaning": null
   },
@@ -1747,6 +1760,15 @@
    ],
    "components": [
     "CLI"
+   ],
+   "meaning": null
+  },
+  "TOO_LARGE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "signing"
    ],
    "meaning": null
   },

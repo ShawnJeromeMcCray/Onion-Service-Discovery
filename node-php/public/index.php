@@ -86,6 +86,17 @@ try {
         if($descriptor!==null){$nodeWire=$store->readRecord($descriptor['hash']);if($nodeWire===null)throw new RuntimeException('Node descriptor unavailable');$node=$verifier->verifyWire($nodeWire)->document();if($node->node_identity_public_key===$record->document()->service_identity_public_key)throw new RuntimeException('Node and Service keys must differ');}
         $response=['status'=>200,'headers'=>['Content-Length'=>(string)strlen($record->canonicalWire)],'body'=>$method==='HEAD'?'':$record->canonicalWire];
     }
+    elseif ($target === '/.well-known/onion-service-discovery-history.json' && $config->nodeOnion !== null && in_array($method,['GET','HEAD'],true)) {
+        // PCP-004: public history bundle maintained by manifest:install; Nodes verify every record themselves.
+        $path=__DIR__.'/.well-known/onion-service-discovery-history.json';
+        if(is_link($path)||!is_file($path)||filesize($path)>\OnionServiceDiscovery\Protocol\ServiceHistory::MAX_BYTES){ $response=['status'=>404,'headers'=>[],'body'=>'{"error":"NOT_FOUND"}']; }
+        else {
+            $wire=file_get_contents($path,false,null,0,\OnionServiceDiscovery\Protocol\ServiceHistory::MAX_BYTES+1);
+            if($wire===false)throw new RuntimeException('History bundle unavailable');
+            \OnionServiceDiscovery\Validation\StrictJson::parse($wire,\OnionServiceDiscovery\Protocol\ServiceHistory::MAX_BYTES);
+            $response=['status'=>200,'headers'=>['Content-Length'=>(string)strlen($wire)],'body'=>$method==='HEAD'?'':$wire];
+        }
+    }
     elseif (in_array($config->role, ['client-host','publisher'], true)) { $response = ['status' => 404, 'headers' => [], 'body' => '{"error":"NOT_FOUND"}']; }
     elseif (!(new PublicRequestBudget($config->exportPath . '/.request-budget'))->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
     else {

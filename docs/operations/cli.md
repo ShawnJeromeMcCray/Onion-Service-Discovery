@@ -149,6 +149,12 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
   needs attention, 6 while waiting for external evidence, when it is older than
   seven days or before `node:init`, 4 for an invalid Manifest, an identity
   conflict or an unreadable store. `status CONFIG` without `--check` keeps the Node counts.
+- `history:verify WEBROOT` checks offline whether the served history bundle
+  connects to the installed Manifest (`CONNECTED`; `MISSING`/`INCOMPLETE` exit 6).
+  `history:install WEBROOT SIGNED_RECORD...` rebuilds it from the owner's signed
+  files (bundles or single records) under the publisher lock; it refuses with
+  `HISTORY_INCOMPLETE` unless the result connects. `manifest:install` maintains
+  the bundle automatically and reports `history` ([PCP-004](../protocol/proposals/PCP-004-continuity-bundle-draft.md)).
 - `node:identity CONFIG` prints the verified Node Onion and Node public key from
   the signed descriptor, with ready-to-use lines for `--node`, `peers:add` and
   visitors. Node and combined roles only; it fails with `NODE_NOT_INITIALIZED`
@@ -177,7 +183,8 @@ reads no signing key and mutates no local store. The exact response is
 `NOT_CONFIRMED`. There is no automatic retry loop. Redirect, rate-limit,
 malformed acknowledgement and bare inclusion assertions fail. This is the
 [PCP-002 draft](../protocol/proposals/PCP-002-bounded-announcement-draft.md),
-subject to D-018 human endpoint/limits/retry freeze. Receiving Nodes must
+owner-approved as D-018 on 2026-10-14 together with bounded automatic
+re-announcement. Receiving Nodes must
 explicitly enable both discovery and the optional announcement switch.
 
 ## Explicit derived-export reconstruction

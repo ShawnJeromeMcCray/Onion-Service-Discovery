@@ -1,0 +1,383 @@
+{
+ "status": "DRAFT_PCP_004",
+ "description": "PCP-004 service history bundle vectors built from TEST ONLY identity-sequence fixtures.",
+ "cases": [
+  {
+   "id": "history-genesis-only",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifV19"
+   },
+   "expected": {
+    "state": "CONNECTED",
+    "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+    "admitted_hashes": []
+   }
+  },
+  {
+   "id": "history-first-contact-after-revision",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwicmV2aXNpb24iOjIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOnoxekQ4Ny1hckV1QU44Tk5zazdqeGJ2RVJJV016UFBpVm9MOE1icndORW83ZnhzbGVSVnc1WnMwa0F3dDdMZjU0U3Z1MHRtWFB6VWxzd2pnRFIzWENRIn1dfQ=="
+   },
+   "expected": {
+    "state": "CONNECTED",
+    "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+    "admitted_hashes": [
+     "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+    ]
+   }
+  },
+  {
+   "id": "history-first-contact-after-rotation",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg\",\"signature\":\"ed25519sig:K4xDV7DMqh2KenLW4KYIuFrsCE89Rn4sRVssYOLFP9cV6ywcGpqR8R4d5oQFBCyAorDJRRXALU55nRiawd_VCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfaWRlbnRpdHlfa2V5X3JvdGF0aW9uIiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsIm9sZF9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwibmV3X3B1YmxpY19rZXkiOiJlZDI1NTE5OmhrR2Zlc2xtQWhCUVBjc1puT3hUY09LSl9FTTRtYi1uMlJNQXRFWUxYaGciLCJlZmZlY3RpdmVfcmV2aXNpb24iOjIsInByZXZpb3VzX3N0YXRlX2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsIm9sZF9rZXlfc2lnbmF0dXJlIjoiZWQyNTUxOXNpZzpYa0xacENjMTV5TDJhYWhYV3pvMTc0WWRRdTBSb3VXeEpORGI2SERjLS1GSVEwWmFlbjVPTHVieE5id29TMHBjX1MyTUstT0FLYkNqTTZoMUplSkRCQSIsIm5ld19rZXlfY29uZmlybWF0aW9uIjoiZWQyNTUxOXNpZzpSUzd5VV9jRE1fYVBnNHZYSGdIWUo3Sk9sakJxSDB1d0V1eGs1cmRnOUJiUlJiTVJ5SWMyTUYwNnFJZ0RKRFR4RTlWeFJTbklJQ0l2LWIwaHoya1ZCdyJ9LHsicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsIm9uaW9uIjoieXdhYXR6NndwbWRvNTdmeDRpZ2Npdm9yczd2N2U3enp6Z3BpcnNhcDdtZHppNnBma281dTJoaWQub25pb24iLCJzZXJ2aWNlX2lkZW50aXR5X3B1YmxpY19rZXkiOiJlZDI1NTE5OmhrR2Zlc2xtQWhCUVBjc1puT3hUY09LSl9FTTRtYi1uMlJNQXRFWUxYaGciLCJyZXZpc2lvbiI6MiwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6InNoYTI1NjpjNzQxNWRlZjdhYjhkZGYzNjQwNmQ3NmNmYmE2ZTU4NTA3YjM3YTU1MWNmNWQ4N2MyOTY2ZDNkY2JlMjc5M2I2IiwiZGlzY292ZXJ5Ijp7InB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sInNlcnZpY2UiOnsibmFtZSI6IlN5bnRoZXRpYyBMaWJyYXJ5IiwiZGVzY3JpcHRpb24iOiJBIHJldmlzZWQgZmljdGlvbmFsIGNvbGxlY3Rpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6SzR4RFY3RE1xaDJLZW5MVzRLWUl1RnJzQ0U4OVJuNHNSVnNzWU9MRlA5Y1Y2eXdjR3BxUjhSNGQ1b1FGQkN5QW9yREpSUlhBTFU1NW5SaWF3ZF9WQ1EifV19"
+   },
+   "expected": {
+    "state": "CONNECTED",
+    "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+    "admitted_hashes": [
+     "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+     "sha256:e6f970571068f8362b327312a59ea23718a1c4bb6260b7b65fc4859f38598966"
+    ]
+   }
+  },
+  {
+   "id": "history-migration-with-known-genesis",
+   "input": {
+    "known_records": [
+     {
+      "protocol": "Onion Service Discovery",
+      "protocol_version": 1,
+      "record_type": "service_manifest",
+      "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+      "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+      "revision": 1,
+      "previous_manifest_hash": null,
+      "discovery": {
+       "publish_service": true,
+       "mirror_directory": false,
+       "discover_services": false,
+       "sync_with_peers": false
+      },
+      "service": {
+       "name": "Synthetic Library",
+       "description": "Fictional books and multilingual documentation.",
+       "languages": [
+        "de",
+        "en"
+       ],
+       "categories": [
+        "books",
+        "documentation"
+       ]
+      },
+      "links": {
+       "related_onion_services": [],
+       "clearnet": []
+      },
+      "published_at": "2026-10-12T00:00:00Z",
+      "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+     }
+    ],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:XjT-dTWsf4FrsaX79LKzog1jg54an-VlfWAF-1c_A1NB18qOYi_fQEO41Qy2bAPjvuLtQPLLwRKzKbwgLnosAQ\"}",
+    "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6Im9uaW9uX3NlcnZpY2VfbWlncmF0aW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwiZnJvbV9vbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwidG9fb25pb24iOiJieHhlMmViZ2pxM3gzZmhybmUzeTJma2I1anByeHkyeWpidzU0dDR0ZjIzY3FzY3N6c3d2NjVhZC5vbmlvbiIsImVmZmVjdGl2ZV9yZXZpc2lvbiI6MiwicHJldmlvdXNfc3RhdGVfaGFzaCI6InNoYTI1NjpjNzQxNWRlZjdhYjhkZGYzNjQwNmQ3NmNmYmE2ZTU4NTA3YjM3YTU1MWNmNWQ4N2MyOTY2ZDNkY2JlMjc5M2I2Iiwic2VydmljZV9pZGVudGl0eV9zaWduYXR1cmUiOiJlZDI1NTE5c2lnOnRHd3lYVmF2SUxGZ01nM0dqZ19UNkNLLTV2OEt4QzRuU0dqMmlyTWV0cmVNd2ZsZng5c3pLT2l3RERWb29IdlhBVk41cGMyVGliOV9NWmhrVGNUTkR3In0seyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJieHhlMmViZ2pxM3gzZmhybmUzeTJma2I1anByeHkyeWpidzU0dDR0ZjIzY3FzY3N6c3d2NjVhZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoyLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjoic2hhMjU2OmM3NDE1ZGVmN2FiOGRkZjM2NDA2ZDc2Y2ZiYTZlNTg1MDdiMzdhNTUxY2Y1ZDg3YzI5NjZkM2RjYmUyNzkzYjYiLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkEgcmV2aXNlZCBmaWN0aW9uYWwgY29sbGVjdGlvbi4iLCJsYW5ndWFnZXMiOlsiZGUiLCJlbiJdLCJjYXRlZ29yaWVzIjpbImJvb2tzIiwiZG9jdW1lbnRhdGlvbiJdfSwibGlua3MiOnsicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W10sImNsZWFybmV0IjpbXX0sInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzpYalQtZFRXc2Y0RnJzYVg3OUxLem9nMWpnNTRhbi1WbGZXQUYtMWNfQTFOQjE4cU9ZaV9mUUVPNDFReTJiQVBqdnVMdFFQTEx3Ukt6S2J3Z0xub3NBUSJ9XX0="
+   },
+   "expected": {
+    "state": "CONNECTED",
+    "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+    "admitted_hashes": [
+     "sha256:febcd01f54383a02bfb9bfa8b3519c76fa3ff95b45b99e410ce6d13f13eac03c"
+    ]
+   }
+  },
+  {
+   "id": "history-combined-transition",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg\",\"signature\":\"ed25519sig:ZPCAYMP_Cg-t_fREDPDETd4Ij80SOslkjZDnXulVxaITwnMGTng3vODJLkanQ6H9Nbue6udtJSJAjzT6fyBuDg\"}",
+    "onion": "bxxe2ebgjq3x3fhrne3y2fkb5jprxy2yjbw54t4tf23cqscszswv65ad.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfaWRlbnRpdHlfa2V5X3JvdGF0aW9uIiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsIm9sZF9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwibmV3X3B1YmxpY19rZXkiOiJlZDI1NTE5OmhrR2Zlc2xtQWhCUVBjc1puT3hUY09LSl9FTTRtYi1uMlJNQXRFWUxYaGciLCJlZmZlY3RpdmVfcmV2aXNpb24iOjIsInByZXZpb3VzX3N0YXRlX2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsIm9sZF9rZXlfc2lnbmF0dXJlIjoiZWQyNTUxOXNpZzpYa0xacENjMTV5TDJhYWhYV3pvMTc0WWRRdTBSb3VXeEpORGI2SERjLS1GSVEwWmFlbjVPTHVieE5id29TMHBjX1MyTUstT0FLYkNqTTZoMUplSkRCQSIsIm5ld19rZXlfY29uZmlybWF0aW9uIjoiZWQyNTUxOXNpZzpSUzd5VV9jRE1fYVBnNHZYSGdIWUo3Sk9sakJxSDB1d0V1eGs1cmRnOUJiUlJiTVJ5SWMyTUYwNnFJZ0RKRFR4RTlWeFJTbklJQ0l2LWIwaHoya1ZCdyJ9LHsicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInJlY29yZF90eXBlIjoib25pb25fc2VydmljZV9taWdyYXRpb24iLCJzZXJ2aWNlX2lkZW50aXR5X3B1YmxpY19rZXkiOiJlZDI1NTE5OnlBd0FhNDFpTUdLaWdRX2FTN2VkaHFndC0tMWRnR1VSODlOVkN2bFMyWVUiLCJmcm9tX29uaW9uIjoieXdhYXR6NndwbWRvNTdmeDRpZ2Npdm9yczd2N2U3enp6Z3BpcnNhcDdtZHppNnBma281dTJoaWQub25pb24iLCJ0b19vbmlvbiI6ImJ4eGUyZWJnanEzeDNmaHJuZTN5MmZrYjVqcHJ4eTJ5amJ3NTR0NHRmMjNjcXNjc3pzd3Y2NWFkLm9uaW9uIiwiZWZmZWN0aXZlX3JldmlzaW9uIjoyLCJwcmV2aW91c19zdGF0ZV9oYXNoIjoic2hhMjU2OmM3NDE1ZGVmN2FiOGRkZjM2NDA2ZDc2Y2ZiYTZlNTg1MDdiMzdhNTUxY2Y1ZDg3YzI5NjZkM2RjYmUyNzkzYjYiLCJzZXJ2aWNlX2lkZW50aXR5X3NpZ25hdHVyZSI6ImVkMjU1MTlzaWc6dEd3eVhWYXZJTEZnTWczR2pnX1Q2Q0stNXY4S3hDNG5TR2oyaXJNZXRyZU13ZmxmeDlzektPaXdERFZvb0h2WEFWTjVwYzJUaWI5X01aaGtUY1RORHcifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6ImJ4eGUyZWJnanEzeDNmaHJuZTN5MmZrYjVqcHJ4eTJ5amJ3NTR0NHRmMjNjcXNjc3pzd3Y2NWFkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTpoa0dmZXNsbUFoQlFQY3Nabk94VGNPS0pfRU00bWItbjJSTUF0RVlMWGhnIiwicmV2aXNpb24iOjIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOlpQQ0FZTVBfQ2ctdF9mUkVEUERFVGQ0SWo4MFNPc2xralpEblh1bFZ4YUlUd25NR1RuZzN2T0RKTGthblE2SDlOYnVlNnVkdEpTSkFqelQ2ZnlCdURnIn1dfQ=="
+   },
+   "expected": {
+    "state": "CONNECTED",
+    "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+    "admitted_hashes": [
+     "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+     "sha256:e6f970571068f8362b327312a59ea23718a1c4bb6260b7b65fc4859f38598966",
+     "sha256:febcd01f54383a02bfb9bfa8b3519c76fa3ff95b45b99e410ce6d13f13eac03c"
+    ]
+   }
+  },
+  {
+   "id": "history-missing-rotation-proof",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg\",\"signature\":\"ed25519sig:K4xDV7DMqh2KenLW4KYIuFrsCE89Rn4sRVssYOLFP9cV6ywcGpqR8R4d5oQFBCyAorDJRRXALU55nRiawd_VCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTpoa0dmZXNsbUFoQlFQY3Nabk94VGNPS0pfRU00bWItbjJSTUF0RVlMWGhnIiwicmV2aXNpb24iOjIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOks0eERWN0RNcWgyS2VuTFc0S1lJdUZyc0NFODlSbjRzUlZzc1lPTEZQOWNWNnl3Y0dwcVI4UjRkNW9RRkJDeUFvckRKUlJYQUxVNTVuUmlhd2RfVkNRIn1dfQ=="
+   },
+   "expected": {
+    "state": "INCOMPLETE",
+    "genesis_key": null,
+    "admitted_hashes": []
+   }
+  },
+  {
+   "id": "history-fork-evidence",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwicmV2aXNpb24iOjIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOnoxekQ4Ny1hckV1QU44Tk5zazdqeGJ2RVJJV016UFBpVm9MOE1icndORW83ZnhzbGVSVnc1WnMwa0F3dDdMZjU0U3Z1MHRtWFB6VWxzd2pnRFIzWENRIn0seyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoyLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjoic2hhMjU2OmM3NDE1ZGVmN2FiOGRkZjM2NDA2ZDc2Y2ZiYTZlNTg1MDdiMzdhNTUxY2Y1ZDg3YzI5NjZkM2RjYmUyNzkzYjYiLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiQ29uZmxpY3Rpbmcgc2Vjb25kIHJldmlzaW9uIiwiZGVzY3JpcHRpb24iOiJBIHJldmlzZWQgZmljdGlvbmFsIGNvbGxlY3Rpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6dTBXWGdJMUdQa2ZPXzVRanpfRGd0cUZSVm9PYXFnYlBDaUtyX2xPSDZ1Wms2Y2JGSERXSzZQQ0pKM19Zelh6TmwtVnhRaHZfZ1B4N2NSam5UTnk2Q1EifV19"
+   },
+   "expected": {
+    "state": "FORKED",
+    "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+    "admitted_hashes": [
+     "sha256:1929f7d21d0c50ef5425c6087e18499d1119d52fef829129f8e4475c317a421f",
+     "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+    ]
+   }
+  },
+  {
+   "id": "history-unrelated-identity-ignored",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTpxX2tkRGktdGV1RmUxaTdBSTlha01Ca3FzYUtGVmlMeG5jajVzTERQeGxNIiwicmV2aXNpb24iOjEsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOm51bGwsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiRmljdGlvbmFsIGJvb2tzIGFuZCBtdWx0aWxpbmd1YWwgZG9jdW1lbnRhdGlvbi4iLCJsYW5ndWFnZXMiOlsiZGUiLCJlbiJdLCJjYXRlZ29yaWVzIjpbImJvb2tzIiwiZG9jdW1lbnRhdGlvbiJdfSwibGlua3MiOnsicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W10sImNsZWFybmV0IjpbXX0sInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzpqQWRyT2lWbUNzYndBdWx2UFB4SGhuUlVOMDNpVy11dFF2LXUwWGoyQ2xid0FDMGlGWHNNdXZtbkJNNEdEaFRJX0ZYYnNESHM4T2dIMm1MWHB4YTlEZyJ9LHsicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsIm9uaW9uIjoieXdhYXR6NndwbWRvNTdmeDRpZ2Npdm9yczd2N2U3enp6Z3BpcnNhcDdtZHppNnBma281dTJoaWQub25pb24iLCJzZXJ2aWNlX2lkZW50aXR5X3B1YmxpY19rZXkiOiJlZDI1NTE5OnlBd0FhNDFpTUdLaWdRX2FTN2VkaHFndC0tMWRnR1VSODlOVkN2bFMyWVUiLCJyZXZpc2lvbiI6MiwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6InNoYTI1NjpjNzQxNWRlZjdhYjhkZGYzNjQwNmQ3NmNmYmE2ZTU4NTA3YjM3YTU1MWNmNWQ4N2MyOTY2ZDNkY2JlMjc5M2I2IiwiZGlzY292ZXJ5Ijp7InB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sInNlcnZpY2UiOnsibmFtZSI6IlN5bnRoZXRpYyBMaWJyYXJ5IiwiZGVzY3JpcHRpb24iOiJBIHJldmlzZWQgZmljdGlvbmFsIGNvbGxlY3Rpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6ejF6RDg3LWFyRXVBTjhOTnNrN2p4YnZFUklXTXpQUGlWb0w4TWJyd05FbzdmeHNsZVJWdzVaczBrQXd0N0xmNTRTdnUwdG1YUHpVbHN3amdEUjNYQ1EifV19"
+   },
+   "expected": {
+    "state": "CONNECTED",
+    "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+    "admitted_hashes": [
+     "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6"
+    ]
+   }
+  },
+  {
+   "id": "history-downgrade",
+   "input": {
+    "known_records": [
+     {
+      "protocol": "Onion Service Discovery",
+      "protocol_version": 1,
+      "record_type": "service_manifest",
+      "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+      "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+      "revision": 1,
+      "previous_manifest_hash": null,
+      "discovery": {
+       "publish_service": true,
+       "mirror_directory": false,
+       "discover_services": false,
+       "sync_with_peers": false
+      },
+      "service": {
+       "name": "Synthetic Library",
+       "description": "Fictional books and multilingual documentation.",
+       "languages": [
+        "de",
+        "en"
+       ],
+       "categories": [
+        "books",
+        "documentation"
+       ]
+      },
+      "links": {
+       "related_onion_services": [],
+       "clearnet": []
+      },
+      "published_at": "2026-10-12T00:00:00Z",
+      "signature": "ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA"
+     },
+     {
+      "protocol": "Onion Service Discovery",
+      "protocol_version": 1,
+      "record_type": "service_manifest",
+      "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+      "service_identity_public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+      "revision": 2,
+      "previous_manifest_hash": "sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6",
+      "discovery": {
+       "publish_service": true,
+       "mirror_directory": false,
+       "discover_services": false,
+       "sync_with_peers": false
+      },
+      "service": {
+       "name": "Synthetic Library",
+       "description": "A revised fictional collection.",
+       "languages": [
+        "de",
+        "en"
+       ],
+       "categories": [
+        "books",
+        "documentation"
+       ]
+      },
+      "links": {
+       "related_onion_services": [],
+       "clearnet": []
+      },
+      "published_at": "2026-10-12T00:00:00Z",
+      "signature": "ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ"
+     }
+    ],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifV19"
+   },
+   "expected": {
+    "state": "DOWNGRADE",
+    "genesis_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+    "admitted_hashes": []
+   }
+  },
+  {
+   "id": "history-orphan-bundle",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoyLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjoic2hhMjU2OmM3NDE1ZGVmN2FiOGRkZjM2NDA2ZDc2Y2ZiYTZlNTg1MDdiMzdhNTUxY2Y1ZDg3YzI5NjZkM2RjYmUyNzkzYjYiLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkEgcmV2aXNlZCBmaWN0aW9uYWwgY29sbGVjdGlvbi4iLCJsYW5ndWFnZXMiOlsiZGUiLCJlbiJdLCJjYXRlZ29yaWVzIjpbImJvb2tzIiwiZG9jdW1lbnRhdGlvbiJdfSwibGlua3MiOnsicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W10sImNsZWFybmV0IjpbXX0sInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzp6MXpEODctYXJFdUFOOE5Oc2s3anhidkVSSVdNelBQaVZvTDhNYnJ3TkVvN2Z4c2xlUlZ3NVpzMGtBd3Q3TGY1NFN2dTB0bVhQelVsc3dqZ0RSM1hDUSJ9XX0="
+   },
+   "expected": {
+    "state": "INCOMPLETE",
+    "genesis_key": null,
+    "admitted_hashes": []
+   }
+  },
+  {
+   "id": "history-bundle-type-invalid",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJjaGVja3BvaW50IiwicmVjb3JkcyI6W3sicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsIm9uaW9uIjoieXdhYXR6NndwbWRvNTdmeDRpZ2Npdm9yczd2N2U3enp6Z3BpcnNhcDdtZHppNnBma281dTJoaWQub25pb24iLCJzZXJ2aWNlX2lkZW50aXR5X3B1YmxpY19rZXkiOiJlZDI1NTE5OnlBd0FhNDFpTUdLaWdRX2FTN2VkaHFndC0tMWRnR1VSODlOVkN2bFMyWVUiLCJyZXZpc2lvbiI6MSwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6bnVsbCwiZGlzY292ZXJ5Ijp7InB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sInNlcnZpY2UiOnsibmFtZSI6IlN5bnRoZXRpYyBMaWJyYXJ5IiwiZGVzY3JpcHRpb24iOiJGaWN0aW9uYWwgYm9va3MgYW5kIG11bHRpbGluZ3VhbCBkb2N1bWVudGF0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOmlhRmNOY28zZzZMZms0YnF3S1B2NEloUjNPbWpONVM3WEF1TnhfRnpydFdxX1A4Z3EwSFZ5SFdDQ1poUHhqTHhYeFhYYlMzbXVDcXNTMXpYZlNieENBIn0seyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoyLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjoic2hhMjU2OmM3NDE1ZGVmN2FiOGRkZjM2NDA2ZDc2Y2ZiYTZlNTg1MDdiMzdhNTUxY2Y1ZDg3YzI5NjZkM2RjYmUyNzkzYjYiLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkEgcmV2aXNlZCBmaWN0aW9uYWwgY29sbGVjdGlvbi4iLCJsYW5ndWFnZXMiOlsiZGUiLCJlbiJdLCJjYXRlZ29yaWVzIjpbImJvb2tzIiwiZG9jdW1lbnRhdGlvbiJdfSwibGlua3MiOnsicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W10sImNsZWFybmV0IjpbXX0sInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzp6MXpEODctYXJFdUFOOE5Oc2s3anhidkVSSVdNelBQaVZvTDhNYnJ3TkVvN2Z4c2xlUlZ3NVpzMGtBd3Q3TGY1NFN2dTB0bVhQelVsc3dqZ0RSM1hDUSJ9XX0="
+   },
+   "error": "HISTORY_BUNDLE_INVALID"
+  },
+  {
+   "id": "history-extra-member",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwicmV2aXNpb24iOjIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOnoxekQ4Ny1hckV1QU44Tk5zazdqeGJ2RVJJV016UFBpVm9MOE1icndORW83ZnhzbGVSVnc1WnMwa0F3dDdMZjU0U3Z1MHRtWFB6VWxzd2pnRFIzWENRIn1dLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOkFBIn0="
+   },
+   "error": "HISTORY_BUNDLE_INVALID"
+  },
+  {
+   "id": "history-empty-records",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbXX0="
+   },
+   "error": "HISTORY_BUNDLE_INVALID"
+  },
+  {
+   "id": "history-protocol-version-boolean",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6dHJ1ZSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwicmV2aXNpb24iOjIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOnoxekQ4Ny1hckV1QU44Tk5zazdqeGJ2RVJJV016UFBpVm9MOE1icndORW83ZnhzbGVSVnc1WnMwa0F3dDdMZjU0U3Z1MHRtWFB6VWxzd2pnRFIzWENRIn1dfQ=="
+   },
+   "error": "HISTORY_BUNDLE_INVALID"
+  },
+  {
+   "id": "history-records-not-array",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjp7IjAiOnsicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsIm9uaW9uIjoieXdhYXR6NndwbWRvNTdmeDRpZ2Npdm9yczd2N2U3enp6Z3BpcnNhcDdtZHppNnBma281dTJoaWQub25pb24iLCJzZXJ2aWNlX2lkZW50aXR5X3B1YmxpY19rZXkiOiJlZDI1NTE5OnlBd0FhNDFpTUdLaWdRX2FTN2VkaHFndC0tMWRnR1VSODlOVkN2bFMyWVUiLCJyZXZpc2lvbiI6MSwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6bnVsbCwiZGlzY292ZXJ5Ijp7InB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sInNlcnZpY2UiOnsibmFtZSI6IlN5bnRoZXRpYyBMaWJyYXJ5IiwiZGVzY3JpcHRpb24iOiJGaWN0aW9uYWwgYm9va3MgYW5kIG11bHRpbGluZ3VhbCBkb2N1bWVudGF0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOmlhRmNOY28zZzZMZms0YnF3S1B2NEloUjNPbWpONVM3WEF1TnhfRnpydFdxX1A4Z3EwSFZ5SFdDQ1poUHhqTHhYeFhYYlMzbXVDcXNTMXpYZlNieENBIn19fQ=="
+   },
+   "error": "HISTORY_BUNDLE_INVALID"
+  },
+  {
+   "id": "history-non-object-entry",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbMSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwicmV2aXNpb24iOjIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOnoxekQ4Ny1hckV1QU44Tk5zazdqeGJ2RVJJV016UFBpVm9MOE1icndORW83ZnhzbGVSVnc1WnMwa0F3dDdMZjU0U3Z1MHRtWFB6VWxzd2pnRFIzWENRIn1dfQ=="
+   },
+   "error": "HISTORY_BUNDLE_INVALID"
+  },
+  {
+   "id": "history-foreign-record-type",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":null,\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":1,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"Fictional books and multilingual documentation.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:iaFcNco3g6Lfk4bqwKPv4IhR3OmjN5S7XAuNx_FzrtWq_P8gq0HVyHWCCZhPxjLxXxXXbS3muCqsS1zXfSbxCA\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6ImRpcmVjdF9vYnNlcnZhdGlvbiIsIm5vZGVfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6S1Jrd0RNOXBmWWwzeUFWRHRUVGdXTE5WdlpqSENZTzM3TWtOSDhFeWlOWSIsIm9uaW9uIjoieXdhYXR6NndwbWRvNTdmeDRpZ2Npdm9yczd2N2U3enp6Z3BpcnNhcDdtZHppNnBma281dTJoaWQub25pb24iLCJzZXJ2aWNlX2lkZW50aXR5X3B1YmxpY19rZXkiOiJlZDI1NTE5OnlBd0FhNDFpTUdLaWdRX2FTN2VkaHFndC0tMWRnR1VSODlOVkN2bFMyWVUiLCJyZXZpc2lvbiI6MSwibWFuaWZlc3RfaGFzaCI6InNoYTI1NjpjNzQxNWRlZjdhYjhkZGYzNjQwNmQ3NmNmYmE2ZTU4NTA3YjM3YTU1MWNmNWQ4N2MyOTY2ZDNkY2JlMjc5M2I2IiwicmVzdWx0IjoiU1VDQ0VTU19DVVJSRU5UIiwib2JzZXJ2ZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6Ym5UblozckxJVWU0UDR5SUN0dHBEYkI1SURNaUd6SC1rVEhjOWt0LU8tZTlmYTRxUTlDUjhsNElHby0wMmIzU1BJNW05QW9zb3ZNLU56eC10U0FmQWcifV19"
+   },
+   "error": "HISTORY_BUNDLE_INVALID"
+  },
+  {
+   "id": "history-duplicate-record",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwicmV2aXNpb24iOjEsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOm51bGwsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiRmljdGlvbmFsIGJvb2tzIGFuZCBtdWx0aWxpbmd1YWwgZG9jdW1lbnRhdGlvbi4iLCJsYW5ndWFnZXMiOlsiZGUiLCJlbiJdLCJjYXRlZ29yaWVzIjpbImJvb2tzIiwiZG9jdW1lbnRhdGlvbiJdfSwibGlua3MiOnsicmVsYXRlZF9vbmlvbl9zZXJ2aWNlcyI6W10sImNsZWFybmV0IjpbXX0sInB1Ymxpc2hlZF9hdCI6IjIwMjYtMTAtMTJUMDA6MDA6MDBaIiwic2lnbmF0dXJlIjoiZWQyNTUxOXNpZzppYUZjTmNvM2c2TGZrNGJxd0tQdjRJaFIzT21qTjVTN1hBdU54X0Z6cnRXcV9QOGdxMEhWeUhXQ0NaaFB4akx4WHhYWGJTM211Q3FzUzF6WGZTYnhDQSJ9LHsicHJvdG9jb2wiOiJPbmlvbiBTZXJ2aWNlIERpc2NvdmVyeSIsInByb3RvY29sX3ZlcnNpb24iOjEsInJlY29yZF90eXBlIjoic2VydmljZV9tYW5pZmVzdCIsIm9uaW9uIjoieXdhYXR6NndwbWRvNTdmeDRpZ2Npdm9yczd2N2U3enp6Z3BpcnNhcDdtZHppNnBma281dTJoaWQub25pb24iLCJzZXJ2aWNlX2lkZW50aXR5X3B1YmxpY19rZXkiOiJlZDI1NTE5OnlBd0FhNDFpTUdLaWdRX2FTN2VkaHFndC0tMWRnR1VSODlOVkN2bFMyWVUiLCJyZXZpc2lvbiI6MiwicHJldmlvdXNfbWFuaWZlc3RfaGFzaCI6InNoYTI1NjpjNzQxNWRlZjdhYjhkZGYzNjQwNmQ3NmNmYmE2ZTU4NTA3YjM3YTU1MWNmNWQ4N2MyOTY2ZDNkY2JlMjc5M2I2IiwiZGlzY292ZXJ5Ijp7InB1Ymxpc2hfc2VydmljZSI6dHJ1ZSwibWlycm9yX2RpcmVjdG9yeSI6ZmFsc2UsImRpc2NvdmVyX3NlcnZpY2VzIjpmYWxzZSwic3luY193aXRoX3BlZXJzIjpmYWxzZX0sInNlcnZpY2UiOnsibmFtZSI6IlN5bnRoZXRpYyBMaWJyYXJ5IiwiZGVzY3JpcHRpb24iOiJBIHJldmlzZWQgZmljdGlvbmFsIGNvbGxlY3Rpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6ejF6RDg3LWFyRXVBTjhOTnNrN2p4YnZFUklXTXpQUGlWb0w4TWJyd05FbzdmeHNsZVJWdzVaczBrQXd0N0xmNTRTdnUwdG1YUHpVbHN3amdEUjNYQ1EifV19"
+   },
+   "error": "HISTORY_BUNDLE_INVALID"
+  },
+  {
+   "id": "history-tampered-signature",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IlRhbXBlcmVkIGFmdGVyIHNpZ25pbmcuIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwicmV2aXNpb24iOjIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOnoxekQ4Ny1hckV1QU44Tk5zazdqeGJ2RVJJV016UFBpVm9MOE1icndORW83ZnhzbGVSVnc1WnMwa0F3dDdMZjU0U3Z1MHRtWFB6VWxzd2pnRFIzWENRIn1dfQ=="
+   },
+   "error": "SIGNATURE_INVALID"
+  },
+  {
+   "id": "history-current-onion-mismatch",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "25njqamcweflpvkl73j4szahhihoc4xt3ktcgjnpaingr5yhkenl5sid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbeyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwicmVjb3JkX3R5cGUiOiJzZXJ2aWNlX21hbmlmZXN0Iiwib25pb24iOiJ5d2FhdHo2d3BtZG81N2Z4NGlnY2l2b3JzN3Y3ZTd6enpncGlyc2FwN21kemk2cGZrbzV1MmhpZC5vbmlvbiIsInNlcnZpY2VfaWRlbnRpdHlfcHVibGljX2tleSI6ImVkMjU1MTk6eUF3QWE0MWlNR0tpZ1FfYVM3ZWRocWd0LS0xZGdHVVI4OU5WQ3ZsUzJZVSIsInJldmlzaW9uIjoxLCJwcmV2aW91c19tYW5pZmVzdF9oYXNoIjpudWxsLCJkaXNjb3ZlcnkiOnsicHVibGlzaF9zZXJ2aWNlIjp0cnVlLCJtaXJyb3JfZGlyZWN0b3J5IjpmYWxzZSwiZGlzY292ZXJfc2VydmljZXMiOmZhbHNlLCJzeW5jX3dpdGhfcGVlcnMiOmZhbHNlfSwic2VydmljZSI6eyJuYW1lIjoiU3ludGhldGljIExpYnJhcnkiLCJkZXNjcmlwdGlvbiI6IkZpY3Rpb25hbCBib29rcyBhbmQgbXVsdGlsaW5ndWFsIGRvY3VtZW50YXRpb24uIiwibGFuZ3VhZ2VzIjpbImRlIiwiZW4iXSwiY2F0ZWdvcmllcyI6WyJib29rcyIsImRvY3VtZW50YXRpb24iXX0sImxpbmtzIjp7InJlbGF0ZWRfb25pb25fc2VydmljZXMiOltdLCJjbGVhcm5ldCI6W119LCJwdWJsaXNoZWRfYXQiOiIyMDI2LTEwLTEyVDAwOjAwOjAwWiIsInNpZ25hdHVyZSI6ImVkMjU1MTlzaWc6aWFGY05jbzNnNkxmazRicXdLUHY0SWhSM09tak41UzdYQXVOeF9GenJ0V3FfUDhncTBIVnlIV0NDWmhQeGpMeFh4WFhiUzNtdUNxc1MxelhmU2J4Q0EifSx7InByb3RvY29sIjoiT25pb24gU2VydmljZSBEaXNjb3ZlcnkiLCJwcm90b2NvbF92ZXJzaW9uIjoxLCJyZWNvcmRfdHlwZSI6InNlcnZpY2VfbWFuaWZlc3QiLCJvbmlvbiI6Inl3YWF0ejZ3cG1kbzU3Zng0aWdjaXZvcnM3djdlN3p6emdwaXJzYXA3bWR6aTZwZmtvNXUyaGlkLm9uaW9uIiwic2VydmljZV9pZGVudGl0eV9wdWJsaWNfa2V5IjoiZWQyNTUxOTp5QXdBYTQxaU1HS2lnUV9hUzdlZGhxZ3QtLTFkZ0dVUjg5TlZDdmxTMllVIiwicmV2aXNpb24iOjIsInByZXZpb3VzX21hbmlmZXN0X2hhc2giOiJzaGEyNTY6Yzc0MTVkZWY3YWI4ZGRmMzY0MDZkNzZjZmJhNmU1ODUwN2IzN2E1NTFjZjVkODdjMjk2NmQzZGNiZTI3OTNiNiIsImRpc2NvdmVyeSI6eyJwdWJsaXNoX3NlcnZpY2UiOnRydWUsIm1pcnJvcl9kaXJlY3RvcnkiOmZhbHNlLCJkaXNjb3Zlcl9zZXJ2aWNlcyI6ZmFsc2UsInN5bmNfd2l0aF9wZWVycyI6ZmFsc2V9LCJzZXJ2aWNlIjp7Im5hbWUiOiJTeW50aGV0aWMgTGlicmFyeSIsImRlc2NyaXB0aW9uIjoiQSByZXZpc2VkIGZpY3Rpb25hbCBjb2xsZWN0aW9uLiIsImxhbmd1YWdlcyI6WyJkZSIsImVuIl0sImNhdGVnb3JpZXMiOlsiYm9va3MiLCJkb2N1bWVudGF0aW9uIl19LCJsaW5rcyI6eyJyZWxhdGVkX29uaW9uX3NlcnZpY2VzIjpbXSwiY2xlYXJuZXQiOltdfSwicHVibGlzaGVkX2F0IjoiMjAyNi0xMC0xMlQwMDowMDowMFoiLCJzaWduYXR1cmUiOiJlZDI1NTE5c2lnOnoxekQ4Ny1hckV1QU44Tk5zazdqeGJ2RVJJV016UFBpVm9MOE1icndORW83ZnhzbGVSVnc1WnMwa0F3dDdMZjU0U3Z1MHRtWFB6VWxzd2pnRFIzWENRIn1dfQ=="
+   },
+   "error": "ONION_BINDING_MISMATCH"
+  },
+  {
+   "id": "history-invalid-json",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6"
+   },
+   "error": "JSON_INVALID"
+  },
+  {
+   "id": "history-too-many-elements",
+   "input": {
+    "known_records": [],
+    "current_wire": "{\"discovery\":{\"discover_services\":false,\"mirror_directory\":false,\"publish_service\":true,\"sync_with_peers\":false},\"links\":{\"clearnet\":[],\"related_onion_services\":[]},\"onion\":\"ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion\",\"previous_manifest_hash\":\"sha256:c7415def7ab8ddf36406d76cfba6e58507b37a551cf5d87c2966d3dcbe2793b6\",\"protocol\":\"Onion Service Discovery\",\"protocol_version\":1,\"published_at\":\"2026-10-12T00:00:00Z\",\"record_type\":\"service_manifest\",\"revision\":2,\"service\":{\"categories\":[\"books\",\"documentation\"],\"description\":\"A revised fictional collection.\",\"languages\":[\"de\",\"en\"],\"name\":\"Synthetic Library\"},\"service_identity_public_key\":\"ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU\",\"signature\":\"ed25519sig:z1zD87-arEuAN8NNsk7jxbvERIWMzPPiVoL8MbrwNEo7fxsleRVw5Zs0kAwt7Lf54Svu0tmXPzUlswjgDR3XCQ\"}",
+    "onion": "ywaatz6wpmdo57fx4igcivors7v7e7zzzgpirsap7mdzi6pfko5u2hid.onion",
+    "bundle_base64": "eyJwcm90b2NvbCI6Ik9uaW9uIFNlcnZpY2UgRGlzY292ZXJ5IiwicHJvdG9jb2xfdmVyc2lvbiI6MSwiYnVuZGxlX3R5cGUiOiJzZXJ2aWNlX2hpc3RvcnkiLCJyZWNvcmRzIjpbe30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se30se31dfQ=="
+   },
+   "error": "SCHEMA_INVALID"
+  }
+ ]
+}

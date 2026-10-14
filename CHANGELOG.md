@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- PCP-004 service history bundle (owner-approved): `manifest:install` maintains
+  `/.well-known/onion-service-discovery-history.json`; Nodes fetch it once when a
+  Manifest does not connect, so Services stay discoverable after revisions, key
+  rotations and Onion migrations. Shared vectors pass in PHP, TypeScript and
+  Python (248 cases each); `history:install`/`history:verify`; missing history now
+  backs off instead of quarantining. Owner decisions D-018, D-029 and protocol v1
+  (D-005–D-017, D-052) recorded.
 - `init` now writes Node, combined and Client Host configurations too, with all
   private paths in the configuration's own directory and the next steps printed.
 - Status page Node card and `node:identity`; publisher lifecycle walkthrough

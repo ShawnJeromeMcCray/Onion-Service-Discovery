@@ -7,7 +7,7 @@ transport, 6 `doctor` warning). HTTP routes return codes as `{"error":CODE}`. Br
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-208 codes.
+210 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -64,13 +64,14 @@ for remedies.
 | `FORKED` | Node worker | 3 | The code name states the condition; see the raising component. |
 | `HASH_INVALID` | Tor transport, browser client, encoding | 3, 5 | The code name states the condition; see the raising component. |
 | `HEADERS_TOO_LARGE` | browser client | – | The code name states the condition; see the raising component. |
-| `HISTORY_INCOMPLETE` | Node worker | 3 | The current Manifest cannot be connected to known history yet; a rotation or migration proof is missing (storage:admit). |
+| `HISTORY_BUNDLE_INVALID` | browser client, protocol, signing | 3 | The PCP-004 history bundle is malformed, too large or contains a record type it must not contain. |
+| `HISTORY_INCOMPLETE` | Node worker, signing | 3 | The current Manifest does not connect to its history: the Service serves no or an incomplete history bundle (history:install), or a proof is missing. |
 | `HTTP_STATUS_REJECTED` | Tor transport | 5 | The remote answered with an unexpected HTTP status; nothing was verified. |
 | `IDENTITY_CHANGED` | Node worker | 3 | Another Service identity now answers at an address this Node already knew; the old evidence is preserved. |
 | `IDENTITY_FORKED` | Node worker | 3 | Two different signed revisions with the same number exist; the fork stays visible. |
 | `IMPORT_FORMAT_INVALID` | browser client | – | The code name states the condition; see the raising component. |
 | `IMPORT_REQUIRES_EMPTY_STAGING_STORE` | storage | 4 | The code name states the condition; see the raising component. |
-| `INPUT_FILE_UNAVAILABLE` | CLI | 3 | The code name states the condition; see the raising component. |
+| `INPUT_FILE_UNAVAILABLE` | CLI, signing | 3 | The code name states the condition; see the raising component. |
 | `INTERNAL_ERROR` | CLI | – | The code name states the condition; see the raising component. |
 | `JSON_DEPTH_EXCEEDED` | browser client, encoding | 3 | The code name states the condition; see the raising component. |
 | `KEY_DIRECTORY_UNSAFE` | signing | 4 | The code name states the condition; see the raising component. |
@@ -205,6 +206,7 @@ for remedies.
 | `STORAGE_VERSION_UNSUPPORTED` | storage | 4 | The code name states the condition; see the raising component. |
 | `STREAMING_UNAVAILABLE` | browser client | – | The code name states the condition; see the raising component. |
 | `SYNC_DISABLED` | CLI | 3 | The code name states the condition; see the raising component. |
+| `TOO_LARGE` | signing | 3 | The code name states the condition; see the raising component. |
 | `TOR_KEY_ACCESS_FORBIDDEN` | CLI, signing | 3, 4 | Commands never read Tor private key files. |
 | `TOR_REQUEST_FAILED` | Tor transport | 5 | Tor or its SOCKS port is unavailable, or the Onion did not answer. |
 | `TRANSPORT_CONFIGURATION_INVALID` | Tor transport | 5 | The code name states the condition; see the raising component. |

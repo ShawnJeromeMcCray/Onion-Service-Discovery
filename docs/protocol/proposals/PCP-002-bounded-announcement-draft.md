@@ -1,6 +1,7 @@
 # PCP-002: bounded public announcement experiment
 
-State: IMPLEMENTATION EXPERIMENT / NEEDS HUMAN PRODUCT AND SECURITY REVIEW.
+State: OWNER-APPROVED AS D-018 (2026-10-14), including bounded automatic
+re-announcement / NEEDS INDEPENDENT SECURITY REVIEW.
 Decision: D-018. This proposal is reviewable code and executed development evidence,
 not a Protocol Freeze or production approval.
 

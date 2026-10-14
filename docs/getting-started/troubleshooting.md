@@ -33,6 +33,7 @@ Keep private keys, passphrases, search history and raw private backups out of re
 | `ENOSPC` / disk full | Free space; the stores resume from the last durable commit. Run `storage:check` afterwards. See [recovery](../operations/deployment-and-recovery.md). |
 | Browser client shows old results | Reload sources explicitly. A failed refresh keeps the last verified view on purpose. |
 | Pin mismatch warning | A loaded identity conflicts with your pin. Treat it as a possible impersonation; keep the pin until you verified the change through the Service's signed rotation/migration evidence. |
+| Node reports `HISTORY_INCOMPLETE` for your Service | Run `history:verify WEBROOT`. If it is `MISSING` or `INCOMPLETE`, rebuild it with `history:install WEBROOT` and all your signed revision and proof files. Nodes retry with bounded backoff. |
 | Status page does not show saved evidence | The web runtime must be able to read `CONFIG_NAME.discoverability.json` beside the configuration; it takes the configuration's group. |
 | Need to report a problem | Attach the reviewed output of `diagnostics:export CONFIG` instead of configuration files or logs. |
 | `READY_LOCALLY`, external status unconfirmed | Your local signed publication is valid. Another Node has not been independently proven to include your fresh current state. Follow the [Publisher verification steps](publisher.md#5-verify-over-tor-and-check-selected-nodes). |

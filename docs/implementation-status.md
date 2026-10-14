@@ -18,8 +18,8 @@ SOCKS isolation. The D-051 owner-approved genesis-key ID now has a complete-hist
 Real private-Tor application traffic and actual headless Tor Browser local tests
 have passed; public Tor, Android and browser security-level profiles remain open.
 A default-off bounded announcement receiver and one-shot Tor operator command
-are implemented as PCP-002; human D-018 freeze and automated multi-Node onboarding
-remain open.
+are implemented as PCP-002; the owner approved D-018 with bounded automatic re-announcement on 2026-10-14, while automated multi-Node onboarding
+remains open.
 The optional default-off NoJS profile now serves explicit HTML POST search from a
 prepared local index, with frozen Unicode 17 normalization shared with browser search.
 Queries do not trigger discovery or synchronization. Both storage backends, corrupt-cache

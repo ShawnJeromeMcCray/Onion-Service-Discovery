@@ -91,11 +91,13 @@ php node-php/bin/onion-service-discovery node:snapshot /absolute/private/osd-nod
 ```
 
 Replace the address placeholder. On a successful direct check expect `VERIFIED`.
-If a Publisher rotated its key or moved to a new Onion, the check reports
-`HISTORY_INCOMPLETE` until you have its signed proof: admit the `rotation.json`
-or `migration.json` it sends you with `storage:admit BACKEND STORE_PATH FILE`,
-then check again. Peers that synchronize with you receive it in your snapshots.
-Otherwise:
+If the Manifest does not connect to history you hold (first contact after a
+revision, a key rotation or an Onion migration), the worker fetches the
+Service's history bundle once and keeps only records whose signatures prove the
+continuity ([PCP-004](../protocol/proposals/PCP-004-continuity-bundle-draft.md)).
+If the Service serves none, the check reports `HISTORY_INCOMPLETE` and retries
+with bounded backoff; you can also admit a proof file it sends you with
+`storage:admit BACKEND STORE_PATH FILE`. Otherwise:
 failed verification or incomplete continuity does not become an active identity.
 A received hint is unconfirmed until direct verification. The bounded worker does
 one unit of work; it is not a continuously running daemon. Inspect `candidate:list`

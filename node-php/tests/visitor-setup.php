@@ -41,7 +41,16 @@ try {
     visitorCommand(['init',$root.'/publisher/config.json',$onion,'--publish']);
     $installed=visitorCommand(['manifest:install',$root.'/publisher/manifest.json',$root.'/publisher/hostname',$app.'/node-php/public']);
     $status=visitorCommand(['publisher:status',$root.'/publisher/config.json']);
-    if($installed['status']!=='INSTALLED'||$status['overall']!=='READY_LOCALLY'||$status['manifest']['revision']!==1||$status['sampled_discoverability']!=='UNCONFIRMED')throw new RuntimeException('publisher acceptance failed');
+    if($installed['status']!=='INSTALLED'||$installed['history']!=='CONNECTED'||$status['overall']!=='READY_LOCALLY'||$status['manifest']['revision']!==1||$status['sampled_discoverability']!=='UNCONFIRMED')throw new RuntimeException('publisher acceptance failed');
+    // PCP-004: the front controller serves the history bundle that manifest:install maintains.
+    $listener=stream_socket_server('tcp://127.0.0.1:0');$port=(int)substr(strrchr(stream_socket_get_name($listener,false),':'),1);fclose($listener);
+    $server=proc_open([PHP_BINARY,'-S','127.0.0.1:'.$port,'-t',$app.'/node-php/public',$app.'/node-php/public/index.php'],[['pipe','r'],['file',$root.'/server.log','a'],['file',$root.'/server.log','a']],$serverPipes,null,['ONION_SERVICE_DISCOVERY_CONFIG'=>$root.'/publisher/config.json']);fclose($serverPipes[0]);
+    try{
+        $deadline=microtime(true)+5;do{$probe=@stream_socket_client('tcp://127.0.0.1:'.$port,$errno,$error,.1);if($probe!==false){fclose($probe);break;}usleep(100000);}while(microtime(true)<$deadline);
+        $socket=stream_socket_client('tcp://127.0.0.1:'.$port,$errno,$error,2);stream_set_timeout($socket,5);fwrite($socket,"GET /.well-known/onion-service-discovery-history.json HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");$reply=(string)stream_get_contents($socket);fclose($socket);
+        $bundle=json_decode(substr($reply,strpos($reply,"\r\n\r\n")+4),true,64,JSON_THROW_ON_ERROR);
+        if(!str_starts_with($reply,'HTTP/1.1 200')||$bundle['bundle_type']!=='service_history'||count($bundle['records'])!==1||$bundle['records'][0]['signature']!==$manifest['signature'])throw new RuntimeException('history bundle not served');
+    }finally{proc_terminate($server);proc_close($server);}
     $config=json_decode(file_get_contents($app.'/node-php/config/node.example.json'),true);
     $config['node']['key_path']=$root.'/node/node.key';$config['storage']['path']=$root.'/node/data';$config['export_path']=$root.'/node/exports';$config['features']['mirror_directory']=true;
     visitorWrite($root.'/node/config.json',$config);

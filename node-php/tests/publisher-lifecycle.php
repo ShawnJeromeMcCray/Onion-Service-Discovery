@@ -27,7 +27,8 @@ try {
     $old = $run(['key:create', 'service', 'old.key', '--passphrase-file', 'p-old'])['public_key'];
     $run(['manifest:init', $onion, $old, 'metadata.json'], 0, 'draft-1.json');
     $run(['record:sign', 'service', 'old.key', 'draft-1.json', '--passphrase-file', 'p-old'], 0, 'manifest-1.json');
-    $assert($run(['manifest:install', 'manifest-1.json', 'hostname', 'web'])['status'] === 'INSTALLED', 'genesis install'); ++$checks;
+    $genesisInstall = $run(['manifest:install', 'manifest-1.json', 'hostname', 'web']);
+    $assert($genesisInstall['status'] === 'INSTALLED' && $genesisInstall['history'] === 'CONNECTED' && $run(['history:verify', 'web'])['record_count'] === 1, 'genesis install and history'); ++$checks;
 
     // Ordinary revision.
     $metadata = json_decode(file_get_contents('metadata.json'), true); $metadata['service']['description'] = 'Synthetic, revised.';
@@ -47,7 +48,8 @@ try {
     $run(['record:sign', 'service', 'new.key', 'rotation/successor-draft.json', '--passphrase-file', 'p-new'], 0, 'manifest-3.json');
     $assert($run(['protocol:inspect', 'rotation.json'])['record_type'] === 'service_identity_key_rotation', 'rotation proof'); ++$checks;
     $assert($run(['manifest:install', 'manifest-3.json', 'hostname', 'web'], 3)['error'] === 'KEY_ROTATION_INVALID', 'rotation needs its proof'); ++$checks;
-    $assert($run(['manifest:install', 'manifest-3.json', 'hostname', 'web', '--rotation', 'rotation.json'])['status'] === 'INSTALLED', 'rotation install'); ++$checks;
+    $rotated = $run(['manifest:install', 'manifest-3.json', 'hostname', 'web', '--rotation', 'rotation.json']);
+    $assert($rotated['status'] === 'INSTALLED' && $rotated['history'] === 'CONNECTED' && $run(['history:verify', 'web'])['record_count'] === 4, 'rotation install keeps the proof in the history bundle'); ++$checks;
 
     // Onion migration: the current (new) key signs both records; Tor now serves the new address.
     mkdir('migration', 0700);
@@ -55,7 +57,15 @@ try {
     $run(['record:sign', 'service', 'new.key', 'migration/migration-draft.json', '--passphrase-file', 'p-new'], 0, 'migration.json');
     $run(['record:sign', 'service', 'new.key', 'migration/successor-draft.json', '--passphrase-file', 'p-new'], 0, 'manifest-4.json');
     file_put_contents('hostname', $newOnion . "\n");
-    $assert($run(['manifest:install', 'manifest-4.json', 'hostname', 'web', '--migration', 'migration.json'])['status'] === 'INSTALLED', 'migration install'); ++$checks;
+    $migrated = $run(['manifest:install', 'manifest-4.json', 'hostname', 'web', '--migration', 'migration.json']);
+    $verified = $run(['history:verify', 'web']);
+    $assert($migrated['status'] === 'INSTALLED' && $verified['state'] === 'CONNECTED' && $verified['record_count'] === 6, 'migration install keeps a connecting history bundle'); ++$checks;
+    // An installation without a bundle (older version) rebuilds it once from the owner's signed files.
+    unlink('web/.well-known/onion-service-discovery-history.json');
+    $assert($run(['history:verify', 'web'], 6)['state'] === 'MISSING', 'missing bundle reported'); ++$checks;
+    $assert($run(['history:install', 'web', 'manifest-1.json', 'manifest-2.json'], 3)['error'] === 'HISTORY_INCOMPLETE', 'incomplete rebuild refused'); ++$checks;
+    $rebuilt = $run(['history:install', 'web', 'manifest-1.json', 'manifest-2.json', 'rotation.json', 'manifest-3.json', 'migration.json', 'manifest-4.json']);
+    $assert($rebuilt['status'] === 'INSTALLED' && $rebuilt['state'] === 'CONNECTED' && $rebuilt['record_count'] === 6 && $run(['history:verify', 'web'])['state'] === 'CONNECTED', 'history rebuilt'); ++$checks;
 
     // The complete owner history is passed file by file, without assembling JSON by hand.
     $history = ['manifest-1.json', 'manifest-2.json', 'rotation.json', 'manifest-3.json', 'migration.json', 'manifest-4.json'];

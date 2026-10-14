@@ -74,6 +74,20 @@ while (($line = fgets(STDIN, 262146)) !== false) {
             foreach ($fixture->chunks as $wire) { if (!is_string($wire)) { throw new ProtocolException('SCHEMA_INVALID'); } }
             foreach ($fixture->checkpoint_wire as $part) { if (!is_string($part)) { throw new ProtocolException('SCHEMA_INVALID'); } }
             $output = ['status' => 'PASS', 'result' => (new \OnionServiceDiscovery\Protocol\SnapshotMembership($verifier))->verify(implode('', $fixture->checkpoint_wire), $fixture->chunks, $fixture->expected_node_key, $history)];
+        } elseif (($request->operation ?? null) === 'service-history') {
+            // PCP-004: known records, then the Onion-bound current Manifest, then the unsigned bundle.
+            $fixture = StrictJson::parse($bytes, 1048576);
+            if (!is_array($fixture->known_records ?? null) || !is_string($fixture->current_wire ?? null) || !is_string($fixture->onion ?? null) || !is_string($fixture->bundle_base64 ?? null)) { throw new ProtocolException('SCHEMA_INVALID'); }
+            $known = [];
+            foreach ($fixture->known_records as $record) {
+                if (!$record instanceof stdClass) { throw new ProtocolException('SCHEMA_INVALID'); }
+                $known[] = $verifier->verify($record);
+            }
+            $current = $verifier->verifyWire($fixture->current_wire, OnionAddress::parse($fixture->onion));
+            $bundle = base64_decode($fixture->bundle_base64, true);
+            if ($bundle === false) { throw new ProtocolException('SCHEMA_INVALID'); }
+            $result = (new \OnionServiceDiscovery\Protocol\ServiceHistory($verifier))->verify($bundle, $current, $known);
+            $output = ['status' => 'PASS', 'result' => ['state' => $result['state'], 'genesis_key' => $result['genesis_key'], 'admitted_hashes' => $result['admitted_hashes']]];
         } else {
             throw new ProtocolException('USAGE_ERROR');
         }

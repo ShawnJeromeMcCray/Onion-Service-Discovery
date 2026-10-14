@@ -196,6 +196,8 @@ administrator machine, transfer only the signed public files, and keep every
 signed revision and proof: your complete history is what lets others verify
 continuity. The commands below are exercised by `node-php/tests/publisher-lifecycle.php`.
 Run them from the repository root after `C="php node-php/bin/onion-service-discovery"`.
+Numbered files keep each revision: `manifest-1.json` is the genesis `manifest.json`
+from step 3, `service.key` and `passphrase` are your current Service key files.
 
 ### Change metadata
 
@@ -210,8 +212,8 @@ with the same revision number: that is a fork, and it stays visible.
 
 ### Rotate your Service key
 
-Create the new key first (`key:create service new.key --passphrase-file new-passphrase`)
-and back it up. The old key authorizes the change and the new key confirms it:
+Create the new key first (`key:create service new.key --passphrase-file new-passphrase`),
+back it up and use the `public_key` it prints as `NEW_PUBLIC_KEY`. The old key authorizes the change and the new key confirms it:
 
 ```sh
 mkdir rotation
@@ -240,15 +242,30 @@ $C manifest:install manifest-4.json NEW_HOSTNAME_DIRECTORY/hostname /absolute/ap
 
 Update `node.onion` in your publisher configuration to the new address.
 
-### Tell Nodes about rotations and migrations
+### How Nodes learn your history
 
-Nodes fetch only your current Manifest from the Well-Known path. They cannot
-connect a rotated key or a new address to your history until they have the
-signed proof (`rotation.json` or `migration.json`); until then they report
-`HISTORY_INCOMPLETE`. Send the proof file to the operators of the Nodes you use.
-Each runs `$C storage:admit BACKEND STORE_PATH rotation.json` and checks your
-address again; Nodes that synchronize with them receive it in their snapshots.
-The protocol has no automatic transport for these proofs yet.
+`manifest:install` also maintains `/.well-known/onion-service-discovery-history.json`
+beside your Manifest ([PCP-004](../protocol/proposals/PCP-004-continuity-bundle-draft.md)):
+every signed revision, rotation and migration proof, written only when it
+connects to the installed Manifest (`"history": "CONNECTED"` in its output).
+A Node that meets your Service for the first time after any revision, or after a
+rotation or migration, fetches this file once and keeps only records whose own
+signatures prove your continuity. Check what Nodes will see:
+
+```sh
+$C history:verify /absolute/app/Onion-Service-Discovery/node-php/public
+```
+
+Installations made before this feature, or a history built elsewhere, are
+rebuilt once from your signed files, in any order:
+
+```sh
+$C history:install /absolute/app/Onion-Service-Discovery/node-php/public manifest-1.json manifest-2.json rotation.json manifest-3.json
+```
+
+`service:verify` reports `history_bundle` as Nodes would see it over Tor. As a
+fallback, a Node operator can still admit a proof file directly with
+`storage:admit BACKEND STORE_PATH rotation.json`.
 
 ### Withdraw
 
