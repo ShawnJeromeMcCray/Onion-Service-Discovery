@@ -18,8 +18,10 @@ check domain-name addressing, credentials, ambient proxy bypass resistance,
 redirect refusal, encoding refusal, header ambiguity and byte limits. These are
 not tests against a running Tor daemon or an external Onion Service.
 
-The CLI configures `node`, `client-host` and `combined` roles explicitly. All
-network feature switches default off. A Client Host config contains no Node
+The CLI configures `node`, `client-host` and `combined` roles explicitly.
+Publishing, peer sync, server search, announcement acceptance and visitor-chosen
+Nodes default off; `init --role node|combined` turns on only mirroring and
+direct checks of admitted candidates. A Client Host config contains no Node
 signing key. `node:init` creates a separate signed Node descriptor and chains
 capability changes. `candidate:add` queues a valid address only when discovery
 is enabled. `node:work-one` performs at most one manifest request, retains
@@ -39,7 +41,9 @@ not create another checkpoint within the daily refresh window. An explicit
 derived-export rebuild also creates a new generation. Chunks use SHA-256 over ASCII
 `Onion Service Discovery/snapshot-chunk/v1`, NUL and canonical array bytes.
 The root hashes ASCII `Onion Service Discovery/snapshot-root/v1`, NUL and the
-canonical ordered chunk descriptors. These are draft byte choices requiring
+canonical ordered chunk descriptors. The owner froze these bytes as protocol v1
+(D-014, D-015, 2026-10-14); cross-language vectors exist and independent review
+is still open. Originally they were draft byte choices requiring
 cross-language vectors and human protocol review.
 
 Peer sync is resumable with at most six generic requests and two chunks per step. It retains global evidence through source omissions and activates a source cursor only after complete chunk verification. Signed checkpoint equivocation is retained, rollback is rejected and one lease per source prevents concurrent jobs. Imported observations never become local checks. Public export excludes never-published Service identities while retaining needed public history and withdrawal evidence. Unchanged direct checks update local liveness without accumulating duplicate observation records; source checkpoints can refresh their signatures daily.

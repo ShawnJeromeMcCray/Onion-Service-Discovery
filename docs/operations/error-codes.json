@@ -569,11 +569,13 @@
    "meaning": null
   },
   "INTERNAL_ERROR": {
-   "cli_exit": [],
+   "cli_exit": [
+    "8"
+   ],
    "components": [
     "CLI"
    ],
-   "meaning": null
+   "meaning": "An unexpected internal failure; details are withheld on purpose. Run storage:check if a store was involved and attach the reviewed diagnostics:export output when reporting it."
   },
   "JSON_DEPTH_EXCEEDED": {
    "cli_exit": [
@@ -1139,12 +1141,14 @@
    "meaning": "The command or feature is not available for this configuration role."
   },
   "RUNTIME_DEPENDENCIES_MISSING": {
-   "cli_exit": [],
+   "cli_exit": [
+    "3"
+   ],
    "components": [
     "CLI",
     "front controller"
    ],
-   "meaning": "Install the locked Composer runtime dependencies first."
+   "meaning": "PHP dependencies are missing: use the development runtime package, which bundles them, or run the locked Composer install."
   },
   "RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX": {
    "cli_exit": [

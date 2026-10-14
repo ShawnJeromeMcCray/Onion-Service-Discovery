@@ -1,8 +1,8 @@
 # Decision register
 
-Source: specification document 24. No approval has been inferred from the request to implement the project. Technical prototypes may proceed; production and protocol approval remain blocked.
+Source: specification document 24. No approval has been inferred from the request to implement the project; every approval below quotes an explicit owner answer. Protocol v1 is owner-frozen as implemented (D-005 to D-017, D-052); independent review and production approval remain open.
 
-D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrestricted use and relinquish rights. Runtime versions and exact protocol choices are not yet frozen.
+D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrestricted use and relinquish rights. Runtime versions (D-002) are not yet decided.
 
 | ID | Decision | State | Owner | Release blocker | Source recommendation |
 | --- | --- | --- | --- | --- | --- |
@@ -57,7 +57,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-049 | External Audit Provider | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-050 | Production Release Approval | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 
-The refreshed source decision register adds four unresolved release blockers:
+The refreshed source decision register adds four release blockers; D-051 and D-052 are now owner-approved, D-053 and D-054 remain open:
 
 | ID | Decision | State | Owner | Release blocker | Source recommendation |
 | --- | --- | --- | --- | --- | --- |

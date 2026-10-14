@@ -1,6 +1,6 @@
 # ADR 003: strict Ed25519 points and snapshot byte construction
 
-Status: IMPLEMENTATION DRAFT — NEEDS HUMAN CRYPTO REVIEW.
+Status: Owner-approved as protocol v1 (D-014, D-015, 2026-10-14) — independent crypto review open.
 
 All Service/Node public keys and signature R points must be canonical,
 non-identity points in the prime-order Ed25519 subgroup. Signature scalars must
@@ -29,6 +29,6 @@ of chunk descriptors (hash, bytes, record_count). Descriptor signatures bind
 root, generation, predecessor, cursor and counts. Both byte constructors have
 independent Python-generated tests in all three languages.
 
-No protocol freeze or human approval is inferred. New dependencies, strict
-point rules, provider compatibility and these bytes require review before a
-production release.
+The owner froze these bytes as protocol v1 on 2026-10-14 (D-014, D-015).
+New dependencies, strict point rules, provider compatibility and these bytes
+still require independent review before a production release.

@@ -1,6 +1,11 @@
 # Specification understanding
 
-Status: complete ordered reading of the current 55-source snapshot on 2026-10-13; implementation alignment remains partial; no Protocol Freeze or production approval
+Status: complete ordered reading of the current 55-source snapshot on 2026-10-13; implementation alignment remains partial; no production approval
+
+Update 2026-10-14: the owner froze protocol v1 as implemented (D-005 to D-017,
+D-052) and approved D-018, D-029 and D-051, so the statements below that call
+these unresolved describe 2026-10-13. D-053 and D-054 remain open; see the
+[decision register](governance/decision-register.md).
 
 Onion Service Discovery enables opt-in public metadata discovery through self-published signed manifests, independent mirrors and a browser-local index. It modifies no Tor code and reads no Tor private keys. It is not a content-safety service, central naming authority, general website crawler or global Sybil solution.
 

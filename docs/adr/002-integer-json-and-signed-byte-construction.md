@@ -1,6 +1,6 @@
 # ADR-002: Integer-only canonical JSON and signed-byte construction
 
-Status: Needs Human Review; implementation draft
+Status: Owner-approved as protocol v1 (D-005 to D-012, 2026-10-14); independent cryptographic review open
 Date: 2026-10-12
 Owner: implementation agent
 
@@ -16,7 +16,7 @@ Signed input is UTF-8 ASCII domain string, one zero byte, then canonical payload
 
 Manifest hash uses `Onion Service Discovery/service-manifest-hash/v1`, a zero byte, and canonical signable manifest payload; SHA-256 encoded as `sha256:` plus lowercase hex.
 
-The draft manifest includes `record_type: service_manifest`. Rotation retains the early Protocol's `old_key_signature` and `new_key_confirmation`, excludes both from the shared signed payload, and requires both signatures over the same rotation domain. Migration retains `service_identity_signature`. Other signed records use `signature`. These choices are explicit draft schema decisions, not a frozen Protocol.
+The draft manifest includes `record_type: service_manifest`. Rotation retains the early Protocol's `old_key_signature` and `new_key_confirmation`, excludes both from the shared signed payload, and requires both signatures over the same rotation domain. Migration retains `service_identity_signature`. Other signed records use `signature`. These choices were explicit draft schema decisions; the owner froze them as protocol v1 on 2026-10-14.
 
 Genesis is revision 1 with explicit null predecessor. Successors require exact predecessor+1. Countersigned rotation and signed migration may be combined only with complete, independently valid evidence linked to the same predecessor.
 
@@ -34,4 +34,4 @@ Exact cross-language Unicode sorting, escaping, message bytes, signatures, hashe
 
 ## Human review
 
-D-005 through D-012 and protocol crypto freeze remain NEEDS-HUMAN-REVIEW. No Production Stable approval is inferred. Runtime/browser provider compatibility remains a separate gate.
+The owner froze D-005 through D-012 as implemented (protocol v1, 2026-10-14); independent cryptographic review remains open and incompatible changes need a new protocol version. No Production Stable approval is inferred. Runtime/browser provider compatibility remains a separate gate.

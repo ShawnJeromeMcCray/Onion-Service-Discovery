@@ -24,8 +24,8 @@ revision is not described as having verified genesis continuity without history.
 A missing/tampered Manifest cannot produce local-ready status.
 
 `publisher:status CONFIG` uses the same evidence derivation. `service:verify
-CONFIG ONION` performs one explicitly requested, bounded Tor fetch without keys
-or storage writes. An HTTP status-page visit does not initiate that request,
+CONFIG ONION` performs explicitly requested, bounded Tor fetches of the Manifest
+and the history bundle, without keys or storage writes. An HTTP status-page visit does not initiate that request,
 announcement, peer sync, storage repair or signing.
 
 The Well-Known route serves valid signed withdrawal records even when publication

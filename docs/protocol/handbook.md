@@ -4,8 +4,9 @@ This document describes implemented behavior and links the offline schemas,
 fixtures and tests. **It is a draft, not Protocol Stable, IANA registration,
 security certification or production approval.** Sources and unresolved human
 choices remain in the specification manifest and decision register. Requirement
-keywords follow RFC 2119/8174 within this development profile; proposed permanent
-protocol bytes still require review/freeze.
+keywords follow RFC 2119/8174 within this development profile. The owner froze the
+implemented protocol v1 bytes on 2026-10-14 (D-005 to D-017, D-052); independent
+review remains open.
 
 ## Participants and trust
 
@@ -13,7 +14,8 @@ A Service operator controls a separate Ed25519 Service key and signs opt-in
 metadata served on its exact canonical Tor v3 hostname. A Node mirrors verified
 signed evidence and can make its own direct observation. A distinct Client Host
 serves locally bundled verification/search code and may relay generic data from
-explicitly configured Nodes. The browser combines multiple source views and
+explicitly configured Nodes and, only when its operator enables
+`visitor_sources`, from Nodes the visitor chose. The browser combines multiple source views and
 searches locally. Combined hosting is supported but has a weaker origin boundary.
 
 ```mermaid
@@ -106,8 +108,10 @@ cloud/account sync exists. Losing a Service key does not create social recovery.
 ## Node data, transport and synchronization
 
 Read-only fixed endpoints under `/onion-service-discovery/v1/` are node, state,
-peers, services/{onion}, changes?after={local-sequence}, snapshots/{hash} and
-chunks/{hash}. Only GET/HEAD are supported; methods, extra query parameters and
+peers, services/{onion}, services/by-id/{logical_service_id},
+changes?after={local-sequence}, snapshots/{hash} and chunks/{hash}; Services
+serve `/.well-known/onion-service-discovery.json` and the PCP-004 history bundle
+`/.well-known/onion-service-discovery-history.json`. Only GET/HEAD are supported; methods, extra query parameters and
 arbitrary URLs are rejected. Signed descriptors authenticate source data;
 unsigned state is only a locator checked against the signed checkpoint.
 Mirror Nodes advertise index.core.v1, sync.changes.v1 and sync.snapshots.v1.
@@ -168,7 +172,8 @@ provenance. See [release gates](../release-gates.json).
 
 ## Interoperability and non-claims
 
-The draft black-box suite passes 134 cases per PHP/TypeScript/Python, with bounded
+The black-box suite runs 248 cases per PHP/TypeScript/Python in CI (the latest
+committed report recorded 226, before the PCP-004 history cases), with bounded
 malformed-input smoke fuzzing and finite formal safety evidence. These do not
 certify all CORE-V1/API/SYNC profiles or prove unbounded/liveness properties.
 Controlled Chromium is not Tor Browser desktop/Android. S1000 local benchmarks

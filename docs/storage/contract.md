@@ -17,8 +17,9 @@ commit means the caller must read back state before deciding whether to retry.
 FilesystemStore requires a private local directory and working advisory locks,
 atomic same-filesystem rename and file/directory fsync. NFS, SMB and object
 storage are unsupported. Immutable content objects precede the checksummed
-checkpoint; PREPARE precedes the atomic HEAD replacement. HEAD replacement is
-the commit point. Recovery completes or aborts an unfinished journal entry
+checkpoint; PREPARE precedes the atomic HEAD replacement. In format 2 the
+durable journal COMMIT before HEAD publication is the commit point (format 1:
+HEAD replacement), see below. Recovery completes or aborts an unfinished journal entry
 according to HEAD. A trailing incomplete journal line may be discarded only
 after consistency checks; malformed complete entries fail closed. Checkpoint
 cleanup preserves the current and previous checkpoints. Journal compaction

@@ -1,7 +1,8 @@
 # Offline exact-state snapshot membership
 
-Status: implemented against existing development snapshot bytes. D-051/D-052
-Protocol Freeze, active-index checkpoint design and human approvals remain open.
+Status: implemented against the snapshot bytes the owner froze as protocol v1
+(D-014, D-015; D-051 and D-052 owner-approved). The active-index checkpoint
+design and independent review remain open.
 
 The verifier checks the selected Node's signature, every signed chunk hash,
 byte/count limits, canonical encoding, global record ordering and every Service

@@ -11,8 +11,8 @@ A public installation needs the remaining [release gates](project-status.md).
 | --- | --- | --- |
 | PHP | 64-bit PHP 8.4+, JSON, sodium, iconv, curl | Publisher, Node and Client Host |
 | PDO SQLite | PHP SQLite driver | SQLite backend only |
-| Composer | Composer 2; respects committed lock | Install PHP runtime dependencies |
-| Node.js/npm | Node 24+ and bundled npm | Build browser assets from source; local demo |
+| Composer | Composer 2; respects committed lock | Install PHP runtime dependencies from source; not needed with the development runtime package |
+| Node.js/npm | Node 24+ and bundled npm | Build browser assets from source; local demo; not needed with the development runtime package |
 | Tor | Existing v3 Onion Service and loopback SOCKS listener | Real Onion hosting / outbound Node and relay requests |
 | Web server | PHP-FPM plus reviewed routing: nginx or Apache httpd 2.4 templates | Persistent staging web hosting |
 | Python | 3.11+ and locked virtual environment | Developer validators; not ordinary PHP operation |
@@ -27,7 +27,7 @@ names and FPM socket locations differ. Check PHP before provisioning:
 
 ```sh
 php -r 'foreach (["json","sodium","iconv","curl"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR,"Missing extension: $e\n"); exit(1); } } if (PHP_INT_SIZE !== 8 || PHP_VERSION_ID < 80400) { fwrite(STDERR,"64-bit PHP 8.4+ required, found ".PHP_VERSION."\n"); exit(1); } echo "PHP runtime prerequisites present\n";'
-composer --version
+composer --version   # only when you build from source
 ```
 
 For SQLite, also check `php -r 'exit(extension_loaded("pdo_sqlite") ? 0 : 1);'`.

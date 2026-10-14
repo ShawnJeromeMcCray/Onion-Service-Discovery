@@ -26,7 +26,7 @@ The narrow credential-pattern check is supplemental. It does not replace the req
 
 The full specification review and standards refresh remain incomplete. Source document import is explicitly distinct from requirement validation. D-001 is approved under the owner’s unrestricted-use instruction: CC0-1.0. Other decision records remain unresolved. No license grant, crypto freeze or production approval is fabricated.
 
-All application and release gates remain open. GitHub rejected the first push because this token cannot modify Actions workflows. The workflow is retained as tools/ci/foundation-workflow.yml and is not active; other changes can be pushed without changing the token. No production release was performed.
+All application and release gates remain open. GitHub rejected the first push because this token cannot modify Actions workflows. The workflow was retained as tools/ci/foundation-workflow.yml and not active at that time; other changes could be pushed without changing the token. (Update: it now runs as `.github/workflows/foundation.yml`; `tools/ci/` no longer exists.) No production release was performed.
 
 ## Next work
 
