@@ -2,26 +2,30 @@ import { localSearch, metadataWarnings, type AdultVisibility, type ClientView, t
 import { CATEGORY_IDS, CATEGORY_LABELS } from '../protocol/category-id.ts';
 import { groupSimilarResults } from './result-groups.ts';
 import { parseStrictJson } from '../protocol/strict-json.ts';
-import { serializePins } from './pins.ts';
+import { serializePins, type PinImportStatus } from './pins.ts';
+import { operationMessage, sourceMessage } from './messages.ts';
 import type { SourceSelection } from './source-loader.ts';
 interface SourceStatus {onion:string;status:string;nodeKey:string|null;generation:number|null;error:string|null;baselineHistoryProven:boolean;}
 interface VisitorSource {onion:string;expectedKey:string;}
 interface ViewMessage {type:'view';view:ClientView;sources:SourceStatus[];synthetic:boolean;busy:boolean;witnessCount:number;visitorSources:VisitorSource[];}
-type WorkerMessage=ViewMessage|{type:'error';code:string}|{type:'visitor-error';code:string}|{type:'pin-preview';pins:LocalPin[]};
+type WorkerMessage=ViewMessage|{type:'error';code:string;op:string;origin:'profile'|'backup'|null}|{type:'visitor-error';code:string}|{type:'pin-preview';pins:{pin:LocalPin;status:PinImportStatus}[]}|{type:'pins-restored';origin:'profile'|'backup';added:number;updated:number;skipped:number};
 const storageKey='onion-service-discovery-pins-v1';
 const sourceStorageKey='onion-service-discovery-sources-v1';
 const visitorErrors:{[code:string]:string}={ADDRESS_INVALID:'Check the onion address: it must be a 56-character v3 address ending in .onion.',PUBLIC_KEY_INVALID:'Check the expected Node key: it starts with ed25519: followed by 43 characters.',EXPECTED_NODE_KEY_REQUIRED:'Enter the Node’s expected public key. Without it, a different Node could answer in its place.',SOURCE_ALREADY_CONFIGURED:'This Node is already listed by this Client Host.',SOURCE_ALREADY_ADDED:'You have already added this Node.',VISITOR_SOURCE_LIMIT:'You can add up to 8 Nodes. Remove one first.',VISITOR_SOURCES_DISABLED:'This Client Host does not load visitor-chosen Nodes.'};
 let configuredSourceCount=0; let renderedVisitorSources='';
 const worker=new Worker(new URL('verifier-worker.js',document.baseURI),{type:'module'});
 let view:ClientView={services:[],pins:[],recordCount:0,pendingCount:0}; let synthetic=false; let busy=false; let pendingPinImport:ArrayBuffer|null=null;
+// Saved pins are overwritten only after they were restored: an empty first view or a failed
+// restore must never replace them.
+let profilePins:'none'|'pending'|'restored'|'failed'='none';
 function el<T extends HTMLElement>(id:string):T { const element=document.getElementById(id); if(element===null) throw new Error('CLIENT_MARKUP_INVALID'); return element as T; }
 function text(tag:string,value:string,className=''):HTMLElement { const node=document.createElement(tag); node.textContent=value; if(className!=='') node.className=className; return node; }
 function operation(message:string):void { el('operation-status').textContent=message; }
 function button(label:string,action:()=>void):HTMLButtonElement { const node=document.createElement('button'); node.type='button'; node.className='secondary'; node.textContent=label; node.addEventListener('click',action); return node; }
 function visit(onion:string):HTMLAnchorElement { const node=document.createElement('a'); node.className='visit'; node.href='http://'+onion+'/'; node.rel='noreferrer noopener'; node.target='_blank'; node.textContent='Open onion service'; return node; }
 function persistPins():void {
-  if(!el<HTMLInputElement>('remember-pins').checked) return;
-  try { localStorage.setItem(storageKey,serializePins(view.pins.map(row=>row.pin))); el('storage-status').textContent='Pins saved in this origin’s browser profile. They are not sent to Nodes.'; }
+  if(!el<HTMLInputElement>('remember-pins').checked||profilePins==='pending'||profilePins==='failed') return;
+  try { localStorage.setItem(storageKey,serializePins(view.pins.map(row=>row.pin))); el('storage-status').textContent='Pins saved in this browser profile for this page only. They are not sent to Nodes or shared with other Client Hosts. Tor Browser deletes them when it closes or on New Identity; use Export pins to keep a copy.'; }
   catch { el('storage-status').textContent='Profile storage unavailable. New changes stay in session memory; older saved pins may remain.'; }
 }
 let resultPage=0;
@@ -92,14 +96,16 @@ function renderPins():void {
   }
   if(view.pins.length===0) container.append(text('p','No local pins yet. Pin a key you have chosen to remember.','muted'));
 }
+const sourceStatusLabels:{[status:string]:string}={COMPLETE:'Verified',STALE:'Verified, but old',PARTIAL:'Partly verified',LOADING:'Loading',NOT_STARTED:'Waiting',CANCELLED:'Cancelled',FAILED:'Not loaded',QUARANTINED:'Set aside: conflicting signed data'};
 function renderSources(sources:SourceStatus[]):void {
   const container=el('source-statuses'); container.replaceChildren(); const keys=new Set(sources.filter(source=>source.status==='COMPLETE').map(source=>source.nodeKey)); keys.delete(null);
   el('coverage').textContent=keys.size+' distinct fresh signing keys · '+sources.filter(source=>source.status==='COMPLETE').length+' complete source views';
   for(const source of sources) {
-    const card=text('div','','source-status'); card.append(text('strong',source.status),text('div',source.onion));
+    const severity=source.status==='QUARANTINED'?'danger':source.status==='COMPLETE'?'ok':'attention';
+    const card=text('div','','source-status status-'+severity); card.append(text('strong',sourceStatusLabels[source.status]??source.status),text('div',source.onion));
     if(source.nodeKey!==null) card.append(text('div',source.nodeKey,'key-value'));
-    if(source.error!==null) card.append(text('div',source.error,'problem'));
-    if(source.error==='SOURCE_NODE_KEY_CHANGED') card.append(text('div','This Node signed with a different key than expected. Check the key you entered; if it is right, another service may be answering at this address.','problem'));
+    if(source.error!==null) card.append(text('div',sourceMessage(source.error),'problem'),text('div','Code: '+source.error,'muted'));
+    if(source.status==='CANCELLED') card.append(text('div','You cancelled loading before this source finished. Nothing from it changed.'));
     if(source.status==='COMPLETE'&&!source.baselineHistoryProven) card.append(text('div','First-contact baseline; earlier Node checkpoint history is not proven.','problem'));
     if(source.status==='STALE') card.append(text('div','Old checkpoint or clock discrepancy. Historical signatures remain evidence, not freshness.','problem'));
     if(source.status==='PARTIAL') card.append(text('div','History verification is incomplete. Refresh again to continue; the last verified local index remains available.'));
@@ -128,10 +134,23 @@ function renderVisitorSources(sources:readonly VisitorSource[]):void {
 }
 worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
   const message=event.data;
-  if(message.type==='error') { operation('Operation stopped: '+message.code+'. Existing pins and evidence are preserved.'); return; }
+  if(message.type==='error') {
+    if(message.op==='restore-pins'&&message.origin==='profile') {
+      // Leave the saved pins untouched; saving again would replace them with what this session holds.
+      profilePins='failed'; el<HTMLInputElement>('remember-pins').checked=false;
+      el('storage-status').textContent='Your saved pins could not be read ('+message.code+') and were left unchanged in this browser profile. New pins stay in this session; turning on “Remember pins” again replaces the saved ones.';
+      return;
+    }
+    operation(operationMessage(message.code)+' (code '+message.code+')'); return;
+  }
+  if(message.type==='pins-restored') {
+    if(message.origin==='profile') { profilePins='restored'; persistPins(); return; }
+    operation('Pin import: '+message.added+' added, '+message.updated+' updated to a newer remembered revision, '+message.skipped+' skipped because they conflict with your existing pins, which were kept.'); return;
+  }
   if(message.type==='visitor-error') { el('visitor-status').textContent='Node not added: '+(visitorErrors[message.code]??message.code); return; }
   if(message.type==='pin-preview') {
-    const preview=el('pin-preview'); preview.replaceChildren(); for(const pin of message.pins) { const item=text('div','','preview-pin'); item.append(text('strong',pin.label),text('div',pin.genesisKey,'key-value'),text('div',pin.contextOnion,'onion-address')); preview.append(item); }
+    const statusText:{[status:string]:string}={NEW:'New pin',SAME:'Already pinned; nothing changes',UPDATES_REVISION:'Already pinned; remembers a newer revision',CONFLICT_KEEPS_EXISTING:'Conflicts with your existing pin; yours is kept and this one is skipped'};
+    const preview=el('pin-preview'); preview.replaceChildren(); for(const {pin,status} of message.pins) { const item=text('div','','preview-pin'+(status==='CONFLICT_KEEPS_EXISTING'?' conflict':'')); item.append(text('strong',pin.label),text('div',statusText[status]??status),text('div',pin.genesisKey,'key-value'),text('div',pin.contextOnion,'onion-address')); preview.append(item); }
     el<HTMLDialogElement>('pin-import-dialog').showModal(); return;
   }
   el('client-startup-notice').hidden=true;
@@ -156,7 +175,10 @@ el('source-form').addEventListener('submit',event=>{
     if(!node.checked) continue; const onion=node.dataset.source!; const key=el<HTMLInputElement>(node.id+'-key').value.trim(); sources.push(key===''?{onion}:{onion,expectedKey:key});
   }
   if(sources.length===0) { operation('Select a configured data Node or import signed records.'); return; }
-  if(sources.length<3&&!el<HTMLInputElement>('limited-coverage').checked) { operation('Select at least three sources, or explicitly allow limited source coverage.'); return; }
+  if(sources.length<3&&!el<HTMLInputElement>('limited-coverage').checked) {
+    operation('Select at least three sources, or allow loading with fewer under “Source selection and expected keys”.');
+    el<HTMLDetailsElement>('source-details').open=true; el<HTMLInputElement>('limited-coverage').focus(); return;
+  }
   worker.postMessage({op:'load',sources});
 });
 el('cancel-load').addEventListener('click',()=>worker.postMessage({op:'cancel'}));
@@ -164,13 +186,14 @@ el('clear-index').addEventListener('click',()=>worker.postMessage({op:'clear-ind
 el('forget-all').addEventListener('click',()=>el<HTMLDialogElement>('forget-dialog').showModal());
 el('forget-dialog').addEventListener('close',()=>{
   if(el<HTMLDialogElement>('forget-dialog').returnValue!=='confirm') return;
-  el<HTMLInputElement>('remember-pins').checked=false;
+  el<HTMLInputElement>('remember-pins').checked=false; profilePins='none';
   el<HTMLInputElement>('remember-sources').checked=false;
   try {localStorage.removeItem(storageKey);localStorage.removeItem(sourceStorageKey);el('storage-status').textContent='Saved profile pins and added Nodes removed. Session memory only.';} catch {el('storage-status').textContent='Saved profile pins could not be removed. Clear this origin’s storage in browser settings.';}
   worker.postMessage({op:'clear-all'});
 });
 el('remember-pins').addEventListener('change',()=>{
-  if(el<HTMLInputElement>('remember-pins').checked)persistPins();
+  // Turning it on after a failed restore is the explicit choice to replace the unreadable saved pins.
+  if(el<HTMLInputElement>('remember-pins').checked){if(profilePins!=='pending')profilePins='restored';persistPins();}
   else {try{localStorage.removeItem(storageKey);el('storage-status').textContent='Session memory only. Saved profile pins removed.';}catch{el('storage-status').textContent='Session memory only for new changes; old saved pins could not be removed.';}}
 });
 el('visitor-form').addEventListener('submit',event=>{
@@ -181,13 +204,16 @@ el('remember-sources').addEventListener('change',()=>{
   if(el<HTMLInputElement>('remember-sources').checked){const current=renderedVisitorSources===''?[]:JSON.parse(renderedVisitorSources) as VisitorSource[];persistVisitorSources(current);}
   else{try{localStorage.removeItem(sourceStorageKey);}catch{operation('Saved Nodes could not be removed. Clear this origin’s storage in browser settings.');}}
 });
-el('export-pins').addEventListener('click',()=>{
+el('export-pins').addEventListener('click',()=>{el('export-count').textContent=String(view.pins.length);el<HTMLDialogElement>('export-dialog').showModal();});
+el('export-dialog').addEventListener('close',()=>{
+  if(el<HTMLDialogElement>('export-dialog').returnValue!=='confirm') return;
   const blob=new Blob([serializePins(view.pins.map(row=>row.pin))],{type:'application/json'});const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download='onion-service-discovery-pins.json';anchor.rel='noreferrer';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000);operation('Pin backup downloaded locally. It has not been uploaded.');
 });
-async function fileBytes(input:HTMLInputElement,max:number):Promise<ArrayBuffer|null>{const file=input.files?.[0];if(file===undefined)return null;if(file.size>max)throw new Error('FILE_TOO_LARGE');return file.arrayBuffer();}
+// The input is cleared at once so choosing the same file again after Cancel works.
+async function fileBytes(input:HTMLInputElement,max:number):Promise<ArrayBuffer|null>{const file=input.files?.[0];input.value='';if(file===undefined)return null;if(file.size>max)throw new Error('FILE_TOO_LARGE');return file.arrayBuffer();}
 el('import-records').addEventListener('change',()=>{void fileBytes(el<HTMLInputElement>('import-records'),1048576).then(bytes=>{if(bytes!==null)worker.postMessage({op:'import-records',bytes},[bytes]);}).catch(()=>operation('Record bundle rejected: file exceeds the local limit or could not be read.'));});
 el('import-pins').addEventListener('change',()=>{void fileBytes(el<HTMLInputElement>('import-pins'),262144).then(bytes=>{if(bytes!==null){pendingPinImport=bytes;worker.postMessage({op:'preview-pins',bytes:bytes.slice(0)});}}).catch(()=>operation('Pin backup rejected: file exceeds the local limit or could not be read.'));});
-el('pin-import-dialog').addEventListener('close',()=>{if(el<HTMLDialogElement>('pin-import-dialog').returnValue==='confirm'&&pendingPinImport!==null){worker.postMessage({op:'restore-pins',bytes:pendingPinImport},[pendingPinImport]);}pendingPinImport=null;});
+el('pin-import-dialog').addEventListener('close',()=>{if(el<HTMLDialogElement>('pin-import-dialog').returnValue==='confirm'&&pendingPinImport!==null){worker.postMessage({op:'restore-pins',bytes:pendingPinImport,origin:'backup'},[pendingPinImport]);}pendingPinImport=null;});
 el('load-demo').addEventListener('click',()=>{void localResource('demo.json',1048576).then(bytes=>{worker.postMessage({op:'import-records',bytes:bytes.buffer,synthetic:true},[bytes.buffer]);}).catch(()=>operation('Offline demonstration unavailable. You can import a signed record bundle.'));});
 async function localResource(name:'config.json'|'demo.json',limit:number):Promise<Uint8Array>{
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),15000);
@@ -220,6 +246,15 @@ async function configure():Promise<void>{
     worker.postMessage({op:'configure',allowedSources:sources,deliveryProfile:value.delivery_profile,visitorSources});
     if(visitorSources) restoreVisitorSources();
   } catch {worker.postMessage({op:'configure',allowedSources:[],deliveryProfile:'direct-cross-origin'});operation('No usable Client Host source configuration. Local signed-record import remains available.');}
-  try{const saved=localStorage.getItem(storageKey);if(saved!==null&&saved.length<=262144){el<HTMLInputElement>('remember-pins').checked=true;const bytes=new TextEncoder().encode(saved).buffer;worker.postMessage({op:'restore-pins',bytes},[bytes]);}}catch{el('storage-status').textContent='Browser profile storage unavailable. Session memory remains available.';}
+  try{const saved=localStorage.getItem(storageKey);if(saved!==null&&saved.length<=262144){profilePins='pending';el<HTMLInputElement>('remember-pins').checked=true;const bytes=new TextEncoder().encode(saved).buffer;worker.postMessage({op:'restore-pins',bytes,origin:'profile'},[bytes]);}}catch{el('storage-status').textContent='Browser profile storage unavailable. Session memory remains available.';}
 }
+// A verifier that dies (for example out of memory on a small device) must not leave the page busy forever.
+function verifierStopped():void {
+  busy=false; if(profilePins==='pending') profilePins='failed';
+  for(const id of ['load-sources','load-demo','clear-index','cancel-load']) el<HTMLButtonElement>(id).disabled=true;
+  el<HTMLButtonElement>('forget-all').disabled=false;
+  operation('The local verifier stopped unexpectedly, for example because the device ran out of memory. Reload the page to start again. Your saved pins in this browser profile were not changed.');
+}
+worker.addEventListener('error',event=>{event.preventDefault();verifierStopped();});
+worker.addEventListener('messageerror',verifierStopped);
 void configure();

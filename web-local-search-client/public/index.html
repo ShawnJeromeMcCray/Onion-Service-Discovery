@@ -26,7 +26,7 @@
     <section class="source-panel" aria-labelledby="sources-title">
       <div class="section-heading"><h2 id="sources-title">Directory sources</h2><span id="coverage" class="muted">No sources loaded</span></div>
       <p class="muted">Compare multiple data Nodes. Several signing keys can still belong to one operator.</p>
-      <details><summary>Source selection and expected keys</summary>
+      <details id="source-details"><summary>Source selection and expected keys</summary>
       <form id="source-form">
         <div id="source-options" class="source-options"></div>
         <div id="visitor-source-options" class="source-options"></div>
@@ -60,7 +60,7 @@
         <div class="section-heading"><h2 id="pins-title">Your local pins</h2><span id="pin-count" class="muted">0</span></div>
         <p class="muted">A pin remembers your chosen key and context. Sources cannot vote to replace it.</p>
         <label class="check-label"><input type="checkbox" id="remember-pins">Remember pins in this browser profile</label>
-        <p id="storage-status" class="muted">Session memory only. Tor Browser may clear profile storage.</p>
+        <p id="storage-status" class="muted">Session memory only. Pins stay in this browser profile only if you turn this on, only for this page, and Tor Browser deletes them when it closes; export them to keep a copy.</p>
         <div id="pins" class="pins"></div>
         <div class="actions"><button id="export-pins" class="secondary" type="button">Export pins</button><label class="file-control" for="import-pins">Import pins<input id="import-pins" type="file" accept="application/json,.json"></label></div>
         <p class="muted">Pin backups can reveal your interests. They stay local unless you share the downloaded file.</p>
@@ -76,7 +76,8 @@
     <noscript><section class="notice"><h2>Local verification and search are unavailable with JavaScript disabled.</h2><p>No search has been sent. You can verify downloaded public records with the offline validator. No search terms are sent automatically. A server-search option, if offered above, is a separate profile that sends your query to the serving Node.</p></section></noscript>
   </main>
   <footer><p>Onion Service Discovery · CC0-1.0 · No analytics, cookies or automatic service visits.</p><p>Real Tor Browser compatibility, independent audit and production release approval remain open for this development preview.</p></footer>
-  <dialog id="pin-import-dialog" aria-labelledby="pin-import-title"><form method="dialog"><h2 id="pin-import-title">Review imported pins</h2><p>These are local preferences, not cryptographic evidence. Existing conflicting pins will be preserved.</p><div id="pin-preview"></div><div class="actions"><button value="cancel" class="secondary">Cancel</button><button value="confirm">Import reviewed pins</button></div></form></dialog>
+  <dialog id="pin-import-dialog" aria-labelledby="pin-import-title"><form method="dialog"><h2 id="pin-import-title">Review imported pins</h2><p>These are local preferences, not cryptographic evidence. Your existing pins are kept: an imported pin that conflicts with one of yours is skipped.</p><div id="pin-preview"></div><div class="actions"><button value="cancel" class="secondary">Cancel</button><button value="confirm">Import reviewed pins</button></div></form></dialog>
+  <dialog id="export-dialog" aria-labelledby="export-title"><form method="dialog"><h2 id="export-title">Export <span id="export-count">0</span> pins?</h2><p>The file lists the services you pinned and can reveal your interests. It is saved only on this device; nothing is uploaded. Keep it private.</p><div class="actions"><button value="cancel" class="secondary">Cancel</button><button value="confirm">Export pins</button></div></form></dialog>
   <dialog id="forget-dialog" aria-labelledby="forget-title"><form method="dialog"><h2 id="forget-title">Forget local data?</h2><p>This removes pins, the loaded index and continuity witnesses from this browser session and the saved pin profile. Revision and fork warnings will be lost. Export pins first if you need them.</p><div class="actions"><button value="cancel" class="secondary">Keep local data</button><button value="confirm">Forget local data</button></div></form></dialog>
 </body>
 </html>

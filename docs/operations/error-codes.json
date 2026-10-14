@@ -953,13 +953,6 @@
    ],
    "meaning": null
   },
-  "PIN_IMPORT_CONFLICT": {
-   "cli_exit": [],
-   "components": [
-    "browser client"
-   ],
-   "meaning": "An imported pin disagrees with a pin you already have; nothing was replaced."
-  },
   "PRIVATE_PATH_IN_WEBROOT": {
    "cli_exit": [
     "3"

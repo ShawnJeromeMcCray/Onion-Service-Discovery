@@ -4,7 +4,7 @@ import test from 'node:test';
 import {browserCryptoProviders} from '../src/protocol/crypto-providers.ts';
 import {verifyRecord,verifyWire} from '../src/protocol/record-verifier.ts';
 import {buildView,pinIdentity,localSearch,metadataWarnings} from '../src/client/view-model.ts';
-import {parsePinBackup,serializePins} from '../src/client/pins.ts';
+import {parsePinBackup,serializePins,mergePins,classifyPinImport} from '../src/client/pins.ts';
 const crypto=browserCryptoProviders();const f=JSON.parse(readFileSync(new URL('../../protocol/test-vectors/signed-records.json',import.meta.url),'utf8'));const stories=f.stories;
 test('pins follow authorized rotation/migration and preserve a fork warning',async()=>{
   const genesis=await verifyRecord(stories.genesis,crypto);const initial=buildView([genesis],[]);const pin=pinIdentity(initial.services[0]);
@@ -40,3 +40,28 @@ test('Unicode presentation warnings do not normalize signed metadata',()=>{
   assert.equal(metadataWarnings('Library','\u202eDirection changed').length,1);
   assert.equal(metadataWarnings('Bibliothèque','Mehrsprachige Bücher').length,0);
 });
+
+test('a maximal emoji name is cut at code points, so the saved pin restores',async()=>{
+  const genesis=await verifyRecord(stories.genesis,crypto);const row={...buildView([genesis],[]).services[0],name:'A'+'\u{1F600}'.repeat(127)};
+  const pin=pinIdentity(row);assert.equal([...pin.label].length,128);assert.equal(pin.label.isWellFormed(),true);
+  assert.deepEqual(parsePinBackup(new TextEncoder().encode(serializePins([pin])),crypto),[pin]);
+  const long=pinIdentity({...row,name:'\u{1F600}'.repeat(200)});assert.equal([...long.label].length,128);assert.equal(long.label.isWellFormed(),true);
+});
+
+test('importing pins keeps existing ones: new pins are added, conflicts skipped, revisions only raised',async()=>{
+  const genesis=await verifyRecord(stories.genesis,crypto);const pin=pinIdentity(buildView([genesis],[]).services[0]);
+  const newer={...pin,latestHash:'sha256:'+'1'.repeat(64),highestRevision:pin.highestRevision+1};
+  const otherAnchor={...pin,anchorHash:'sha256:'+'2'.repeat(64),label:'Imported impostor'};
+  const sameRevisionOtherHash={...pin,latestHash:'sha256:'+'3'.repeat(64)};
+  const stranger={...pin,genesisKey:'ed25519:'+'A'.repeat(43)};
+  assert.equal(classifyPinImport(undefined,pin),'NEW');assert.equal(classifyPinImport(pin,{...pin}),'SAME');
+  assert.equal(classifyPinImport(pin,newer),'UPDATES_REVISION');assert.equal(classifyPinImport(pin,otherAnchor),'CONFLICT_KEEPS_EXISTING');
+  assert.equal(classifyPinImport(pin,sameRevisionOtherHash),'CONFLICT_KEEPS_EXISTING');assert.equal(classifyPinImport(newer,pin),'SAME');
+  const raised=mergePins([pin],[newer]);assert.deepEqual([raised.added,raised.updated,raised.skipped],[0,1,0]);assert.equal(raised.pins[0].highestRevision,pin.highestRevision+1);
+  const kept=mergePins([pin],[otherAnchor,stranger]);assert.deepEqual([kept.added,kept.updated,kept.skipped],[1,0,1]);
+  assert.equal(kept.pins.find(item=>item.genesisKey===pin.genesisKey).label,pin.label);
+  assert.equal(mergePins([newer],[pin]).pins[0].highestRevision,newer.highestRevision);
+  const many=Array.from({length:256},(_,index)=>({...pin,genesisKey:'ed25519:'+String(index).padStart(43,'A')}));
+  assert.throws(()=>mergePins(many,[stranger]),{message:'PIN_BUDGET_EXHAUSTED'});
+});
+

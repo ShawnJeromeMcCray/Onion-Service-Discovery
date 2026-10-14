@@ -7,7 +7,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-211 codes.
+210 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -115,7 +115,6 @@ for remedies.
 | `PIN_BACKUP_INVALID` | browser client | – | The code name states the condition; see the raising component. |
 | `PIN_BUDGET_EXHAUSTED` | browser client | – | The code name states the condition; see the raising component. |
 | `PIN_CONTEXT_UNAVAILABLE` | browser client | – | The code name states the condition; see the raising component. |
-| `PIN_IMPORT_CONFLICT` | browser client | – | An imported pin disagrees with a pin you already have; nothing was replaced. |
 | `PRIVATE_PATH_IN_WEBROOT` | configuration and status | 3 | A private file or directory is inside the public web root; move it out. |
 | `PROTOCOL_UNSUPPORTED` | browser client, protocol | 3 | The code name states the condition; see the raising component. |
 | `PUBLIC_HOSTNAME_FILE_REQUIRED` | signing | 3 | manifest:install needs the public Tor hostname file, named hostname. |
