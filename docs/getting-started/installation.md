@@ -45,6 +45,13 @@ php node-php/bin/onion-service-discovery help
 ```
 
 Expect JSON help with `status: DEVELOPMENT`. Record the commit you inspected.
+
+Alternatively, every merge to `main` produces an unsigned **development runtime
+package** with the PHP dependencies and the built browser client already
+included, so Composer and npm are not needed; PHP 8.4+ still is. Download it,
+verify its GitHub build provenance and extract it as described in
+[development runtime package](../operations/release-candidate.md#development-runtime-package-d-029),
+then continue below from the extracted `onion-service-discovery` directory.
 The runtime Composer dependencies are locked; development dependencies are
 excluded here. Source builds require dependency downloads. The browser's default
 configuration contains zero approved sources.
@@ -54,6 +61,7 @@ production release and independently authenticated trust root exist, follow the
 [release verification procedure](../../release-tools/README.md) before execution.
 The development [source/browser package](../operations/release-candidate.md)
 contains built browser assets; it still needs its PHP Composer runtime provisioned.
+The development runtime package also contains that runtime.
 
 ## Files and permissions
 

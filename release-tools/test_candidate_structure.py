@@ -5,8 +5,12 @@ spec=importlib.util.spec_from_file_location('candidate_checker',Path(__file__).p
 class CandidateStructureTests(unittest.TestCase):
  def setUp(self):self.temp=tempfile.TemporaryDirectory();self.path=Path(self.temp.name)/'candidate.tar.gz'
  def tearDown(self):self.temp.cleanup()
- def archive(self,tamper=False,traversal=False,bad_sbom=False,symlink=False):
-  files={'app.txt':b'SYNTHETIC ONLY, never execute','release/BUILD-METADATA.json':json.dumps({'source_commit':'0'*40,'production_approved':False,'artifact_profile':'source-browser-v1'}).encode(),'release/SBOM.cdx.json':json.dumps({'bomFormat':'CycloneDX','specVersion':'1.6','version':1,'components':[]}if not bad_sbom else {'bad':'schema'}).encode()}
+ def archive(self,tamper=False,traversal=False,bad_sbom=False,symlink=False,profile='source-browser-v1',vendor=(),preview=True):
+  metadata={'source_commit':'0'*40,'production_approved':False,'artifact_profile':profile}
+  if profile=='runtime-v1':metadata['unsigned_development_preview']=preview
+  files={'app.txt':b'SYNTHETIC ONLY, never execute','release/BUILD-METADATA.json':json.dumps(metadata).encode(),'release/SBOM.cdx.json':json.dumps({'bomFormat':'CycloneDX','specVersion':'1.6','version':1,'components':[]}if not bad_sbom else {'bad':'schema'}).encode()}
+  for name in vendor:files['node-php/vendor/'+name]=b'<?php // SYNTHETIC ONLY'
+  if profile=='runtime-v1':files['release/DEVELOPMENT-PREVIEW.txt']=b'UNSIGNED DEVELOPMENT PREVIEW'
   files['release/FILE-MANIFEST.json']=json.dumps({name:hashlib.sha256(body).hexdigest()for name,body in files.items()}).encode()
   if tamper:files['app.txt']=b'Replaced after manifest construction'
   with tarfile.open(self.path,'w:gz')as archive:
@@ -30,4 +34,20 @@ class CandidateStructureTests(unittest.TestCase):
  def test_invalid_sbom_rejected(self):
   self.archive(bad_sbom=True)
   with self.assertRaisesRegex(ValueError,'SBOM schema rejected'):module.verify(self.path)
+ RUNTIME=('autoload.php','composer/installed.json','opis/json-schema/src/Validator.php')
+ def test_runtime_profile_carries_runtime_dependencies(self):
+  self.archive(profile='runtime-v1',vendor=self.RUNTIME);result=module.verify(self.path)
+  self.assertEqual('runtime-v1',result['artifact_profile']);self.assertEqual('NOT_PERFORMED',result['authentication']);self.assertFalse(result['production_approved'])
+ def test_runtime_profile_without_dependencies_rejected(self):
+  self.archive(profile='runtime-v1')
+  with self.assertRaisesRegex(ValueError,'profile rejected'):module.verify(self.path)
+ def test_runtime_profile_with_development_packages_rejected(self):
+  self.archive(profile='runtime-v1',vendor=self.RUNTIME+('phpstan/phpstan/phpstan.phar',))
+  with self.assertRaisesRegex(ValueError,'profile rejected'):module.verify(self.path)
+ def test_runtime_profile_must_be_marked_as_preview(self):
+  self.archive(profile='runtime-v1',vendor=self.RUNTIME,preview=False)
+  with self.assertRaisesRegex(ValueError,'profile rejected'):module.verify(self.path)
+ def test_source_profile_with_dependencies_rejected(self):
+  self.archive(vendor=self.RUNTIME)
+  with self.assertRaisesRegex(ValueError,'profile rejected'):module.verify(self.path)
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -28,14 +28,20 @@ def verify(path):
    hashes[entry.name]=digest.hexdigest()
    if retain:documents[relative]=b''.join(body)
  if set(documents)!={'release/FILE-MANIFEST.json','release/BUILD-METADATA.json','release/SBOM.cdx.json'}:raise ValueError('Release metadata absent')
+ vendor={name for name in hashes if name.startswith('onion-service-discovery/node-php/vendor/')}
  manifest=json.loads(documents['release/FILE-MANIFEST.json']);expected={'onion-service-discovery/'+name:digest for name,digest in manifest.items()}
  actual={name:digest for name,digest in hashes.items()if name!='onion-service-discovery/release/FILE-MANIFEST.json'}
  if expected!=actual:raise ValueError('File manifest mismatch')
  metadata=json.loads(documents['release/BUILD-METADATA.json'])
- if metadata.get('production_approved')is not False or metadata.get('artifact_profile')!='source-browser-v1' or re.fullmatch('[0-9a-f]{40}',metadata.get('source_commit',''))is None:raise ValueError('Development profile rejected')
+ profile=metadata.get('artifact_profile')
+ if metadata.get('production_approved')is not False or profile not in {'source-browser-v1','runtime-v1'} or re.fullmatch('[0-9a-f]{40}',metadata.get('source_commit',''))is None:raise ValueError('Development profile rejected')
+ # Only the runtime profile (D-029) carries PHP dependencies, and never development packages.
+ if profile=='source-browser-v1' and vendor:raise ValueError('Development profile rejected')
+ if profile=='runtime-v1' and (metadata.get('unsigned_development_preview')is not True or not {'onion-service-discovery/node-php/vendor/autoload.php','onion-service-discovery/node-php/vendor/composer/installed.json','onion-service-discovery/release/DEVELOPMENT-PREVIEW.txt'}<=set(hashes)
+  or any(name.startswith(('onion-service-discovery/node-php/vendor/phpstan/','onion-service-discovery/node-php/vendor/bin/'))for name in vendor)):raise ValueError('Development profile rejected')
  error=JsonStrictValidator(SchemaVersion.V1_6).validate_str(documents['release/SBOM.cdx.json'].decode())
  if error:raise ValueError('SBOM schema rejected')
- return {'status':'PASS','files':count,'uncompressed_bytes':total,'source_commit':metadata['source_commit'],'authentication':'NOT_PERFORMED','executed':False,'production_approved':False}
+ return {'status':'PASS','artifact_profile':profile,'files':count,'uncompressed_bytes':total,'source_commit':metadata['source_commit'],'authentication':'NOT_PERFORMED','executed':False,'production_approved':False}
 if __name__=='__main__':
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('artifact',type=Path);a=p.parse_args()
  try:result=verify(a.artifact)

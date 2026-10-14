@@ -123,7 +123,9 @@ conversation. Each answer selected one listed option:
   per day per Node.
 - **D-029:** "Entwicklungspaket je Merge": CI builds a reproducible runtime
   package with PHP dependencies and the built client for each merge to main,
-  with provenance, marked as an unsigned development preview.
+  with provenance, marked as an unsigned development preview. Implemented as the
+  `development-runtime-package` CI job and `build_release_candidate.py --profile
+  runtime`; see [release candidate](../operations/release-candidate.md#development-runtime-package-d-029).
 - **Protocol v1 (D-005 to D-017, D-052):** "Jetzt annehmen": the implemented and
   tested choices listed in the table are frozen as protocol v1. This is the
   owner's approval, not an independent cryptographic review, which stays open;

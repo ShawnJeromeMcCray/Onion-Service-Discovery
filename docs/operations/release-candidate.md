@@ -57,6 +57,47 @@ Preservation alone does not verify their certificates, transparency proofs or
 workflow identity. Use a supported GitHub CLI with attestation verification;
 older installations without `gh attestation` are insufficient.
 
+## Development runtime package (D-029)
+
+`python3 tools/build_release_candidate.py --profile runtime --output DIR` adds the
+PHP runtime dependencies to the same deterministic archive
+(`onion-service-discovery-development-runtime.tar.gz`, profile `runtime-v1`), so
+an operator needs neither Composer nor npm. It requires `node-php/vendor` from
+`composer install --no-dev --prefer-dist` of the committed lock, with
+`COMPOSER_ROOT_VERSION=dev-main` so the install does not depend on the checkout,
+and refuses source installs, development packages and any difference from the
+lock. `release/DEVELOPMENT-PREVIEW.txt` and the build metadata mark it as an
+unsigned development preview; `tools/verify_candidate.py` rejects a runtime
+archive without that marking or with development packages.
+
+CI builds it twice from two independent dependency installs, compares both
+archives byte for byte, checks the structure and runs the packaged protocol,
+Client Host, operator and walkthrough checks as shipped, without Composer or
+network. For every merge to `main` (owner decision D-029, 2026-10-14) it also
+requests GitHub build-provenance and SBOM attestations, verifies them and keeps
+the package with its evidence as the workflow artifact
+`development-runtime-preview-COMMIT` for 90 days. Pull requests and other
+branches publish nothing.
+
+To use a preview, pick the merge commit you reviewed and run, with a supported
+GitHub CLI signed in to GitHub:
+
+```sh
+gh run download --repo ShawnJeromeMcCray/Onion-Service-Discovery --name development-runtime-preview-COMMIT --dir osd-preview
+cd osd-preview
+gh attestation verify onion-service-discovery-development-runtime.tar.gz --repo ShawnJeromeMcCray/Onion-Service-Discovery \
+  --signer-workflow ShawnJeromeMcCray/Onion-Service-Discovery/.github/workflows/foundation.yml --source-ref refs/heads/main --source-digest COMMIT
+sha256sum -c SHA256SUMS
+tar -xzf onion-service-discovery-development-runtime.tar.gz
+php onion-service-discovery/node-php/bin/onion-service-discovery help
+```
+
+A passing verification proves which workflow built the archive from which
+commit. It does not prove that the code was reviewed or is production-ready;
+signed stable releases still need decisions D-030 and D-031.
+
+## Package smoke check
+
 The package smoke check explicitly executes only a trusted local candidate:
 `python tools/run_candidate_smoke.py ARTIFACT --expected-source COMMIT
 --execute-trusted-local-development-candidate`. It first validates archive
@@ -64,5 +105,7 @@ structure, provisions the Composer runtime lock with plugins/scripts disabled,
 and exercises packaged protocol validation, Client Host and the operator
 initialize/diagnose/publish/backup/restore workflow in disposable containers.
 Dependency provisioning needs HTTPS; application checks use `--network none`.
+A runtime package is not provisioned: it must answer `help` and pass the same
+checks as shipped.
 A source-commit match is not authentication: verify trust before permitting code
 execution. These synthetic checks do not certify a deployed host or live Tor.

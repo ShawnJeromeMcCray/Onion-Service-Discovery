@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Development runtime package (owner decision D-029): CI builds
+  `onion-service-discovery-development-runtime.tar.gz` with the locked PHP runtime
+  dependencies and the built client twice from independent installs, compares
+  them byte for byte and runs the packaged checks without Composer or network.
+  Each merge to main gets verified GitHub provenance and SBOM attestations and a
+  90-day workflow artifact, marked as an unsigned development preview. CI now
+  also regenerates the PCP-004 history vectors.
 - Bounded automatic announcement (owner decision D-018): `network:announce …
   --if-due` in the publisher timer sends a hint only for a new revision or while
   a Node still lacks the current revision, at most once per day per Node, with
