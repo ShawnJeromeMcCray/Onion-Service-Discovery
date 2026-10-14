@@ -175,3 +175,16 @@ is silently evicted. [Executed scope](conformance/source-witness-report.json)
 includes all 246 Node unit tests, typechecking, four Chromium checks and sink policy.
 The previous browser/baseline commit `dead657f3aeafbefbb3d8f654acae55060da1988`
 passed all hosted jobs in [run 38479421456](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38479421456).
+
+Actual Tor Browser 15.0.25 now passes the signed-worker/expected-Node-key/local
+search/pin workflow over a real private Onion address, plus a separate JavaScript-
+disabled disclosed form POST workflow. No query appears in a URL, response or
+reference server log; local search emits no HTTP request. The private-network
+CLI/snapshot/membership/sync assertions also pass on both backends.
+[Browser scope](conformance/tor-browser-private-onion-report.json) explicitly
+records the lab direct-source config override, headless profiles and public-Tor/
+security-level/Android/production limitations.
+The signed-witness commit `96213ab52e3a3513d3cd1afd4f1de0657e9f2023` passes all
+eight hosted jobs in [run 38480981250](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38480981250)
+and two byte-identical clean packages with all six packaged runtime smoke checks:
+[candidate scope](conformance/witness-candidate-report.json).

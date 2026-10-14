@@ -107,3 +107,32 @@ HTTP requests, synthetic content has no active visit/media links and pins work.
 It does not test public Onion navigation, the installed user's profile,
 Normal/Safer/Safest privacy behavior, mobile UI or Android. WebDriver preferences
 are test harness choices and must not be copied into deployment browser guidance.
+
+## Optional real private-Onion Tor Browser integration
+
+The private-network driver can additionally run `tor-browser-private-onion.py`
+with already signature-verified Tor Browser/geckodriver executables and a trusted
+Python environment. Set these variables inside the isolated container before
+running `private-tor-network.sh`:
+
+```sh
+export OSD_PRIVATE_TOR_BROWSER_BINARY=/path/to/verified/Browser/firefox
+export OSD_PRIVATE_TOR_BROWSER_DRIVER=/path/to/verified/geckodriver
+export OSD_PRIVATE_TOR_BROWSER_PYTHON=/path/to/python
+```
+
+This opts the temporary fixture into the combined role and prepared NoJS search.
+The lab explicitly serves a direct-source browser configuration to avoid a
+self-relay deadlock in PHP’s single-worker development HTTP server. This config
+override is part of the lab, not a production PHP-FPM deployment claim. The
+browser uses the private Tor SOCKS client with remote hostname resolution.
+The normal-script workflow explicitly acknowledges the one-Node coverage limit,
+binds the expected Node key, verifies signed records in the worker, searches
+locally without a new HTTP request, and pins the identity. A separate JavaScript-
+disabled session exercises the disclosed HTML POST form over the same Onion
+address. It uses only W3C DOM operations in that session. The driver verifies
+query exclusion from URL/response/reference logs and absence of cookies.
+
+These are headless private-network functional checks. Public Tor, ordinary
+Normal/Safer/Safest desktop settings, Android, deployed process isolation and
+independent privacy/accessibility reviews remain separate gates.

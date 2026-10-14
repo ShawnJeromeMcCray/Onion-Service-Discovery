@@ -1,0 +1,32 @@
+{
+  "status": "PASS_DEVELOPMENT",
+  "browser_versions": [
+    "140.17.0",
+    "140.17.0"
+  ],
+  "onion_secure_context_observed": true,
+  "checks": [
+    "ACTUAL_TOR_BROWSER_REAL_PRIVATE_ONION",
+    "EXPECTED_NODE_KEY_SIGNED_WORKER_IMPORT",
+    "LOCAL_QUERY_NO_ONION_HTTP_REQUEST",
+    "LOCAL_IDENTITY_PIN",
+    "NOJS_EXPLICIT_DISCLOSURE",
+    "NOJS_HTML_POST_ON_REAL_ONION",
+    "QUERY_EXCLUDED_FROM_URL_RESPONSE_REFERENCE_LOG",
+    "COOKIE_FREE_PROFILES"
+  ],
+  "profile": "headless verified Tor Browser, isolated real Tor SOCKS, explicit lab direct-source config; external Tor launcher disabled",
+  "public_tor_verified": false,
+  "privacy_security_level_certified": false,
+  "android_verified": false,
+  "production_approved": false,
+  "tor_browser_release": "15.0.25",
+  "artifact_sha256": "37432d6f4d9b1f1190ba2cfbbd4ab9dad5ccd52c14aa47a21795d08273f4a165",
+  "signing_primary_fingerprint": "EF6E286DDA85EA2A4BA7DE684E2C6E8793298290",
+  "signature_verified": true,
+  "executed_at": "2026-10-13",
+  "tor_version": "0.4.9.11",
+  "chutney_commit": "ae3a33c63a10ab29453225242c9c5985e6f2cf1c",
+  "isolation": "Docker --network none",
+  "php_image": "php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3"
+}

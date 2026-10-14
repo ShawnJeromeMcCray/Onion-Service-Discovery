@@ -221,6 +221,17 @@
         "docs/performance/s1000-server-search-report.json"
       ],
       "remaining": "Optional local headless NoJS functions and bounded synthetic capacity only; deployed isolation, accessibility, desktop security levels, Android, public Tor and independent review remain open."
+    },
+    {
+      "id": "ACTUAL_TOR_BROWSER_PRIVATE_ONION",
+      "status": "PASS_DEVELOPMENT",
+      "evidence": [
+        "docs/conformance/tor-browser-private-onion-report.json",
+        "docs/conformance/private-tor-browser-application-report.json",
+        "lab/tor-browser-private-onion.py",
+        "lab/real-tor-cli.md"
+      ],
+      "remaining": "Real isolated private Tor and headless browser with explicit lab direct-source profile only. Public Tor, Normal/Safer/Safest desktop, Android, deployed isolation and independent privacy/accessibility reviews remain open."
     }
   ]
 }
