@@ -15,6 +15,8 @@ final class NodeStatus
     {
         if (!in_array($config->role, ['node', 'combined'], true)) { return null; }
         $status = ['role' => $config->role, 'storage_backend' => $config->backend, 'storage_state' => 'ERROR', 'identity' => 'NOT_INITIALIZED'];
+        // Before node:init there is nothing to read yet: setup in progress, not a fault.
+        if (!file_exists($config->storagePath)) { $status['storage_state'] = 'NOT_INITIALIZED'; return $status; }
         try {
             $store = $config->store(readOnly: true); $state = $store->snapshot();
             $status['storage_state'] = 'READABLE';

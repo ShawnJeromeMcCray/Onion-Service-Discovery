@@ -35,7 +35,8 @@ try {
     $v['features']['mirror_directory'] = true; $v['features']['discover_services'] = true; $v['features']['sync_with_peers'] = true;
     file_put_contents($root . '/config.json', json_encode($v, JSON_THROW_ON_ERROR)); chmod($root . '/config.json', 0600);
     $config = NodeConfig::load($root . '/config.json');
-    $assert(NodeStatus::inspect($config, $verifier, 1800000000)['storage_state'] === 'ERROR', 'missing store is not an error state'); ++$checks;
+    $assert(NodeStatus::inspect($config, $verifier, 1800000000)['storage_state'] === 'NOT_INITIALIZED', 'a fresh Node is setup in progress, not an error'); ++$checks;
+    $assert($cli(['status', $root . '/config.json', '--check'], 6)['node']['identity'] === 'NOT_INITIALIZED', 'status --check before node:init waits'); ++$checks;
     $signer = ProtectedFileSigner::create($root . '/node.key', 'node', 'TEST ONLY node status passphrase', $verifier);
     NodeInitializer::initialize($config, $signer, $verifier);
     $assert($cli(['node:identity', $root . '/config.json'], 0)['node_identity_public_key'] === $signer->publicKey(), 'identity before snapshot'); ++$checks;

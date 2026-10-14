@@ -385,7 +385,7 @@ try {
         $output['network_side_effects'] = false;
         // 0: nothing needs attention; 6: waiting or degraded; 4: error or identity conflict.
         $exitCode = in_array($output['overall'], ['ERROR', 'IDENTITY_CONFLICT'], true) || ($output['node']['storage_state'] ?? null) === 'ERROR' ? 4
-            : (in_array($output['overall'], ['READY_LOCALLY', 'DISCOVERABLE_DEGRADED'], true) ? 6 : 0);
+            : (in_array($output['overall'], ['READY_LOCALLY', 'DISCOVERABLE_DEGRADED'], true) || ($output['node']['identity'] ?? null) === 'NOT_INITIALIZED' ? 6 : 0);
     } elseif ($command === 'node:status' || $command === 'node:maintain') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
