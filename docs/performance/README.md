@@ -51,3 +51,12 @@ signed snapshot; an over-budget individual bucket yields 413 and directs callers
 to generic snapshots. The derived shortcut cannot block valid snapshot publication.
 Generate it with `--lookup-prefix 00`. It is a controlled address-distribution
 stress case, not a live malicious-node or Tor load result.
+
+The 2026-10-14 search-cache report measures the current frozen Unicode 17
+implementation on the same signed dataset. The pre-cache implementation repeats
+metadata normalization for every query; the changed implementation uses weak
+row keys and compares the complete metadata input before reusing derived text.
+Empty queries skip normalization. The report records the first nonempty query
+and maximum separately because percentile summaries can hide the initial cost.
+Metadata-mutation tests prevent stale cache matches. This is still Node execution
+of client code, not desktop Tor Browser or mobile capacity certification.

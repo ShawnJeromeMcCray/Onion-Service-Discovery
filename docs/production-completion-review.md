@@ -188,3 +188,13 @@ The signed-witness commit `96213ab52e3a3513d3cd1afd4f1de0657e9f2023` passes all
 eight hosted jobs in [run 38480981250](https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/actions/runs/38480981250)
 and two byte-identical clean packages with all six packaged runtime smoke checks:
 [candidate scope](conformance/witness-candidate-report.json).
+
+### Current client Unicode search capacity (2026-10-14)
+
+`docs/performance/s1000-client-search-cache-report.json` records a current signed
+S1000 run and its pre-cache baseline. Frozen Unicode metadata normalization is
+reused through weak row keys with full input comparison; metadata changes
+invalidate reuse and an empty query avoids normalization. All 247 client tests,
+type checking, source sink policy and four controlled browser tests pass. The
+first-query cost is recorded explicitly. Node execution without DOM/Tor/mobile
+does not close the browser capacity gates.
