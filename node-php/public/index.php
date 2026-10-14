@@ -47,7 +47,7 @@ try {
         }
     }
     elseif ($target === '/onion-service-discovery/status/') {
-        $response = StatusPage::render(PublisherStatus::inspect($config, new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas'), __DIR__ . '/.well-known/onion-service-discovery.json'), $method);
+        $response = StatusPage::render(PublisherStatus::inspect($config, new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas'), __DIR__ . '/.well-known/onion-service-discovery.json', $configPath), $method);
     }
     elseif ($asset !== null) { $response = $asset; }
     elseif (str_starts_with($target, '/onion-service-discovery/relay/')) {

@@ -39,7 +39,7 @@ Requires **Node.js 24+**, its bundled npm, and Git. No Tor, PHP, signing keys or
 public Onion Service are needed for this synthetic demonstration.
 
 ```sh
-git clone --branch implementation/production-completion https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery.git
+git clone https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery.git
 cd Onion-Service-Discovery/web-local-search-client
 npm ci --ignore-scripts
 npm run demo
@@ -56,7 +56,7 @@ npm run demo -- --port 8081
 
 The preview listens only on loopback and serves a fixed set of public assets.
 Dependency installation needs Internet access; after building, the synthetic demo
-uses local assets. This branch is the current continuation; it is not a signed
+uses local assets. The default branch `main` is a development preview, not a signed
 stable release. [Detailed quickstart and troubleshooting](docs/getting-started/quickstart.md).
 
 ## Choose your role
@@ -96,7 +96,7 @@ local browser verification.
 
 ## Tested behavior and current boundaries
 
-The continuation includes three-language protocol/membership vectors, bounded
+The current code includes three-language protocol/membership vectors, bounded
 Tor transport, crash and disk-full recovery tests, resumable snapshot ancestry,
 and browser privacy checks. Actual signature-verified Tor Browser tests pass over
 an **isolated real private Tor network**, including a JavaScript-disabled profile.

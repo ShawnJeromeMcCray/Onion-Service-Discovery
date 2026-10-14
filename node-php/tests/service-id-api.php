@@ -39,6 +39,8 @@ try {
                 $derived = IdentityDeriver::derive(array_map($verifier->verify(...), json_decode($reply['body'])->records));
                 if (json_encode($derived['identities'], JSON_THROW_ON_ERROR) !== json_encode([$identity], JSON_THROW_ON_ERROR)) { throw new RuntimeException('lost continuity/fork/withdrawal: ' . $case->id); }
                 if ($api->handle('HEAD', $path)['body'] !== '') { throw new RuntimeException('HEAD'); }
+                $canonical = $api->handle('GET', '/onion-service-discovery/v1/services/by-id/' . $identity['genesis_key']);
+                if ($canonical['status'] !== 200 || $canonical['body'] !== $reply['body']) { throw new RuntimeException('canonical by-id route: ' . $case->id); }
                 foreach ($identity['history_hashes'] as $hash) {
                     foreach ($public as $record) {
                         if ($record->contentHash !== $hash) { continue; }
@@ -56,6 +58,7 @@ try {
                 }
             }
             if ($api->handle('GET', '/onion-service-discovery/v1/services/ed25519:' . str_repeat('A',43))['status'] !== 400) { throw new RuntimeException('invalid point accepted'); }
+            if ($api->handle('GET', '/onion-service-discovery/v1/services/by-id/' . $public[0]->document()->onion)['status'] !== 404) { throw new RuntimeException('by-id accepted an address'); }
             if ($before !== $store->snapshot()) { throw new RuntimeException('lookup mutated storage'); }
             unset($api, $producer, $blobs, $store);
         }

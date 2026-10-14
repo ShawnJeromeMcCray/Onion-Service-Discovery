@@ -34,6 +34,8 @@ final readonly class DataApi
         if (!in_array($method, ['GET','HEAD'], true)) { return $this->response(405, ['error' => 'METHOD_NOT_ALLOWED'], $headers + ['Allow' => 'GET, HEAD']); }
         if (strlen($target) > 256 || preg_match('/[\x00-\x20\x7f]/', $target) === 1) { return $this->response(400, ['error' => 'REQUEST_INVALID'], $headers); }
         [$path, $query] = array_pad(explode('?', $target, 2), 2, '');
+        // Canonical stable-identity route (specs 04/14/46/48); the combined route remains for address lookup.
+        if (preg_match('~\A/onion-service-discovery/v1/services/by-id/(ed25519:[A-Za-z0-9_-]{43})\z~D', $path, $byId) === 1) { $path = '/onion-service-discovery/v1/services/' . $byId[1]; }
         try {
             $state = $this->store->snapshot(); $publicHashes = [];
             foreach ($state['tables']['node'] as $key => $row) { if (str_starts_with($key,'key:public-index-')) { foreach ($row['hashes'] as $hash) { $publicHashes[$hash]=true; } } }

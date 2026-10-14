@@ -96,6 +96,28 @@ verifies exact current owner-state membership offline in a complete signed draft
 snapshot, including genesis continuity through rotation/migration. It evaluates
 neither freshness nor checkpoint ancestry. See [the contract](snapshot-membership.md).
 
+`service:membership CONFIG OWN_HISTORY --node NODE_ONION EXPECTED_NODE_KEY [--node ...]`
+fetches, for each of at most 16 explicitly selected Nodes, its current state,
+signed checkpoint and every chunk through the configured Tor SOCKS transport,
+then applies the same exact-state membership verifier as `index:verify-inclusion`.
+OWN_HISTORY is `{"records": [...]}` or a single signed genesis Manifest. Each
+source is reported once as included, stale, not_present, contradictory,
+unavailable or rejected; mere acknowledgements are never counted. It mutates no
+store and loads no signing key. Exit 0 only when every selected Node includes the
+current state, otherwise 6. Freshness and checkpoint ancestry stay `NOT_EVALUATED`;
+operator independence stays `NOT_ESTABLISHED`. Not usable with the client-host role.
+`network:discoverability-check` is the specification's name for the same command.
+With `--save-status` it also writes aggregate counts (never Node addresses or keys)
+atomically to `CONFIG_NAME.discoverability.json` beside the configuration, with
+the configuration file's owner permissions. `publisher:status` and the public
+`/onion-service-discovery/status/` page then report `DISCOVERABLE` only when at
+least one checked Node both includes the exact installed revision and exported
+its own direct observation of it, `IDENTITY_CONFLICT` when a checked Node holds a
+conflicting state, and `DISCOVERABLE_DEGRADED` when that evidence is older than
+seven days. The seven-day age is a proposed local default pending decision D-036;
+evidence for another revision is ignored. `network:announce` is an alias of
+`service:announce`.
+
 `peers:group CONFIG ONION GROUP|--clear` records local source-family policy.
 Diagnostics expose concentration and unknown/inconsistent grouping without
 inferring independent operators or trust from key count. See [source groups](source-groups.md).

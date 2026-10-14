@@ -11,10 +11,14 @@ independent cryptographic review and the overall protocol freeze remain open.
 The read-only mirror endpoint accepts either canonical identifier:
 
 ```text
+GET /onion-service-discovery/v1/services/by-id/ed25519:<43-character-base64url-key>
 GET /onion-service-discovery/v1/services/ed25519:<43-character-base64url-key>
 GET /onion-service-discovery/v1/services/<56-character-onion>.onion
 ```
 
+The `by-id` form is the canonical stable-identity route named by specifications
+04, 14, 46 and 48 and accepts only the logical service ID; the combined route
+returns the same bytes and remains for compatibility and address lookup.
 No percent-encoded alternatives, padding, arbitrary URL, query parameters or
 mutation methods are accepted. A mirror must publish once with this version
 before serving lookups; old version-1 indexes return `SERVICE_INDEX_NOT_READY`

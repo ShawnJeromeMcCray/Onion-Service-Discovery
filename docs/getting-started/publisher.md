@@ -122,13 +122,58 @@ verification worker. An optional receiving Node can enable the bounded draft
 announcement endpoint; `service:announce CONFIG SIGNED_MANIFEST NODE_ONION`
 returns `HINT_RECEIVED_UNCONFIRMED`, never proof of inclusion.
 
-For each independently selected Node, collect its complete signed snapshot,
-all referenced chunks and the expected Node public key; verify against your
-complete owner history using [offline exact-state membership](../operations/snapshot-membership.md).
-An included current revision is stronger than a `listed=true` response, but the
-current command separately leaves freshness/ancestry unevaluated. There is no
-finished automated status-page “2 of 3 fresh Nodes” workflow yet. See the
+Then check, in one bounded command, whether your exact current signed state is
+included at the Nodes you selected. Obtain each Node's Onion and its expected
+Node public key through a channel you chose independently; never copy them from
+the Node's own response. On the administrator machine, collect your complete
+owner history (every signed revision and continuity proof) in
+`history.json` as `{"records": [ ... ]}`. For a Service that has only its
+genesis Manifest, the signed `manifest.json` itself is accepted instead:
+
+```sh
+php node-php/bin/onion-service-discovery service:membership /absolute/private/osd-publisher/config.json /absolute/private/osd-service/history.json \
+  --node FIRST_NODE.onion ed25519:FIRST_NODE_PUBLIC_KEY \
+  --node SECOND_NODE.onion ed25519:SECOND_NODE_PUBLIC_KEY \
+  --node THIRD_NODE.onion ed25519:THIRD_NODE_PUBLIC_KEY
+```
+
+The history contains only public signed records; it never needs the Service key.
+For every Node, the command fetches the current signed checkpoint and all its
+chunks through Tor (fresh SOCKS isolation per request), verifies them under the
+key you supplied and compares the complete snapshot with your own history. It
+writes nothing locally. Each Node is reported in exactly one category:
+
+| Category | Meaning |
+| --- | --- |
+| `included` | The verified snapshot contains your exact current Manifest hash |
+| `stale` | It contains an older revision of your identity |
+| `not_present` | The complete verified snapshot does not contain your identity |
+| `contradictory` | It contains a conflicting or forked state for your identity |
+| `unavailable` | Tor/HTTP failure; nothing was verified |
+| `rejected` | Wrong Node key, corrupt chunk, broken binding or exhausted work budget |
+
+Overall status `CURRENT_STATE_INCLUDED_AT_ALL_SELECTED` exits 0; partial or no
+confirmation exits 6 with the same JSON. The checkpoint age is shown for your
+judgement only: `freshness` and `checkpoint_consistency` remain `NOT_EVALUATED`
+because the draft protocol has no frozen freshness rule or active-index ancestry
+yet, and `operator_independence` is always `NOT_ESTABLISHED`: several keys may
+belong to one operator. Membership is evidence about those Nodes' current
+snapshots, not a promise that browsers will load them. See the
 [acceptance scenario and remaining work](project-status.md#end-to-end-acceptance-scenario).
+
+Add `--save-status` to the same command to show the result on your status page
+(`network:discoverability-check` is an equivalent name). Only aggregate counts
+are stored beside your private configuration; Node addresses and keys are not.
+Afterwards `/onion-service-discovery/status/` answers the main question
+directly, for example *DISCOVERABLE — current revision 1 verified in the signed
+snapshots of 2 of 3 checked Discovery Nodes*. DISCOVERABLE requires that a
+checked Node includes your exact installed revision **and** exported its own
+direct observation of it. Rerun the check after every new revision; evidence for
+an older revision is ignored, and evidence older than seven days shows
+`DISCOVERABLE_DEGRADED`.
+
+To verify a snapshot you already downloaded, without network access, use
+[offline exact-state membership](../operations/snapshot-membership.md).
 
 ## Updates and withdrawal
 

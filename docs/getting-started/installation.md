@@ -32,7 +32,7 @@ For SQLite, also check `php -r 'exit(extension_loaded("pdo_sqlite") ? 0 : 1);'`.
 ## Get and provision the current source
 
 ```sh
-git clone --branch implementation/production-completion https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery.git
+git clone https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery.git
 cd Onion-Service-Discovery
 git rev-parse HEAD
 composer --working-dir=node-php install --no-dev --no-plugins --no-scripts --no-interaction --prefer-dist
