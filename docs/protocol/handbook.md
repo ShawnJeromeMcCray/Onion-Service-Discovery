@@ -81,6 +81,12 @@ not use arrival order or clocks to choose one. Two roots sharing an Onion remain
 distinct identities. A copied TypeScript object is not a VerifiedRecord: the
 verifier brands actual results privately and provenance is lost on serialization.
 
+A Service also serves its complete public history at
+`/.well-known/onion-service-discovery-history.json` (PCP-004): an unsigned
+bundle of at most 256 individually signed Manifests and proofs (1 MiB). A Node
+fetches it only when a fetched Manifest does not connect to history it holds and
+keeps only records that belong to that identity; a bundle cannot hide a fork.
+
 Rotation is countersigned by old/new keys and committed only together with its
 first valid successor. Migration authorizes the new Onion through a signed proof
 and successor. Combined rotation/migration needs both independently valid proofs

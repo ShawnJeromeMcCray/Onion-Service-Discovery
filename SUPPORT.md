@@ -9,7 +9,9 @@ For ordinary bugs, open a [GitHub issue](https://github.com/ShawnJeromeMcCray/On
 with the source commit, operating system, PHP/Node/Tor versions, intended role,
 exact error code, reproduction steps, expected result and observed result.
 Say whether the problem involves synthetic demo data, a controlled lab or real
-operator infrastructure. Include only the smallest sanitized relevant output.
+operator infrastructure. Include only the smallest sanitized relevant output. `php node-php/bin/onion-service-discovery diagnostics:export CONFIG`
+prints a redacted support bundle (versions, role and `doctor` results, without
+paths, addresses or keys); review it before attaching it.
 
 Do not include private keys, passphrases, tokens, private backups, pin exports,
 search queries/history or private paths. Redact operator-specific addresses when

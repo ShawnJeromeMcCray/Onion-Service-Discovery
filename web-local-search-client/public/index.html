@@ -29,9 +29,22 @@
       <details><summary>Source selection and expected keys</summary>
       <form id="source-form">
         <div id="source-options" class="source-options"></div>
+        <div id="visitor-source-options" class="source-options"></div>
         <p id="source-empty" class="muted">No Nodes configured on this Client Host. You can import signed records or try the offline demonstration.</p>
         <label class="check-label"><input type="checkbox" id="limited-coverage">Allow loading with fewer than three selected sources</label>
       </form>
+      <section class="visitor-sources" aria-labelledby="visitor-title">
+        <h3 id="visitor-title">Add a Node you chose</h3>
+        <p id="visitor-disabled" class="muted">This page only loads the Nodes chosen by its Client Host. To use any other Node, run your own Client Host or ask this host’s operator to allow visitor-chosen Nodes.</p>
+        <form id="visitor-form" hidden>
+          <label for="visitor-onion">Node onion address</label><input type="text" id="visitor-onion" maxlength="62" autocomplete="off" spellcheck="false" placeholder="56 characters followed by .onion">
+          <label for="visitor-key">Expected Node public key</label><input type="text" id="visitor-key" maxlength="51" autocomplete="off" spellcheck="false" placeholder="ed25519:…">
+          <p class="muted">Get both values from the Node’s operator through a channel you trust, not from the Node itself. This Client Host fetches the Node’s public signed data for you over Tor: it learns which Nodes you add, never your searches or pins.</p>
+          <div class="actions"><button type="submit" id="add-visitor-source" class="secondary">Add Node</button></div>
+          <p id="visitor-status" class="muted" role="status" aria-live="polite"></p>
+          <label class="check-label"><input type="checkbox" id="remember-sources">Remember the Nodes I add in this browser profile</label>
+        </form>
+      </section>
       </details>
       <div class="actions"><button type="submit" form="source-form" id="load-sources">Load directory</button><button type="button" id="cancel-load" class="secondary" disabled>Cancel</button><button type="button" id="load-demo" class="secondary">Try offline demo</button></div>
       <div id="source-statuses" class="source-statuses"></div>

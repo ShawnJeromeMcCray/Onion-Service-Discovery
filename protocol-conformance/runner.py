@@ -43,6 +43,9 @@ def cases():
     for fixture in json.loads((vectors / 'snapshot-membership.json').read_text())['cases']:
         expected = {'status': 'FAIL', 'error': fixture['error']} if fixture.get('error') else {'status': 'PASS', 'result': fixture['expected']}
         result.append((fixture['id'], request('snapshot-membership', json.dumps(fixture['input'], ensure_ascii=False, separators=(',', ':')).encode()), expected))
+    for fixture in json.loads((vectors / 'service-history.json').read_text())['cases']:
+        expected = {'status': 'FAIL', 'error': fixture['error']} if fixture.get('error') else {'status': 'PASS', 'result': fixture['expected']}
+        result.append((fixture['id'], request('service-history', json.dumps(fixture['input'], ensure_ascii=False, separators=(',', ':')).encode()), expected))
     return result
 
 

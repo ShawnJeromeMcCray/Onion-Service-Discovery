@@ -13,7 +13,14 @@ configuration with its explicit source allowlist, and a query-independent relay.
 It requires no Node or Service signing key. Its relay accepts only generic
 node/state/snapshot/chunk GET/HEAD requests to configured Tor v3 Nodes. The
 server's single Tor-only adapter performs those requests. Search terms, pins,
-credentials, client IDs and Service URLs are not relay inputs. This same-origin
+credentials, client IDs and Service URLs are not relay inputs. With the optional
+`visitor_sources` Client Host switch, the public configuration carries
+`"visitor_sources": true` and the relay also accepts any checksum-valid canonical
+v3 Onion on the same four fixed paths, under a separate request budget. The
+worker admits a visitor-chosen Node only together with the exact expected key the
+visitor entered (at most 8), so the loaded Node descriptor must match that key.
+Visitor-chosen Nodes are kept in session memory unless the visitor opts into
+profile storage; Forget local data removes them. This same-origin
 reference profile keeps browser CORS closed. A static direct-cross-origin
 profile is separately supported with exact source origins in its CSP; each
 Data Node must explicitly permit the Client Host origin. Real Tor Browser

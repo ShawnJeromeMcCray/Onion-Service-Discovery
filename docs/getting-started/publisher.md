@@ -118,17 +118,21 @@ php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-pu
 Expect `SIGNATURE_AND_BINDING_VALID`. This establishes the fetched signature and
 Onion binding, not full owner continuity or inclusion at another Node.
 A cooperating Discovery Node can explicitly admit your address and run its direct
-verification worker. An optional receiving Node can enable the bounded draft
-announcement endpoint; `service:announce CONFIG SIGNED_MANIFEST NODE_ONION`
-returns `HINT_RECEIVED_UNCONFIRMED`, never proof of inclusion.
+verification worker. A Node that enabled the bounded announcement endpoint
+accepts a hint: `network:announce CONFIG SIGNED_MANIFEST NODE_ONION` returns
+`HINT_RECEIVED_UNCONFIRMED`, never proof of inclusion; the Node still fetches and
+verifies your Manifest itself.
 
 Then check, in one bounded command, whether your exact current signed state is
 included at the Nodes you selected. Obtain each Node's Onion and its expected
 Node public key through a channel you chose independently; never copy them from
 the Node's own response. On the administrator machine, collect your complete
 owner history (every signed revision and continuity proof) in
-`history.json` as `{"records": [ ... ]}`. For a Service that has only its
-genesis Manifest, the signed `manifest.json` itself is accepted instead:
+`history.json` as `{"records": [ ... ]}`. On the web host the history bundle
+that `manifest:install` maintains,
+`node-php/public/.well-known/onion-service-discovery-history.json`, is accepted
+directly, and for a Service that has only its genesis Manifest, the signed
+`manifest.json` itself:
 
 ```sh
 php node-php/bin/onion-service-discovery service:membership /absolute/private/osd-publisher/config.json /absolute/private/osd-service/history.json \
@@ -172,15 +176,142 @@ direct observation of it. Rerun the check after every new revision; evidence for
 an older revision is ignored, and evidence older than seven days shows
 `DISCOVERABLE_DEGRADED`.
 
+For a complete status page also save the self-check and announcement results:
+
+```sh
+php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion --save-status
+php node-php/bin/onion-service-discovery network:announce /absolute/private/osd-publisher/config.json /absolute/public-transfer/manifest.json \
+  --node FIRST_NODE.onion ed25519:FIRST_NODE_PUBLIC_KEY --node SECOND_NODE.onion ed25519:SECOND_NODE_PUBLIC_KEY --save-status
+```
+
+The page then lists ten steps (installation, configuration, identity, Manifest,
+self-verification, bootstrap connectivity, announcement, external observation,
+searchable state, redundancy/freshness), each PASS, PENDING, WARN, FAIL or
+NOT_APPLICABLE, and answers YES, NOT YET, NO, DEGRADED or PROBLEM at the top.
+To keep it current and announce automatically, adapt
+`deployment/systemd/osd-publisher-check.service`, put your Onion and Node list
+into `/etc/onion-service-discovery/publisher-check.env`:
+
+```sh
+OSD_ONION=YOUR_CANONICAL_V3_ADDRESS.onion
+OSD_NODES=--node FIRST_NODE.onion ed25519:FIRST_NODE_PUBLIC_KEY --node SECOND_NODE.onion ed25519:SECOND_NODE_PUBLIC_KEY
+```
+
+and enable `osd-publisher-check.timer`. Every six hours it verifies your own
+Onion, checks the Nodes and then runs `network:announce … --if-due`: a Node gets
+a hint only for a new revision or while it still lacks your current revision,
+at most once per day per Node, with backoff of 1, 2, 4 up to 32 days (decision
+D-018). After a new revision it announces by itself once your Onion serves it.
+Delete the announce line from the unit to announce only by hand. The status page
+shows the results and the next retry.
+
 To verify a snapshot you already downloaded, without network access, use
 [offline exact-state membership](../operations/snapshot-membership.md).
 
-## Updates and withdrawal
+## Updates, key rotation, migration and withdrawal
 
-Use `manifest:revise SIGNED_MANIFEST METADATA`, sign the returned record offline,
-verify it, and install it. An unchanged description needs no renewal/revision.
-Use `manifest:withdraw SIGNED_MANIFEST` and sign/install the successor to withdraw.
-Use the documented countersigned rotation and signed migration workflows for key
-or address changes; never generate an unrelated genesis and call it continuity.
-Keep the current predecessor and required proofs available during installation.
-Independent Nodes may retain historical public records after withdrawal.
+Every change is a new signed revision of your current Manifest. Work on the
+administrator machine, transfer only the signed public files, and keep every
+signed revision and proof: your complete history is what lets others verify
+continuity. The commands below are exercised by `node-php/tests/publisher-lifecycle.php`.
+Run them from the repository root after `C="php node-php/bin/onion-service-discovery"`.
+Numbered files keep each revision: `manifest-1.json` is the genesis `manifest.json`
+from step 3, `service.key` and `passphrase` are your current Service key files.
+
+### Change metadata
+
+```sh
+$C manifest:revise manifest-1.json metadata-2.json > draft-2.json
+$C record:sign service service.key draft-2.json --passphrase-file passphrase > manifest-2.json
+$C manifest:install manifest-2.json hostname /absolute/app/Onion-Service-Discovery/node-php/public
+```
+
+An unchanged description needs no renewal. Never sign two different Manifests
+with the same revision number: that is a fork, and it stays visible.
+
+### Rotate your Service key
+
+Create the new key first (`key:create service new.key --passphrase-file new-passphrase`),
+back it up and use the `public_key` it prints as `NEW_PUBLIC_KEY`. The old key authorizes the change and the new key confirms it:
+
+```sh
+mkdir rotation
+$C manifest:rotate manifest-2.json ed25519:NEW_PUBLIC_KEY --output-dir rotation
+$C record:sign service service.key rotation/rotation-draft.json --passphrase-file passphrase > rotation/rotation-old.json
+$C record:sign service new.key rotation/rotation-old.json --passphrase-file new-passphrase --rotation-confirmation > rotation.json
+$C record:sign service new.key rotation/successor-draft.json --passphrase-file new-passphrase > manifest-3.json
+$C manifest:install manifest-3.json hostname /absolute/app/Onion-Service-Discovery/node-php/public --rotation rotation.json
+```
+
+`--output-dir` writes the two drafts as separate owner-private files and never
+overwrites existing ones. Installation refuses a new key without its proof.
+
+### Move to a new Onion address
+
+Configure Tor for the new address first and copy its public `hostname`. The
+current key signs both the migration proof and the successor:
+
+```sh
+mkdir migration
+$C manifest:migrate manifest-3.json NEW_CANONICAL_V3_ADDRESS.onion --output-dir migration
+$C record:sign service new.key migration/migration-draft.json --passphrase-file new-passphrase > migration.json
+$C record:sign service new.key migration/successor-draft.json --passphrase-file new-passphrase > manifest-4.json
+$C manifest:install manifest-4.json NEW_HOSTNAME_DIRECTORY/hostname /absolute/app/Onion-Service-Discovery/node-php/public --migration migration.json
+```
+
+Update `node.onion` in your publisher configuration to the new address.
+
+### How Nodes learn your history
+
+`manifest:install` also maintains `/.well-known/onion-service-discovery-history.json`
+beside your Manifest ([PCP-004](../protocol/proposals/PCP-004-continuity-bundle-draft.md)):
+every signed revision, rotation and migration proof, written only when it
+connects to the installed Manifest (`"history": "CONNECTED"` in its output).
+A Node that meets your Service for the first time after any revision, or after a
+rotation or migration, fetches this file once and keeps only records whose own
+signatures prove your continuity. Check what Nodes will see:
+
+```sh
+$C history:verify /absolute/app/Onion-Service-Discovery/node-php/public
+```
+
+Installations made before this feature, or a history built elsewhere, are
+rebuilt once from your signed files, in any order:
+
+```sh
+$C history:install /absolute/app/Onion-Service-Discovery/node-php/public manifest-1.json manifest-2.json rotation.json manifest-3.json
+```
+
+`service:verify` reports `history_bundle` as Nodes would see it over Tor. As a
+fallback, a Node operator can still admit a proof file directly with
+`storage:admit BACKEND STORE_PATH rotation.json`.
+
+### Withdraw
+
+```sh
+$C manifest:withdraw manifest-4.json > draft-5.json
+$C record:sign service new.key draft-5.json --passphrase-file new-passphrase > manifest-5.json
+$C manifest:install manifest-5.json hostname /absolute/app/Onion-Service-Discovery/node-php/public
+```
+
+Withdrawal removes your Service from normal results. Independent Nodes may keep
+historical public records; global deletion cannot be guaranteed.
+
+### Check discoverability with your full history
+
+Pass all signed files in order; no hand-made JSON is needed:
+
+```sh
+$C network:discoverability-check /absolute/private/osd-publisher/config.json \
+  manifest-1.json manifest-2.json rotation.json manifest-3.json migration.json manifest-4.json \
+  --node NODE.onion ed25519:NODE_KEY --save-status
+```
+
+On the web host the served history bundle holds the same records, which is what
+`osd-publisher-check.timer` uses:
+
+```sh
+$C network:discoverability-check /absolute/private/osd-publisher/config.json \
+  /absolute/app/Onion-Service-Discovery/node-php/public/.well-known/onion-service-discovery-history.json \
+  --node NODE.onion ed25519:NODE_KEY --save-status
+```

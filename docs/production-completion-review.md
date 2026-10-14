@@ -85,11 +85,13 @@ genesis `ed25519:` encoding and computes the authorized key epoch from complete
 continuity evidence. The owner approved that choice on 2026-10-13; independent review is not implied.
 The existing complete-snapshot diagnostic is not the missing active-root scheme.
 
-D-018 still controls final bounded announcement endpoint/media type/default
-retry policy. The default-off receiver and one-shot operator Tor announcement
-are implemented as [PCP-002](protocol/proposals/PCP-002-bounded-announcement-draft.md).
-Automated multi-Node self-announcement/external observation/active-index onboarding
-remains incomplete. Local source grouping does not implement bounded learned
+D-018 (owner-approved 2026-10-14) fixes the bounded announcement endpoint and
+retry policy. The default-off receiver, the explicit operator Tor announcement
+and the bounded automatic re-announcement in the publisher timer are
+implemented as [PCP-002](protocol/proposals/PCP-002-bounded-announcement-draft.md);
+independent security review remains open. Automatic choice of Nodes, external
+observation beyond the operator's selected Nodes and active-index onboarding
+remain incomplete. Local source grouping does not implement bounded learned
 probation/referral admission/gradual source rotation. The optional No-JavaScript
 profile now has scoped development evidence described below; full atomic
 requirement traceability, expanded capacity/chaos profiles and

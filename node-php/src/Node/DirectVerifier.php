@@ -5,6 +5,7 @@ use OnionServiceDiscovery\Domain\OnionAddress;
 use OnionServiceDiscovery\Protocol\RecordVerifier;
 use OnionServiceDiscovery\Protocol\IdentityDeriver;
 use OnionServiceDiscovery\Protocol\ProtocolException;
+use OnionServiceDiscovery\Protocol\ServiceHistory;
 use OnionServiceDiscovery\Signing\SignerProvider;
 use OnionServiceDiscovery\Storage\StorageBackend;
 use OnionServiceDiscovery\Storage\StorageTransaction;
@@ -46,7 +47,22 @@ final readonly class DirectVerifier
             foreach ($view['identities'] as $identity) {
                 if (in_array($manifest->contentHash, $identity['history_hashes'], true)) { $matched = $identity; break; }
             }
-            if ($matched === null) { throw new ProtocolException('HISTORY_INCOMPLETE'); }
+            if ($matched === null) {
+                // PCP-004: fetch the Service's own history bundle once and keep only records it proves.
+                try { $bundle = $this->transport->get($address, ProtocolEndpoint::history()); }
+                catch (TransportException) { throw new ProtocolException('HISTORY_INCOMPLETE'); }
+                $history = (new ServiceHistory($this->verifier))->verify($bundle, $manifest, $records);
+                if ($history['state'] === 'INCOMPLETE') { throw new ProtocolException('HISTORY_INCOMPLETE'); }
+                $this->store->transaction(static function (StorageTransaction $tx) use ($history, $job): void { CandidateQueue::claimedRow($tx, $job); foreach ($history['admitted'] as $record) { $tx->putRecord($record); } });
+                // The admission is this worker's own change: later concurrency checks compare against it.
+                $snapshot = $this->store->snapshot();
+                $records = array_merge($records, $history['admitted']);
+                $view = IdentityDeriver::derive($records, 10000);
+                foreach ($view['identities'] as $identity) {
+                    if (in_array($manifest->contentHash, $identity['history_hashes'], true)) { $matched = $identity; break; }
+                }
+                if ($matched === null) { throw new ProtocolException('HISTORY_INCOMPLETE'); }
+            }
             if ($matched['identity_state'] !== 'VALID' || $matched['current_hash'] !== $manifest->contentHash) { throw new ProtocolException($matched['identity_state'] === 'FORKED' ? 'IDENTITY_FORKED' : 'REVISION_DOWNGRADE'); }
             $previousLocal = $snapshot['tables']['local_observations']['key:' . $address->hostname] ?? null;
             $previousRoot = $previousLocal['genesis_key'] ?? null;
@@ -78,7 +94,8 @@ final readonly class DirectVerifier
             return ['status' => 'VERIFIED', 'onion' => $address->hostname, 'manifest_hash' => $manifest->contentHash, 'unchanged' => $unchanged];
         } catch (TransportException | \InvalidArgumentException $error) {
             if ($error->getMessage() === 'CANDIDATE_CLAIM_LOST') { return ['status' => 'CLAIM_LOST']; }
-            $quarantine = !in_array($error->getMessage(), ['TOR_REQUEST_FAILED', 'HTTP_STATUS_REJECTED', 'EVIDENCE_CHANGED_RETRY'], true);
+            // Missing or invalid history is recoverable by the publisher (PCP-004): retry with bounded backoff.
+            $quarantine = !in_array($error->getMessage(), ['TOR_REQUEST_FAILED', 'HTTP_STATUS_REJECTED', 'EVIDENCE_CHANGED_RETRY', 'HISTORY_INCOMPLETE', 'HISTORY_BUNDLE_INVALID'], true);
             $queue->fail($job, $now, $error->getMessage(), $quarantine);
             return ['status' => $quarantine ? 'QUARANTINED' : 'BACKOFF', 'error' => $error->getMessage()];
         }

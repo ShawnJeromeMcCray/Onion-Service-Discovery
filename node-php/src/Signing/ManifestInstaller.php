@@ -9,7 +9,7 @@ use OnionServiceDiscovery\Protocol\ProtocolException;
 final readonly class ManifestInstaller
 {
     public function __construct(private RecordVerifier $verifier) {}
-    /** @return array{status:string,manifest_hash:string} */
+    /** @return array{status:string,manifest_hash:string,history:string} */
     public function install(ValidatedRecord $manifest,string $hostnamePath,string $webroot,?ValidatedRecord $rotation=null,?ValidatedRecord $migration=null): array
     {
         if($manifest->type!=='service_manifest'||basename($hostnamePath)!=='hostname'||is_link($hostnamePath)||!is_file($hostnamePath)||filesize($hostnamePath)>64)throw new ProtocolException('PUBLIC_HOSTNAME_FILE_REQUIRED');
@@ -24,7 +24,7 @@ final readonly class ManifestInstaller
         if(is_file($path)){
             if(filesize($path)>16384)throw new ProtocolException('EXISTING_MANIFEST_INVALID');$bytes=file_get_contents($path);if($bytes===false)throw new ProtocolException('EXISTING_MANIFEST_INVALID');$previous=$this->verifier->verifyWire($bytes);$old=$previous->document();
             if($previous->type!=='service_manifest')throw new ProtocolException('EXISTING_MANIFEST_INVALID');
-            if($manifest->contentHash===$previous->contentHash)return ['status'=>'UNCHANGED','manifest_hash'=>$manifest->contentHash];
+            if($manifest->contentHash===$previous->contentHash){$history=(new HistoryInstaller($this->verifier))->update($directory,$manifest,array_values(array_filter([$rotation,$migration])));return ['status'=>'UNCHANGED','manifest_hash'=>$manifest->contentHash,'history'=>$history['state']];}
             if($current->revision!==$old->revision+1||$current->previous_manifest_hash!==$previous->contentHash)throw new ProtocolException('REVISION_CHAIN_BROKEN');
             if($current->service_identity_public_key!==$old->service_identity_public_key){
                 if($rotation===null||$rotation->type!=='service_identity_key_rotation')throw new ProtocolException('KEY_ROTATION_INVALID');$r=$rotation->document();
@@ -38,7 +38,9 @@ final readonly class ManifestInstaller
         $temporary=$directory.'/.manifest-'.bin2hex(random_bytes(12));$mask=umask(0077);try{$stream=fopen($temporary,'x+b');}finally{umask($mask);}if($stream===false)throw new ProtocolException('PUBLIC_MANIFEST_WRITE_FAILED');
         try{$wire=$manifest->canonicalWire;$offset=0;while($offset<strlen($wire)){$written=fwrite($stream,substr($wire,$offset));if($written===false||$written<1)throw new ProtocolException('PUBLIC_MANIFEST_WRITE_FAILED');$offset+=$written;}if(!fflush($stream)||!fsync($stream)||!chmod($temporary,0644))throw new ProtocolException('PUBLIC_MANIFEST_WRITE_FAILED');}catch(\Throwable $error){@unlink($temporary);throw $error;}finally{fclose($stream);}
         if(!rename($temporary,$path)){@unlink($temporary);throw new ProtocolException('PUBLIC_MANIFEST_WRITE_FAILED');}$handle=fopen($directory,'r');if($handle===false)throw new ProtocolException('FILESYSTEM_SEMANTICS_UNSUPPORTED');try{if(!fsync($handle))throw new ProtocolException('FILESYSTEM_SEMANTICS_UNSUPPORTED');}finally{fclose($handle);}
-        return ['status'=>'INSTALLED','manifest_hash'=>$manifest->contentHash];
+        // PCP-004: keep the public history bundle beside the Manifest connected to the installed state.
+        $history=(new HistoryInstaller($this->verifier))->update($directory,$manifest,array_values(array_filter([$previous??null,$rotation,$migration])));
+        return ['status'=>'INSTALLED','manifest_hash'=>$manifest->contentHash,'history'=>$history['state']];
         } finally { flock($lock,LOCK_UN);fclose($lock); }
     }
 }

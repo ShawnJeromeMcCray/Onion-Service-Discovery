@@ -1,0 +1,11 @@
+[Unit]
+Description=Schedule bounded publisher discoverability checks
+
+[Timer]
+OnBootSec=15m
+OnUnitActiveSec=6h
+RandomizedDelaySec=30m
+Persistent=yes
+
+[Install]
+WantedBy=timers.target

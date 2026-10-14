@@ -15,7 +15,7 @@ final readonly class ClientAssets
         if(!in_array($method,['GET','HEAD'],true))return ['status'=>405,'headers'=>$headers+['Content-Type'=>'application/json','Allow'=>'GET, HEAD'],'body'=>'{"error":"METHOD_NOT_ALLOWED"}'];
         $name=$files[$target];
         if($name==='config.json'){
-            $body=json_encode(['client_config_version'=>1,'mode'=>$this->config->role==='combined'?'combined':'client-host','allowed_sources'=>$this->config->sources,'minimum_distinct_keys'=>3,'delivery_profile'=>'client-host-proxy'],JSON_THROW_ON_ERROR);$type='application/json';
+            $body=json_encode(['client_config_version'=>1,'mode'=>$this->config->role==='combined'?'combined':'client-host','allowed_sources'=>$this->config->sources,'minimum_distinct_keys'=>3,'delivery_profile'=>'client-host-proxy','visitor_sources'=>(bool)($this->config->features['visitor_sources']??false)],JSON_THROW_ON_ERROR);$type='application/json';
         }else{
             $path=$this->directory.'/'.$name;
             if(is_link($path)||!is_file($path)||filesize($path)>2097152)return ['status'=>503,'headers'=>$headers+['Content-Type'=>'application/json'],'body'=>'{"error":"CLIENT_BUILD_UNAVAILABLE"}'];

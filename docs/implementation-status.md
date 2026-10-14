@@ -17,9 +17,11 @@ learned-source admission remains open. Tor transport uses explicit format-zero
 SOCKS isolation. The D-051 owner-approved genesis-key ID now has a complete-history lookup.
 Real private-Tor application traffic and actual headless Tor Browser local tests
 have passed; public Tor, Android and browser security-level profiles remain open.
-A default-off bounded announcement receiver and one-shot Tor operator command
-are implemented as PCP-002; human D-018 freeze and automated multi-Node onboarding
-remain open.
+A default-off bounded announcement receiver, the explicit Tor operator command
+and the owner-approved (D-018, 2026-10-14) bounded automatic announcement in the
+publisher timer are implemented as PCP-002: only a new revision or a missing
+observation, at most once per day per Node, backoff up to 32 days. Choosing
+which Nodes to announce to stays the operator's explicit list.
 The optional default-off NoJS profile now serves explicit HTML POST search from a
 prepared local index, with frozen Unicode 17 normalization shared with browser search.
 Queries do not trigger discovery or synchronization. Both storage backends, corrupt-cache

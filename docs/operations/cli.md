@@ -56,7 +56,7 @@ explicit and source high-water marks/conflicts are not erased by retry.
 at most 256 unreferenced derived blobs, not signed identity/fork records.
 No command executes a downloaded software artifact.
 
-Exit codes: 0 successful command; 2 usage; 3 input/config/protocol validation;
+Exit codes ([all error codes](error-codes.md)): 0 successful command; 2 usage; 3 input/config/protocol validation;
 4 storage/signing failure or failed diagnostic; 5 direct transport failure;
 6 diagnostic WARN/degraded;
 8 normalized internal error. Transport workers can return structured BACKOFF,
@@ -80,6 +80,11 @@ An unprovisioned source package returns typed `RUNTIME_DEPENDENCIES_MISSING`
 with exit 3 and no raw include warning. Install the locked Composer runtime
 dependencies before invoking application commands.
 
+`init CONFIG [ONION] --role node|combined|client-host [--sqlite] [--source ONION]... [--visitor-sources]`
+writes the other roles the same way: all private paths inside the configuration's
+own 0700 directory, Node roles with mirroring and direct checks on and peer sync
+off, and role-specific next steps in `next_action`.
+
 `init CONFIG ONION [--publish]` creates a publisher-only configuration in an
 existing private directory, refuses overwrite, creates no keys/storage/Manifest,
 and makes no network request. `publisher:status CONFIG` is read-only and uses
@@ -100,40 +105,120 @@ neither freshness nor checkpoint ancestry. See [the contract](snapshot-membershi
 fetches, for each of at most 16 explicitly selected Nodes, its current state,
 signed checkpoint and every chunk through the configured Tor SOCKS transport,
 then applies the same exact-state membership verifier as `index:verify-inclusion`.
-OWN_HISTORY is `{"records": [...]}` or a single signed genesis Manifest. Each
+OWN_HISTORY is `{"records": [...]}`, the PCP-004 history bundle that
+`manifest:install` maintains (`.well-known/onion-service-discovery-history.json`
+in the webroot) or a single signed record; several files may be given. Each
 source is reported once as included, stale, not_present, contradictory,
 unavailable or rejected; mere acknowledgements are never counted. It mutates no
 store and loads no signing key. Exit 0 only when every selected Node includes the
 current state, otherwise 6. Freshness and checkpoint ancestry stay `NOT_EVALUATED`;
 operator independence stays `NOT_ESTABLISHED`. Not usable with the client-host role.
 `network:discoverability-check` is the specification's name for the same command.
-With `--save-status` it also writes aggregate counts (never Node addresses or keys)
+With `--save-status` it also writes aggregate counts and each Node's category
+under a SHA-256 hash of its address (never addresses or keys)
 atomically to `CONFIG_NAME.discoverability.json` beside the configuration, with
-the configuration file's owner permissions. `publisher:status` and the public
+the configuration file's group and at most its read permissions, so the web
+runtime that reads the configuration can also read the evidence.
+`service:verify CONFIG OWN_ONION --save-status` records the self-check result
+(also typed failures such as `TOR_REQUEST_FAILED`; another Onion is refused with
+`SELF_VERIFICATION_ONION_MISMATCH`), and `service:announce … --save-status`
+records each Node's acknowledgement under a SHA-256 hash of its address, with
+the announced revision, the consecutive attempts and the earliest automatic
+retry. `publisher:status` and the public
 `/onion-service-discovery/status/` page then report `DISCOVERABLE` only when at
 least one checked Node both includes the exact installed revision and exported
 its own direct observation of it, `IDENTITY_CONFLICT` when a checked Node holds a
 conflicting state, and `DISCOVERABLE_DEGRADED` when that evidence is older than
-seven days. The seven-day age is a proposed local default pending decision D-036;
+seven days. The seven-day age is the owner-approved local threshold (D-036);
 evidence for another revision is ignored. `network:announce` is an alias of
 `service:announce`.
+
+The status page derives one plain answer (YES, NOT YET, NO, DEGRADED or PROBLEM)
+and the ten-step pipeline of specification 47 section 11 from these facts only.
+
+## Specification command names and support commands
+
+- `storage:verify` = `storage:check`; `snapshot:build` = `node:snapshot`;
+  `peer:remove` = `peers:disable` (the peer is deactivated, its evidence and
+  high-water marks are preserved); `key:service:rotate` = `manifest:rotate`.
+- `key:node:rotate` always fails with `NODE_KEY_ROTATION_UNSUPPORTED` (exit 3):
+  protocol v1 has no Node key-rotation proof. Create a new Node key and have
+  peers pin the new Node explicitly.
+- `storage:migrate-backend FROM_BACKEND FROM_PATH TO_BACKEND NEW_STAGING_PATH`
+  copies records and operational state through the private backup format into a
+  fresh staging store, opens the source read-only and removes its temporary
+  carrier. Stop workers, run `storage:check` on the new path, then switch the
+  configuration. An existing destination is refused.
+- `status CONFIG --check` runs the same read-only derivation as the status page
+  (answer, ten-step pipeline, Node card) for monitoring: exit 0 when nothing
+  needs attention, 6 while waiting for external evidence, when it is older than
+  seven days or before `node:init`, 4 for an invalid Manifest, an identity
+  conflict or an unreadable store. `status CONFIG` without `--check` keeps the Node counts.
+- `history:verify WEBROOT` checks offline whether the served history bundle
+  connects to the installed Manifest (`CONNECTED`; `MISSING`/`INCOMPLETE` exit 6).
+  `history:install WEBROOT SIGNED_RECORD...` rebuilds it from the owner's signed
+  files (bundles or single records) under the publisher lock; it refuses with
+  `HISTORY_INCOMPLETE` unless the result connects. `manifest:install` maintains
+  the bundle automatically and reports `history` ([PCP-004](../protocol/proposals/PCP-004-continuity-bundle-draft.md)).
+- `node:identity CONFIG` prints the verified Node Onion and Node public key from
+  the signed descriptor, with ready-to-use lines for `--node`, `peers:add` and
+  visitors. Node and combined roles only; it fails with `NODE_NOT_INITIALIZED`
+  before `node:init`.
+- `manifest:rotate … --output-dir DIR` and `manifest:migrate … --output-dir DIR`
+  write `rotation-draft.json`/`migration-draft.json` and `successor-draft.json`
+  as owner-private files (never overwriting) instead of one combined JSON object.
+- `network:discoverability-check` accepts several history files before the first
+  `--node`: each is a `{"records": [...]}` bundle or a single signed record.
+- `diagnostics:export CONFIG` prints a privacy-reviewed support bundle: versions,
+  extensions, role/features and `doctor` results. Paths, Onion addresses, keys,
+  passphrases, sources, pins and queries are excluded and additionally redacted.
+  Review the output before attaching it to a report.
 
 `peers:group CONFIG ONION GROUP|--clear` records local source-family policy.
 Diagnostics expose concentration and unknown/inconsistent grouping without
 inferring independent operators or trust from key count. See [source groups](source-groups.md).
 
-## One-shot untrusted announcement
+## Untrusted announcement: explicit and bounded automatic
 
 `service:announce CONFIG SIGNED_MANIFEST_FILE NODE_ONION` requires explicit
 local publication and a signed, opted-in manifest bound to the configured
 Service Onion. It makes one fixed-path Tor POST with fresh SOCKS isolation; it
 reads no signing key and mutates no local store. The exact response is
 `HINT_RECEIVED_UNCONFIRMED`; both direct observation and membership remain
-`NOT_CONFIRMED`. There is no automatic retry loop. Redirect, rate-limit,
-malformed acknowledgement and bare inclusion assertions fail. This is the
-[PCP-002 draft](../protocol/proposals/PCP-002-bounded-announcement-draft.md),
-subject to D-018 human endpoint/limits/retry freeze. Receiving Nodes must
-explicitly enable both discovery and the optional announcement switch.
+`NOT_CONFIRMED`. Redirect, malformed acknowledgement and bare inclusion
+assertions fail; HTTP 429 fails as `ANNOUNCEMENT_RATE_LIMITED`.
+
+`service:announce CONFIG SIGNED_MANIFEST_FILE --node ONION KEY [--node ...]`
+takes the same Node list as `network:discoverability-check` (at most 16) and
+announces to each Node in turn; one failing Node does not stop the others. The
+JSON lists one row per Node and counts `accepted`, `rate_limited`, `unreachable`
+and `other_failure`; exit 0 when every hint was received, otherwise 6.
+
+With `--if-due` the same command is the bounded automatic announcement of
+decision D-018 (owner-approved 2026-10-14). It first requires a saved
+`service:verify --save-status` result for exactly this Manifest from the last 24
+hours (otherwise `SELF_VERIFICATION_REQUIRED`, exit 6, nothing sent). Then each
+Node is announced only when it is due:
+
+| Reason | Decision |
+| --- | --- |
+| `INITIAL` | Never announced to this Node: sent |
+| `NEW_REVISION` | The last hint announced another revision: sent |
+| `MISSING_OBSERVATION` | Same revision, the Node still lacks it and the backoff has elapsed: sent |
+| `ALREADY_INCLUDED` | Saved membership shows this Node includes the current revision: skipped |
+| `NODE_EVIDENCE_NEEDS_REVIEW` | Saved membership is `contradictory` or `rejected`; a hint cannot fix that: skipped |
+| `DAILY_LIMIT` | Less than 24 hours since the last hint to this Node, also for a new revision: skipped |
+| `BACKOFF` | Waiting 1, 2, 4, 8, 16, then 32 days after consecutive hints for one revision: skipped |
+
+A due Node is reserved under a lock on the configuration file before the POST,
+so two runs at the same time cannot both announce; a reservation whose run dies
+still counts as an attempt (`ANNOUNCEMENT_STARTED`). `--if-due` always saves its
+results, so the schedule survives restarts. Explicit announcements without
+`--if-due` ignore the schedule but, when saved, count toward the daily limit.
+A received hint never stops the schedule; only saved membership evidence does.
+`network:announce` is an alias. Receiving Nodes must explicitly enable both
+discovery and the optional announcement switch; see
+[PCP-002](../protocol/proposals/PCP-002-bounded-announcement-draft.md).
 
 ## Explicit derived-export reconstruction
 

@@ -47,12 +47,18 @@ try {
         }
     }
     elseif ($target === '/onion-service-discovery/status/') {
-        $response = StatusPage::render(PublisherStatus::inspect($config, new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas'), __DIR__ . '/.well-known/onion-service-discovery.json', $configPath), $method);
+        $statusVerifier = new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas');
+        $facts = PublisherStatus::inspect($config, $statusVerifier, __DIR__ . '/.well-known/onion-service-discovery.json', $configPath);
+        $facts['node'] = \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $statusVerifier, time());
+        $response = StatusPage::render($facts, $method);
     }
     elseif ($asset !== null) { $response = $asset; }
     elseif (str_starts_with($target, '/onion-service-discovery/relay/')) {
-        if (!(new PublicRequestBudget($config->exportPath . '/.relay-budget'))->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
-        else { $response = (new ClientHostRelay($config))->handle($method, $target); }
+        $relay = new ClientHostRelay($config);
+        // Visitor-chosen Nodes draw on a separate, smaller budget; abuse cannot starve operator-configured sources.
+        $budget = $relay->isVisitorSource($target) ? new PublicRequestBudget($config->exportPath . '/.visitor-relay-budget', 64, 1.0) : new PublicRequestBudget($config->exportPath . '/.relay-budget');
+        if (!$budget->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
+        else { $response = $relay->handle($method, $target); }
     }
     elseif ($target === CandidateAnnouncement::PATH && $config->features['accept_announcements']) {
         if ($method !== 'POST') { $response = ['status' => 405, 'headers' => ['Allow' => 'POST'], 'body' => '{"error":"METHOD_NOT_ALLOWED"}']; }
@@ -79,6 +85,17 @@ try {
         if ($config->role !== 'publisher') { $store=$config->store(readOnly: true);$descriptor=$store->snapshot()['tables']['node']['key:descriptor']??null; }
         if($descriptor!==null){$nodeWire=$store->readRecord($descriptor['hash']);if($nodeWire===null)throw new RuntimeException('Node descriptor unavailable');$node=$verifier->verifyWire($nodeWire)->document();if($node->node_identity_public_key===$record->document()->service_identity_public_key)throw new RuntimeException('Node and Service keys must differ');}
         $response=['status'=>200,'headers'=>['Content-Length'=>(string)strlen($record->canonicalWire)],'body'=>$method==='HEAD'?'':$record->canonicalWire];
+    }
+    elseif ($target === '/.well-known/onion-service-discovery-history.json' && $config->nodeOnion !== null && in_array($method,['GET','HEAD'],true)) {
+        // PCP-004: public history bundle maintained by manifest:install; Nodes verify every record themselves.
+        $path=__DIR__.'/.well-known/onion-service-discovery-history.json';
+        if(is_link($path)||!is_file($path)||filesize($path)>\OnionServiceDiscovery\Protocol\ServiceHistory::MAX_BYTES){ $response=['status'=>404,'headers'=>[],'body'=>'{"error":"NOT_FOUND"}']; }
+        else {
+            $wire=file_get_contents($path,false,null,0,\OnionServiceDiscovery\Protocol\ServiceHistory::MAX_BYTES+1);
+            if($wire===false)throw new RuntimeException('History bundle unavailable');
+            \OnionServiceDiscovery\Validation\StrictJson::parse($wire,\OnionServiceDiscovery\Protocol\ServiceHistory::MAX_BYTES);
+            $response=['status'=>200,'headers'=>['Content-Length'=>(string)strlen($wire)],'body'=>$method==='HEAD'?'':$wire];
+        }
     }
     elseif (in_array($config->role, ['client-host','publisher'], true)) { $response = ['status' => 404, 'headers' => [], 'body' => '{"error":"NOT_FOUND"}']; }
     elseif (!(new PublicRequestBudget($config->exportPath . '/.request-budget'))->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }

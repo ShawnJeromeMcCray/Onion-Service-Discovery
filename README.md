@@ -64,9 +64,9 @@ stable release. [Detailed quickstart and troubleshooting](docs/getting-started/q
 | You want to… | Start here | What you need |
 | --- | --- | --- |
 | Explore local search and identity pins | [Local demo](docs/getting-started/quickstart.md) | Node.js; synthetic data only |
-| Publish an existing Onion Service | [Publisher guide](docs/getting-started/publisher.md) | Existing v3 Onion; separate offline Service key; PHP |
+| Publish an existing Onion Service | [Operator contract](docs/operations/operator-contract.md), then the [Publisher guide](docs/getting-started/publisher.md) | Existing v3 Onion; separate offline Service key; PHP |
 | Collect and serve discovery evidence | [Node guide](docs/getting-started/node.md) | PHP, local Tor SOCKS, private storage and a separate Node key |
-| Host the browser client for selected Nodes | [Client Host installation](docs/getting-started/installation.md#client-host) | PHP, built client, Tor SOCKS and explicitly selected sources; no signing keys |
+| Host the browser client for selected Nodes | [Client Host installation](docs/getting-started/installation.md#client-host) | PHP, built client, Tor SOCKS and explicitly selected sources; no signing keys. Optionally let visitors add their own Nodes |
 | Review or contribute | [Contributing](CONTRIBUTING.md) | Locked development toolchains and the test suite |
 
 There is no approved public seed list. An empty source list is intentional.
@@ -110,7 +110,8 @@ No test count is an independent security audit or production approval.
 ## Documentation and help
 
 - [Installation and prerequisites](docs/getting-started/installation.md), [quickstart](docs/getting-started/quickstart.md), [troubleshooting](docs/getting-started/troubleshooting.md).
-- [Operator CLI](docs/operations/cli.md), [offline signing](docs/signing/offline.md), [backup and recovery](docs/operations/deployment-and-recovery.md).
+- [Five-minute operator contract](docs/operations/operator-contract.md): what becomes public, which key matters, how to withdraw.
+- [Operator CLI](docs/operations/cli.md), [configuration reference](docs/operations/configuration.md), [error codes](docs/operations/error-codes.md), [offline signing](docs/signing/offline.md), [backup and recovery](docs/operations/deployment-and-recovery.md).
 - [Draft protocol handbook](docs/protocol/handbook.md), [browser contract](docs/browser/client-contract.md), [decision register](docs/governance/decision-register.md).
 - [Development package verification](docs/operations/release-candidate.md), [offline release verifier](release-tools/README.md).
 - [Support](SUPPORT.md), [security reporting](SECURITY.md), [contributing](CONTRIBUTING.md), [changelog](CHANGELOG.md).

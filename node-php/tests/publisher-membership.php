@@ -121,17 +121,32 @@ try {
     file_put_contents($root . '/publisher.json', json_encode($v, JSON_THROW_ON_ERROR));
     file_put_contents($root . '/history.json', json_encode(['records' => [$genesis->document(), $current->document()]], JSON_THROW_ON_ERROR));
     file_put_contents($root . '/genesis.json', json_encode($genesis->document(), JSON_THROW_ON_ERROR));
-    foreach (['history.json', 'genesis.json'] as $file) {
+    // The served PCP-004 bundle is accepted as the owner's history too.
+    $bundle = ['protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'bundle_type' => 'service_history', 'records' => [$genesis->document(), $current->document()]];
+    file_put_contents($root . '/bundle.json', json_encode($bundle, JSON_THROW_ON_ERROR));
+    foreach (['history.json', 'genesis.json', 'bundle.json'] as $file) {
         $out = cli(['service:membership', $root . '/publisher.json', $root . '/' . $file, '--node', $nodes['included']['onion'], $nodes['included']['key']], 6);
         $assert($out['status'] === 'CURRENT_STATE_NOT_CONFIRMED' && $out['counts']['unavailable'] === 1 && $out['network_side_effects'] === true, 'cli unavailable ' . $file); ++$checks;
     }
+    $bundle['bundle_type'] = 'checkpoint'; file_put_contents($root . '/bad-bundle.json', json_encode($bundle, JSON_THROW_ON_ERROR));
+    $assert(cli(['service:membership', $root . '/publisher.json', $root . '/bad-bundle.json', '--node', $nodes['included']['onion'], $nodes['included']['key']], 3)['error'] === 'HISTORY_BUNDLE_INVALID', 'malformed bundle'); ++$checks;
     $assert(!file_exists($root . '/publisher.discoverability.json'), 'evidence saved without --save-status'); ++$checks;
     chmod($root . '/publisher.json', 0600);
     $saved = cli(['network:discoverability-check', $root . '/publisher.json', $root . '/history.json', '--node', $nodes['included']['onion'], $nodes['included']['key'], '--save-status'], 6);
     $evidence = json_decode((string) file_get_contents($root . '/publisher.discoverability.json'), true, 8, JSON_THROW_ON_ERROR);
-    $assert($saved['state_mutated'] === true && $evidence['unavailable'] === 1 && $evidence['manifest_hash'] === $current->contentHash
+    $assert($saved['state_mutated'] === true && $evidence['membership']['unavailable'] === 1 && $evidence['membership']['manifest_hash'] === $current->contentHash
+        && $evidence['membership']['logical_service_id'] === $genesis->document()->service_identity_public_key && $evidence['membership']['key_epoch'] === 1
         && !str_contains(json_encode($evidence, JSON_THROW_ON_ERROR), $nodes['included']['onion']) && (fileperms($root . '/publisher.discoverability.json') & 0077) === 0, 'saved aggregate evidence'); ++$checks;
     $assert(cli(['network:announce', $root . '/publisher.json'], 2)['error'] === 'USAGE_ERROR', 'network:announce alias'); ++$checks;
+    // Failed self-verification and announcement are recorded as typed failures, never as success.
+    $assert(cli(['service:verify', $root . '/publisher.json', $genesis->document()->onion, '--save-status'], 5)['error'] === 'TOR_REQUEST_FAILED', 'self-verification failure'); ++$checks;
+    $assert(cli(['service:verify', $root . '/publisher.json', $unreachable, '--save-status'], 3)['error'] === 'SELF_VERIFICATION_ONION_MISMATCH', 'foreign self-verification'); ++$checks;
+    file_put_contents($root . '/current.json', json_encode($current->document(), JSON_THROW_ON_ERROR));
+    $assert(cli(['network:announce', $root . '/publisher.json', $root . '/current.json', $unreachable, '--save-status'], 5)['error'] === 'TOR_REQUEST_FAILED', 'announcement failure'); ++$checks;
+    $evidence = json_decode((string) file_get_contents($root . '/publisher.discoverability.json'), true, 8, JSON_THROW_ON_ERROR);
+    $assert($evidence['self_verification']['result'] === 'TOR_REQUEST_FAILED' && $evidence['self_verification']['manifest_hash'] === null
+        && array_values($evidence['announcement']['nodes'])[0]['result'] === 'TOR_REQUEST_FAILED' && isset($evidence['membership'])
+        && !str_contains(json_encode($evidence, JSON_THROW_ON_ERROR), $unreachable), 'recorded failures'); ++$checks;
     $assert(!file_exists($root . '/must-not-be-created') && !file_exists($root . '/exports-must-not-be-created'), 'publisher storage created'); ++$checks;
     $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json'], 2)['error'] === 'USAGE_ERROR', 'no sources'); ++$checks;
     $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json', '--peer', $unreachable, $nodes['included']['key']], 2)['error'] === 'USAGE_ERROR', 'wrong flag'); ++$checks;

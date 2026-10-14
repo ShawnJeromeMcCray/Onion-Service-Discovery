@@ -14,16 +14,19 @@ A public installation needs the remaining [release gates](project-status.md).
 | Composer | Composer 2; respects committed lock | Install PHP runtime dependencies |
 | Node.js/npm | Node 24+ and bundled npm | Build browser assets from source; local demo |
 | Tor | Existing v3 Onion Service and loopback SOCKS listener | Real Onion hosting / outbound Node and relay requests |
-| Web server | PHP-FPM plus reviewed routing, for example nginx | Persistent staging web hosting |
+| Web server | PHP-FPM plus reviewed routing: nginx or Apache httpd 2.4 templates | Persistent staging web hosting |
 | Python | 3.11+ and locked virtual environment | Developer validators; not ordinary PHP operation |
 
 Executed reference versions include PHP 8.4.26/8.5.11, Node 24.19.0 and Tor
 0.4.9.11. These are evidence points, not a guarantee for every Linux distribution.
+Ubuntu 24.04 LTS ships PHP 8.3, which this project does not support; use a
+distribution release that ships PHP 8.4 or newer (for example Debian 13) or a
+PHP build from a source you trust.
 Install supported packages through your OS package manager. Distribution package
 names and FPM socket locations differ. Check PHP before provisioning:
 
 ```sh
-php -r 'foreach (["json","sodium","iconv","curl"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR,"Missing extension: $e\n"); exit(1); } } if (PHP_INT_SIZE !== 8 || PHP_VERSION_ID < 80400) { exit(1); } echo "PHP runtime prerequisites present\n";'
+php -r 'foreach (["json","sodium","iconv","curl"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR,"Missing extension: $e\n"); exit(1); } } if (PHP_INT_SIZE !== 8 || PHP_VERSION_ID < 80400) { fwrite(STDERR,"64-bit PHP 8.4+ required, found ".PHP_VERSION."\n"); exit(1); } echo "PHP runtime prerequisites present\n";'
 composer --version
 ```
 
@@ -42,6 +45,13 @@ php node-php/bin/onion-service-discovery help
 ```
 
 Expect JSON help with `status: DEVELOPMENT`. Record the commit you inspected.
+
+Alternatively, every merge to `main` produces an unsigned **development runtime
+package** with the PHP dependencies and the built browser client already
+included, so Composer and npm are not needed; PHP 8.4+ still is. Download it,
+verify its GitHub build provenance and extract it as described in
+[development runtime package](../operations/release-candidate.md#development-runtime-package-d-029),
+then continue below from the extracted `onion-service-discovery` directory.
 The runtime Composer dependencies are locked; development dependencies are
 excluded here. Source builds require dependency downloads. The browser's default
 configuration contains zero approved sources.
@@ -51,6 +61,7 @@ production release and independently authenticated trust root exist, follow the
 [release verification procedure](../../release-tools/README.md) before execution.
 The development [source/browser package](../operations/release-candidate.md)
 contains built browser assets; it still needs its PHP Composer runtime provisioned.
+The development runtime package also contains that runtime.
 
 ## Files and permissions
 
@@ -91,13 +102,16 @@ This role needs no Service or Node signing key. From the repository root:
 ```sh
 umask 077
 mkdir -p /absolute/private/osd-client
-cp node-php/config/example.json /absolute/private/osd-client/config.json
+php node-php/bin/onion-service-discovery init /absolute/private/osd-client/config.json --role client-host --source FIRST_NODE.onion --source SECOND_NODE.onion
 ```
 
-Replace `/absolute/private/osd-client` with a real absolute owner-private path.
-Edit this one configuration file:
+Replace `/absolute/private/osd-client` with a real absolute owner-private path
+and the sources with independently chosen Node addresses (up to 16, or none).
+Add `--visitor-sources` to let visitors add their own Nodes (see below). `init`
+refuses to overwrite a file. The generated file follows these rules, explained
+in the [configuration reference](../operations/configuration.md):
 
-- Keep `role` as `client-host`, `node.onion` and `node.key_path` null, and all features false.
+- Keep `role` as `client-host`, `node.onion` and `node.key_path` null, and all features false except, optionally, `visitor_sources` (see below).
 - Set `export_path` to `/absolute/private/osd-client/exports` and the unused storage path to `/absolute/private/osd-client/data`.
 - Put independently chosen canonical v3 Node addresses in `sources` (maximum 16).
 - Set the actual loopback Tor SOCKS port, normally 9050. Tor Browser's separate SOCKS listener is not automatically a persistent server runtime.
@@ -127,9 +141,27 @@ proven independent operators. Fewer sources require explicit limited coverage.
 An empty source list still allows the synthetic demo but provides no live results.
 No seed addresses or approval are silently supplied by initialization.
 
+#### Let visitors add their own Nodes (optional)
+
+Set `"visitor_sources": true` in `features` to let visitors load Nodes you did
+not list. Visitors then see **Add a Node you chose**, enter the Node's onion
+address and its expected public key (both required), and load it like a listed
+source. The browser verifies everything exactly as for your own sources; a wrong
+key quarantines that source. Visitors may add up to 8 Nodes and keep them only
+in their own browser profile if they choose to.
+
+Consequences for you as host: your relay then fetches the four fixed public
+protocol paths (node, state, snapshot, chunk) from any valid v3 Onion a visitor
+names, through your Tor client. These requests use their own budget (burst 64,
+one per second) so they cannot starve your listed sources, and `doctor` keeps
+showing `VISITOR_SOURCE_RELAY_ENABLED_OUTBOUND_TO_VISITOR_CHOSEN_NODES` as a
+reminder. You learn which Nodes visitors add, never their searches or pins.
+Leave it off if your Tor client must not contact visitor-chosen destinations.
+
 ## Web serving and operations
 
-Adapt [nginx routing](../../deployment/nginx/onion-service-discovery.conf) and
+Adapt [nginx routing](../../deployment/nginx/onion-service-discovery.conf) or the
+[Apache httpd equivalent](../../deployment/apache/onion-service-discovery.conf) and
 [the FPM pool](../../deployment/php-fpm-pool.conf) to your service user, paths,
 configuration and socket. These files are templates, not enabled services.
 Disable request/query logging and expose only the front controller. Configure

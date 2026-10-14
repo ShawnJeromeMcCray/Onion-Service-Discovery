@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+- Development runtime package (owner decision D-029): CI builds
+  `onion-service-discovery-development-runtime.tar.gz` with the locked PHP runtime
+  dependencies and the built client twice from independent installs, compares
+  them byte for byte and runs the packaged checks without Composer or network.
+  Each merge to main gets verified GitHub provenance and SBOM attestations and a
+  90-day workflow artifact, marked as an unsigned development preview. CI now
+  also regenerates the PCP-004 history vectors.
+- Bounded automatic announcement (owner decision D-018): `network:announce …
+  --if-due` in the publisher timer sends a hint only for a new revision or while
+  a Node still lacks the current revision, at most once per day per Node, with
+  backoff of 1, 2, 4 up to 32 days, and only after a passing self-check of the
+  same Manifest within 24 hours. Decisions are reserved under a lock; only hashed
+  schedule state is saved. `network:announce` also takes the `--node ONION KEY`
+  list; HTTP 429 is reported as `ANNOUNCEMENT_RATE_LIMITED`; the status page shows
+  result counts and the next retry. `service:membership` and `history:install`
+  read the served PCP-004 history bundle directly, so the timer needs no separate
+  history file.
+- PCP-004 service history bundle (owner-approved): `manifest:install` maintains
+  `/.well-known/onion-service-discovery-history.json`; Nodes fetch it once when a
+  Manifest does not connect, so Services stay discoverable after revisions, key
+  rotations and Onion migrations. Shared vectors pass in PHP, TypeScript and
+  Python (248 cases each); `history:install`/`history:verify`; missing history now
+  backs off instead of quarantining. Owner decisions D-018, D-029 and protocol v1
+  (D-005–D-017, D-052) recorded.
+- `init` now writes Node, combined and Client Host configurations too, with all
+  private paths in the configuration's own directory and the next steps printed.
+- Status page Node card and `node:identity`; publisher lifecycle walkthrough
+  (revision, rotation, migration, proof delivery, withdrawal) executed by a test;
+  `--output-dir` drafts and multi-file history; operator contract, configuration
+  reference and generated error-code registry.
+- Let visitors add their own Nodes: an opt-in Client Host `visitor_sources`
+  switch relays visitor-chosen v3 Onions on the four fixed protocol paths under a
+  separate budget; the browser requires the expected Node key, verifies as for
+  listed sources, stores added Nodes only on request and forgets them with
+  Forget local data. Tested in Chromium and through the PHP front controller.
 - Add `service:membership`: a publisher checks over Tor whether explicitly
   selected Nodes' complete signed snapshots include its exact current state, with
   one category per Node (included, stale, not present, contradictory, unavailable,
@@ -12,6 +47,16 @@
   conflicts, stale revisions and evidence older than seven days are shown.
 - Add the specification's `network:discoverability-check` and `network:announce`
   command names and the canonical `GET /v1/services/by-id/{logical_service_id}` route.
+- Status page: plain answer (YES/NOT YET/NO/DEGRADED/PROBLEM), the ten-step
+  publication pipeline, role explanations, logical service ID and key epoch;
+  `service:verify` and `service:announce` accept `--save-status`. Evidence files
+  take the configuration's group so the web runtime can read them.
+- Add the specification's missing commands: `storage:verify`, `snapshot:build`,
+  `peer:remove`, `key:service:rotate`, an explicit `key:node:rotate` refusal,
+  `storage:migrate-backend` and the redacted `diagnostics:export` support bundle.
+- Add an Apache httpd 2.4 template (tested with PHP-FPM; it refuses bodies over
+  1 KiB because LimitRequestBody does not cover proxied FastCGI requests) and a
+  publisher check timer; document the Ubuntu 24.04 PHP 8.3 limitation.
 - Point clone instructions at the default branch now that production-completion
   work is merged.
 

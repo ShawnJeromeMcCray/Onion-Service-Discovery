@@ -67,6 +67,8 @@ final readonly class TorTransport
             $status = curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
             if ($rejected !== null) { throw new TransportException($rejected); }
             if ($success === false) { throw new TransportException('TOR_REQUEST_FAILED'); }
+            // A rate-limited announcement is reported separately so the publisher can show it (spec 47 section 23).
+            if ($status === 429 && $requestBody !== null) { throw new TransportException('ANNOUNCEMENT_RATE_LIMITED'); }
             if ($status !== $expectedStatus) { throw new TransportException('HTTP_STATUS_REJECTED'); }
             if (isset($headers['content-encoding']) && strtolower($headers['content-encoding']) !== 'identity') { throw new TransportException('CONTENT_ENCODING_REJECTED'); }
             if (preg_match('/\Aapplication\/json(?:\s*;\s*charset=utf-8)?\z/iD', $headers['content-type'] ?? '') !== 1) { throw new TransportException('CONTENT_TYPE_REJECTED'); }

@@ -10,6 +10,7 @@ from record_format import message, payload
 from record_verifier import verify_wire, verify_record
 from strict_json import parse_strict_json
 from snapshot_membership import verify_membership
+from service_history import verify_service_history
 
 
 def operation(request):
@@ -50,6 +51,24 @@ def operation(request):
             raise ValueError('SCHEMA_INVALID')
         return {'status': 'PASS', 'result': verify_membership(''.join(fixture['checkpoint_wire']).encode(),
                 (wire.encode() for wire in fixture['chunks']), fixture['expected_node_key'], [verify_record(r) for r in fixture['local_records']])}
+    if request.get('operation') == 'service-history':
+        fixture = parse_strict_json(data, 1048576)
+        if (type(fixture.get('known_records')) is not list or type(fixture.get('current_wire')) is not str
+                or type(fixture.get('onion')) is not str or type(fixture.get('bundle_base64')) is not str):
+            raise ValueError('SCHEMA_INVALID')
+        known = []
+        for record in fixture['known_records']:
+            if type(record) is not dict:
+                raise ValueError('SCHEMA_INVALID')
+            known.append(verify_record(record))
+        current = verify_wire(fixture['current_wire'].encode(), fixture['onion'])
+        try:
+            bundle = base64.b64decode(fixture['bundle_base64'], validate=True)
+        except ValueError:
+            raise ValueError('SCHEMA_INVALID') from None
+        if base64.b64encode(bundle).decode() != fixture['bundle_base64']:
+            raise ValueError('SCHEMA_INVALID')
+        return {'status': 'PASS', 'result': verify_service_history(bundle, current, known)}
     raise ValueError('USAGE_ERROR')
 
 

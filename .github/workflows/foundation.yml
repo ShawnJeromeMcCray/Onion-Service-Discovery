@@ -49,6 +49,7 @@ jobs:
           .venv/bin/python tools/generate_schemas.py
           .venv/bin/python tools/generate_protocol_vectors.py
           .venv/bin/python tools/generate_membership_vectors.py
+          .venv/bin/python tools/generate_history_vectors.py
           .venv/bin/python tools/generate_browser_dataset.py
           npm --prefix web-local-search-client run schemas:build
           git diff --exit-code -- protocol/registries node-php/src/Domain/CategoryId.php node-php/src/Domain/LanguageGrammar.php validator-python/category_ids.py validator-python/language_grammar.py web-local-search-client/src/protocol/category-id.ts web-local-search-client/src/protocol/language-grammar.ts protocol/schemas protocol/test-vectors web-local-search-client/generated web-local-search-client/public/demo.json web-local-search-client/src/client/search-unicode-data.ts
@@ -186,6 +187,74 @@ jobs:
           name: unsigned-development-candidate
           path: .tools/candidate-a/
           retention-days: 14
+
+  development-runtime-package:
+    # Decision D-029: every merge to main yields an unsigned development preview that runs
+    # without Composer. Pull requests and other branches build and test it but publish nothing.
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - name: Set up pinned browser build runtime
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: 24.19.0
+      - name: Install locked build dependencies
+        working-directory: web-local-search-client
+        run: npm ci --ignore-scripts --no-fund
+      - name: Install hash-locked artifact validation dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r validator-python/requirements.lock -r tools/audit-requirements.lock
+      - name: Build two runtime packages from independent locked dependency installs
+        run: |
+          for copy in a b; do
+            rm -rf node-php/vendor
+            docker run --rm --user "$(id -u):$(id -g)" -e COMPOSER_HOME=/tmp/composer -e COMPOSER_ROOT_VERSION=dev-main --mount "type=bind,src=$GITHUB_WORKSPACE/node-php,dst=/app" --workdir /app composer@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac composer install --no-dev --no-plugins --no-scripts --no-interaction --prefer-dist
+            python3 tools/build_release_candidate.py --profile runtime --output ".tools/runtime-$copy"
+          done
+          cmp .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz .tools/runtime-b/onion-service-discovery-development-runtime.tar.gz
+          .venv/bin/python tools/verify_candidate.py .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz
+      - name: Run the packaged runtime as shipped, without Composer or network
+        run: .venv/bin/python tools/run_candidate_smoke.py .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz --expected-source "$(git rev-parse HEAD)" --execute-trusted-local-development-candidate
+      - name: Authenticate runtime build provenance for the merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: provenance
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz
+      - name: Authenticate runtime dependency inventory for the merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: sbom
+        uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34 # v3
+        with:
+          subject-path: .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz
+          sbom-path: .tools/runtime-a/SBOM.cdx.json
+      - name: Verify and preserve the authentication bundles
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          PROVENANCE_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+          SBOM_BUNDLE: ${{ steps.sbom.outputs.bundle-path }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp "$PROVENANCE_BUNDLE" .tools/runtime-a/provenance.sigstore.json
+          cp "$SBOM_BUNDLE" .tools/runtime-a/sbom.sigstore.json
+          gh attestation verify .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz --bundle "$PROVENANCE_BUNDLE" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/foundation.yml" --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners --format json > .tools/runtime-a/verified-provenance.json
+          gh attestation verify .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz --bundle "$SBOM_BUNDLE" --predicate-type https://cyclonedx.org/bom --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/foundation.yml" --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners --format json > .tools/runtime-a/verified-sbom.json
+      - name: Publish the development preview of this merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: development-runtime-preview-${{ github.sha }}
+          path: .tools/runtime-a/
+          retention-days: 90
 
   dependency-security:
     runs-on: ubuntu-24.04
