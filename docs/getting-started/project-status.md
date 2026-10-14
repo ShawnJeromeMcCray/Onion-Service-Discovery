@@ -65,7 +65,8 @@ renamed to the pending active-index checkpoint protocol.
 
 ## Remaining engineering that can be developed
 
-- Complete external onboarding/evidence collection and a read-only status summary bound to exact owner state, source key, freshness and ancestry.
+- Freshness and checkpoint-ancestry evaluation for the publisher's discoverability evidence. Collection (`network:discoverability-check`), the read-only status summary and Node/visitor tooling exist; the 7-day evidence age is owner-approved, the ancestry rule awaits D-052.
+- A protocol path that delivers rotation and migration proofs to Nodes; today the publisher hands them to Node operators for `storage:admit`.
 - Final active-index checkpoint semantics, exact wire bytes and continuity design, then implementation/adversarial vectors after the required protocol decisions are reviewed.
 - Learned-source admission and independent-source bootstrap policy; current peers are explicitly pinned and bounded.
 - Long-lived record growth/retention, larger applicable tiers, operational-state-heavy sync, concurrency and degraded-network/low-end-browser measurements.

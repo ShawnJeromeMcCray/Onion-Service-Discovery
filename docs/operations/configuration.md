@@ -9,7 +9,9 @@ absent are the two later additions marked *optional*, which then default to
 `false`. Examples: [`example.json`](../../node-php/config/example.json) (Client
 Host), [`node.example.json`](../../node-php/config/node.example.json) and
 [`combined.example.json`](../../node-php/config/combined.example.json);
-`init CONFIG ONION [--publish]` writes a publisher file.
+`init CONFIG ONION [--publish]` writes a publisher file and
+`init CONFIG [ONION] --role node|combined|client-host` the other roles
+([CLI](cli.md)).
 
 `node-php/tests/configuration-reference.php` fails if a key in the example files
 is missing from this page.

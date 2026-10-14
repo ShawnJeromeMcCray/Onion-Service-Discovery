@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `init` now writes Node, combined and Client Host configurations too, with all
+  private paths in the configuration's own directory and the next steps printed.
+- Status page Node card and `node:identity`; publisher lifecycle walkthrough
+  (revision, rotation, migration, proof delivery, withdrawal) executed by a test;
+  `--output-dir` drafts and multi-file history; operator contract, configuration
+  reference and generated error-code registry.
 - Let visitors add their own Nodes: an opt-in Client Host `visitor_sources`
   switch relays visitor-chosen v3 Onions on the four fixed protocol paths under a
   separate budget; the browser requires the expected Node key, verifies as for

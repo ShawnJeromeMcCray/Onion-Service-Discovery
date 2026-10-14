@@ -80,6 +80,11 @@ An unprovisioned source package returns typed `RUNTIME_DEPENDENCIES_MISSING`
 with exit 3 and no raw include warning. Install the locked Composer runtime
 dependencies before invoking application commands.
 
+`init CONFIG [ONION] --role node|combined|client-host [--sqlite] [--source ONION]... [--visitor-sources]`
+writes the other roles the same way: all private paths inside the configuration's
+own 0700 directory, Node roles with mirroring and direct checks on and peer sync
+off, and role-specific next steps in `next_action`.
+
 `init CONFIG ONION [--publish]` creates a publisher-only configuration in an
 existing private directory, refuses overwrite, creates no keys/storage/Manifest,
 and makes no network request. `publisher:status CONFIG` is read-only and uses

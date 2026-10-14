@@ -58,6 +58,7 @@ def main() -> int:
         ('php-node-status', php + ['node-php/tests/node-status.php'], ROOT),
         ('php-publisher-lifecycle', php + ['node-php/tests/publisher-lifecycle.php'], ROOT),
         ('php-configuration-reference', php + ['node-php/tests/configuration-reference.php'], ROOT),
+        ('php-configuration-init', php + ['node-php/tests/configuration-init.php'], ROOT),
         ('php-static-analysis', php + ['node-php/vendor/bin/phpstan', 'analyse', 'node-php/src', '--level=8', '--no-progress'], ROOT),
         ('php-announcement-http', php + ['node-php/tests/announcement-http.php'], ROOT),
         ('php-candidate-announcement', php + ['node-php/tests/candidate-announcement.php'], ROOT),

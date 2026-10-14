@@ -13,10 +13,15 @@ From the repository root, as the dedicated service user:
 ```sh
 umask 077
 mkdir -p /absolute/private/osd-node
-cp node-php/config/node.example.json /absolute/private/osd-node/config.json
+php node-php/bin/onion-service-discovery init /absolute/private/osd-node/config.json YOUR_NODE_V3_ADDRESS.onion --role node
 ```
 
-Edit `config.json`:
+`init` writes a validated configuration with every private path inside that
+directory (`data`, `exports`, `node.key`), mirroring and direct checks on, peer
+sync off and the SOCKS port 9050, and prints the next commands. Add `--sqlite`
+for the SQLite store. It never overwrites a file and creates no key or store.
+Adjust the result if needed; all fields are explained in the
+[configuration reference](../operations/configuration.md):
 
 | Field | Set to |
 | --- | --- |

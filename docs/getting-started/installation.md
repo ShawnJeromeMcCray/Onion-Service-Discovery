@@ -94,11 +94,14 @@ This role needs no Service or Node signing key. From the repository root:
 ```sh
 umask 077
 mkdir -p /absolute/private/osd-client
-cp node-php/config/example.json /absolute/private/osd-client/config.json
+php node-php/bin/onion-service-discovery init /absolute/private/osd-client/config.json --role client-host --source FIRST_NODE.onion --source SECOND_NODE.onion
 ```
 
-Replace `/absolute/private/osd-client` with a real absolute owner-private path.
-Edit this one configuration file:
+Replace `/absolute/private/osd-client` with a real absolute owner-private path
+and the sources with independently chosen Node addresses (up to 16, or none).
+Add `--visitor-sources` to let visitors add their own Nodes (see below). `init`
+refuses to overwrite a file. The generated file follows these rules, explained
+in the [configuration reference](../operations/configuration.md):
 
 - Keep `role` as `client-host`, `node.onion` and `node.key_path` null, and all features false except, optionally, `visitor_sources` (see below).
 - Set `export_path` to `/absolute/private/osd-client/exports` and the unused storage path to `/absolute/private/osd-client/data`.
