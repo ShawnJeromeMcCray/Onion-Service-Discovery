@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Installation and troubleshooting
+    url: https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/blob/implementation/production-completion/docs/getting-started/installation.md
+    about: Check the role-specific setup and expected results first.
+  - name: Security policy
+    url: https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery/blob/implementation/production-completion/SECURITY.md
+    about: Read the reporting policy before sharing security-sensitive details.
