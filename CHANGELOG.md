@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Add a loopback-only executable visitor demo, actual UI screenshot, role-specific
+  installation/publishing/Node guides, troubleshooting and evidence map.
+- Exercise fresh-copy Publisher, Node and keyless Client Host walkthroughs in
+  runtime and packaged-install checks; add the real demo browser acceptance test.
+- Enable and verify private GitHub vulnerability reporting; add sanitized bug-report
+  templates and a practical support entry point.
+- Reuse frozen Unicode search metadata with mutation-safe weak caching and record
+  first-query cost; keep local storage failures out of peer quarantine penalties.
+
 - Add default-off bounded candidate announcement hints and a one-shot Tor
   operator command; accepted hints never claim observation or index inclusion.
 

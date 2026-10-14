@@ -1,0 +1,47 @@
+name: Bug report
+description: Report a reproducible problem with the demo or a staging workflow.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include credentials, private keys, passphrases, private backups, pin exports or search history. Security-sensitive findings follow SECURITY.md."
+  - type: input
+    id: commit
+    attributes:
+      label: Source commit
+      description: Output of git rev-parse HEAD.
+    validations:
+      required: true
+  - type: dropdown
+    id: workflow
+    attributes:
+      label: Workflow
+      options:
+        - Local synthetic demo
+        - Publisher staging setup
+        - Discovery Node staging setup
+        - Client Host staging setup
+        - Developer tests or package tooling
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Runtime and environment
+      description: OS and applicable PHP, Node, Tor, browser versions; synthetic lab or real infrastructure. No private paths or secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Smallest repeatable steps, using synthetic data when possible.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Expected result and actual result
+      description: Include sanitized error codes. Exclude raw private data and queries.
+    validations:
+      required: true

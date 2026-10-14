@@ -210,3 +210,21 @@ and completes import after capacity is restored without manual peer readmission.
 The peer-sync integration and PHPStan level 8 pass on pinned PHP 8.4/8.5. A disk
 failure that also prevents the backoff transaction from persisting can still
 surface a local error; lease expiry remains the existing recovery bound.
+
+### GitHub visitor installation and presentation (2026-10-14)
+
+The README now leads with the user purpose, actual synthetic UI screenshot,
+loopback quickstart and role-specific setup. New getting-started guides cover
+requirements, locked provisioning, Publisher offline signing/public transfer,
+Node initialization and explicit sources, expected status/error outcomes,
+troubleshooting, support and the updated evidence map. Private GitHub
+vulnerability reporting was enabled and independently read back as enabled.
+
+The visitor demo serves only a fixed public asset set on loopback with no
+request logging or proxy routes. Its real browser acceptance passes local
+search/pinning and no query-triggered requests. All 248 client tests and five
+controlled browser tests pass. A fresh-copy CLI walkthrough passes on pinned
+PHP 8.4/8.5 for Publisher sign/install/READY_LOCALLY, Node init/snapshot and
+keyless Client Host initialization; the packaged smoke workflow now includes
+this check. This improves practical development use without closing full
+external onboarding, independent audits or production release gates.

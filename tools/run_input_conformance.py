@@ -39,6 +39,7 @@ def main() -> int:
         ('php-public-blobs', php + ['node-php/tests/public-blobs.php'], ROOT),
         ('php-public-evidence', php + ['node-php/tests/public-evidence.php'], ROOT),
         ('php-operator-cli', php + ['node-php/tests/operator-cli.php'], ROOT),
+        ('php-visitor-setup', php + ['node-php/tests/visitor-setup.php'], ROOT),
         ('php-read-only-diagnostics', php + ['node-php/tests/read-only-diagnostics.php'], ROOT),
         ('php-configuration', php + ['node-php/tests/configuration.php'], ROOT),
         ('php-publisher-status', php + ['node-php/tests/publisher-status.php'], ROOT),

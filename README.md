@@ -1,94 +1,122 @@
 # Onion Service Discovery
 
-Opt-in decentralized discovery for public Tor Onion Services, with self-published metadata and local browser search.
+**Find public Onion Services through signed, opt-in directories. Search locally. Keep identity continuity in your own hands.**
 
-**Status: development implementation partially aligned with the fully read 55-document specification. Significant production requirements remain open. Production approval remains open.**
+Onion Service Discovery lets operators publish signed metadata about their Tor
+Onion Services. Discovery Nodes collect and verify that evidence; your browser
+checks signed directory data and searches it on your device. Local identity pins
+help detect conflicting histories, key changes and Onion migrations.
 
-See the [source refresh and implementation gaps](docs/specification-refresh.md). Historical passing tests do not certify the revised specification.
+[Try it locally](#try-it-locally) · [Installation](docs/getting-started/installation.md) · [Publish your service](docs/getting-started/publisher.md) · [Run a Node](docs/getting-started/node.md) · [Evidence and limits](docs/getting-started/project-status.md)
 
-Technical identity evidence must not be presented as an assurance about content or operator honesty. Tor itself is not modified and its private keys must never be accessed.
+**Current release channel: development preview.** The local demo and documented
+operator workflows are executable. Public production approval, independent audits,
+a public seed network and the complete external onboarding workflow remain open.
+Use a staging installation for network operation. [Current status](docs/getting-started/project-status.md)
+explains exactly what the evidence establishes.
 
-## Current implementation
+![Actual local client showing a synthetic library search and an identity pin](docs/images/local-demo.png)
 
-- Import of 55 current specification documents with observed source links, modification times and integrity hashes.
-- [Decision register](docs/governance/decision-register.md) preserving the 54 owner/reviewer decisions without inferred approvals.
-- [Implementation status](docs/implementation-status.md) distinguishing requirements from verified behavior.
-- Strict Onion v3, bounded JSON, canonical bytes, signed-record schemas and Ed25519 verification in PHP, TypeScript and independent Python.
-- Deterministic evidence graphs for forks, exact revision chains, countersigned rotation and signed migration.
-- [202 black-box core cases per language](docs/conformance/core-report.json), with zero failures/skips in the current offline draft suite.
-- Required FilesystemStore plus SQLiteStore, read-only diagnostics, trusted private staged backup/restore and journal-first durable commits, explicit legacy-format migration and process-interruption tests.
-- Encrypted offline Service signing, role-separated Node signing, manifest revision/withdrawal/rotation/migration and atomic public installation.
-- Bounded Tor-only transport, direct verification, resumable peer snapshots and read-only protocol API.
-- Bundled local-search client, query-independent Client Host relay, explicit source allowlist and origin-local pins.
-- Shared draft category/language rules, local category/adult filters and paginated duplicate-result groups.
-- Publisher-only initialization and a read-only status page that keeps untested external discoverability unconfirmed.
-- Offline exact-state membership verification in a complete signed development
-  snapshot, independently implemented in PHP/TypeScript/Python; see
-  [the scope and CLI](docs/operations/snapshot-membership.md).
-- Local peer source groups and concentration diagnostics without inferred
-  operator independence or key-count trust.
-- Persistent candidate admission/work budgets shared by enqueue and PeerSync, with a bounded pinned-peer pool.
-- Finite TLA+ models, PHPStan Level 8, syntax sink checks and controlled browser/privacy tests.
+*Screenshot from the executable local demo. The addresses are synthetic test
+fixtures; they are not live services or a public directory.*
 
-After installing the hash-locked validator dependencies in a virtual environment:
+## Why this project?
 
-```sh
-python tools/check_repository.py
-.venv/bin/python -m unittest discover -s tests -v
-```
+- **Publication is opt-in.** Operators explicitly sign the metadata they want to make public.
+- **Local search.** Loading a directory fetches generic signed data. Search terms, filters and identity pins stay on your device in the local-search mode.
+- **Identity survives change.** Separate Service keys, countersigned rotation and signed Onion migration preserve a verifiable history.
+- **Sources cannot vote away a fork.** Conflicting signed histories remain evidence; more Node keys do not make an identity authoritative.
+- **Self-hostable building blocks.** PHP reference Node, Filesystem/SQLite storage and a bundled browser client, with reproducible development packages.
 
-For the PHP/TypeScript/Python input subset, see [reproduction instructions](docs/conformance/input-subset.md). These checks do not establish full protocol or browser conformance.
+Signatures establish signed statements and key continuity. They do not establish
+who operates a service, whether its content is safe, or whether several Node keys
+belong to independent people. The Client Host controls the code delivered to your
+browser; use a reviewed self-hosted build when that boundary matters.
 
-## Components
+## Try it locally
 
-- `protocol/`: versioned schemas, limits, exact-byte vectors and independent conformance.
-- `node-php/`: PHP reference Node, offline signing, bounded Tor transport, verification, CLI and read-only API.
-- `web-local-search-client/`: static local-search client, multi-source validation and explicit origin trust boundary.
-- Storage: required FilesystemStore and SQLiteStore behind a backend-neutral contract; server database adapters need independent conformance evidence.
-- Formal models, synthetic corpus, chaos lab, operational runbooks and release evidence.
-
-See the [source manifest](docs/specification-manifest.json). Later precise requirements supersede earlier generic descriptions; contradictions need recorded resolution.
-
-## Running the development build
+Requires **Node.js 24+**, its bundled npm, and Git. No Tor, PHP, signing keys or
+public Onion Service are needed for this synthetic demonstration.
 
 ```sh
-cd web-local-search-client
+git clone --branch implementation/production-completion https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery.git
+cd Onion-Service-Discovery/web-local-search-client
 npm ci --ignore-scripts
-npm run build
+npm run demo
 ```
 
-The default static client has a clearly synthetic offline demonstration and no production seed Nodes. The PHP Client Host uses a strict configuration and a Tor-only generic relay; it requires no signing keys. See the [browser contract](docs/browser/client-contract.md), [Node/transport contract](docs/transport/contract.md), [offline signing workflow](docs/signing/offline.md) and [storage contract](docs/storage/contract.md). Start with `node-php/bin/onion-service-discovery help`. Serve only `node-php/public` and keep data, configuration and keys outside it. Deployment/operations packaging is still being completed.
+Open **http://127.0.0.1:8080/onion-service-discovery/** in a current browser.
+Click **Try offline demo**, search for `library`, then click **Pin this identity**.
+You should see one matching synthetic library and one local pin. Synthetic results
+have no visit links. Stop the server with **Ctrl+C**. If port 8080 is busy:
 
-## Release conditions
+```sh
+npm run demo -- --port 8081
+```
 
-No stable protocol or production claim is authorized by the current repository. Exact protocol bytes, cryptographic lifecycle, browser profile, release trust root and final release need evidence and human reviews. An external audit has not been performed.
+The preview listens only on loopback and serves a fixed set of public assets.
+Dependency installation needs Internet access; after building, the synthetic demo
+uses local assets. This branch is the current continuation; it is not a signed
+stable release. [Detailed quickstart and troubleshooting](docs/getting-started/quickstart.md).
+
+## Choose your role
+
+| You want to… | Start here | What you need |
+| --- | --- | --- |
+| Explore local search and identity pins | [Local demo](docs/getting-started/quickstart.md) | Node.js; synthetic data only |
+| Publish an existing Onion Service | [Publisher guide](docs/getting-started/publisher.md) | Existing v3 Onion; separate offline Service key; PHP |
+| Collect and serve discovery evidence | [Node guide](docs/getting-started/node.md) | PHP, local Tor SOCKS, private storage and a separate Node key |
+| Host the browser client for selected Nodes | [Client Host installation](docs/getting-started/installation.md#client-host) | PHP, built client, Tor SOCKS and explicitly selected sources; no signing keys |
+| Review or contribute | [Contributing](CONTRIBUTING.md) | Locked development toolchains and the test suite |
+
+There is no approved public seed list. An empty source list is intentional.
+For real sources, obtain Onion addresses and expected Node public keys through
+independently chosen channels. Do not replace missing infrastructure with the
+synthetic example addresses.
+
+## How it works
+
+```mermaid
+flowchart LR
+    Operator[Service operator] -->|Signed opt-in manifest| Service[Existing Onion Service]
+    Service -->|Tor fetch and verification| Node[Discovery Nodes]
+    Node -->|Generic signed directory data| Browser[Local browser verifier]
+    Browser --> Search[Local search and identity pins]
+```
+
+The application does not modify Tor or read Tor private keys. Discovery Nodes
+retain signed history and publish complete development snapshots. A browser
+validates data before merging source views. [Exact-state snapshot membership](docs/operations/snapshot-membership.md)
+can be checked offline with full owner history and an independently selected Node
+key; that check alone does not prove freshness or network-wide discoverability.
+
+Without JavaScript, operators can optionally enable [server-side HTML search](docs/operations/server-search.md).
+That mode explicitly sends search terms to the selected Node and does not provide
+local browser verification.
+
+## Tested behavior and current boundaries
+
+The continuation includes three-language protocol/membership vectors, bounded
+Tor transport, crash and disk-full recovery tests, resumable snapshot ancestry,
+and browser privacy checks. Actual signature-verified Tor Browser tests pass over
+an **isolated real private Tor network**, including a JavaScript-disabled profile.
+Public Tor, Android and desktop Normal/Safer/Safest certification remain open.
+
+See [the evidence map and comparison with the October 2026 assessment](docs/getting-started/project-status.md),
+[measured capacity](docs/performance/README.md), [deployment and recovery](docs/operations/deployment-and-recovery.md),
+and [machine-readable production gates](docs/production-readiness.json).
+No test count is an independent security audit or production approval.
+
+## Documentation and help
+
+- [Installation and prerequisites](docs/getting-started/installation.md), [quickstart](docs/getting-started/quickstart.md), [troubleshooting](docs/getting-started/troubleshooting.md).
+- [Operator CLI](docs/operations/cli.md), [offline signing](docs/signing/offline.md), [backup and recovery](docs/operations/deployment-and-recovery.md).
+- [Draft protocol handbook](docs/protocol/handbook.md), [browser contract](docs/browser/client-contract.md), [decision register](docs/governance/decision-register.md).
+- [Development package verification](docs/operations/release-candidate.md), [offline release verifier](release-tools/README.md).
+- [Support](SUPPORT.md), [security reporting](SECURITY.md), [contributing](CONTRIBUTING.md), [changelog](CHANGELOG.md).
 
 ## License
 
-Dedicated to the public domain under [CC0-1.0](LICENSE), as authorized by the project owner on 2026-10-12. Use, modification and redistribution are unrestricted to the extent permitted by applicable law. No warranty is provided. Third-party dependencies retain their own licenses.
-
-For the expanded draft core after installing locked dependencies:
-
-```sh
-.venv/bin/python protocol-conformance/runner.py --php-container
-```
-
-The runner imports no reference implementation code. It compares separate-process outputs with exact shared vectors. See docs/adr/002-integer-json-and-signed-byte-construction.md for the explicit draft byte rules and pending review.
-
-## Operation and review
-
-[Deployment/recovery](docs/operations/deployment-and-recovery.md),
-[CLI](docs/operations/cli.md), [controlled developer lab](lab/README.md),
-[measured capacity](docs/performance/README.md),
-[offline TUF verification](release-tools/README.md), and
-[reproducible unsigned candidates](docs/operations/release-candidate.md)
-are available. The [draft protocol handbook](docs/protocol/handbook.md) and
-[machine-readable gates](docs/release-gates.json) describe the exact implemented
-scope and remaining external evidence. No approved production root, public seed
-infrastructure, independent audit or live Tor Browser/Android certification is
-invented. Public release requires those applicable gates to pass.
-
-Optional explicit [NoJS server search](docs/operations/server-search.md) is available
-as a default-off development profile. It sends queries to the selected Node and
-does not provide local-browser verification. Bundled Unicode data retains its
-[third-party license notice](THIRD_PARTY_NOTICES.md).
+Project code is dedicated to the public domain under [CC0-1.0](LICENSE), as approved
+by the owner. Third-party code and Unicode data retain their own licenses; see
+[third-party notices](THIRD_PARTY_NOTICES.md). No warranty is provided.
