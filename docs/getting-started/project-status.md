@@ -56,6 +56,10 @@ membership unconfirmed. Steps 4–5 are partly automated for the publisher:
 `service:membership` fetches complete signed snapshots from explicitly selected
 Nodes over Tor and reports each as included, stale, not present, contradictory,
 unavailable or rejected (controlled tests only; no public-Tor run is recorded).
+Step 2's hint is automated within the owner-approved bounds of D-018: the
+publisher timer announces only a new revision or a missing observation, at most
+once per day per Node. Rotation and migration proofs reach Nodes through the
+served PCP-004 history bundle, so no Node operator has to admit them by hand.
 With `--save-status` (also for `service:verify` and `service:announce`), the read-only status page now answers YES/NOT YET/NO/DEGRADED/PROBLEM with the ten-step pipeline and derives DISCOVERABLE,
 DISCOVERABLE_DEGRADED or IDENTITY_CONFLICT from those saved aggregate counts.
 It still does not evaluate freshness, checkpoint ancestry or operator
@@ -66,7 +70,6 @@ renamed to the pending active-index checkpoint protocol.
 ## Remaining engineering that can be developed
 
 - Freshness and checkpoint-ancestry evaluation for the publisher's discoverability evidence. Collection (`network:discoverability-check`), the read-only status summary and Node/visitor tooling exist; the 7-day evidence age is owner-approved, the ancestry rule awaits D-052.
-- A protocol path that delivers rotation and migration proofs to Nodes; today the publisher hands them to Node operators for `storage:admit`.
 - Final active-index checkpoint semantics, exact wire bytes and continuity design, then implementation/adversarial vectors after the required protocol decisions are reviewed.
 - Learned-source admission and independent-source bootstrap policy; current peers are explicitly pinned and bounded.
 - Long-lived record growth/retention, larger applicable tiers, operational-state-heavy sync, concurrency and degraded-network/low-end-browser measurements.

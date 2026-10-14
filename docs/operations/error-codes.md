@@ -7,12 +7,13 @@ transport, 6 `doctor` warning). HTTP routes return codes as `{"error":CODE}`. Br
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-210 codes.
+211 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
 | `ADDRESS_INVALID` | browser client, input parsing | 3 | Not a canonical, checksum-valid v3 Onion address (56 lowercase characters plus .onion). |
-| `ANNOUNCEMENT_RESPONSE_INVALID` | Tor transport | 5 | The code name states the condition; see the raising component. |
+| `ANNOUNCEMENT_RATE_LIMITED` | Tor transport | 5 | The Node answered 429: its shared announcement budget is exhausted. The bounded schedule retries no earlier than a day later. |
+| `ANNOUNCEMENT_RESPONSE_INVALID` | Tor transport | 5 | The Node did not answer with exactly HINT_RECEIVED_UNCONFIRMED; no other claim is accepted as an announcement result. |
 | `ARCHIVE_BUDGET_EXHAUSTED` | storage | 4 | The code name states the condition; see the raising component. |
 | `ARCHIVE_INVALID` | storage | 4 | The code name states the condition; see the raising component. |
 | `ARCHIVE_PATH_INVALID` | storage | 4 | The code name states the condition; see the raising component. |
@@ -121,7 +122,7 @@ for remedies.
 | `PUBLIC_KEY_INVALID` | browser client, encoding | 3 | Not a canonical ed25519: public key (43 base64url characters after the prefix). |
 | `PUBLIC_MANIFEST_PATH_UNSAFE` | signing | 3 | The code name states the condition; see the raising component. |
 | `PUBLIC_MANIFEST_WRITE_FAILED` | signing | 3 | The code name states the condition; see the raising component. |
-| `PUBLISHER_BUSY` | signing | 3 | The code name states the condition; see the raising component. |
+| `PUBLISHER_BUSY` | configuration and status, signing | 3 | Another publisher command holds the lock on the same files; run it again when that command has finished. |
 | `PUBLISHING_DISABLED` | CLI | 3 | Publishing is off in the configuration or the Manifest withdraws publication. |
 | `RATE_LIMIT_CONFIGURATION_INVALID` | web routes | 4 | The code name states the condition; see the raising component. |
 | `RATE_LIMIT_CORRUPT` | web routes | 4 | The code name states the condition; see the raising component. |
@@ -169,7 +170,7 @@ for remedies.
 | `SOURCE_DESCRIPTOR_EQUIVOCATION` | browser client | – | The code name states the condition; see the raising component. |
 | `SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE` | browser client | – | The code name states the condition; see the raising component. |
 | `SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK` | browser client | – | The code name states the condition; see the raising component. |
-| `SOURCE_DUPLICATE` | configuration and status | 3 | The same Node was listed twice. |
+| `SOURCE_DUPLICATE` | CLI, configuration and status | 3 | The same Node was listed twice. |
 | `SOURCE_EQUIVOCATION_PRESERVED` | browser client | – | The code name states the condition; see the raising component. |
 | `SOURCE_FETCH_FAILED` | browser client | – | The Node could not be reached through the relay or Tor. |
 | `SOURCE_GROUP_ASSIGNMENTS_INCONSISTENT` | doctor | 6 | The code name states the condition; see the raising component. |

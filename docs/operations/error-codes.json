@@ -10,6 +10,15 @@
    ],
    "meaning": "Not a canonical, checksum-valid v3 Onion address (56 lowercase characters plus .onion)."
   },
+  "ANNOUNCEMENT_RATE_LIMITED": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": "The Node answered 429: its shared announcement budget is exhausted. The bounded schedule retries no earlier than a day later."
+  },
   "ANNOUNCEMENT_RESPONSE_INVALID": {
    "cli_exit": [
     "5"
@@ -17,7 +26,7 @@
    "components": [
     "Tor transport"
    ],
-   "meaning": null
+   "meaning": "The Node did not answer with exactly HINT_RECEIVED_UNCONFIRMED; no other claim is accepted as an announcement result."
   },
   "ARCHIVE_BUDGET_EXHAUSTED": {
    "cli_exit": [
@@ -1010,9 +1019,10 @@
     "3"
    ],
    "components": [
+    "configuration and status",
     "signing"
    ],
-   "meaning": null
+   "meaning": "Another publisher command holds the lock on the same files; run it again when that command has finished."
   },
   "PUBLISHING_DISABLED": {
    "cli_exit": [
@@ -1447,6 +1457,7 @@
     "3"
    ],
    "components": [
+    "CLI",
     "configuration and status"
    ],
    "meaning": "The same Node was listed twice."

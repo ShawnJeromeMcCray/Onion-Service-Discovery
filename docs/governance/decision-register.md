@@ -82,11 +82,12 @@ rotation, migration, withdrawal and fork evidence on both storage backends. D-04
 [ADR 005](../adr/005-tor-socks-format-zero.md); actual deployed Tor and human
 review remain open. No other decision approval is inferred.
 
-D-018 now has the executable default-off receiver and one-shot publisher Tor
-POST in [PCP-002](../protocol/proposals/PCP-002-bounded-announcement-draft.md).
+D-018 now has the executable default-off receiver, the explicit publisher Tor
+POST and the owner-approved bounded automatic re-announcement (`--if-due` in the
+publisher timer) in [PCP-002](../protocol/proposals/PCP-002-bounded-announcement-draft.md).
 A received hint has no signature/observation/index authority; anonymous caller
-identity rotation cannot increase its shared source/global budget. The endpoint,
-limits and retry freeze remain explicitly human-review-open.
+identity rotation cannot increase its shared source/global budget. Independent
+security review of the endpoint and limits remains open.
 
 ## Owner decisions on 2026-10-14
 

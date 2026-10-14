@@ -71,10 +71,13 @@ Tor Browser also passes scoped local headless checks. See
 [browser evidence](../conformance/tor-browser-local-report.json). These do not
 complete the deployed public-Tor/browser privacy gates above.
 
-`service:announce` makes one fixed-endpoint Tor POST for an explicitly published
-signed Service manifest. The exact unconfirmed response is required; no automatic
-retry or signing/storage side effect occurs. A received hint never supplies an
-identity, observation or active-index claim.
+`service:announce` makes one fixed-endpoint Tor POST per selected Node for an
+explicitly published signed Service manifest. The exact unconfirmed response is
+required; no signing or storage side effect occurs. With `--if-due` it follows
+the bounded D-018 schedule (new revision or missing observation only, at most
+once per day per Node, backoff up to 32 days) and saves only hashed schedule
+state. A received hint never supplies an identity, observation or active-index
+claim.
 
 ## Long-absence PHP checkpoint catch-up
 

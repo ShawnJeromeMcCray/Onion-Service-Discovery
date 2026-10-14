@@ -8,13 +8,14 @@ use OnionServiceDiscovery\Validation\StrictJson;
 
 /**
  * Private publisher evidence beside the configuration, written only by explicit `--save-status`
- * CLI runs and read by the status page. Aggregates only: Node addresses are stored as hashes
- * and keys are never stored, so the public page cannot reveal the publisher's selected sources.
+ * or `--if-due` CLI runs and read by the status page. Aggregates only: Node addresses are stored
+ * as hashes and keys are never stored, so the public page cannot reveal the selected sources.
  */
 final class PublisherEvidence
 {
     public const MAX_ANNOUNCED_NODES = 16;
-    private const MAX_BYTES = 8192;
+    private const MAX_BYTES = 16384;
+    private const CATEGORIES = ['included', 'stale', 'not_present', 'contradictory', 'unavailable', 'rejected'];
     private const MEMBERSHIP_COUNTS = ['revision', 'key_epoch', 'selected_sources', 'distinct_node_keys', 'included_with_node_direct_observation',
         'included', 'stale', 'not_present', 'contradictory', 'unavailable', 'rejected'];
 
@@ -23,14 +24,20 @@ final class PublisherEvidence
         return dirname($configPath) . '/' . preg_replace('/\.json\z/D', '', basename($configPath)) . '.discoverability.json';
     }
 
+    /** The saved form of a Node address; the status page never needs the address itself. */
+    public static function nodeKey(OnionAddress $node): string { return hash('sha256', $node->hostname); }
+
     /** @param array<string,mixed> $result Output of PublisherMembership::check(). */
     public static function recordMembership(array $result, string $configPath, int $now): void
     {
         $expected = $result['expected_state'];
+        // Per-Node categories let the bounded announcement skip Nodes that already include this revision.
+        $nodes = [];
+        foreach ($result['sources'] as $source) { $nodes[self::nodeKey(OnionAddress::parse($source['node_onion']))] = $source['category']; }
         self::update($configPath, 'membership', ['checked_at' => self::time($now), 'manifest_hash' => $expected['manifest_hash'],
             'logical_service_id' => $expected['logical_service_id'], 'revision' => $expected['revision'], 'key_epoch' => $expected['key_epoch'],
             'selected_sources' => $result['selected_sources'], 'distinct_node_keys' => $result['distinct_node_keys'],
-            'included_with_node_direct_observation' => $result['included_with_node_direct_observation']] + $result['counts']);
+            'included_with_node_direct_observation' => $result['included_with_node_direct_observation']] + $result['counts'] + ['nodes' => $nodes]);
     }
 
     public static function recordSelfVerification(string $configPath, int $now, ?string $manifestHash, string $result): void
@@ -38,12 +45,55 @@ final class PublisherEvidence
         self::update($configPath, 'self_verification', ['checked_at' => self::time($now), 'manifest_hash' => $manifestHash, 'result' => $result]);
     }
 
-    public static function recordAnnouncement(string $configPath, int $now, OnionAddress $node, string $result): void
+    /** An explicit operator announcement; it also counts toward the automatic daily limit. */
+    public static function recordAnnouncement(string $configPath, int $now, OnionAddress $node, string $result, string $manifestHash): void
     {
-        $nodes = self::load($configPath)['announcement']['nodes'] ?? [];
-        $nodes[hash('sha256', $node->hostname)] = ['at' => self::time($now), 'result' => $result];
-        uasort($nodes, static fn (array $a, array $b): int => strcmp($b['at'], $a['at']));
-        self::update($configPath, 'announcement', ['nodes' => array_slice($nodes, 0, self::MAX_ANNOUNCED_NODES, true)]);
+        self::locked($configPath, static function () use ($configPath, $now, $node, $result, $manifestHash): void {
+            $nodes = self::load($configPath)['announcement']['nodes'] ?? [];
+            $nodes[self::nodeKey($node)] = AnnouncementSchedule::attempt($nodes[self::nodeKey($node)] ?? null, $manifestHash, $now, $result);
+            self::writeAnnouncements($configPath, $nodes);
+        });
+    }
+
+    /**
+     * Decides which Nodes are due and reserves them in one locked step, so concurrent runs
+     * cannot exceed the daily limit. A reservation counts as an attempt even if the run dies.
+     * @param list<OnionAddress> $nodes
+     * @return list<array{node:OnionAddress,due:bool,reason:string,next_due_at:?int,attempt:?int}>
+     */
+    public static function reserveAnnouncements(string $configPath, int $now, string $manifestHash, array $nodes): array
+    {
+        return self::locked($configPath, static function () use ($configPath, $now, $manifestHash, $nodes): array {
+            $evidence = self::load($configPath);
+            $saved = $evidence['announcement']['nodes'] ?? [];
+            $membership = $evidence['membership'] ?? null;
+            $categories = $membership !== null && $membership['manifest_hash'] === $manifestHash ? ($membership['nodes'] ?? []) : [];
+            $plan = []; $reserved = false;
+            foreach ($nodes as $node) {
+                $key = self::nodeKey($node);
+                $decision = AnnouncementSchedule::decide($saved[$key] ?? null, $categories[$key] ?? null, $manifestHash, $now) + ['attempt' => null];
+                if ($decision['due']) {
+                    $saved[$key] = AnnouncementSchedule::attempt($saved[$key] ?? null, $manifestHash, $now, AnnouncementSchedule::STARTED);
+                    $decision['attempt'] = $saved[$key]['attempts']; $decision['next_due_at'] = $now + AnnouncementSchedule::interval($saved[$key]['attempts']);
+                    $reserved = true;
+                }
+                $plan[] = ['node' => $node] + $decision;
+            }
+            if ($reserved) { self::writeAnnouncements($configPath, $saved); }
+            return $plan;
+        });
+    }
+
+    /** Replaces this run's reservation with the typed result; a newer entry is left alone. */
+    public static function finishAnnouncement(string $configPath, int $startedAt, OnionAddress $node, string $result): void
+    {
+        self::locked($configPath, static function () use ($configPath, $startedAt, $node, $result): void {
+            $nodes = self::load($configPath)['announcement']['nodes'] ?? [];
+            $key = self::nodeKey($node);
+            if (($nodes[$key]['result'] ?? null) !== AnnouncementSchedule::STARTED || $nodes[$key]['at'] !== self::time($startedAt)) { return; }
+            $nodes[$key]['result'] = $result;
+            self::writeAnnouncements($configPath, $nodes);
+        });
     }
 
     /** @return array<string,mixed> Validated sections; an invalid section is dropped, never trusted. */
@@ -62,8 +112,45 @@ final class PublisherEvidence
         return $sections;
     }
 
+    /** @param array<string,array<string,mixed>> $nodes */
+    private static function writeAnnouncements(string $configPath, array $nodes): void
+    {
+        uasort($nodes, static fn (array $a, array $b): int => strcmp($b['at'], $a['at']));
+        self::write($configPath, 'announcement', ['nodes' => array_slice($nodes, 0, self::MAX_ANNOUNCED_NODES, true)]);
+    }
+
     /** @param array<string,mixed> $section */
     private static function update(string $configPath, string $name, array $section): void
+    {
+        self::locked($configPath, static fn () => self::write($configPath, $name, $section));
+    }
+
+    /**
+     * Serializes evidence updates of all CLI runs on the configuration file itself, which every
+     * writer can already read and no update replaces; flock needs no write permission.
+     * @template T
+     * @param \Closure(): T $critical
+     * @return T
+     */
+    private static function locked(string $configPath, \Closure $critical): mixed
+    {
+        $handle = @fopen($configPath, 'rb');
+        if ($handle === false) { throw new ProtocolException('EVIDENCE_WRITE_FAILED'); }
+        try {
+            $deadline = hrtime(true) + 10000000000;
+            while (!flock($handle, LOCK_EX | LOCK_NB)) {
+                if (hrtime(true) >= $deadline) { throw new ProtocolException('PUBLISHER_BUSY'); }
+                usleep(20000);
+            }
+            try { return $critical(); } finally { flock($handle, LOCK_UN); }
+        } finally { fclose($handle); }
+    }
+
+    /**
+     * The caller holds the lock.
+     * @param array<string,mixed> $section
+     */
+    private static function write(string $configPath, string $name, array $section): void
     {
         $path = self::path($configPath);
         if (is_link($path)) { throw new ProtocolException('EVIDENCE_PATH_UNSAFE'); }
@@ -86,13 +173,21 @@ final class PublisherEvidence
     private static function isTime(mixed $value): bool { return is_string($value) && preg_match('/\A[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z\z/D', $value) === 1; }
     private static function isHash(mixed $value): bool { return is_string($value) && preg_match('/\Asha256:[0-9a-f]{64}\z/D', $value) === 1; }
     private static function isCode(mixed $value): bool { return is_string($value) && preg_match('/\A[A-Z][A-Z0-9_]{1,63}\z/D', $value) === 1; }
+    private static function isNodeKey(mixed $value): bool { return is_string($value) && preg_match('/\A[0-9a-f]{64}\z/D', $value) === 1; }
 
     /** @param array<array-key,mixed> $m */
     private static function validMembership(array $m): bool
     {
-        if (count($m) !== 14 || !self::isTime($m['checked_at'] ?? null) || !self::isHash($m['manifest_hash'] ?? null) ||
+        // Evidence saved before per-Node categories existed has 14 members and stays valid.
+        if (count($m) !== (array_key_exists('nodes', $m) ? 15 : 14) || !self::isTime($m['checked_at'] ?? null) || !self::isHash($m['manifest_hash'] ?? null) ||
             !is_string($m['logical_service_id'] ?? null) || preg_match('/\Aed25519:[A-Za-z0-9_-]{43}\z/D', $m['logical_service_id']) !== 1) { return false; }
         foreach (self::MEMBERSHIP_COUNTS as $field) { if (!is_int($m[$field] ?? null) || $m[$field] < 0 || $m[$field] > 1000000) { return false; } }
+        if (array_key_exists('nodes', $m)) {
+            if (!is_array($m['nodes']) || count($m['nodes']) !== $m['selected_sources']) { return false; }
+            foreach ($m['nodes'] as $key => $category) { if (!self::isNodeKey($key) || !in_array($category, self::CATEGORIES, true)) { return false; } }
+            $categories = array_count_values($m['nodes']);
+            foreach (self::CATEGORIES as $category) { if (($categories[$category] ?? 0) !== $m[$category]) { return false; } }
+        }
         return $m['included'] + $m['stale'] + $m['not_present'] + $m['contradictory'] + $m['unavailable'] + $m['rejected'] === $m['selected_sources']
             && $m['selected_sources'] <= PublisherMembership::MAX_SOURCES && $m['included_with_node_direct_observation'] <= $m['included'] && $m['key_epoch'] >= 1;
     }
@@ -108,7 +203,10 @@ final class PublisherEvidence
     {
         if (count($a) !== 1 || !is_array($a['nodes'] ?? null) || count($a['nodes']) > self::MAX_ANNOUNCED_NODES) { return false; }
         foreach ($a['nodes'] as $key => $node) {
-            if (!is_string($key) || preg_match('/\A[0-9a-f]{64}\z/D', $key) !== 1 || !is_array($node) || count($node) !== 2 || !self::isTime($node['at'] ?? null) || !self::isCode($node['result'] ?? null)) { return false; }
+            if (!self::isNodeKey($key) || !is_array($node) || !self::isTime($node['at'] ?? null) || !self::isCode($node['result'] ?? null)) { return false; }
+            // Entries saved before the D-018 schedule have only a time and a result.
+            if (count($node) !== 2 && (count($node) !== 5 || !self::isHash($node['manifest_hash'] ?? null) || !is_int($node['attempts'] ?? null)
+                || $node['attempts'] < 1 || $node['attempts'] > 1000 || !self::isTime($node['next_at'] ?? null))) { return false; }
         }
         return true;
     }

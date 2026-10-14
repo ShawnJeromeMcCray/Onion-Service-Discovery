@@ -57,11 +57,14 @@ its public `hostname` file. The application never provisions or reads Tor keys.
     public rollout. Local mocked SOCKS/Chromium tests cannot substitute this step.
 
 A publisher can keep its status page current with `osd-publisher-check.timer`:
-every six hours it runs `service:verify --save-status` for the own Onion and
+every six hours it runs `service:verify --save-status` for the own Onion,
 `network:discoverability-check --save-status` for the Nodes listed in
-`/etc/onion-service-discovery/publisher-check.env`. It reaches only loopback
-(the Tor SOCKS listener) and never announces automatically; decision D-018 on
-automatic announcement is still open.
+`/etc/onion-service-discovery/publisher-check.env` (using the served history
+bundle) and finally `network:announce … --if-due`, the bounded automatic
+announcement of decision D-018: only for a new revision or a missing
+observation, at most once per day per Node, with backoff up to 32 days. It
+reaches only loopback (the Tor SOCKS listener). Delete the announce line to
+announce only by hand.
 
 Scheduler templates are references, not auto-enabled installation. Instantiate
 peer jobs only with explicitly configured onions. Direct worker and snapshot

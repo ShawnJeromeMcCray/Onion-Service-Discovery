@@ -53,6 +53,7 @@ def main() -> int:
         ('php-service-id-api', php + ['node-php/tests/service-id-api.php'], ROOT),
         ('php-snapshot-membership-cli', php + ['node-php/tests/snapshot-membership-cli.php'], ROOT),
         ('php-publisher-membership', php + ['node-php/tests/publisher-membership.php'], ROOT),
+        ('php-announcement-schedule', php + ['node-php/tests/announcement-schedule.php'], ROOT),
         ('php-operator-commands', php + ['node-php/tests/operator-commands.php'], ROOT),
         ('php-visitor-relay-http', php + ['node-php/tests/visitor-relay-http.php'], ROOT),
         ('php-node-status', php + ['node-php/tests/node-status.php'], ROOT),

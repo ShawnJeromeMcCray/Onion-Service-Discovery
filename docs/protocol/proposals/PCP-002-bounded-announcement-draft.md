@@ -1,7 +1,7 @@
 # PCP-002: bounded public announcement experiment
 
 State: OWNER-APPROVED AS D-018 (2026-10-14), including bounded automatic
-re-announcement / NEEDS INDEPENDENT SECURITY REVIEW.
+re-announcement (implemented, see below) / NEEDS INDEPENDENT SECURITY REVIEW.
 Decision: D-018. This proposal is reviewable code and executed development evidence,
 not a Protocol Freeze or production approval.
 
@@ -64,16 +64,39 @@ No new signed Node capability token is invented by this experiment.
 
 ```text
 service:announce CONFIG SIGNED_MANIFEST_FILE NODE_ONION
+service:announce CONFIG SIGNED_MANIFEST_FILE --node ONION KEY [--node ...] [--if-due | --save-status]
 ```
 
 Requires explicit local publication and a validated signed manifest bound to
-its configured Onion address with `publish_service: true`. One invocation makes
-one bounded Tor POST, to a canonical Onion destination and fixed endpoint, with
-fresh SOCKS isolation. It reads no private key and mutates no local store. No
-retry loop is created. Only the exact 202 unconfirmed response is accepted;
-claims of inclusion, redirect, media/byte ambiguity and rate limits cannot pass
-as success. JSON output explicitly leaves observation/membership unconfirmed.
-The operator can separately run the exact snapshot membership verifier.
+its configured Onion address with `publish_service: true`. Each selected Node
+(at most 16) gets one bounded Tor POST, to a canonical Onion destination and
+fixed endpoint, with fresh SOCKS isolation. It reads no private key and mutates
+no Node store. Only the exact 202 unconfirmed response is accepted; claims of
+inclusion, redirect, media/byte ambiguity and rate limits (`ANNOUNCEMENT_RATE_LIMITED`)
+cannot pass as success. JSON output explicitly leaves observation/membership
+unconfirmed. The operator can separately run the exact snapshot membership verifier.
+
+## Bounded automatic re-announcement (owner-approved D-018)
+
+`--if-due`, run by the publisher timer after the self-check and the membership
+check, announces to a Node only when:
+
+- the Manifest was verified through the own Onion within the last 24 hours
+  (saved `service:verify --save-status`), otherwise nothing is sent; and
+- the Node never received a hint (`INITIAL`), the last hint announced another
+  revision (`NEW_REVISION`), or it still lacks the current revision and the
+  backoff has elapsed (`MISSING_OBSERVATION`); and
+- at least 24 hours passed since the last hint to that Node, whatever the
+  revision (a timestamp in the future also blocks).
+
+Consecutive hints for one revision wait 1, 2, 4, 8, 16 and then 32 days. Saved
+membership showing the Node `included` stops the schedule; `contradictory` or
+`rejected` stops it too, because a hint cannot fix them. A received hint never
+does. A never-observing Node therefore gets at most 8 hints in 120 days.
+Decisions and reservations happen under one lock on the configuration file, so
+concurrent runs cannot double an attempt; a reservation whose run dies counts as
+an attempt. Only SHA-256 hashes of Node addresses, the revision hash, the attempt
+count and times are saved, beside the private configuration.
 
 ## Evidence and unresolved review
 

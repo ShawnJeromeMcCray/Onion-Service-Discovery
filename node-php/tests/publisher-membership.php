@@ -121,10 +121,15 @@ try {
     file_put_contents($root . '/publisher.json', json_encode($v, JSON_THROW_ON_ERROR));
     file_put_contents($root . '/history.json', json_encode(['records' => [$genesis->document(), $current->document()]], JSON_THROW_ON_ERROR));
     file_put_contents($root . '/genesis.json', json_encode($genesis->document(), JSON_THROW_ON_ERROR));
-    foreach (['history.json', 'genesis.json'] as $file) {
+    // The served PCP-004 bundle is accepted as the owner's history too.
+    $bundle = ['protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'bundle_type' => 'service_history', 'records' => [$genesis->document(), $current->document()]];
+    file_put_contents($root . '/bundle.json', json_encode($bundle, JSON_THROW_ON_ERROR));
+    foreach (['history.json', 'genesis.json', 'bundle.json'] as $file) {
         $out = cli(['service:membership', $root . '/publisher.json', $root . '/' . $file, '--node', $nodes['included']['onion'], $nodes['included']['key']], 6);
         $assert($out['status'] === 'CURRENT_STATE_NOT_CONFIRMED' && $out['counts']['unavailable'] === 1 && $out['network_side_effects'] === true, 'cli unavailable ' . $file); ++$checks;
     }
+    $bundle['bundle_type'] = 'checkpoint'; file_put_contents($root . '/bad-bundle.json', json_encode($bundle, JSON_THROW_ON_ERROR));
+    $assert(cli(['service:membership', $root . '/publisher.json', $root . '/bad-bundle.json', '--node', $nodes['included']['onion'], $nodes['included']['key']], 3)['error'] === 'HISTORY_BUNDLE_INVALID', 'malformed bundle'); ++$checks;
     $assert(!file_exists($root . '/publisher.discoverability.json'), 'evidence saved without --save-status'); ++$checks;
     chmod($root . '/publisher.json', 0600);
     $saved = cli(['network:discoverability-check', $root . '/publisher.json', $root . '/history.json', '--node', $nodes['included']['onion'], $nodes['included']['key'], '--save-status'], 6);

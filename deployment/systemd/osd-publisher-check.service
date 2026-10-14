@@ -1,5 +1,5 @@
 [Unit]
-Description=Onion Service Discovery publisher self-check and sampled discoverability evidence
+Description=Onion Service Discovery publisher self-check, sampled discoverability evidence and bounded announcement
 After=tor.service
 
 [Service]
@@ -12,10 +12,17 @@ WorkingDirectory=/opt/onion-service-discovery
 # OSD_ONION=<your canonical v3 Onion>
 # OSD_NODES=--node <node.onion> <ed25519:expected-node-key> [--node ...]
 EnvironmentFile=/etc/onion-service-discovery/publisher-check.env
-# A leading "-" keeps the second check running when the first one fails; each
-# check records its own typed result. No announcement is sent automatically.
+# A leading "-" keeps later steps running when one fails; each step records its own
+# typed result. The order matters: the announcement relies on the fresh self-check
+# and per-Node membership that the two steps before it save. The history bundle and
+# the Manifest are the public files manifest:install maintains; adjust both paths if
+# you install into another webroot.
 ExecStart=-/usr/bin/php node-php/bin/onion-service-discovery service:verify /etc/onion-service-discovery/publisher.json ${OSD_ONION} --save-status
-ExecStart=-/usr/bin/php node-php/bin/onion-service-discovery network:discoverability-check /etc/onion-service-discovery/publisher.json /etc/onion-service-discovery/history.json $OSD_NODES --save-status
+ExecStart=-/usr/bin/php node-php/bin/onion-service-discovery network:discoverability-check /etc/onion-service-discovery/publisher.json node-php/public/.well-known/onion-service-discovery-history.json $OSD_NODES --save-status
+# Bounded automatic announcement (decision D-018): only for a new revision or a missing
+# observation, at most once per day per Node, backoff 1, 2, 4 ... 32 days while a Node
+# still lacks the current revision. Delete this line to announce only by hand.
+ExecStart=-/usr/bin/php node-php/bin/onion-service-discovery network:announce /etc/onion-service-discovery/publisher.json node-php/public/.well-known/onion-service-discovery.json $OSD_NODES --if-due
 UMask=0027
 NoNewPrivileges=yes
 PrivateTmp=yes

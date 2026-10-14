@@ -108,10 +108,23 @@ final class PublisherStatus
         }
         $nodes = $evidence['announcement']['nodes'] ?? [];
         if ($nodes !== []) {
-            $accepted = count(array_filter($nodes, static fn (array $node): bool => $node['result'] === 'HINT_RECEIVED_UNCONFIRMED'));
-            $status['announcement'] = sprintf('HINT_ACCEPTED_BY_%d_OF_%d_ATTEMPTED_NODES', $accepted, count($nodes));
+            $results = ['accepted' => 0, 'rate limited' => 0, 'unreachable' => 0, 'in progress' => 0, 'other failures' => 0];
+            foreach ($nodes as $node) {
+                ++$results[match ($node['result']) { 'HINT_RECEIVED_UNCONFIRMED' => 'accepted', 'ANNOUNCEMENT_RATE_LIMITED' => 'rate limited', 'TOR_REQUEST_FAILED' => 'unreachable',
+                    AnnouncementSchedule::STARTED => 'in progress', default => 'other failures' }];
+            }
+            $status['announcement'] = sprintf('HINT_ACCEPTED_BY_%d_OF_%d_ATTEMPTED_NODES', $results['accepted'], count($nodes));
+            $status['announcement_results'] = implode(', ', array_map(static fn (string $name, int $count): string => $name . ' ' . $count, array_keys($results), $results));
             $last = ''; foreach ($nodes as $node) { if (strcmp($node['at'], $last) > 0) { $last = $node['at']; } }
             $status['announcement_last_at'] = $last;
+            // Spec 47 section 23: the next bounded retry for Nodes that still lack the current revision.
+            $categories = ($evidence['membership']['manifest_hash'] ?? null) === $currentHash ? ($evidence['membership']['nodes'] ?? []) : [];
+            $retry = null;
+            foreach ($nodes as $key => $node) {
+                $decision = AnnouncementSchedule::decide($node, $categories[$key] ?? null, $currentHash, $now);
+                if (in_array($decision['reason'], ['BACKOFF', 'DAILY_LIMIT'], true)) { $retry = min($retry ?? PHP_INT_MAX, (int) $decision['next_due_at']); }
+            }
+            if ($retry !== null) { $status['announcement_next_retry_at'] = gmdate('Y-m-d\TH:i:s\Z', $retry); }
         }
         $membership = $evidence['membership'] ?? null;
         if ($membership === null) { return; }

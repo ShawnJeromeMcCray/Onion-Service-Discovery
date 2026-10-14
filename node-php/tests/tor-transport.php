@@ -28,7 +28,7 @@ $hintReply = '{"status":"HINT_RECEIVED_UNCONFIRMED"}';
 $cases['cli-announce'] = ["HTTP/1.1 202 Accepted\r\nContent-Type: application/json\r\nContent-Length: " . strlen($hintReply) . "\r\n\r\n" . $hintReply, ['status'=>'HINT_RECEIVED_UNCONFIRMED','direct_observation'=>'NOT_CONFIRMED','index_membership'=>'NOT_CONFIRMED','state_mutated'=>false,'network_side_effects'=>true]];
 $falseReply = '{"status":"CURRENT_STATE_INCLUDED"}';
 $cases['cli-announce-false-proof'] = ["HTTP/1.1 202 Accepted\r\nContent-Type: application/json\r\nContent-Length: " . strlen($falseReply) . "\r\n\r\n" . $falseReply, ['status'=>'FAIL','error'=>'ANNOUNCEMENT_RESPONSE_INVALID']];
-$cases['cli-announce-rate-limit'] = ["HTTP/1.1 429 Too Many Requests\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{}", ['status'=>'FAIL','error'=>'HTTP_STATUS_REJECTED']];
+$cases['cli-announce-rate-limit'] = ["HTTP/1.1 429 Too Many Requests\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{}", ['status'=>'FAIL','error'=>'ANNOUNCEMENT_RATE_LIMITED']];
 $checks = 0;
 $isolationParameters = [];
 foreach ($cases as $name => [$response, $expected]) {

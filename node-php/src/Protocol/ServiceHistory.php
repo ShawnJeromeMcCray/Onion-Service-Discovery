@@ -25,20 +25,7 @@ final readonly class ServiceHistory
     public function verify(string $bundleBytes, ValidatedRecord $current, array $known): array
     {
         if (strlen($bundleBytes) > self::MAX_BYTES || $current->type !== 'service_manifest') { throw new ProtocolException('HISTORY_BUNDLE_INVALID'); }
-        $bundle = StrictJson::parse($bundleBytes, self::MAX_BYTES);
-        $members = get_object_vars($bundle); ksort($members);
-        if (array_keys($members) !== ['bundle_type', 'protocol', 'protocol_version', 'records'] || $bundle->protocol !== 'Onion Service Discovery'
-            || $bundle->protocol_version !== 1 || $bundle->bundle_type !== 'service_history' || !is_array($bundle->records)
-            || count($bundle->records) < 1 || count($bundle->records) > self::MAX_RECORDS) {
-            throw new ProtocolException('HISTORY_BUNDLE_INVALID');
-        }
-        $records = [];
-        foreach ($bundle->records as $entry) {
-            if (!$entry instanceof \stdClass) { throw new ProtocolException('HISTORY_BUNDLE_INVALID'); }
-            $record = $this->verifier->verify($entry);
-            if (!in_array($record->type, self::TYPES, true) || isset($records[$record->contentHash])) { throw new ProtocolException('HISTORY_BUNDLE_INVALID'); }
-            $records[$record->contentHash] = $record;
-        }
+        $records = $this->records($bundleBytes);
         $union = [];
         foreach ($known as $record) { $union[$record->contentHash] = $record; }
         $knownHashes = $union;
@@ -59,5 +46,30 @@ final readonly class ServiceHistory
             return ['state' => $state, 'genesis_key' => $identity['genesis_key'], 'admitted_hashes' => array_keys($admitted), 'admitted' => array_values($admitted)];
         }
         return ['state' => 'INCOMPLETE', 'genesis_key' => null, 'admitted_hashes' => [], 'admitted' => []];
+    }
+
+    /**
+     * Steps 1 and 2 alone: the bundle shape and each self-proving record, in array order.
+     * Owner tools use this to read a served bundle as their own public history.
+     * @return array<string,ValidatedRecord> Keyed by content hash.
+     */
+    public function records(string $bundleBytes): array
+    {
+        if (strlen($bundleBytes) > self::MAX_BYTES) { throw new ProtocolException('HISTORY_BUNDLE_INVALID'); }
+        $bundle = StrictJson::parse($bundleBytes, self::MAX_BYTES);
+        $members = get_object_vars($bundle); ksort($members);
+        if (array_keys($members) !== ['bundle_type', 'protocol', 'protocol_version', 'records'] || $bundle->protocol !== 'Onion Service Discovery'
+            || $bundle->protocol_version !== 1 || $bundle->bundle_type !== 'service_history' || !is_array($bundle->records)
+            || count($bundle->records) < 1 || count($bundle->records) > self::MAX_RECORDS) {
+            throw new ProtocolException('HISTORY_BUNDLE_INVALID');
+        }
+        $records = [];
+        foreach ($bundle->records as $entry) {
+            if (!$entry instanceof \stdClass) { throw new ProtocolException('HISTORY_BUNDLE_INVALID'); }
+            $record = $this->verifier->verify($entry);
+            if (!in_array($record->type, self::TYPES, true) || isset($records[$record->contentHash])) { throw new ProtocolException('HISTORY_BUNDLE_INVALID'); }
+            $records[$record->contentHash] = $record;
+        }
+        return $records;
     }
 }

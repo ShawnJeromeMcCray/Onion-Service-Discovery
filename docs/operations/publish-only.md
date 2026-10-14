@@ -1,7 +1,8 @@
 # Publish-only setup and public status
 
-This is a development profile. It does not claim automatic external announcement,
-signed active-index membership or production readiness.
+This is a development profile. Announcement stays an untrusted hint (explicit or
+bounded automatic through the publisher timer); it does not claim signed
+active-index membership or production readiness.
 
 Create a private configuration directory (owner-only 0700) outside the webroot.
 Run `php node-php/bin/onion-service-discovery init /absolute/private/config.json ONION`

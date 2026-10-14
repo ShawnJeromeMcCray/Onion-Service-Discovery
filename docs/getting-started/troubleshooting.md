@@ -39,6 +39,10 @@ Keep private keys, passphrases, search history and raw private backups out of re
 | `READY_LOCALLY`, external status unconfirmed | Your local signed publication is valid. Another Node has not been independently proven to include your fresh current state. Follow the [Publisher verification steps](publisher.md#5-verify-over-tor-and-check-selected-nodes). |
 | `TOR_REQUEST_FAILED` | Check the configured loopback SOCKS listener, its port, Tor bootstrap and actual Onion availability. No direct clearnet or ambient-proxy fallback is provided. |
 | `HINT_RECEIVED_UNCONFIRMED` | Announcement was accepted as an untrusted hint. It is not direct observation, identity continuity or index inclusion. |
+| `SELF_VERIFICATION_REQUIRED` | Automatic announcement (`--if-due`) needs `service:verify CONFIG YOUR.onion --save-status` to pass for exactly the installed Manifest within the last 24 hours. Fix the self-check first. |
+| `ANNOUNCEMENT_RATE_LIMITED` | The Node's shared announcement budget is exhausted (HTTP 429). The timer retries no earlier than a day later with growing backoff; nothing else is needed. |
+| Announcement `DAILY_LIMIT` / `BACKOFF` | Bounded on purpose: at most one hint per Node per day, then 1, 2, 4 … 32 days while the Node lacks your revision. A new revision is announced once a day has passed. |
+| Announcement `NODE_EVIDENCE_NEEDS_REVIEW` | The membership check found a conflicting state or rejected that Node's evidence (often a wrong expected key). A hint cannot fix that; see the rows above. |
 | Fewer than three sources | Enter independently selected expected keys; explicitly acknowledge limited coverage if you intentionally use fewer. Key count does not establish operator independence. |
 | `PROGRESS` / partial source history | Retry through the bounded refresh/scheduler after the source retry time. Do not delete anchors to bypass missing ancestry. |
 | `BACKOFF` with `STORAGE_BUDGET_EXHAUSTED` | Local quota is exhausted. Inspect capacity; preserve evidence and use reviewed staging migration/recovery. Local failures do not add peer penalties. |

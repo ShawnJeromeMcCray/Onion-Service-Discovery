@@ -31,7 +31,7 @@ final class StatusPage
             $body .= '</ol></section>';
         }
         $body .= '<section><h2>Publication facts</h2><dl>';
-        $allowed = ['onion','self_verification','self_verification_checked_at','bootstrap','announcement','announcement_last_at','external_observation','active_index_membership','sampled_discoverability','evidence_checked_at'];
+        $allowed = ['onion','self_verification','self_verification_checked_at','bootstrap','announcement','announcement_results','announcement_last_at','announcement_next_retry_at','external_observation','active_index_membership','sampled_discoverability','evidence_checked_at'];
         foreach ($allowed as $field) {
             $value = $facts[$field] ?? null;
             if (is_string($value)) { $body .= '<dt>' . self::escape(str_replace('_', ' ', $field)) . '</dt><dd>' . self::escape($value) . '</dd>'; }

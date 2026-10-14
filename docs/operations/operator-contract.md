@@ -66,7 +66,7 @@ redundancy. Feed it evidence with:
 
 ```sh
 service:verify CONFIG YOUR.onion --save-status
-network:announce CONFIG SIGNED_MANIFEST NODE.onion --save-status
+network:announce CONFIG SIGNED_MANIFEST --node NODE.onion ed25519:NODE_KEY --save-status
 network:discoverability-check CONFIG HISTORY --node NODE.onion ed25519:NODE_KEY --save-status
 ```
 
@@ -74,7 +74,9 @@ network:discoverability-check CONFIG HISTORY --node NODE.onion ed25519:NODE_KEY 
 contains your exact current revision together with that Node's own direct
 observation. It never means every Node has it. Evidence older than seven days
 shows **DEGRADED**. The optional `osd-publisher-check.timer` repeats the checks
-every six hours; it never announces automatically.
+every six hours and announces automatically only within strict bounds: a Node
+gets a hint for a new revision or while it still lacks your current revision,
+at most once per day, with backoff up to 32 days. A hint is never proof.
 
 ## Running a Node is optional
 
@@ -93,7 +95,7 @@ Publish only:
 - [ ] `manifest:init`, sign offline with `record:sign`, `manifest:verify`.
 - [ ] `init CONFIG YOUR.onion --publish`, `manifest:install`, `publisher:status`.
 - [ ] `service:verify CONFIG YOUR.onion --save-status` through Tor.
-- [ ] Announce or ask Node operators to admit you; then `network:discoverability-check --save-status`.
+- [ ] Announce (`network:announce`, or enable `osd-publisher-check.timer`) or ask Node operators to admit you; then `network:discoverability-check --save-status`.
 
 Additional for a Node ([Node guide](../getting-started/node.md)):
 

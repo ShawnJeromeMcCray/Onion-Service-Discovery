@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Bounded automatic announcement (owner decision D-018): `network:announce …
+  --if-due` in the publisher timer sends a hint only for a new revision or while
+  a Node still lacks the current revision, at most once per day per Node, with
+  backoff of 1, 2, 4 up to 32 days, and only after a passing self-check of the
+  same Manifest within 24 hours. Decisions are reserved under a lock; only hashed
+  schedule state is saved. `network:announce` also takes the `--node ONION KEY`
+  list; HTTP 429 is reported as `ANNOUNCEMENT_RATE_LIMITED`; the status page shows
+  result counts and the next retry. `service:membership` and `history:install`
+  read the served PCP-004 history bundle directly, so the timer needs no separate
+  history file.
 - PCP-004 service history bundle (owner-approved): `manifest:install` maintains
   `/.well-known/onion-service-discovery-history.json`; Nodes fetch it once when a
   Manifest does not connect, so Services stay discoverable after revisions, key
