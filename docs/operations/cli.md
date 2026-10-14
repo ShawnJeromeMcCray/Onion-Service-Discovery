@@ -119,7 +119,7 @@ records each Node's acknowledgement under a SHA-256 hash of its address. `publis
 least one checked Node both includes the exact installed revision and exported
 its own direct observation of it, `IDENTITY_CONFLICT` when a checked Node holds a
 conflicting state, and `DISCOVERABLE_DEGRADED` when that evidence is older than
-seven days. The seven-day age is a proposed local default pending decision D-036;
+seven days. The seven-day age is the owner-approved local threshold (D-036);
 evidence for another revision is ignored. `network:announce` is an alias of
 `service:announce`.
 

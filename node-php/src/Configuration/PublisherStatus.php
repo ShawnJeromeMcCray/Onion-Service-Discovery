@@ -11,7 +11,7 @@ use OnionServiceDiscovery\Protocol\RecordVerifier;
  */
 final class PublisherStatus
 {
-    /** Proposed local default pending D-036 staleness thresholds; not a wire or trust rule. */
+    /** Owner-approved local threshold (D-036, 2026-10-14); not a wire or trust rule. */
     public const EVIDENCE_DEGRADED_AFTER_SECONDS = 604800;
 
     private const ANSWERS = [

@@ -41,7 +41,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-033 | OWASP ASVS Applicability Level/Matrix | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-034 | Logging Defaults | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-035 | Direct Observation Publication | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
-| D-036 | Staleness Thresholds | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
+| D-036 | Staleness Thresholds | PARTIALLY OWNER-APPROVED | Project owner / reviewer | CONDITIONAL / REVIEW | Owner approved 7 days for publisher discoverability evidence (2026-10-14); other local staleness thresholds remain open. |
 | D-037 | Default Operator Switches | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | publishing false until configured; mirror/discover conservative; sync only if node role enabled. |
 | D-038 | Manifest Auto-Regeneration | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-039 | Key Backup UX | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
@@ -87,3 +87,23 @@ POST in [PCP-002](../protocol/proposals/PCP-002-bounded-announcement-draft.md).
 A received hint has no signature/observation/index authority; anonymous caller
 identity rotation cannot increase its shared source/global budget. The endpoint,
 limits and retry freeze remain explicitly human-review-open.
+
+## Owner decisions on 2026-10-14
+
+Recorded from the owner's explicit answers in the continuation conversation
+("Englisch bleibt Hauptsprache. 7 Tage ist gut. Das Besucher eigene nodes
+eintragen gerne einbauen."). No other approval is inferred from them.
+
+- **D-036 (partial):** saved publisher discoverability evidence older than
+  **7 days** is shown as `DISCOVERABLE_DEGRADED`
+  (`PublisherStatus::EVIDENCE_DEGRADED_AFTER_SECONDS`). Browser source freshness
+  and the remaining staleness thresholds stay open.
+- **Interface language:** English remains the only reference interface language
+  (browser client, status page, CLI messages). Category localization files stay
+  data for third-party clients; no translated UI is planned for now.
+- **Visitor-chosen Nodes:** the reference client lets visitors add Nodes they
+  chose, with a required expected Node key, through the opt-in Client Host
+  `visitor_sources` relay (default off). This is local source-selection policy
+  (specs 42 sections 13/25, 49 section 13); it does not decide D-026 (bootstrap
+  set), D-027 (seed policy) or D-044 (cross-origin CORS model).
+
