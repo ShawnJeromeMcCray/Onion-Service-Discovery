@@ -52,7 +52,17 @@ php node-php/bin/onion-service-discovery node:snapshot /absolute/private/osd-nod
 php node-php/bin/onion-service-discovery node:status /absolute/private/osd-node/config.json
 ```
 
-Keep the public key printed by key creation for independent source pinning.
+Others need two public values to use your Node: its Onion and its Node public
+key. Print both, with ready-to-use lines for publishers, peers and visitors:
+
+```sh
+php node-php/bin/onion-service-discovery node:identity /absolute/private/osd-node/config.json
+```
+
+Give them through a channel others trust; they must not take the key from your
+Node's own answers. Your `/onion-service-discovery/status/` page shows the same
+two values plus aggregate snapshot, storage, queue and peer facts (never peer
+addresses or paths).
 `node:init` initializes the selected store/export directory and signs the Node
 descriptor. Repeating it with unchanged capabilities does not invent a revision.
 The first snapshot has no discovered Services until evidence is admitted. An empty
@@ -75,7 +85,12 @@ php node-php/bin/onion-service-discovery node:work-one /absolute/private/osd-nod
 php node-php/bin/onion-service-discovery node:snapshot /absolute/private/osd-node/config.json --passphrase-file /absolute/private/osd-node/passphrase
 ```
 
-Replace the address placeholder. On a successful direct check expect `VERIFIED`;
+Replace the address placeholder. On a successful direct check expect `VERIFIED`.
+If a Publisher rotated its key or moved to a new Onion, the check reports
+`HISTORY_INCOMPLETE` until you have its signed proof: admit the `rotation.json`
+or `migration.json` it sends you with `storage:admit BACKEND STORE_PATH FILE`,
+then check again. Peers that synchronize with you receive it in your snapshots.
+Otherwise:
 failed verification or incomplete continuity does not become an active identity.
 A received hint is unconfirmed until direct verification. The bounded worker does
 one unit of work; it is not a continuously running daemon. Inspect `candidate:list`
@@ -115,8 +130,9 @@ Default capacity is 10,000 immutable records, including history and observations
 not 10,000 active Services. Long-term growth and higher tiers remain open. Read
 [measured capacity](../performance/README.md) before choosing a workload.
 
-Hand a selected snapshot and its chunks to the Publisher for an independent
-[exact-current-state membership check](../operations/snapshot-membership.md).
-A Node's assertion that it indexed a service is not that proof. Public Tor,
+Publishers check whether your snapshot includes them with
+`network:discoverability-check` and your `node:identity` values; a Node's own
+assertion that it indexed a Service is not that proof. Client Hosts that enable
+visitor-chosen Nodes let visitors load your Node with the same two values. Public Tor,
 independent-source acceptance and production isolation still require evidence
 beyond this staging installation.

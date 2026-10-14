@@ -1,0 +1,1876 @@
+{
+ "codes": {
+  "ADDRESS_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "input parsing"
+   ],
+   "meaning": "Not a canonical, checksum-valid v3 Onion address (56 lowercase characters plus .onion)."
+  },
+  "ANNOUNCEMENT_RESPONSE_INVALID": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": null
+  },
+  "ARCHIVE_BUDGET_EXHAUSTED": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "ARCHIVE_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "ARCHIVE_PATH_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "ARCHIVE_UNAVAILABLE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "ASSERTION_STATE_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "BACKUP_BUDGET_EXHAUSTED": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "BACKUP_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "BACKUP_PATH_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "BACKUP_RESTORE_MISMATCH": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "BACKUP_UNAVAILABLE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "CANDIDATE_CLAIM_LOST": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "CHECKPOINT_NODE_MISMATCH": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "protocol"
+   ],
+   "meaning": null
+  },
+  "CLIENT_BUILD_UNAVAILABLE": {
+   "cli_exit": [],
+   "components": [
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "CLIENT_BUSY": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "CLIENT_CONFIGURATION_INVALID": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "CLIENT_MARKUP_INVALID": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "CLIENT_ORIGIN_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "CLIENT_RECORD_BUDGET_EXHAUSTED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "CLOCK_INVALID": {
+   "cli_exit": [
+    "3",
+    "4"
+   ],
+   "components": [
+    "Node worker",
+    "signing",
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "CLOCK_ROLLBACK": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "CONFIGURATION_CREATE_REFUSED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "CONFIGURATION_INVALID": {
+   "cli_exit": [
+    "3",
+    "4"
+   ],
+   "components": [
+    "browser client",
+    "configuration and status",
+    "storage"
+   ],
+   "meaning": "The configuration file has a missing, unknown or wrongly typed key; see the configuration reference."
+  },
+  "CONFIGURATION_PATH_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "CONFIGURATION_PATH_UNSAFE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "CONFIGURATION_UNAVAILABLE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": "The configuration file is missing, unreadable, a symlink or larger than 16 KiB."
+  },
+  "CONFIGURATION_WRITE_FAILED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "CONTENT_ENCODING_REJECTED": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport",
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "CONTENT_TYPE_REJECTED": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport",
+    "browser client"
+   ],
+   "meaning": "A Node or Service answered without application/json; nothing was verified."
+  },
+  "CRYPTO_ALGORITHM_UNSUPPORTED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "CURSOR_INVALID": {
+   "cli_exit": [
+    "3",
+    "5"
+   ],
+   "components": [
+    "Tor transport",
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "DISCOVERY_DISABLED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": null
+  },
+  "DOCUMENT_TOO_LARGE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI",
+    "JSON parsing",
+    "browser client",
+    "protocol"
+   ],
+   "meaning": "An input file exceeds the limit for its record type."
+  },
+  "ENCODING_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "JSON parsing",
+    "browser client",
+    "encoding"
+   ],
+   "meaning": null
+  },
+  "ERROR_CODE_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "EVIDENCE_CHANGED_RETRY": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "EVIDENCE_PATH_UNSAFE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "EVIDENCE_TOO_LARGE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "EVIDENCE_WRITE_FAILED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": "Saved status evidence could not be written beside the configuration; check directory permissions."
+  },
+  "EXISTING_MANIFEST_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "EXPECTED_NODE_KEY_REQUIRED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "A visitor-chosen Node needs its expected public key."
+  },
+  "EXPORT_BUDGET_EXHAUSTED": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "EXPORT_BUSY": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "EXPORT_CORRUPT": {
+   "cli_exit": [
+    "3",
+    "4"
+   ],
+   "components": [
+    "CLI",
+    "configuration and status",
+    "storage",
+    "web routes"
+   ],
+   "meaning": "Published snapshot files do not match their signed hashes; rebuild with node:snapshot --rebuild-derived."
+  },
+  "EXPORT_DIRECTORY_UNSAFE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "EXPORT_UNAVAILABLE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "FILESYSTEM_FORMAT_MIGRATION_REQUIRED": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor: the filesystem store uses format 1; plan storage:migrate."
+  },
+  "FILESYSTEM_SEMANTICS_UNSUPPORTED": {
+   "cli_exit": [
+    "3",
+    "4"
+   ],
+   "components": [
+    "signing",
+    "storage"
+   ],
+   "meaning": null
+  },
+  "FILE_TOO_LARGE": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "FORKED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "HASH_INVALID": {
+   "cli_exit": [
+    "3",
+    "5"
+   ],
+   "components": [
+    "Tor transport",
+    "browser client",
+    "encoding"
+   ],
+   "meaning": null
+  },
+  "HEADERS_TOO_LARGE": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "HISTORY_INCOMPLETE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": "The current Manifest cannot be connected to known history yet; a rotation or migration proof is missing (storage:admit)."
+  },
+  "HTTP_STATUS_REJECTED": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": "The remote answered with an unexpected HTTP status; nothing was verified."
+  },
+  "IDENTITY_CHANGED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": "Another Service identity now answers at an address this Node already knew; the old evidence is preserved."
+  },
+  "IDENTITY_FORKED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": "Two different signed revisions with the same number exist; the fork stays visible."
+  },
+  "IMPORT_FORMAT_INVALID": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "IMPORT_REQUIRES_EMPTY_STAGING_STORE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "INPUT_FILE_UNAVAILABLE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": null
+  },
+  "INTERNAL_ERROR": {
+   "cli_exit": [],
+   "components": [
+    "CLI"
+   ],
+   "meaning": null
+  },
+  "JSON_DEPTH_EXCEEDED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "encoding"
+   ],
+   "meaning": null
+  },
+  "KEY_DIRECTORY_UNSAFE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "KEY_ENVELOPE_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "KEY_FILE_UNAVAILABLE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "KEY_ROTATION_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "protocol",
+    "signing"
+   ],
+   "meaning": "A key change without a valid rotation proof for exactly this predecessor and revision."
+  },
+  "KEY_UNAVAILABLE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "KEY_UNLOCK_FAILED": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": "Wrong passphrase or damaged key envelope."
+  },
+  "LOCAL_CONTINUITY_INCOMPLETE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "configuration and status",
+    "protocol"
+   ],
+   "meaning": "Your own history files do not form one complete identity; include every revision and proof."
+  },
+  "LOCAL_IDENTITY_CONFLICT": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "configuration and status",
+    "protocol"
+   ],
+   "meaning": "Your own history contains a fork; resolve which branch you published before checking Nodes."
+  },
+  "LOCAL_RESOURCE_TOO_LARGE": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "LOCAL_RESOURCE_UNAVAILABLE": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "MANIFEST_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "METADATA_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "METHOD_NOT_ALLOWED": {
+   "cli_exit": [],
+   "components": [
+    "front controller",
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "MIGRATION_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "protocol",
+    "signing"
+   ],
+   "meaning": "An address change without a valid migration proof for exactly this predecessor and revision."
+  },
+  "MIRROR_DISABLED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": null
+  },
+  "NODE_DESCRIPTOR_HISTORY_INCOMPLETE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "NODE_DESCRIPTOR_INVALID": {
+   "cli_exit": [
+    "3",
+    "4"
+   ],
+   "components": [
+    "configuration and status",
+    "doctor"
+   ],
+   "meaning": null
+  },
+  "NODE_DESCRIPTOR_ROLLBACK_OR_FORK": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "NODE_IDENTITY_CHANGED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": null
+  },
+  "NODE_IDENTITY_CHANGE_REQUIRES_MIGRATION": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "NODE_KEY_ENVELOPE_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": null
+  },
+  "NODE_KEY_MISSING_OR_UNSAFE": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor: the Node key file is missing or readable by others (needs 0600)."
+  },
+  "NODE_KEY_ROTATION_UNSUPPORTED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": "Protocol v1 cannot rotate a Node key; create a new Node identity and have peers pin it explicitly."
+  },
+  "NODE_NOT_INITIALIZED": {
+   "cli_exit": [
+    "3",
+    "6"
+   ],
+   "components": [
+    "CLI",
+    "doctor",
+    "web routes"
+   ],
+   "meaning": "Run node:init before this command."
+  },
+  "NODE_UNAVAILABLE": {
+   "cli_exit": [],
+   "components": [
+    "front controller"
+   ],
+   "meaning": null
+  },
+  "NOT_FOUND": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "front controller",
+    "web routes"
+   ],
+   "meaning": "The route or record does not exist on this installation."
+  },
+  "ONION_BINDING_MISMATCH": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "protocol",
+    "signing"
+   ],
+   "meaning": "The signed Manifest belongs to a different Onion than the one it was fetched from or installed for."
+  },
+  "OUTPUT_DIRECTORY_UNAVAILABLE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": null
+  },
+  "OUTPUT_FILE_EXISTS_OR_UNAVAILABLE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": "The draft file already exists or cannot be created; drafts are never overwritten."
+  },
+  "PASSPHRASE_FILE_UNSAFE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": "The passphrase file must be a regular owner-only (0600) file."
+  },
+  "PASSPHRASE_POLICY": {
+   "cli_exit": [
+    "3",
+    "4"
+   ],
+   "components": [
+    "CLI",
+    "signing"
+   ],
+   "meaning": null
+  },
+  "PEER_BINDING_MISMATCH": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "PEER_BUSY": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "PEER_CLAIM_LOST": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "PEER_KEY_CHANGE_REQUIRES_EXPLICIT_RESET": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "PEER_NOT_CONFIGURED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI",
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "PEER_POOL_FULL": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "PIN_BACKUP_INVALID": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "PIN_BUDGET_EXHAUSTED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "PIN_CONTEXT_UNAVAILABLE": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "PIN_IMPORT_CONFLICT": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "An imported pin disagrees with a pin you already have; nothing was replaced."
+  },
+  "PRIVATE_PATH_IN_WEBROOT": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": "A private file or directory is inside the public web root; move it out."
+  },
+  "PROTOCOL_UNSUPPORTED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "protocol"
+   ],
+   "meaning": null
+  },
+  "PUBLIC_HOSTNAME_FILE_REQUIRED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": "manifest:install needs the public Tor hostname file, named hostname."
+  },
+  "PUBLIC_KEY_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "encoding"
+   ],
+   "meaning": "Not a canonical ed25519: public key (43 base64url characters after the prefix)."
+  },
+  "PUBLIC_MANIFEST_PATH_UNSAFE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "PUBLIC_MANIFEST_WRITE_FAILED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "PUBLISHER_BUSY": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "PUBLISHING_DISABLED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": "Publishing is off in the configuration or the Manifest withdraws publication."
+  },
+  "RATE_LIMIT_CONFIGURATION_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "RATE_LIMIT_CORRUPT": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "RATE_LIMIT_UNAVAILABLE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "REQUEST_BUDGET_EXHAUSTED": {
+   "cli_exit": [],
+   "components": [
+    "front controller"
+   ],
+   "meaning": "The shared request budget is used up; retry after a second."
+  },
+  "REQUEST_INVALID": {
+   "cli_exit": [],
+   "components": [
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "REQUEST_TOO_LARGE": {
+   "cli_exit": [],
+   "components": [
+    "front controller"
+   ],
+   "meaning": null
+  },
+  "RESPONSE_TOO_LARGE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "web routes"
+   ],
+   "meaning": "A response exceeded its byte limit and was discarded."
+  },
+  "RESTORE_REQUIRES_EMPTY_STAGING_STORE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": "Restores and migrations write only into a new, empty store path."
+  },
+  "REVISION_CHAIN_BROKEN": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": "The new Manifest is not the next revision of the installed one."
+  },
+  "REVISION_DOWNGRADE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "REVISION_EXHAUSTED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "ROLE_CONFIGURATION_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI",
+    "Node worker",
+    "configuration and status"
+   ],
+   "meaning": "The command or feature is not available for this configuration role."
+  },
+  "RUNTIME_DEPENDENCIES_MISSING": {
+   "cli_exit": [],
+   "components": [
+    "CLI",
+    "front controller"
+   ],
+   "meaning": "Install the locked Composer runtime dependencies first."
+  },
+  "RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor: this PHP minor version is outside the tested 8.4/8.5 matrix."
+  },
+  "SCHEMA_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI",
+    "Node worker",
+    "browser client",
+    "encoding",
+    "input parsing",
+    "protocol",
+    "signing",
+    "web routes"
+   ],
+   "meaning": "The record does not match its draft schema."
+  },
+  "SEARCH_INDEX_CORRUPT": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "server search"
+   ],
+   "meaning": null
+  },
+  "SEARCH_INDEX_STALE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "server search"
+   ],
+   "meaning": null
+  },
+  "SEARCH_INDEX_UNAVAILABLE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "server search"
+   ],
+   "meaning": null
+  },
+  "SEARCH_REQUEST_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "server search",
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "SEARCH_TEXT_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "server search"
+   ],
+   "meaning": null
+  },
+  "SEARCH_WORK_BUDGET_EXHAUSTED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "server search",
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "SEARCH_WORK_LIMIT": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "server search"
+   ],
+   "meaning": null
+  },
+  "SELF_VERIFICATION_ONION_MISMATCH": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": "--save-status self-checks only the Onion configured for this installation."
+  },
+  "SERVER_SEARCH_ENABLED_QUERIES_SENT_TO_NODE": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor: server search is on, so search terms reach this Node."
+  },
+  "SERVER_SEARCH_INDEX_UNAVAILABLE_OR_CORRUPT": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": null
+  },
+  "SERVICE_INDEX_NOT_READY": {
+   "cli_exit": [],
+   "components": [
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "SIGNATURE_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "protocol"
+   ],
+   "meaning": "The signature does not verify; the record was changed after signing or signed by another key."
+  },
+  "SIGNER_BINDING_MISMATCH": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "SIGNER_KEY_MISMATCH": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "SIGNER_ROLE_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "SIGNER_ROLE_MISMATCH": {
+   "cli_exit": [
+    "3",
+    "4"
+   ],
+   "components": [
+    "Node worker",
+    "signing"
+   ],
+   "meaning": null
+  },
+  "SNAPSHOT_CHUNK_HASH_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "protocol"
+   ],
+   "meaning": null
+  },
+  "SNAPSHOT_INCOMPLETE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI",
+    "browser client",
+    "protocol"
+   ],
+   "meaning": "A snapshot chunk is missing; the snapshot was not used."
+  },
+  "SNAPSHOT_NOT_PUBLISHED": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor: directory mirroring is on but no snapshot was published yet (node:snapshot)."
+  },
+  "SNAPSHOT_RECORD_ORDER_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "browser client",
+    "protocol"
+   ],
+   "meaning": null
+  },
+  "SNAPSHOT_UNAVAILABLE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI",
+    "web routes"
+   ],
+   "meaning": null
+  },
+  "SOURCE_ALREADY_ADDED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "You already added this Node."
+  },
+  "SOURCE_ALREADY_CONFIGURED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "This Node is already listed by the Client Host."
+  },
+  "SOURCE_CANCELLED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SOURCE_CHECKPOINT_BINDING_MISMATCH": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker",
+    "browser client",
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "SOURCE_CHECKPOINT_CHAIN_BROKEN": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker",
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SOURCE_CHECKPOINT_EQUIVOCATION": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker",
+    "browser client"
+   ],
+   "meaning": "The Node signed two different checkpoints for the same generation; the source is quarantined."
+  },
+  "SOURCE_CHECKPOINT_ROLLBACK": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker",
+    "browser client"
+   ],
+   "meaning": "The Node served an older checkpoint than already seen; the source is quarantined."
+  },
+  "SOURCE_DESCRIPTOR_EQUIVOCATION": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SOURCE_DUPLICATE": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": "The same Node was listed twice."
+  },
+  "SOURCE_EQUIVOCATION_PRESERVED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SOURCE_FETCH_FAILED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "The Node could not be reached through the relay or Tor."
+  },
+  "SOURCE_GROUP_ASSIGNMENTS_INCONSISTENT": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": null
+  },
+  "SOURCE_GROUP_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "SOURCE_HISTORY_PROGRESS": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "Long-absence history is verified in bounded steps; load again to continue."
+  },
+  "SOURCE_HTTP_STATUS_REJECTED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SOURCE_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": null
+  },
+  "SOURCE_KEY_MISMATCH": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": "The Node signs with a different key than the one you supplied."
+  },
+  "SOURCE_NODE_BINDING_MISMATCH": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SOURCE_NODE_KEY_CHANGED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "The Node signed with a different key than expected; check the key or treat it as another Node."
+  },
+  "SOURCE_NOT_IN_HOST_ALLOWLIST": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "The Client Host does not relay this Node."
+  },
+  "SOURCE_RECORD_COUNT_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker",
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SOURCE_SET_CONCENTRATED": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor: most configured peers share one source group; diversity is low."
+  },
+  "SOURCE_STATE_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "SOURCE_TIMEOUT": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "The Node did not answer in time; the existing local index is unchanged."
+  },
+  "SOURCE_TIME_BUDGET_EXHAUSTED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SOURCE_WORK_BUDGET_EXHAUSTED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "Node worker",
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SQLITE_DRIVER_UNAVAILABLE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "STORAGE_ADDRESS_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "STORAGE_BACKEND_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI",
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "STORAGE_BUDGET_EXHAUSTED": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": "The local store reached its record or byte quota; existing evidence is preserved."
+  },
+  "STORAGE_BUSY": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": "Another worker holds the store lock; let it finish."
+  },
+  "STORAGE_CORRUPT": {
+   "cli_exit": [
+    "3",
+    "4"
+   ],
+   "components": [
+    "CLI",
+    "Node worker",
+    "configuration and status",
+    "storage",
+    "web routes"
+   ],
+   "meaning": "Stored data failed verification; run storage:check and restore from backup if needed."
+  },
+  "STORAGE_ENCODING_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "STORAGE_ERROR": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "STORAGE_MIGRATION_REQUIRED": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": "This store uses an older format; stop workers, back up, run storage:migrate."
+  },
+  "STORAGE_MODE_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "STORAGE_NOT_REQUIRED_FOR_PUBLISHER": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "configuration and status"
+   ],
+   "meaning": null
+  },
+  "STORAGE_PATH_UNSAFE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "STORAGE_PERMISSIONS_UNSAFE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "STORAGE_READ_ONLY": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "STORAGE_RECOVERY_REQUIRED": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": "An interrupted write must be recovered with storage:check before read-only use."
+  },
+  "STORAGE_UNAVAILABLE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "STORAGE_VERSION_UNSUPPORTED": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "storage"
+   ],
+   "meaning": null
+  },
+  "STREAMING_UNAVAILABLE": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "SYNC_DISABLED": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": null
+  },
+  "TOR_KEY_ACCESS_FORBIDDEN": {
+   "cli_exit": [
+    "3",
+    "4"
+   ],
+   "components": [
+    "CLI",
+    "signing"
+   ],
+   "meaning": "Commands never read Tor private key files."
+  },
+  "TOR_REQUEST_FAILED": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": "Tor or its SOCKS port is unavailable, or the Onion did not answer."
+  },
+  "TRANSPORT_CONFIGURATION_INVALID": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": null
+  },
+  "TRANSPORT_UNAVAILABLE": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": null
+  },
+  "UNVERIFIED_RECORD": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "USAGE_ERROR": {
+   "cli_exit": [
+    "2"
+   ],
+   "components": [
+    "CLI",
+    "configuration and status"
+   ],
+   "meaning": "Wrong arguments; run help for the exact syntax."
+  },
+  "VISITOR_SOURCES_DISABLED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "This Client Host does not relay visitor-chosen Nodes."
+  },
+  "VISITOR_SOURCE_LIMIT": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "At most 8 visitor-chosen Nodes can be added."
+  },
+  "VISITOR_SOURCE_RELAY_ENABLED_OUTBOUND_TO_VISITOR_CHOSEN_NODES": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor: the Client Host relays Nodes chosen by visitors."
+  },
+  "WEBROOT_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "signing"
+   ],
+   "meaning": null
+  },
+  "WITNESS_BUDGET_EXHAUSTED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "WITNESS_CONFIGURATION_INVALID": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "WITNESS_TYPE_INVALID": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": null
+  },
+  "WORK_BUDGET_EXHAUSTED": {
+   "cli_exit": [
+    "3",
+    "4"
+   ],
+   "components": [
+    "Node worker",
+    "browser client",
+    "protocol",
+    "storage"
+   ],
+   "meaning": "The input exceeds a bounded work limit and was refused."
+  }
+ },
+ "registry_version": 1
+}

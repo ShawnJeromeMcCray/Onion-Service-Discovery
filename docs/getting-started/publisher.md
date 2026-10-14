@@ -189,12 +189,84 @@ enable its timer; it rechecks every six hours and never announces automatically.
 To verify a snapshot you already downloaded, without network access, use
 [offline exact-state membership](../operations/snapshot-membership.md).
 
-## Updates and withdrawal
+## Updates, key rotation, migration and withdrawal
 
-Use `manifest:revise SIGNED_MANIFEST METADATA`, sign the returned record offline,
-verify it, and install it. An unchanged description needs no renewal/revision.
-Use `manifest:withdraw SIGNED_MANIFEST` and sign/install the successor to withdraw.
-Use the documented countersigned rotation and signed migration workflows for key
-or address changes; never generate an unrelated genesis and call it continuity.
-Keep the current predecessor and required proofs available during installation.
-Independent Nodes may retain historical public records after withdrawal.
+Every change is a new signed revision of your current Manifest. Work on the
+administrator machine, transfer only the signed public files, and keep every
+signed revision and proof: your complete history is what lets others verify
+continuity. The commands below are exercised by `node-php/tests/publisher-lifecycle.php`.
+Run them from the repository root after `C="php node-php/bin/onion-service-discovery"`.
+
+### Change metadata
+
+```sh
+$C manifest:revise manifest-1.json metadata-2.json > draft-2.json
+$C record:sign service service.key draft-2.json --passphrase-file passphrase > manifest-2.json
+$C manifest:install manifest-2.json hostname /absolute/app/Onion-Service-Discovery/node-php/public
+```
+
+An unchanged description needs no renewal. Never sign two different Manifests
+with the same revision number: that is a fork, and it stays visible.
+
+### Rotate your Service key
+
+Create the new key first (`key:create service new.key --passphrase-file new-passphrase`)
+and back it up. The old key authorizes the change and the new key confirms it:
+
+```sh
+mkdir rotation
+$C manifest:rotate manifest-2.json ed25519:NEW_PUBLIC_KEY --output-dir rotation
+$C record:sign service service.key rotation/rotation-draft.json --passphrase-file passphrase > rotation/rotation-old.json
+$C record:sign service new.key rotation/rotation-old.json --passphrase-file new-passphrase --rotation-confirmation > rotation.json
+$C record:sign service new.key rotation/successor-draft.json --passphrase-file new-passphrase > manifest-3.json
+$C manifest:install manifest-3.json hostname /absolute/app/Onion-Service-Discovery/node-php/public --rotation rotation.json
+```
+
+`--output-dir` writes the two drafts as separate owner-private files and never
+overwrites existing ones. Installation refuses a new key without its proof.
+
+### Move to a new Onion address
+
+Configure Tor for the new address first and copy its public `hostname`. The
+current key signs both the migration proof and the successor:
+
+```sh
+mkdir migration
+$C manifest:migrate manifest-3.json NEW_CANONICAL_V3_ADDRESS.onion --output-dir migration
+$C record:sign service new.key migration/migration-draft.json --passphrase-file new-passphrase > migration.json
+$C record:sign service new.key migration/successor-draft.json --passphrase-file new-passphrase > manifest-4.json
+$C manifest:install manifest-4.json NEW_HOSTNAME_DIRECTORY/hostname /absolute/app/Onion-Service-Discovery/node-php/public --migration migration.json
+```
+
+Update `node.onion` in your publisher configuration to the new address.
+
+### Tell Nodes about rotations and migrations
+
+Nodes fetch only your current Manifest from the Well-Known path. They cannot
+connect a rotated key or a new address to your history until they have the
+signed proof (`rotation.json` or `migration.json`); until then they report
+`HISTORY_INCOMPLETE`. Send the proof file to the operators of the Nodes you use.
+Each runs `$C storage:admit BACKEND STORE_PATH rotation.json` and checks your
+address again; Nodes that synchronize with them receive it in their snapshots.
+The protocol has no automatic transport for these proofs yet.
+
+### Withdraw
+
+```sh
+$C manifest:withdraw manifest-4.json > draft-5.json
+$C record:sign service new.key draft-5.json --passphrase-file new-passphrase > manifest-5.json
+$C manifest:install manifest-5.json hostname /absolute/app/Onion-Service-Discovery/node-php/public
+```
+
+Withdrawal removes your Service from normal results. Independent Nodes may keep
+historical public records; global deletion cannot be guaranteed.
+
+### Check discoverability with your full history
+
+Pass all signed files in order; no hand-made JSON is needed:
+
+```sh
+$C network:discoverability-check /absolute/private/osd-publisher/config.json \
+  manifest-1.json manifest-2.json rotation.json manifest-3.json migration.json manifest-4.json \
+  --node NODE.onion ed25519:NODE_KEY --save-status
+```

@@ -45,6 +45,28 @@ final class StatusPage
             }
         }
         $body .= '</dl></section>';
+        if (is_array($facts['node'] ?? null)) {
+            $node = $facts['node'];
+            $body .= '<section><h2>Discovery Node</h2>';
+            if (is_string($node['node_onion'] ?? null) && is_string($node['node_identity_public_key'] ?? null)) {
+                $body .= '<p>Publishers, peers and visitors need both values below to use this Node. Give them through a channel they trust; they must never take the key from the Node’s own answers.</p>';
+            }
+            $body .= '<dl>';
+            $labels = ['node_onion' => 'Node onion', 'node_identity_public_key' => 'Node public key', 'identity' => 'Identity', 'storage_backend' => 'Storage backend', 'storage_state' => 'Storage',
+                'signed_records' => 'Signed records', 'snapshot' => 'Snapshot', 'snapshot_generation' => 'Snapshot generation', 'snapshot_created_at' => 'Snapshot created at',
+                'last_direct_verification_at' => 'Last direct verification', 'last_successful_sync_at' => 'Last successful sync'];
+            foreach ($labels as $field => $label) {
+                $value = $node[$field] ?? null;
+                if (is_string($value) || is_int($value)) { $body .= '<dt>' . self::escape($label) . '</dt><dd>' . ($field === 'node_onion' || $field === 'node_identity_public_key' ? '<code>' . self::escape((string) $value) . '</code>' : self::escape((string) $value)) . '</dd>'; }
+            }
+            foreach (['candidates' => 'Discovery queue', 'peers' => 'Peers'] as $field => $label) {
+                if (!is_array($node[$field] ?? null)) { continue; }
+                $parts = [];
+                foreach ($node[$field] as $name => $count) { if (is_string($name) && is_int($count)) { $parts[] = strtolower(str_replace('_', ' ', $name)) . ': ' . $count; } }
+                $body .= '<dt>' . self::escape($label) . '</dt><dd>' . self::escape($parts === [] ? 'none' : implode(', ', $parts)) . '</dd>';
+            }
+            $body .= '</dl></section>';
+        }
         if (is_array($facts['roles'] ?? null)) {
             $body .= '<section><h2>Roles</h2><dl>';
             foreach (['publish_service' => 'Publish', 'mirror_directory' => 'Mirror', 'discover_services' => 'Discover', 'sync_with_peers' => 'Sync'] as $field => $label) {

@@ -56,7 +56,7 @@ explicit and source high-water marks/conflicts are not erased by retry.
 at most 256 unreferenced derived blobs, not signed identity/fork records.
 No command executes a downloaded software artifact.
 
-Exit codes: 0 successful command; 2 usage; 3 input/config/protocol validation;
+Exit codes ([all error codes](error-codes.md)): 0 successful command; 2 usage; 3 input/config/protocol validation;
 4 storage/signing failure or failed diagnostic; 5 direct transport failure;
 6 diagnostic WARN/degraded;
 8 normalized internal error. Transport workers can return structured BACKOFF,
@@ -139,6 +139,15 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
   fresh staging store, opens the source read-only and removes its temporary
   carrier. Stop workers, run `storage:check` on the new path, then switch the
   configuration. An existing destination is refused.
+- `node:identity CONFIG` prints the verified Node Onion and Node public key from
+  the signed descriptor, with ready-to-use lines for `--node`, `peers:add` and
+  visitors. Node and combined roles only; it fails with `NODE_NOT_INITIALIZED`
+  before `node:init`.
+- `manifest:rotate … --output-dir DIR` and `manifest:migrate … --output-dir DIR`
+  write `rotation-draft.json`/`migration-draft.json` and `successor-draft.json`
+  as owner-private files (never overwriting) instead of one combined JSON object.
+- `network:discoverability-check` accepts several history files before the first
+  `--node`: each is a `{"records": [...]}` bundle or a single signed record.
 - `diagnostics:export CONFIG` prints a privacy-reviewed support bundle: versions,
   extensions, role/features and `doctor` results. Paths, Onion addresses, keys,
   passphrases, sources, pins and queries are excluded and additionally redacted.

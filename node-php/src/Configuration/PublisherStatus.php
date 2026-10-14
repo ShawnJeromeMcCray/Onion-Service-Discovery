@@ -165,6 +165,11 @@ final class PublisherStatus
     {
         $overall = $status['overall'];
         $status['answer'] = self::ANSWERS[$overall] ?? 'NO';
+        // A Discovery Node that does not advertise its own Onion is not "not found": the question does not apply.
+        if (in_array($config->role, ['node', 'combined'], true) && !$config->features['publish_service']) {
+            $status['answer'] = 'NOT APPLICABLE';
+            $status['next_action'] = 'This installation runs a Discovery Node and does not advertise an Onion Service of its own. Its Node facts are listed below.';
+        }
         $publishing = in_array($overall, ['READY_LOCALLY', 'DISCOVERABLE', 'DISCOVERABLE_DEGRADED', 'IDENTITY_CONFLICT'], true);
         $manifestValid = ($status['manifest']['state'] ?? null) === 'SIGNATURE_VALID';
         $na = static fn (string $state): string => $publishing ? $state : 'NOT_APPLICABLE';

@@ -47,7 +47,10 @@ try {
         }
     }
     elseif ($target === '/onion-service-discovery/status/') {
-        $response = StatusPage::render(PublisherStatus::inspect($config, new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas'), __DIR__ . '/.well-known/onion-service-discovery.json', $configPath), $method);
+        $statusVerifier = new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas');
+        $facts = PublisherStatus::inspect($config, $statusVerifier, __DIR__ . '/.well-known/onion-service-discovery.json', $configPath);
+        $facts['node'] = \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $statusVerifier, time());
+        $response = StatusPage::render($facts, $method);
     }
     elseif ($asset !== null) { $response = $asset; }
     elseif (str_starts_with($target, '/onion-service-discovery/relay/')) {

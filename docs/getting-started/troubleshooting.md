@@ -1,6 +1,7 @@
 # Troubleshooting
 
 Start with the exact commit (`git rev-parse HEAD`), intended role and error code.
+Every code is listed with its meaning and CLI exit code in the [error code registry](../operations/error-codes.md).
 CLI output is JSON; exit 0 is command success, not blanket production approval.
 Keep private keys, passphrases, search history and raw private backups out of reports.
 
