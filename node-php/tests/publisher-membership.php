@@ -125,6 +125,13 @@ try {
         $out = cli(['service:membership', $root . '/publisher.json', $root . '/' . $file, '--node', $nodes['included']['onion'], $nodes['included']['key']], 6);
         $assert($out['status'] === 'CURRENT_STATE_NOT_CONFIRMED' && $out['counts']['unavailable'] === 1 && $out['network_side_effects'] === true, 'cli unavailable ' . $file); ++$checks;
     }
+    $assert(!file_exists($root . '/publisher.discoverability.json'), 'evidence saved without --save-status'); ++$checks;
+    chmod($root . '/publisher.json', 0600);
+    $saved = cli(['network:discoverability-check', $root . '/publisher.json', $root . '/history.json', '--node', $nodes['included']['onion'], $nodes['included']['key'], '--save-status'], 6);
+    $evidence = json_decode((string) file_get_contents($root . '/publisher.discoverability.json'), true, 8, JSON_THROW_ON_ERROR);
+    $assert($saved['state_mutated'] === true && $evidence['unavailable'] === 1 && $evidence['manifest_hash'] === $current->contentHash
+        && !str_contains(json_encode($evidence, JSON_THROW_ON_ERROR), $nodes['included']['onion']) && (fileperms($root . '/publisher.discoverability.json') & 0077) === 0, 'saved aggregate evidence'); ++$checks;
+    $assert(cli(['network:announce', $root . '/publisher.json'], 2)['error'] === 'USAGE_ERROR', 'network:announce alias'); ++$checks;
     $assert(!file_exists($root . '/must-not-be-created') && !file_exists($root . '/exports-must-not-be-created'), 'publisher storage created'); ++$checks;
     $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json'], 2)['error'] === 'USAGE_ERROR', 'no sources'); ++$checks;
     $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json', '--peer', $unreachable, $nodes['included']['key']], 2)['error'] === 'USAGE_ERROR', 'wrong flag'); ++$checks;

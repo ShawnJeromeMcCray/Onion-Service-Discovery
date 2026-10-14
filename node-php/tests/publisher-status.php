@@ -3,6 +3,7 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 use OnionServiceDiscovery\Configuration\NodeConfig;
 use OnionServiceDiscovery\Configuration\PublisherStatus;
+use OnionServiceDiscovery\Configuration\PublisherMembership;
 use OnionServiceDiscovery\Configuration\Diagnostics;
 use OnionServiceDiscovery\Configuration\PublisherInitializer;
 use OnionServiceDiscovery\Http\StatusPage;
@@ -27,6 +28,34 @@ try {
     $facts = PublisherStatus::inspect($config, $verifier, $manifest);
     $assert($facts['overall'] === 'READY_LOCALLY' && $facts['sampled_discoverability'] === 'UNCONFIRMED'); ++$checks;
     $assert($facts['active_index_membership'] === 'NOT_CHECKED'); ++$checks;
+    // Saved aggregate evidence drives the dashboard only for the exact installed revision.
+    $cfg = $temp . '/config.json'; $now = 1800000000; $hash = $facts['manifest']['hash'];
+    $result = static fn (array $counts, int $observed, ?string $h = null): array => ['expected_state' => ['manifest_hash' => $h ?? $hash, 'revision' => 1],
+        'selected_sources' => array_sum($counts), 'distinct_node_keys' => array_sum($counts), 'included_with_node_direct_observation' => $observed,
+        'counts' => $counts + ['included' => 0, 'stale' => 0, 'not_present' => 0, 'contradictory' => 0, 'unavailable' => 0, 'rejected' => 0]];
+    chmod($cfg, 0600);
+    $saved = PublisherMembership::save($result(['included' => 2, 'unavailable' => 1], 2), $cfg, $now);
+    $assert($saved === $temp . '/config.discoverability.json' && (fileperms($saved) & 0077) === 0); ++$checks;
+    $found = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now + 60);
+    $assert($found['overall'] === 'DISCOVERABLE' && $found['external_observation'] === 'OBSERVED_CURRENT_REVISION' && str_contains($found['sampled_discoverability'], '2 of 3')
+        && $found['active_index_membership'] === 'CURRENT_REVISION_IN_2_OF_3_CHECKED_NODE_SNAPSHOTS'); ++$checks;
+    $page = StatusPage::render($found)['body'];
+    $assert(str_contains($page, 'DISCOVERABLE') && str_contains($page, '2 of 3 checked Discovery Nodes') && !str_contains($page, '.onion</dd><dt>evidence')); ++$checks;
+    $assert(PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now + PublisherStatus::EVIDENCE_DEGRADED_AFTER_SECONDS + 1)['overall'] === 'DISCOVERABLE_DEGRADED'); ++$checks;
+    PublisherMembership::save($result(['included' => 1], 0), $cfg, $now);
+    $unobserved = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($unobserved['overall'] === 'READY_LOCALLY' && $unobserved['external_observation'] === 'NO_EXTERNAL_OBSERVATION'); ++$checks;
+    PublisherMembership::save($result(['included' => 1, 'contradictory' => 1], 1), $cfg, $now);
+    $assert(PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now)['overall'] === 'IDENTITY_CONFLICT'); ++$checks;
+    PublisherMembership::save($result(['stale' => 2], 0), $cfg, $now);
+    $pending = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($pending['overall'] === 'READY_LOCALLY' && $pending['external_observation'] === 'OBSERVED_STALE_REVISION'); ++$checks;
+    PublisherMembership::save($result(['included' => 3], 3, 'sha256:' . str_repeat('0', 64)), $cfg, $now);
+    $other = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($other['overall'] === 'READY_LOCALLY' && $other['active_index_membership'] === 'NOT_CHECKED'); ++$checks;
+    file_put_contents($saved, '{"evidence_version":1,"included":99}');
+    $assert(PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now)['overall'] === 'READY_LOCALLY'); ++$checks;
+    unlink($saved);
     $page = StatusPage::render($facts);
     $assert($page['status'] === 200 && $page['headers']['Cache-Control'] === 'no-store' && str_contains($page['headers']['Content-Security-Policy'], 'frame-ancestors')); ++$checks;
     $assert(!str_contains($page['body'], $temp) && !str_contains($page['body'], 'must-not-be-created')); ++$checks;

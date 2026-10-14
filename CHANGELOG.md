@@ -6,6 +6,12 @@
   selected Nodes' complete signed snapshots include its exact current state, with
   one category per Node (included, stale, not present, contradictory, unavailable,
   rejected); freshness, ancestry and operator independence stay unevaluated.
+- Let the publisher status page answer “Can this Service be found?” from saved
+  `network:discoverability-check --save-status` evidence: DISCOVERABLE needs the
+  exact installed revision plus the checked Node's own direct observation;
+  conflicts, stale revisions and evidence older than seven days are shown.
+- Add the specification's `network:discoverability-check` and `network:announce`
+  command names and the canonical `GET /v1/services/by-id/{logical_service_id}` route.
 - Point clone instructions at the default branch now that production-completion
   work is merged.
 

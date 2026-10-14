@@ -161,6 +161,17 @@ belong to one operator. Membership is evidence about those Nodes' current
 snapshots, not a promise that browsers will load them. See the
 [acceptance scenario and remaining work](project-status.md#end-to-end-acceptance-scenario).
 
+Add `--save-status` to the same command to show the result on your status page
+(`network:discoverability-check` is an equivalent name). Only aggregate counts
+are stored beside your private configuration; Node addresses and keys are not.
+Afterwards `/onion-service-discovery/status/` answers the main question
+directly, for example *DISCOVERABLE — current revision 1 verified in the signed
+snapshots of 2 of 3 checked Discovery Nodes*. DISCOVERABLE requires that a
+checked Node includes your exact installed revision **and** exported its own
+direct observation of it. Rerun the check after every new revision; evidence for
+an older revision is ignored, and evidence older than seven days shows
+`DISCOVERABLE_DEGRADED`.
+
 To verify a snapshot you already downloaded, without network access, use
 [offline exact-state membership](../operations/snapshot-membership.md).
 
