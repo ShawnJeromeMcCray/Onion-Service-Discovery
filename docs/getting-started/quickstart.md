@@ -16,7 +16,7 @@ supported method; no global npm packages are required.
 Run in a terminal:
 
 ```sh
-git clone --branch implementation/production-completion https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery.git
+git clone https://github.com/ShawnJeromeMcCray/Onion-Service-Discovery.git
 cd Onion-Service-Discovery/web-local-search-client
 npm ci --ignore-scripts
 npm run demo

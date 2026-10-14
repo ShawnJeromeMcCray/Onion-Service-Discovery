@@ -52,8 +52,13 @@ host to independent discoverability. A release reviewer should be able to run:
 
 This full scenario is **not yet recorded as passing**. The current public status
 page deliberately reports local readiness separately and keeps external
-membership unconfirmed. It does not currently automate “current revision in 2 of
-3 fresh independent Nodes.” Existing complete-snapshot evidence is not silently
+membership unconfirmed. Steps 4–5 are partly automated for the publisher:
+`service:membership` fetches complete signed snapshots from explicitly selected
+Nodes over Tor and reports each as included, stale, not present, contradictory,
+unavailable or rejected (controlled tests only; no public-Tor run is recorded).
+It still does not evaluate freshness, checkpoint ancestry or operator
+independence, so it does not establish “current revision in 2 of 3 fresh
+independent Nodes.” Existing complete-snapshot evidence is not silently
 renamed to the pending active-index checkpoint protocol.
 
 ## Remaining engineering that can be developed

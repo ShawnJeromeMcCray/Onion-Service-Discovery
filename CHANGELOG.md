@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add `service:membership`: a publisher checks over Tor whether explicitly
+  selected Nodes' complete signed snapshots include its exact current state, with
+  one category per Node (included, stale, not present, contradictory, unavailable,
+  rejected); freshness, ancestry and operator independence stay unevaluated.
+- Point clone instructions at the default branch now that production-completion
+  work is merged.
+
 - Add a loopback-only executable visitor demo, actual UI screenshot, role-specific
   installation/publishing/Node guides, troubleshooting and evidence map.
 - Exercise fresh-copy Publisher, Node and keyless Client Host walkthroughs in

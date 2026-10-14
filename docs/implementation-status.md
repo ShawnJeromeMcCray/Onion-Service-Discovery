@@ -2,7 +2,7 @@
 
 The baseline repository contained only a one-line README. The implementation is
 on `implementation/repository-foundation`; incremental PRs #1–#6 have been merged
-by the repository owner. Production-completion work continues in draft PR #8 on `implementation/production-completion`. The project now contains
+by the repository owner. Production-completion work from `implementation/production-completion` has been merged into `main` through PR #11. The project now contains
 an executable development Node, offline Service signer, separate Client Host,
 locally verifying/searching browser client and mature offline release verifier.
 There is no approved production release.
