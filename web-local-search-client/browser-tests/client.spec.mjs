@@ -118,7 +118,7 @@ test('visitor-chosen Nodes need the host switch and the expected key, and persis
     await expect(page.locator('.source-status').filter({hasText:third.onion})).toContainText('SOURCE_NODE_KEY_CHANGED');
     await expect(page.locator('.source-status').filter({hasText:third.onion})).toContainText('Check the key you entered');
     await expect(page.locator('#coverage')).toContainText('2 distinct fresh signing keys');
-    await page.getByRole('button',{name:'Remove this Node',exact:true}).click();await expect(page.locator('#visitor-source-options .source-option')).toHaveCount(0);
+    await page.getByRole('button',{name:'Remove the Node '+third.onion,exact:true}).click();await expect(page.locator('#visitor-source-options .source-option')).toHaveCount(0);
     // The correct key loads the third Node through the same-origin relay.
     await page.locator('#visitor-key').fill(keyOf(third));await page.getByRole('button',{name:'Add Node',exact:true}).click();
     await expect(page.locator('#visitor-source-options .source-option')).toContainText('added by you');

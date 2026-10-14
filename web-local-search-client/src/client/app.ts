@@ -120,7 +120,8 @@ function renderVisitorSources(sources:readonly VisitorSource[]):void {
     const label=document.createElement('label'); label.className='check-label'; label.append(check,text('span',source.onion+' · added by you'));
     const key=document.createElement('input'); key.type='text'; key.id=check.id+'-key'; key.value=source.expectedKey; key.readOnly=true;
     const keyLabel=document.createElement('label'); keyLabel.htmlFor=key.id; keyLabel.textContent='Expected Node key you entered';
-    item.append(label,keyLabel,key,button('Remove this Node',()=>worker.postMessage({op:'remove-source',onion:source.onion}))); container.append(item);
+    const remove=button('Remove this Node',()=>worker.postMessage({op:'remove-source',onion:source.onion})); remove.setAttribute('aria-label','Remove the Node '+source.onion);
+    item.append(label,keyLabel,key,remove); container.append(item);
   });
   el('source-empty').hidden=configuredSourceCount+sources.length>0;
   persistVisitorSources(sources);

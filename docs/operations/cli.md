@@ -144,6 +144,11 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
   fresh staging store, opens the source read-only and removes its temporary
   carrier. Stop workers, run `storage:check` on the new path, then switch the
   configuration. An existing destination is refused.
+- `status CONFIG --check` runs the same read-only derivation as the status page
+  (answer, ten-step pipeline, Node card) for monitoring: exit 0 when nothing
+  needs attention, 6 while waiting for external evidence or when it is older
+  than seven days, 4 for an invalid Manifest, an identity conflict or an
+  unreadable store. `status CONFIG` without `--check` keeps the Node counts.
 - `node:identity CONFIG` prints the verified Node Onion and Node public key from
   the signed descriptor, with ready-to-use lines for `--node`, `peers:add` and
   visitors. Node and combined roles only; it fails with `NODE_NOT_INITIALIZED`

@@ -67,6 +67,12 @@ try {
     file_put_contents($root . '/publisher.json', json_encode($publisher, JSON_THROW_ON_ERROR));
     $assert($cli(['node:identity', $root . '/publisher.json'], 3)['error'] === 'ROLE_CONFIGURATION_INVALID', 'publisher has no Node identity'); ++$checks;
     $assert(NodeStatus::inspect(NodeConfig::load($root . '/publisher.json'), $verifier, 1800000000) === null, 'publisher card'); ++$checks;
+    // `status CONFIG --check` runs the dashboard derivation for monitoring.
+    $check = $cli(['status', $root . '/config.json', '--check'], 0);
+    $assert($check['answer'] === 'NOT APPLICABLE' && $check['node']['node_identity_public_key'] === $signer->publicKey() && $check['network_side_effects'] === false, 'status --check node'); ++$checks;
+    $publisher['features']['publish_service'] = true; file_put_contents($root . '/publisher.json', json_encode($publisher, JSON_THROW_ON_ERROR));
+    $failing = $cli(['status', $root . '/publisher.json', '--check'], 4);
+    $assert($failing['overall'] === 'ERROR' && $failing['node'] === null && $failing['pipeline']['manifest'] === 'FAIL', 'status --check missing Manifest'); ++$checks;
 
     // Production front controller renders the Node card from the read-only store.
     $listener = stream_socket_server('tcp://127.0.0.1:0'); $port = (int) substr(strrchr(stream_socket_get_name($listener, false), ':'), 1); fclose($listener);
