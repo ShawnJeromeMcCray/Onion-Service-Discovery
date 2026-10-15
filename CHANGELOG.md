@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+- Browser client evidence: every result says how many loaded sources include
+  its current revision; the details name the sources that supplied it, those
+  that still serve an older revision and those that do not list it, the
+  current signing key after a rotation, earlier onion addresses, the Manifest
+  hash and the Nodes that observed the revision (with the latest observation
+  time). Entries supplied only by Nodes later set aside are flagged. Each source
+  shows its signed checkpoint generation and age; a Node that signed two
+  conflicting records can be reported with a saved evidence bundle. The footer
+  and `build-manifest.json` carry the client and protocol version.
+- Browser client accessibility and identity safety: without JavaScript only an
+  explanation and the server-search option are shown; load results and search
+  counts are announced once instead of on every update, and high-risk pin
+  changes use an alert; keyboard focus, open details and the result page
+  survive updates; repeated controls name their identity; every notice carries
+  a marker and a written severity, and text fields reach 3:1 contrast. A result
+  with a pinned name under another key is flagged, the pinned identity leads its
+  group, invisible characters are reported (also in pin labels and imports),
+  keys and onion addresses can be copied, and the privacy wording no longer
+  overstates: the page says what a Client Host relay learns. New security copy
+  registry (`docs/ux/security-copy-registry.md`) and accessibility notes.
+- Publisher Nodes live in the validated configuration: the optional
+  `publisher_nodes` list (Onion plus independently obtained Node key, at most 16)
+  is checked by `config:validate`, written by `init … --node ONION KEY`, and used
+  by `service:membership` and `service:announce` when no `--node` is given;
+  `service:verify` checks `node.onion` when no Onion is given. The publisher
+  timer therefore needs no environment file, and a typo fails at validation
+  instead of silently in a nightly job. `doctor` warns when a publishing
+  installation has no Nodes. Explicit `--node` triples keep working.
+- Publisher dashboard follows the states of spec 47: `CONNECTING`,
+  `ANNOUNCED_PENDING_VERIFICATION` and `EXTERNALLY_OBSERVED` between
+  `READY_LOCALLY` and `DISCOVERABLE`, derived from the saved self-check,
+  announcements and Node checks. The next action is the most urgent one: a
+  failing self-check comes first and names its cause. Transport failures are
+  typed: `TOR_PROXY_UNREACHABLE`, `ONION_UNREACHABLE`, `TOR_REQUEST_TIMEOUT`,
+  `HTTP_NOT_FOUND`, `HTTP_REDIRECT_REJECTED`, `HTTP_SERVER_ERROR` (workers keep
+  treating them as transient). A self-check expires after seven days, one from
+  before the installed revision no longer counts, Nodes that contradicted their
+  previous checkpoint (D-052) raise a visible warning, a migrated Manifest names
+  the new Onion instead of "invalid", and the page links the public Manifest and
+  history bundle. `doctor` and `diagnostics:export` report the publication
+  (`manifest_state`) and fail on a missing or invalid Manifest. The SOCKS connect
+  phase may now use the whole `transport.timeout_ms`, because it includes Tor's
+  circuit to the Onion. Both real-Tor lab scripts pass with Tor 0.4.9.
 - One service user on a host: the publisher timer now runs as `osd-worker`, the
   same user as the PHP-FPM pool, and the guides run `init` and every check with
   `sudo -u osd-worker`, so the status page can read the evidence the checks save.

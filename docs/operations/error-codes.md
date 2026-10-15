@@ -7,7 +7,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-212 codes.
+220 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -69,7 +69,10 @@ for remedies.
 | `HEADERS_TOO_LARGE` | browser client | – | The code name states the condition; see the raising component. |
 | `HISTORY_BUNDLE_INVALID` | browser client, protocol, signing | 3 | The PCP-004 history bundle is malformed, too large or contains a record type it must not contain. |
 | `HISTORY_INCOMPLETE` | Node worker, signing | 3 | The current Manifest does not connect to its history: the Service serves no or an incomplete history bundle (history:install), or a proof is missing. |
-| `HTTP_STATUS_REJECTED` | Tor transport | 5 | The remote answered with an unexpected HTTP status; nothing was verified. |
+| `HTTP_NOT_FOUND` | Tor transport | 5 | The Onion answered 404: its web server does not pass this path to the OSD front controller, or the Node does not offer the endpoint. |
+| `HTTP_REDIRECT_REJECTED` | Tor transport | 5 | The Onion answered with a redirect. OSD never follows redirects; serve the path directly over HTTP on the Onion. |
+| `HTTP_SERVER_ERROR` | Tor transport | 5 | The Onion answered 5xx. For OSD itself this usually means the web server user cannot read the configuration. |
+| `HTTP_STATUS_REJECTED` | Tor transport | 5 | The remote answered with an unexpected HTTP status other than 404, a redirect or 5xx; nothing was verified. |
 | `IDENTITY_CHANGED` | Node worker | 3 | Another Service identity now answers at an address this Node already knew; the old evidence is preserved. |
 | `IDENTITY_FORKED` | Node worker | 3 | Two different signed revisions with the same number exist; the fork stays visible. |
 | `IMPORT_FORMAT_INVALID` | browser client | – | The code name states the condition; see the raising component. |
@@ -104,6 +107,7 @@ for remedies.
 | `NODE_UNAVAILABLE` | front controller | – | The code name states the condition; see the raising component. |
 | `NOT_FOUND` | front controller, web routes | 3 | The route or record does not exist on this installation. |
 | `ONION_BINDING_MISMATCH` | browser client, protocol, signing | 3 | The signed Manifest belongs to a different Onion than the one it was fetched from or installed for. |
+| `ONION_UNREACHABLE` | Tor transport | 5 | Tor answered with a SOCKS error: it could not reach the Onion (still bootstrapping, Service offline or descriptor not published). |
 | `OUTPUT_DIRECTORY_UNAVAILABLE` | CLI | 3 | The code name states the condition; see the raising component. |
 | `OUTPUT_FILE_EXISTS_OR_UNAVAILABLE` | CLI | 3 | The draft file already exists or cannot be created; drafts are never overwritten. |
 | `PASSPHRASE_FILE_UNSAFE` | CLI | 3 | The passphrase file must be a regular owner-only (0600) file. |
@@ -124,6 +128,8 @@ for remedies.
 | `PUBLIC_MANIFEST_PATH_UNSAFE` | signing | 3 | The code name states the condition; see the raising component. |
 | `PUBLIC_MANIFEST_WRITE_FAILED` | signing | 3 | The code name states the condition; see the raising component. |
 | `PUBLISHER_BUSY` | configuration and status, signing | 3 | Another publisher command holds the lock on the same files; run it again when that command has finished. |
+| `PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT` | doctor | 6 | doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page. |
+| `PUBLISHER_NODES_NOT_CONFIGURED` | CLI, doctor | 3, 6 | No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key. |
 | `PUBLISHING_DISABLED` | CLI | 3 | Publishing is off in the configuration or the Manifest withdraws publication. |
 | `RATE_LIMIT_CONFIGURATION_INVALID` | web routes | 4 | The code name states the condition; see the raising component. |
 | `RATE_LIMIT_CORRUPT` | web routes | 4 | The code name states the condition; see the raising component. |
@@ -210,7 +216,9 @@ for remedies.
 | `SYNC_DISABLED` | CLI | 3 | The code name states the condition; see the raising component. |
 | `TOO_LARGE` | signing | 3 | The code name states the condition; see the raising component. |
 | `TOR_KEY_ACCESS_FORBIDDEN` | CLI, signing | 3, 4 | Commands never read Tor private key files. |
-| `TOR_REQUEST_FAILED` | Tor transport | 5 | Tor or its SOCKS port is unavailable, or the Onion did not answer. |
+| `TOR_PROXY_UNREACHABLE` | Tor transport | 5 | Nothing accepted a connection on the configured Tor SOCKS port: Tor is not running or transport.proxy_port is wrong. |
+| `TOR_REQUEST_FAILED` | Tor transport | 5 | Tor connected, but the HTTP exchange with the Onion failed (connection reset, empty or malformed reply). |
+| `TOR_REQUEST_TIMEOUT` | Tor transport | 5 | The Onion did not answer within transport.timeout_ms; first contact can be slow, retry or raise the limit (at most 60000). |
 | `TRANSPORT_CONFIGURATION_INVALID` | Tor transport | 5 | The code name states the condition; see the raising component. |
 | `TRANSPORT_UNAVAILABLE` | Tor transport | 5 | The code name states the condition; see the raising component. |
 | `UNVERIFIED_RECORD` | browser client | – | The code name states the condition; see the raising component. |

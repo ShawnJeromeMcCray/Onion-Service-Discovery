@@ -63,8 +63,8 @@ its public `hostname` file. The application never provisions or reads Tor keys.
 A publisher can keep its status page current with `osd-publisher-check.timer`:
 every six hours it runs `service:verify --save-status` for the own Onion,
 `network:discoverability-check --save-status` for the Nodes listed in
-`/etc/onion-service-discovery/publisher-check.env` (using the served history
-bundle) and finally `network:announce … --if-due`, the bounded automatic
+`publisher_nodes` of the configuration (using the served history bundle) and
+finally `network:announce … --if-due`, the bounded automatic
 announcement of decision D-018: only for a new revision or a missing
 observation, at most once per day per Node, with backoff up to 32 days. It
 reaches only loopback (the Tor SOCKS listener). Delete the announce line to

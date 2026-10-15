@@ -16,7 +16,7 @@ test('GitHub visitor quickstart verifies synthetic data, searches locally and pi
  const before=requests.length;
  await page.locator('#query').fill('library');
  await expect(page.locator('.result-card')).toHaveCount(1);
- await page.getByRole('button',{name:'Pin this identity',exact:true}).click();
+ await page.getByRole('button',{name:/^Pin this identity/}).click();
  await expect(page.locator('.pin-card')).toHaveCount(1);
  await expect(page.locator('.visit')).toHaveCount(0);
  expect(requests.length).toBe(before);

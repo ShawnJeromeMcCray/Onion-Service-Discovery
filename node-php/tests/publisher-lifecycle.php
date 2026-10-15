@@ -99,6 +99,16 @@ try {
     $assert($run(['manifest:install', 'manifest-5.json', 'hostname', 'web'])['status'] === 'INSTALLED', 'withdrawal install'); ++$checks;
     $served = json_decode((string) file_get_contents('web/.well-known/onion-service-discovery.json'), true, 32, JSON_THROW_ON_ERROR);
     $assert($served['revision'] === 5 && $served['discovery']['publish_service'] === false && $served['onion'] === $newOnion, 'withdrawal served'); ++$checks;
+    // The status page states what a withdrawal does and does not do (spec 47 section 58).
+    require_once $project . '/node-php/vendor/autoload.php';
+    $publisher = json_decode((string) file_get_contents($project . '/node-php/config/example.json'), true, 32, JSON_THROW_ON_ERROR);
+    $publisher['role'] = 'publisher'; $publisher['node']['onion'] = $newOnion; $publisher['features']['publish_service'] = true;
+    $publisher['storage']['path'] = $root . '/unused-store'; $publisher['export_path'] = $root . '/unused-exports';
+    file_put_contents('publisher.json', json_encode($publisher, JSON_THROW_ON_ERROR)); chmod('publisher.json', 0600);
+    $facts = \OnionServiceDiscovery\Configuration\PublisherStatus::inspect(\OnionServiceDiscovery\Configuration\NodeConfig::load($root . '/publisher.json'),
+        new \OnionServiceDiscovery\Protocol\RecordVerifier($project . '/protocol/schemas'), $root . '/web/.well-known/onion-service-discovery.json');
+    $assert($facts['overall'] === 'WITHDRAWN' && $facts['answer'] === 'NO' && str_contains($facts['next_action'], 'Withdrawn from active discovery')
+        && str_contains($facts['next_action'], 'global deletion cannot be guaranteed') && $facts['manifest']['revision'] === 5, 'withdrawal status'); ++$checks;
 } finally {
     chdir($project);
     $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);

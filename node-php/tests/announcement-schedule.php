@@ -193,6 +193,13 @@ try {
     [$exit, $out, $contacted] = announce(['network:announce', $cfg, $root . '/manifest.json', ...$triples], $server, [$a->hostname => $accepted, $b->hostname => $accepted], $service);
     $assert($exit === 0 && $out['status'] === 'HINTS_RECEIVED_UNCONFIRMED' && $out['mode'] === 'EXPLICIT' && $contacted === [$a->hostname, $b->hostname]
         && $out['state_mutated'] === false && file_get_contents(PublisherEvidence::path($cfg)) === $before, 'explicit multi-Node announcement'); ++$checks;
+    // Without Node arguments the command announces to the publisher_nodes of the configuration.
+    $configured = json_decode((string) file_get_contents($cfg), true, 32, JSON_THROW_ON_ERROR);
+    $configured['publisher_nodes'] = [['onion' => $a->hostname, 'expected_node_key' => $nodeKey(1)], ['onion' => $b->hostname, 'expected_node_key' => $nodeKey(2)]];
+    file_put_contents($root . '/configured.json', json_encode($configured, JSON_THROW_ON_ERROR)); chmod($root . '/configured.json', 0600);
+    [$exit, $out, $contacted] = announce(['network:announce', $root . '/configured.json', $root . '/manifest.json'], $server, [$a->hostname => $accepted, $b->hostname => $accepted], $service);
+    $assert($exit === 0 && $out['status'] === 'HINTS_RECEIVED_UNCONFIRMED' && $contacted === [$a->hostname, $b->hostname], 'configured Nodes announced'); ++$checks;
+    unlink($root . '/configured.json');
     [$exit, $out, $contacted] = announce(['service:announce', $cfg, $root . '/manifest.json', $a->hostname], $server, [$a->hostname => $limited], $service);
     $assert($exit === 5 && $out['error'] === 'ANNOUNCEMENT_RATE_LIMITED' && $contacted === [$a->hostname], 'single Node form unchanged'); ++$checks;
     foreach ([[[$a->hostname, '--if-due'], 2, 'USAGE_ERROR'], [['--peer', $a->hostname, $nodeKey(1)], 2, 'USAGE_ERROR'],

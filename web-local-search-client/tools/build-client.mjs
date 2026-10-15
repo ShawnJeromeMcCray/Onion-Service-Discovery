@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { validateOnionAddress } from '../src/protocol/onion-address.ts';
 import { sha3_256 } from '@noble/hashes/sha3.js';
+import { CLIENT_VERSION, PROTOCOL_VERSION } from '../src/client/version.ts';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const argument=process.argv.indexOf('--config');
 const config=JSON.parse(await readFile(argument<0?join(root,'public/config.json'):process.argv[argument+1],'utf8'));
@@ -20,7 +21,7 @@ await copyFile(join(root,'public/client.css'),join(output,'client.css'));
 await copyFile(join(root,'public/demo.json'),join(output,'demo.json'));
 await writeFile(join(output,'config.json'),JSON.stringify(config)+'\n');
 const files=['client.js','client.js.LEGAL.txt','verifier-worker.js','verifier-worker.js.LEGAL.txt','client.css','index.html','demo.json','config.json'];
-const manifest={artifact:'Onion Service Discovery development browser client',files:[]};
+const manifest={artifact:'Onion Service Discovery development browser client',version:CLIENT_VERSION,protocol_version:PROTOCOL_VERSION,files:[]};
 for(const name of files){let bytes;try{bytes=await readFile(join(output,name));}catch(error){if(name.endsWith('.LEGAL.txt')&&error.code==='ENOENT')continue;throw error;}manifest.files.push({file:name,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});}
 await writeFile(join(output,'build-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
 console.log('Built local browser client with '+config.allowed_sources.length+' explicit source origins');

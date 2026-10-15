@@ -29,11 +29,12 @@ try{
  $cases=json_decode(file_get_contents($project.'/protocol/test-vectors/identity-sequences.json'),true,64,JSON_THROW_ON_ERROR);$onion=$cases['cases'][0]['records'][0]['onion'];
  $trap=stream_socket_server('tcp://127.0.0.1:0');$trapPort=(int)substr(strrchr(stream_socket_get_name($trap,false),':'),1);putenv('NO_PROXY=*');putenv('HTTP_PROXY=http://127.0.0.1:'.$trapPort);
  $error=null;$started=microtime(true);try{(new TorTransport('127.0.0.1',$port,1000))->get(OnionAddress::parse($onion),ProtocolEndpoint::manifest());}catch(TransportException $failure){$error=$failure->getMessage();}
- if($error!=='TOR_REQUEST_FAILED')throw new RuntimeException('Real Tor unavailable request not normalized');
+ // Tor accepted the SOCKS request but reached no Onion: a typed Tor-side failure, never the local-listener one.
+ if(!in_array($error,['ONION_UNREACHABLE','TOR_REQUEST_TIMEOUT'],true))throw new RuntimeException('Real Tor unavailable request not normalized: '.$error);
  $v=json_decode(file_get_contents($project.'/node-php/config/node.example.json'),true,32,JSON_THROW_ON_ERROR);$v['storage']['path']=$root.'/store';$v['export_path']=$root.'/exports';$v['node']['key_path']=$root.'/node.key';$v['transport']['proxy_port']=$port;$v['transport']['timeout_ms']=1000;
  file_put_contents($root.'/node.json',json_encode($v));chmod($root.'/node.json',0600);
  $cli=proc_open([PHP_BINARY,$project.'/node-php/bin/onion-service-discovery','service:verify',$root.'/node.json',$onion,'--json','--no-interaction'],[['pipe','r'],['pipe','w'],['pipe','w']],$cp);fclose($cp[0]);$out=stream_get_contents($cp[1]);$err=stream_get_contents($cp[2]);fclose($cp[1]);fclose($cp[2]);$exit=proc_close($cli);
- if($exit!==5||$err!==''||json_decode($out,true)!==['status'=>'FAIL','error'=>'TOR_REQUEST_FAILED'])throw new RuntimeException('CLI real Tor failure contract invalid');
+ if($exit!==5||$err!==''||!in_array(json_decode($out,true),[['status'=>'FAIL','error'=>'ONION_UNREACHABLE'],['status'=>'FAIL','error'=>'TOR_REQUEST_TIMEOUT']],true))throw new RuntimeException('CLI real Tor failure contract invalid');
  if(is_dir($root.'/store')||is_dir($root.'/exports')||is_file($root.'/node.key'))throw new RuntimeException('Read-only probe created application state');
  $events='';stream_set_blocking($control,false);$eventDeadline=microtime(true)+1;while(microtime(true)<$eventDeadline){$events.=stream_get_contents($control);if(str_contains($events,$onion.':80'))break;usleep(10000);}fclose($control);
  if(!str_contains($events,'650 STREAM ')||!str_contains($events,$onion.':80'))throw new RuntimeException('Real Tor SOCKS hostname stream not observed');

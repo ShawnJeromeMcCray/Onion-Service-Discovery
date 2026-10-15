@@ -69,7 +69,7 @@ try {
     $assert($found['self_verification'] === 'PASS' && $found['announcement'] === 'HINT_ACCEPTED_BY_1_OF_2_ATTEMPTED_NODES' && $found['pipeline']['announcement'] === 'PASS'
         && $found['pipeline']['onion_self_verification'] === 'PASS' && $found['overall'] === 'DISCOVERABLE'); ++$checks;
     // Spec 47 section 23: result counts and the next bounded retry for Nodes without the current revision.
-    $assert($found['announcement_results'] === 'accepted 1, rate limited 0, unreachable 1, in progress 0, other failures 0'
+    $assert($found['announcement_results'] === 'accepted 1, rate limited 0, not accepting announcements 0, unreachable 1, local Tor unavailable 0, in progress 0, other failures 0'
         && $found['announcement_next_retry_at'] === gmdate('Y-m-d\TH:i:s\Z', $now + 86400)); ++$checks;
     PublisherEvidence::recordSelfVerification($cfg, $now, null, 'TOR_REQUEST_FAILED');
     $failed = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
@@ -83,19 +83,83 @@ try {
     $assert($old['overall'] === 'DISCOVERABLE_DEGRADED' && $old['answer'] === 'DEGRADED' && $old['pipeline']['redundancy_freshness'] === 'WARN'); ++$checks;
     PublisherEvidence::recordMembership($result(['included' => 1], 0), $cfg, $now);
     $unobserved = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
-    $assert($unobserved['overall'] === 'READY_LOCALLY' && $unobserved['external_observation'] === 'NO_EXTERNAL_OBSERVATION'); ++$checks;
+    $assert($unobserved['overall'] === 'EXTERNALLY_OBSERVED' && $unobserved['answer'] === 'NOT YET' && $unobserved['external_observation'] === 'NO_EXTERNAL_OBSERVATION'); ++$checks;
     PublisherEvidence::recordMembership($result(['included' => 1, 'contradictory' => 1], 1), $cfg, $now);
     $conflict = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
     $assert($conflict['overall'] === 'IDENTITY_CONFLICT' && $conflict['answer'] === 'PROBLEM' && $conflict['pipeline']['external_direct_observation'] === 'FAIL'); ++$checks;
     PublisherEvidence::recordMembership($result(['stale' => 2], 0), $cfg, $now);
     $pending = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
-    $assert($pending['overall'] === 'READY_LOCALLY' && $pending['external_observation'] === 'OBSERVED_STALE_REVISION'); ++$checks;
+    $assert($pending['overall'] === 'EXTERNALLY_OBSERVED' && $pending['external_observation'] === 'OBSERVED_STALE_REVISION'); ++$checks;
     PublisherEvidence::recordMembership($result(['included' => 3], 3, 'sha256:' . str_repeat('0', 64)), $cfg, $now);
     $other = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
-    $assert($other['overall'] === 'READY_LOCALLY' && $other['active_index_membership'] === 'NOT_CHECKED'); ++$checks;
+    // Membership for another revision is ignored; the accepted announcement of this revision still counts.
+    $assert($other['overall'] === 'ANNOUNCED_PENDING_VERIFICATION' && $other['active_index_membership'] === 'NOT_CHECKED' && str_contains($other['next_action'], 'revision 1, not the installed')); ++$checks;
     file_put_contents($saved, '{"evidence_version":1,"membership":{"included":99}}');
     $assert(PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now)['overall'] === 'READY_LOCALLY'); ++$checks;
     unlink($saved);
+    // Spec 47 sections 9 and 62: each primary state on the way to DISCOVERABLE, derived from saved evidence.
+    PublisherEvidence::recordSelfVerification($cfg, $now, $hash, 'SIGNATURE_AND_BINDING_VALID');
+    $connecting = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($connecting['overall'] === 'CONNECTING' && $connecting['answer'] === 'NOT YET' && str_contains($connecting['next_action'], 'announce it')
+        && $connecting['pipeline']['onion_self_verification'] === 'PASS' && $connecting['pipeline']['bootstrap_connectivity'] === 'PENDING'); ++$checks;
+    PublisherEvidence::recordAnnouncement($cfg, $now, $nodeA, 'HINT_RECEIVED_UNCONFIRMED', $hash);
+    $announced = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($announced['overall'] === 'ANNOUNCED_PENDING_VERIFICATION' && $announced['answer'] === 'NOT YET' && str_contains($announced['next_action'], 'accepted the announcement')
+        && $announced['bootstrap'] === 'ANNOUNCEMENT_ACCEPTED_BY_1_NODES' && $announced['pipeline']['bootstrap_connectivity'] === 'PASS'); ++$checks;
+    $outdated = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now + PublisherStatus::EVIDENCE_DEGRADED_AFTER_SECONDS + 1);
+    $assert($outdated['self_verification'] === 'PASS_OUTDATED' && $outdated['pipeline']['onion_self_verification'] === 'WARN' && str_contains($outdated['next_action'], 'older than seven days')); ++$checks;
+    unlink($saved);
+    // No checked Node reachable and nothing announced: bootstrap fails, with a remedy.
+    PublisherEvidence::recordMembership($result(['unavailable' => 3], 0), $cfg, $now);
+    $offline = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($offline['overall'] === 'READY_LOCALLY' && $offline['bootstrap'] === 'NO_CHECKED_NODE_REACHABLE' && $offline['pipeline']['bootstrap_connectivity'] === 'FAIL'
+        && str_contains($offline['next_action'], 'None of the checked Nodes answered')); ++$checks;
+    // Discoverable on exactly one Node: found, without redundancy.
+    PublisherEvidence::recordMembership($result(['included' => 1], 1), $cfg, $now);
+    $single = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($single['overall'] === 'DISCOVERABLE' && str_contains($single['sampled_discoverability'], '1 of 1') && $single['pipeline']['redundancy_freshness'] === 'WARN'); ++$checks;
+    // A failing self-check outranks good news in the next action and names its remedy.
+    PublisherEvidence::recordSelfVerification($cfg, $now, null, 'HTTP_NOT_FOUND');
+    $routing = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($routing['overall'] === 'DISCOVERABLE' && str_contains($routing['next_action'], 'answered 404') && $routing['pipeline']['onion_self_verification'] === 'FAIL'); ++$checks;
+    PublisherEvidence::recordSelfVerification($cfg, $now, null, 'TOR_PROXY_UNREACHABLE');
+    $assert(str_contains(PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now)['next_action'], 'SOCKS listener')); ++$checks;
+    // A check from before the installed revision says nothing about it; a later one that differs is a routing problem.
+    PublisherEvidence::recordSelfVerification($cfg, $now, 'sha256:' . str_repeat('1', 64), 'SIGNATURE_AND_BINDING_VALID');
+    touch($manifest, $now + 10);
+    $since = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now + 20);
+    $assert($since['self_verification'] === 'NOT_CHECKED_SINCE_INSTALL' && $since['pipeline']['onion_self_verification'] === 'PENDING'); ++$checks;
+    touch($manifest, $now - 10);
+    $differs = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now + 20);
+    $assert($differs['self_verification'] === 'SERVED_MANIFEST_DIFFERS' && $differs['pipeline']['onion_self_verification'] === 'FAIL'); ++$checks;
+    unlink($saved);
+    // D-052: a Node that contradicted its previous checkpoint is named separately (spec 47 section 79).
+    $integrity = $result(['included' => 1, 'rejected' => 1], 1);
+    $integrity['sources'][1]['error'] = 'SOURCE_CHECKPOINT_EQUIVOCATION';
+    PublisherEvidence::recordMembership($integrity, $cfg, $now);
+    $warned = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $warnedPage = StatusPage::render($warned)['body'];
+    $assert($warned['source_integrity'] === 'CHECKPOINT_CONFLICT_AT_1_CHECKED_NODES' && count($warned['warnings']) === 1 && $warned['overall'] === 'DISCOVERABLE'
+        && str_contains($warnedPage, 'role="alert"') && str_contains($warnedPage, 'Conflicting signed index checkpoints')); ++$checks;
+    $assert(str_contains($warnedPage, 'href="/.well-known/onion-service-discovery.json"')); ++$checks;
+    // doctor and the support bundle report the publication too (spec 32 sections 8 and 10).
+    $doctor = Diagnostics::inspect($config, $verifier, $manifest, $cfg);
+    $assert($doctor['manifest_state'] === 'SIGNATURE_VALID' && $doctor['security_check_summary']['publisher_manifest'] === 'PASS' && $doctor['publication']['overall'] === 'DISCOVERABLE'
+        && in_array('PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT', $doctor['warnings'], true)); ++$checks;
+    $bundle = json_encode(\OnionServiceDiscovery\Configuration\SupportBundle::create($config, $verifier, $cfg, $manifest), JSON_THROW_ON_ERROR);
+    $assert(str_contains($bundle, '"manifest_state":"SIGNATURE_VALID"') && !str_contains($bundle, $genesisKey) && !str_contains($bundle, (string) $v['node']['onion'])); ++$checks;
+    unlink($saved);
+    // Publishing switched off in the configuration.
+    $off = $v; $off['features']['publish_service'] = false; file_put_contents($temp . '/off.json', json_encode($off, JSON_THROW_ON_ERROR)); chmod($temp . '/off.json', 0600);
+    $disabled = PublisherStatus::inspect(NodeConfig::load($temp . '/off.json'), $verifier, $manifest);
+    $assert($disabled['overall'] === 'CONFIGURED_NOT_PUBLISHED' && $disabled['answer'] === 'NO' && str_contains($disabled['next_action'], 'Publishing is disabled')); ++$checks;
+    // After an Onion migration the new Manifest belongs to the new address (spec 47 section 59).
+    file_put_contents($manifest, json_encode($fixture['stories']['migrated'], JSON_THROW_ON_ERROR));
+    $migrated = PublisherStatus::inspect($config, $verifier, $manifest);
+    $assert($migrated['overall'] === 'ERROR' && $migrated['manifest']['state'] === 'OTHER_ONION' && $migrated['manifest']['onion'] === $fixture['stories']['migrated']['onion']
+        && str_contains($migrated['next_action'], 'set node.onion to the new address') && $migrated['pipeline']['manifest'] === 'FAIL'); ++$checks;
+    $assert(Diagnostics::inspect($config, $verifier, $manifest, $cfg)['security_check_summary']['publisher_manifest'] === 'FAIL'); ++$checks;
+    file_put_contents($manifest, json_encode($fixture['stories']['genesis'], JSON_THROW_ON_ERROR));
     $page = StatusPage::render($facts);
     $assert($page['status'] === 200 && $page['headers']['Cache-Control'] === 'no-store' && str_contains($page['headers']['Content-Security-Policy'], 'frame-ancestors')); ++$checks;
     $assert(!str_contains($page['body'], $temp) && !str_contains($page['body'], 'must-not-be-created')); ++$checks;

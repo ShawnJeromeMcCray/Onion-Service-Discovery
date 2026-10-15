@@ -6,24 +6,28 @@ import { buildView, pinIdentity, type LocalPin } from './view-model.ts';
 import { classifyPinImport, mergePins, parsePinBackup } from './pins.ts';
 import { SourceWitnesses } from './source-witnesses.ts';
 
-type Command = {op:'configure';allowedSources:string[];deliveryProfile:DeliveryProfile;visitorSources?:boolean}|{op:'add-source';onion:string;expectedKey:string}|{op:'remove-source';onion:string}|{op:'load';sources:SourceSelection[]}|{op:'cancel'}|{op:'import-records';bytes:ArrayBuffer;synthetic?:boolean}|{op:'pin';genesisKey:string}|{op:'unpin';genesisKey:string}|{op:'restore-pins';bytes:ArrayBuffer;origin:'profile'|'backup'}|{op:'preview-pins';bytes:ArrayBuffer}|{op:'clear-index'}|{op:'clear-all'};
+type Command = {op:'configure';allowedSources:string[];deliveryProfile:DeliveryProfile;visitorSources?:boolean}|{op:'add-source';onion:string;expectedKey:string}|{op:'remove-source';onion:string}|{op:'export-evidence';onion:string}|{op:'load';sources:SourceSelection[]}|{op:'cancel'}|{op:'import-records';bytes:ArrayBuffer;synthetic?:boolean}|{op:'pin';genesisKey:string}|{op:'unpin';genesisKey:string}|{op:'restore-pins';bytes:ArrayBuffer;origin:'profile'|'backup'}|{op:'preview-pins';bytes:ArrayBuffer}|{op:'clear-index'}|{op:'clear-all'};
 const scope=globalThis as unknown as {onmessage:((event:MessageEvent<Command>)=>void)|null;postMessage:(data:unknown)=>void};
 const crypto=browserCryptoProviders(); let loader=new SourceLoader(crypto);
 const records=new Map<string,VerifiedRecord>(); const ledgers=new Map<string,SourceLedger>(); const witnesses=new SourceWitnesses();
+// Which origin supplied each admitted record: a loaded Node's onion, 'local file' or 'demonstration'.
+const provenance=new Map<string,Set<string>>();
 // Visitor-chosen Nodes (onion -> expected key) exist only when the Client Host explicitly relays them.
 const MAX_VISITOR_SOURCES=8; const visitor=new Map<string,string>(); let visitorEnabled=false;
 let pins:LocalPin[]=[]; let allowed=new Set<string>(); let controller:AbortController|null=null; let busy=false; let synthetic=false;
-interface SourceStatus {onion:string;status:'LOADING'|'PARTIAL'|'COMPLETE'|'STALE'|'FAILED'|'QUARANTINED'|'CANCELLED'|'NOT_STARTED';nodeKey:string|null;generation:number|null;error:string|null;baselineHistoryProven:boolean;}
+interface SourceStatus {onion:string;status:'LOADING'|'PARTIAL'|'COMPLETE'|'STALE'|'FAILED'|'QUARANTINED'|'CANCELLED'|'NOT_STARTED';nodeKey:string|null;generation:number|null;createdAt:string|null;error:string|null;baselineHistoryProven:boolean;evidenceAvailable:boolean;}
 let statuses:SourceStatus[]=[];
 function code(error:unknown):string { return error instanceof Error&&/^[A-Z_]{1,80}$/.test(error.message)?error.message:'CLIENT_OPERATION_FAILED'; }
 function publish():void {
-  const view=buildView([...records.values()],pins); pins=view.pins.map(row=>row.pin);
+  const quarantined=new Set(statuses.filter(status=>status.status==='QUARANTINED').map(status=>status.onion));
+  for(const status of statuses){const key=ledgers.get(status.onion)?.nodeKey??null;status.evidenceAvailable=key!==null&&witnesses.forkEvidence(key).length===2;}
+  const view=buildView([...records.values()],pins,{provenance,quarantined}); pins=view.pins.map(row=>row.pin);
   scope.postMessage({type:'view',view,sources:statuses,synthetic,busy,witnessCount:witnesses.size,visitorSources:[...visitor].map(([onion,expectedKey])=>({onion,expectedKey}))});
 }
-function admit(incoming:readonly VerifiedRecord[]):void {
+function admit(incoming:readonly VerifiedRecord[],origin:string):void {
   const added=new Set(incoming.filter(record=>!records.has(record.contentHash)).map(record=>record.contentHash));
   if(records.size+added.size>10000) throw new Error('CLIENT_RECORD_BUDGET_EXHAUSTED');
-  for(const record of incoming) records.set(record.contentHash,record);
+  for(const record of incoming) { records.set(record.contentHash,record); const origins=provenance.get(record.contentHash)??new Set<string>(); origins.add(origin); provenance.set(record.contentHash,origins); }
 }
 async function command(message:Command):Promise<void> {
   if(message.op==='cancel') { controller?.abort(); return; }
@@ -48,6 +52,12 @@ async function command(message:Command):Promise<void> {
     return;
   }
   if(message.op==='remove-source') { visitor.delete(message.onion); publish(); return; }
+  if(message.op==='export-evidence') {
+    // The two conflicting signed records a Node produced, for reporting; nothing else is included.
+    const key=ledgers.get(message.onion)?.nodeKey??null; const pair=key===null?[]:witnesses.forkEvidence(key);
+    if(pair.length!==2) throw new Error('EVIDENCE_UNAVAILABLE');
+    scope.postMessage({type:'evidence',onion:message.onion,wires:pair.map(record=>record.canonicalWire)}); return;
+  }
   if(message.op==='pin') {
     const row=buildView([...records.values()],pins).services.find(item=>item.genesisKey===message.genesisKey);
     if(row===undefined||pins.length>=256) throw new Error('PIN_CONTEXT_UNAVAILABLE');
@@ -64,8 +74,8 @@ async function command(message:Command):Promise<void> {
     scope.postMessage({type:'pins-restored',origin:message.origin,added:result.added,updated:result.updated,skipped:result.skipped}); return;
   }
   if(busy) throw new Error('CLIENT_BUSY');
-  if(message.op==='clear-all') { records.clear(); ledgers.clear(); witnesses.clear(); loader.clear(); pins=[]; statuses=[]; synthetic=false; visitor.clear(); publish(); return; }
-  if(message.op==='clear-index') { records.clear(); statuses=[]; synthetic=false; publish(); return; }
+  if(message.op==='clear-all') { records.clear(); provenance.clear(); ledgers.clear(); witnesses.clear(); loader.clear(); pins=[]; statuses=[]; synthetic=false; visitor.clear(); publish(); return; }
+  if(message.op==='clear-index') { records.clear(); provenance.clear(); statuses=[]; synthetic=false; publish(); return; }
   busy=true; publish();
   try {
     if(message.op==='import-records') {
@@ -74,21 +84,21 @@ async function command(message:Command):Promise<void> {
       if(incoming===null)throw new Error('IMPORT_FORMAT_INVALID');
       const verified:VerifiedRecord[]=[];
       for(const item of incoming) { verified.push(await verifyRecord(requiredObject(item),crypto)); if(verified.length%32===0) await new Promise(resolve=>setTimeout(resolve,0)); }
-      if(message.synthetic===true) { records.clear(); statuses=[]; synthetic=true; }
-      admit(verified);
+      if(message.synthetic===true) { records.clear(); provenance.clear(); statuses=[]; synthetic=true; }
+      admit(verified,message.synthetic===true?'demonstration':'local file');
     } else if(message.op==='load') {
       if(message.sources.length<1||message.sources.length>16||new Set(message.sources.map(source=>source.onion)).size!==message.sources.length) throw new Error('CLIENT_CONFIGURATION_INVALID');
       // A visitor-chosen Node loads only with exactly the key the visitor entered for it.
       for(const selection of message.sources) { loader.validate(selection); if(!allowed.has(selection.onion)&&!(visitorEnabled&&visitor.get(selection.onion)!==undefined&&visitor.get(selection.onion)===selection.expectedKey)) throw new Error('SOURCE_NOT_IN_HOST_ALLOWLIST'); }
-      if(synthetic) { records.clear(); synthetic=false; }
+      if(synthetic) { records.clear(); provenance.clear(); synthetic=false; }
       controller=new AbortController();
-      statuses=message.sources.map(selection=>({onion:selection.onion,status:'NOT_STARTED',nodeKey:null,generation:null,error:null,baselineHistoryProven:false}));
+      statuses=message.sources.map(selection=>({onion:selection.onion,status:'NOT_STARTED',nodeKey:null,generation:null,createdAt:null,error:null,baselineHistoryProven:false,evidenceAvailable:false}));
       for(let index=0;index<message.sources.length;++index) {
         const selection=message.sources[index]!; const status=statuses[index]!; status.status='LOADING'; publish();
         try {
           const result=await loader.load(selection,ledgers.get(selection.onion),controller.signal,(ledger,evidence)=>{const fork=witnesses.observe(evidence);ledger.equivocated ||= fork;ledgers.set(selection.onion,structuredClone(ledger));if(ledger.equivocated)throw new Error(evidence.type==='node_descriptor'?'SOURCE_DESCRIPTOR_EQUIVOCATION':'SOURCE_CHECKPOINT_EQUIVOCATION');});
-          admit(result.records); ledgers.set(selection.onion,result.ledger);
-          const age=Date.now()-Date.parse(result.createdAt); status.status=age>604800000||age< -300000?'STALE':'COMPLETE'; status.nodeKey=result.ledger.nodeKey; status.generation=result.ledger.generation; status.baselineHistoryProven=result.baselineHistoryProven;
+          admit(result.records,selection.onion); ledgers.set(selection.onion,result.ledger);
+          const age=Date.now()-Date.parse(result.createdAt); status.status=age>604800000||age< -300000?'STALE':'COMPLETE'; status.nodeKey=result.ledger.nodeKey; status.generation=result.ledger.generation; status.createdAt=result.createdAt; status.baselineHistoryProven=result.baselineHistoryProven;
         } catch(error) {
           status.error=code(error);
           status.status=status.error==='SOURCE_CANCELLED'?'CANCELLED':status.error==='SOURCE_HISTORY_PROGRESS'?'PARTIAL':/EQUIVOCATION|ROLLBACK|FORK|KEY_CHANGED|CHAIN_BROKEN/.test(status.error)?'QUARANTINED':'FAILED';

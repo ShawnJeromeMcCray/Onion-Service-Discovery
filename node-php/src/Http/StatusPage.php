@@ -13,7 +13,7 @@ final class StatusPage
     {
         $headers = ['Content-Type' => 'text/html; charset=utf-8', 'Cache-Control' => 'no-store', 'Referrer-Policy' => 'no-referrer', 'X-Content-Type-Options' => 'nosniff'];
         if (!in_array($method, ['GET','HEAD'], true)) { return ['status' => 405, 'headers' => $headers + ['Allow' => 'GET, HEAD'], 'body' => 'Method not allowed']; }
-        $css = 'body{font:1rem system-ui,sans-serif;max-width:52rem;margin:0 auto;padding:1.25rem;line-height:1.6;background:#111827;color:#f3f4f6}h1,h2{line-height:1.3}section{border:1px solid #6b7280;border-radius:.5rem;padding:1rem;margin:1rem 0}dt{font-weight:bold}dd{margin:0 0 1rem;overflow-wrap:anywhere}a{color:#c4b5fd}a:focus{outline:3px solid #fff}code{overflow-wrap:anywhere}.answer{font-size:1.25rem}.state{display:inline-block;min-width:9.5rem;font-family:monospace;font-weight:bold}li{margin:.5rem 0}';
+        $css = 'body{font:1rem system-ui,sans-serif;max-width:52rem;margin:0 auto;padding:1.25rem;line-height:1.6;background:#111827;color:#f3f4f6}h1,h2{line-height:1.3}section{border:1px solid #6b7280;border-radius:.5rem;padding:1rem;margin:1rem 0}dt{font-weight:bold}dd{margin:0 0 1rem;overflow-wrap:anywhere}a{color:#c4b5fd}a:focus{outline:3px solid #fff}code{overflow-wrap:anywhere}.answer{font-size:1.25rem}.state{display:inline-block;min-width:9.5rem;font-family:monospace;font-weight:bold}.warning{border:2px solid #fbbf24}li{margin:.5rem 0}';
         $headers['Content-Security-Policy'] = "default-src 'none'; style-src 'sha256-" . base64_encode(hash('sha256', $css, true)) . "'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
         $headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()';
         $overall = is_string($facts['overall'] ?? null) ? $facts['overall'] : 'NOT_CONFIGURED';
@@ -22,6 +22,7 @@ final class StatusPage
         $body = '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onion Service Discovery — Service status</title><style>' . $css . '</style><main><h1>Onion Service Discovery</h1>'
             . '<h2>Can this Service currently be found through Onion Service Discovery?</h2><p class="answer"><strong>' . self::escape($answer) . '</strong> — ' . self::escape(is_string($facts['sampled_discoverability'] ?? null) && $answer !== 'NO' && $facts['sampled_discoverability'] !== 'UNCONFIRMED' ? $facts['sampled_discoverability'] : $action) . '</p>'
             . '<p>State: <code>' . self::escape($overall) . '</code>. Discoverability is sampled evidence from checked Discovery Nodes: the exact current revision in a verified complete signed snapshot plus that Node’s own direct observation. It is never a global guarantee.</p>'
+            . self::warnings($facts)
             . '<section><h2>Next action</h2><p>' . self::escape($action) . '</p></section>';
         if (is_array($facts['pipeline'] ?? null)) {
             $body .= '<section><h2>Steps</h2><ol>';
@@ -31,7 +32,7 @@ final class StatusPage
             $body .= '</ol></section>';
         }
         $body .= '<section><h2>Publication facts</h2><dl>';
-        $allowed = ['onion','self_verification','self_verification_checked_at','bootstrap','announcement','announcement_results','announcement_last_at','announcement_next_retry_at','external_observation','active_index_membership','sampled_discoverability','evidence_checked_at'];
+        $allowed = ['onion','self_verification','self_verification_checked_at','bootstrap','announcement','announcement_results','announcement_last_at','announcement_next_retry_at','external_observation','active_index_membership','sampled_discoverability','source_integrity','evidence_checked_at'];
         foreach ($allowed as $field) {
             $value = $facts[$field] ?? null;
             if (is_string($value)) { $body .= '<dt>' . self::escape(str_replace('_', ' ', $field)) . '</dt><dd>' . self::escape($value) . '</dd>'; }
@@ -44,7 +45,13 @@ final class StatusPage
                 }
             }
         }
-        $body .= '</dl></section>';
+        $body .= '</dl>';
+        // Spec 47 section 15: the public records this installation serves, for anyone to inspect.
+        if (($facts['manifest']['state'] ?? null) === 'SIGNATURE_VALID') {
+            $body .= '<p><a href="/.well-known/onion-service-discovery.json">View the public signed Manifest</a>'
+                . (($facts['manifest']['history_bundle'] ?? null) === 'INSTALLED' ? ' · <a href="/.well-known/onion-service-discovery-history.json">View the public history bundle</a>' : '') . '</p>';
+        }
+        $body .= '</section>';
         if (is_array($facts['node'] ?? null)) {
             $node = $facts['node'];
             $body .= '<section><h2>Discovery Node</h2>';
@@ -78,6 +85,15 @@ final class StatusPage
         }
         $body .= '<p>Signature validity establishes technical key evidence, not content safety or operator identity. Several Node keys may belong to one operator.</p><p>Development implementation. Production approval remains open.</p></main></html>';
         return ['status' => 200, 'headers' => $headers, 'body' => $method === 'HEAD' ? '' : $body];
+    }
+    /** @param array<string,mixed> $facts */
+    private static function warnings(array $facts): string
+    {
+        $items = '';
+        foreach (is_array($facts['warnings'] ?? null) ? $facts['warnings'] : [] as $warning) {
+            if (is_string($warning)) { $items .= '<li>' . self::escape($warning) . '</li>'; }
+        }
+        return $items === '' ? '' : '<section class="warning" role="alert"><h2>Warning</h2><ul>' . $items . '</ul></section>';
     }
     private static function escape(string $text): string { return htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8'); }
 }
