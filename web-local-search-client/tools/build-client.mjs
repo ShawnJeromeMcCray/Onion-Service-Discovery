@@ -9,7 +9,10 @@ import { CLIENT_VERSION, PROTOCOL_VERSION } from '../src/client/version.ts';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const argument=process.argv.indexOf('--config');
 const config=JSON.parse(await readFile(argument<0?join(root,'public/config.json'):process.argv[argument+1],'utf8'));
-if(Object.keys(config).length!==5||config.client_config_version!==1||!['client-host','combined'].includes(config.mode)||config.minimum_distinct_keys!==3||!['client-host-proxy','direct-cross-origin'].includes(config.delivery_profile)||!Array.isArray(config.allowed_sources)||config.allowed_sources.length>16||new Set(config.allowed_sources).size!==config.allowed_sources.length)throw new Error('Invalid Client Host configuration');
+// expected_node_keys is optional: {onion: "ed25519:..."} for listed sources only.
+const hostKeys=config.expected_node_keys??{};
+if(typeof hostKeys!=='object'||hostKeys===null||Array.isArray(hostKeys)||Object.entries(hostKeys).some(([onion,key])=>!Array.isArray(config.allowed_sources)||!config.allowed_sources.includes(onion)||typeof key!=='string'||!/^ed25519:[A-Za-z0-9_-]{43}$/.test(key)))throw new Error('Invalid expected_node_keys');
+if(Object.keys(config).length!==5+('expected_node_keys' in config?1:0)||config.client_config_version!==1||!['client-host','combined'].includes(config.mode)||config.minimum_distinct_keys!==3||!['client-host-proxy','direct-cross-origin'].includes(config.delivery_profile)||!Array.isArray(config.allowed_sources)||config.allowed_sources.length>16||new Set(config.allowed_sources).size!==config.allowed_sources.length)throw new Error('Invalid Client Host configuration');
 for(const source of config.allowed_sources)validateOnionAddress(source,sha3_256);
 const output=join(root,'dist');await mkdir(output,{recursive:true});
 await build({absWorkingDir:root,entryPoints:{client:'src/client/app.ts','verifier-worker':'src/client/verifier-worker.ts'},outdir:output,bundle:true,format:'esm',platform:'browser',target:'firefox128',minify:true,sourcemap:false,legalComments:'external',metafile:false});

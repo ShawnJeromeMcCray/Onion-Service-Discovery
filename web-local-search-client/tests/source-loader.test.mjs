@@ -105,3 +105,72 @@ test('a conflicting signed ancestor is retained and quarantines the source befor
   await assert.rejects(loader.load(selection,ledger,new AbortController().signal,observe),{message:'SOURCE_EQUIVOCATION_PRESERVED'});
  }finally{fixture.restore();}
 });
+
+// Serves all three fixture Nodes by host name; `delay` holds every answer back (ignoring aborts, like a slow circuit).
+function serveAll({delay=0}={}){
+ const sources=JSON.parse(readFileSync(new URL('../../protocol/test-vectors/browser-dataset.json',import.meta.url),'utf8')).sources;
+ const byOnion=new Map(sources.map(item=>[item.onion,item])); const original=globalThis.fetch;
+ globalThis.fetch=async url=>{
+  const parsed=new URL(url); const node=byOnion.get(parsed.hostname); if(node===undefined)throw new Error('unexpected host');
+  if(delay>0)await new Promise(resolve=>setTimeout(resolve,delay));
+  let body;
+  if(parsed.pathname.endsWith('/node'))body=canonicalJson(node.node_descriptor);
+  else if(parsed.pathname.endsWith('/state'))body=JSON.stringify(node.state);
+  else if(parsed.pathname.includes('/snapshots/'))body=canonicalJson(node.checkpoint);
+  else if(parsed.pathname.includes('/chunks/'))body=Buffer.from(node.chunk_base64,'base64').toString('utf8');
+  else throw new Error('unexpected generic endpoint');
+  return new Response(body,{headers:{'content-type':'application/json'}});
+ };
+ return {sources,restore:()=>{globalThis.fetch=original;}};
+}
+function instrumented({before=async()=>{}}={}){
+ const counter={calls:0};
+ return {counter,crypto:{...crypto,verifyEd25519:async(...args)=>{counter.calls++;await before(counter.calls);return crypto.verifyEd25519(...args);}}};
+}
+const signatures=record=>record.record_type==='service_identity_key_rotation'?2:1;
+const pick=node=>({onion:node.onion,expectedKey:node.node_descriptor.node_identity_public_key});
+
+test('a record verified for one Node is not verified again for the next',async()=>{
+ const served=serveAll(); const {counter,crypto:counting}=instrumented(); const loader=new SourceLoader(counting);
+ try{
+  const [first,second]=served.sources; const chunk=node=>JSON.parse(Buffer.from(node.chunk_base64,'base64').toString('utf8'));
+  await loader.load(pick(first),undefined,new AbortController().signal);
+  // Descriptor and checkpoint are always checked; chunk records once each.
+  assert.equal(counter.calls,2+chunk(first).reduce((sum,record)=>sum+signatures(record),0));
+  const seen=new Set(chunk(first).map(record=>canonicalJson(record))); counter.calls=0;
+  const result=await loader.load(pick(second),undefined,new AbortController().signal);
+  const fresh=chunk(second).filter(record=>!seen.has(canonicalJson(record)));
+  assert.ok(fresh.length<chunk(second).length,'the fixture Nodes share records');
+  assert.equal(counter.calls,2+fresh.reduce((sum,record)=>sum+signatures(record),0));
+  assert.equal(result.records.length,1+chunk(second).length);
+  // Forgetting drops the memory: the same Node is checked in full again.
+  loader.forgetVerified(); counter.calls=0;
+  await loader.load(pick(second),undefined,new AbortController().signal);
+  assert.equal(counter.calls,2+chunk(second).reduce((sum,record)=>sum+signatures(record),0));
+ }finally{served.restore();}
+});
+
+test('slow signature checks do not use up the network time of a source',async()=>{
+ const served=serveAll(); const {crypto:slow}=instrumented({before:()=>new Promise(resolve=>setTimeout(resolve,40))});
+ const loader=new SourceLoader(slow,'direct-cross-origin',{networkBudgetMs:30}); const progress=[];
+ try{
+  const result=await loader.load(pick(served.sources[0]),undefined,new AbortController().signal,undefined,(records,total)=>progress.push([records,total]));
+  assert.equal(result.records.length,8);
+  assert.deepEqual(progress,[[7,7]]);
+ }finally{served.restore();}
+});
+
+test('network time beyond the budget refuses the source without partial data',async()=>{
+ const served=serveAll({delay:20}); const loader=new SourceLoader(crypto,'direct-cross-origin',{networkBudgetMs:30});
+ try{
+  await assert.rejects(loader.load(pick(served.sources[0]),undefined,new AbortController().signal),{message:'SOURCE_TIME_BUDGET_EXHAUSTED'});
+ }finally{served.restore();}
+});
+
+test('cancel while signatures are checked stops the load',async()=>{
+ const served=serveAll(); const controller=new AbortController();
+ const {crypto:cancelling}=instrumented({before:async calls=>{if(calls===4)controller.abort();}});
+ try{
+  await assert.rejects(new SourceLoader(cancelling).load(pick(served.sources[0]),undefined,controller.signal),{message:'SOURCE_CANCELLED'});
+ }finally{served.restore();}
+});

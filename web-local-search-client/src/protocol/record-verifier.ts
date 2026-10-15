@@ -112,3 +112,27 @@ export async function verifyRecord(input: WireRecord, crypto: CryptoProviders, e
   verifiedRecords.add(verified);
   return verified;
 }
+
+/**
+ * Records this page already verified, keyed by their exact canonical wire. Verification is a pure
+ * function of those bytes, so a record served again (by another Node or a later load) is not checked
+ * twice; any other byte, including a different signature, is a different key and is verified in full.
+ */
+export class VerifiedRecordCache {
+  readonly #entries = new Map<string, VerifiedRecord>();
+  readonly #limit: number;
+  constructor(limit = 20000) { this.#limit = limit; }
+  get size(): number { return this.#entries.size; }
+  clear(): void { this.#entries.clear(); }
+  async verify(input: WireRecord, crypto: CryptoProviders): Promise<VerifiedRecord> {
+    const canonicalWire = canonicalJson(input);
+    const known = this.#entries.get(canonicalWire);
+    if (known !== undefined) return known;
+    const verified = await verifyRecord(input, crypto);
+    // verifyRecord isolates its own input; this keeps a caller's later mutation out of the cache key.
+    if (verified.canonicalWire !== canonicalWire) throw new Error('UNVERIFIED_RECORD');
+    if (this.#entries.size >= this.#limit) this.#entries.delete(this.#entries.keys().next().value!);
+    this.#entries.set(verified.canonicalWire, verified);
+    return verified;
+  }
+}

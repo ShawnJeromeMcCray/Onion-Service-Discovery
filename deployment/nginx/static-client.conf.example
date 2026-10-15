@@ -1,0 +1,58 @@
+# Static self-hosting of the built browser client (web-local-search-client/dist),
+# without PHP. Build it with the direct-cross-origin profile; see
+# docs/browser/client-contract.md. Tor forwards your Client Host Onion to this
+# loopback listener; do not expose it on WAN. Replace paths for the supported host.
+server {
+    listen 127.0.0.1:8081;
+    server_name _;
+    root /opt/onion-service-discovery/web-local-search-client/dist;
+    server_tokens off;
+    access_log off;
+    error_log /var/log/nginx/onion-service-discovery-client-error.log crit;
+    autoindex off;
+    # Like the PHP host, never follow a symbolic link out of dist.
+    disable_symlinks on;
+    client_max_body_size 1k;
+    client_body_timeout 5s;
+    client_header_timeout 5s;
+    large_client_header_buffers 4 4k;
+    keepalive_timeout 10s;
+    # The client accepts config.json and demo.json only as application/json.
+    types {
+        text/html html;
+        application/javascript js;
+        text/css css;
+        application/json json;
+    }
+    default_type application/octet-stream;
+    # text/html always gets the charset; these types get it as well.
+    charset utf-8;
+    charset_types application/javascript text/css application/json;
+    if ($request_method !~ ^(?:GET|HEAD)$) {
+        return 405;
+    }
+    # The same headers as the PHP Client Host (node-php/src/Http/ClientAssets.php).
+    # A meta tag cannot set frame-ancestors; this header does. connect-src must also
+    # list every Node origin of your build, exactly as the build wrote it into
+    # dist/index.html (for example connect-src 'self' http://NODE.onion): the
+    # verifier worker makes the data requests under this header's policy.
+    # A location with its own add_header does not inherit these lines: to serve the
+    # files from an existing website, copy them into both locations.
+    add_header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Cache-Control "no-store" always;
+    add_header Allow "GET, HEAD" always;
+    # Exactly the files the PHP host serves, at the same paths.
+    location = /onion-service-discovery/ {
+        try_files /index.html =404;
+    }
+    location ~ ^/onion-service-discovery/(index\.html|client\.js|verifier-worker\.js|client\.css|demo\.json|config\.json)$ {
+        try_files /$1 =404;
+    }
+    location / {
+        return 404;
+    }
+}

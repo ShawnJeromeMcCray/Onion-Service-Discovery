@@ -57,6 +57,9 @@ its public `hostname` file. The application never provisions or reads Tor keys.
    For a distinct Client Host, configure the allowed sources and use the generic
    proxy delivery profile. Configure Tor to forward public port 80 to the
    loopback listener yourself; keep its HiddenServiceDir inaccessible to OSD.
+   If the Onion already serves a website, keep it and add only the OSD routes:
+   see [existing website](existing-website.md). The templates' controls and
+   their gaps are listed in the [hardening matrix](hardening-matrix.md).
 10. Verify through the actual Onion with the supported Tor Browser profiles before
     public rollout. Local mocked SOCKS/Chromium tests cannot substitute this step.
 
@@ -139,7 +142,9 @@ Archive exports and stop publishers/web workers before running
 export blobs per call and retains all current chunks and derived indexes. Old
 signed checkpoints/identity/fork records remain in the database. The current API
 serves only current-checkpoint chunks; older checkpoint bytes for chain proof
-remain in record storage. This operator-only cleanup is not scheduled automatically. No automatic destruction
+remain in record storage. Besides this immediate operator action, `node:maintain`
+(the maintenance timer) prunes unreferenced blobs once they are older than one
+hour, at most 256 per run; `doctor` reports the export usage. No automatic destruction
 of conflict evidence or private keys is provided.
 
 Before upgrading, keep an authenticated full backup and verify the package.
@@ -154,8 +159,10 @@ To remove the application, stop/disable schedules, stop its web pool and remove
 its web routing/application directory. Leave Tor and operator data/keys intact
 until the operator separately chooses their disposition. Publish a signed
 withdrawal before removing discovery if desired; removal alone is downtime and
-cannot erase copies held by independent Nodes. Do not delete or rotate keys
-blindly during an incident. Preserve bounded evidence and error codes first.
+cannot erase copies held by independent Nodes. For a lost or compromised key,
+a corrupted store, conflicting peer checkpoints or a leaked passphrase file,
+follow the [incident runbook](incident-runbook.md): it preserves evidence first
+and names what protocol v1 cannot undo.
 
 Actual disk-full development evidence: `node-php/tests/storage-disk-full.php`
 runs only on an explicitly provisioned tiny `/fault` tmpfs, never a normal host

@@ -3,7 +3,7 @@ const sourceMessages:{[code:string]:string}={
   SOURCE_FETCH_FAILED:'The Node did not answer. It may be offline or unreachable over Tor right now; try again later. The last verified local index stays available.',
   SOURCE_HTTP_STATUS_REJECTED:'The Node answered with an error page instead of signed data. Nothing from it was used; try again later.',
   SOURCE_TIMEOUT:'The Node answered too slowly. Nothing from this attempt was used; try again later.',
-  SOURCE_TIME_BUDGET_EXHAUSTED:'Checking this Node’s signatures took longer than the time limit, so nothing partial was used. Try again on a faster device or connection.',
+  SOURCE_TIME_BUDGET_EXHAUSTED:'Downloading this Node’s data took more than 90 seconds in total, so nothing partial was used. Try again later; the Node or the Tor connection may be slow.',
   SOURCE_WORK_BUDGET_EXHAUSTED:'This Node offered more data than this page checks at once. Nothing from it was used.',
   RESPONSE_TOO_LARGE:'This Node offered more data than this page checks at once. Nothing from it was used.',
   SOURCE_CHECKPOINT_EQUIVOCATION:'This Node signed two different states for the same moment. Its data is set aside and both signatures are kept as evidence.',
@@ -13,7 +13,7 @@ const sourceMessages:{[code:string]:string}={
   SOURCE_CHECKPOINT_CHAIN_BROKEN:'This Node’s states do not connect to the one it showed before. Its data is set aside.',
   SOURCE_NODE_KEY_CHANGED:'This Node signed with a different key than expected. Check the key you entered; if it is right, another service may be answering at this address.',
   SOURCE_NODE_BINDING_MISMATCH:'The data does not belong to the Node at this address. Nothing from it was used.',
-  SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE:'This Node’s earlier states could not be connected yet. Load again to continue.',
+  SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE:'This Node’s current description does not connect to the one this browser saw earlier, so nothing from it was used. Loading again helps only once the Node serves the missing history.',
   SOURCE_NOT_IN_HOST_ALLOWLIST:'This Node is not listed by this Client Host and was not added by you.',
 };
 const operationMessages:{[code:string]:string}={

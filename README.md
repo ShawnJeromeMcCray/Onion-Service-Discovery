@@ -112,9 +112,10 @@ No test count is an independent security audit or production approval.
 - [Installation and prerequisites](docs/getting-started/installation.md), [quickstart](docs/getting-started/quickstart.md), [troubleshooting](docs/getting-started/troubleshooting.md).
 - [Five-minute operator contract](docs/operations/operator-contract.md): what becomes public, which key matters, how to withdraw.
 - [Operator CLI](docs/operations/cli.md), [configuration reference](docs/operations/configuration.md), [error codes](docs/operations/error-codes.md), [offline signing](docs/signing/offline.md), [backup and recovery](docs/operations/deployment-and-recovery.md).
+- [Add OSD to an existing website](docs/operations/existing-website.md), [deployment hardening matrix](docs/operations/hardening-matrix.md), [incident runbook](docs/operations/incident-runbook.md).
 - [Draft protocol handbook](docs/protocol/handbook.md), [browser contract](docs/browser/client-contract.md), [decision register](docs/governance/decision-register.md).
 - [Development package verification](docs/operations/release-candidate.md), [offline release verifier](release-tools/README.md).
-- [Support](SUPPORT.md), [security reporting](SECURITY.md), [contributing](CONTRIBUTING.md), [changelog](CHANGELOG.md).
+- [Support](SUPPORT.md), [security reporting](SECURITY.md), [privacy](PRIVACY.md) with its [data inventory](docs/privacy/data-inventory.md), [contributing](CONTRIBUTING.md), [changelog](CHANGELOG.md).
 
 ## License
 

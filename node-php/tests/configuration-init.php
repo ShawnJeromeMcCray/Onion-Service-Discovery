@@ -48,10 +48,10 @@ try {
     $combined = $run(['init', $root . '/combined/config.json', $onion, '--role', 'combined', '--source', $source, '--visitor-sources'], 0);
     $assert($combined['role'] === 'combined' && $combined['source_count'] === 1 && $combined['features']['visitor_sources'] === true, 'combined init'); ++$checks;
 
-    $client = $run(['init', $root . '/client/config.json', '--role', 'client-host', '--source', $source, '--source', $second, '--visitor-sources'], 0);
+    $client = $run(['init', $root . '/client/config.json', '--role', 'client-host', '--source', $source, $nodeKey, '--source', $second, '--visitor-sources'], 0);
     $written = json_decode(file_get_contents($root . '/client/config.json'), true, 16, JSON_THROW_ON_ERROR);
     $assert($client['role'] === 'client-host' && $written['sources'] === [$source, $second] && $written['node'] === ['onion' => null, 'key_path' => null]
-        && $written['features']['visitor_sources'] === true && array_filter($written['features']) === ['visitor_sources' => true], 'client host init'); ++$checks;
+        && $written['features']['visitor_sources'] === true && array_filter($written['features']) === ['visitor_sources' => true] && $written['source_node_keys'] === [$source => $nodeKey], 'client host init'); ++$checks;
     $assert($run(['client:init', $root . '/client/config.json'], 0)['status'] === 'INITIALIZED', 'client host next step'); ++$checks;
 
     $assert($run(['init', $root . '/unsafe/config.json', '--role', 'client-host'], 3)['error'] === 'CONFIGURATION_PATH_UNSAFE', 'shared directory refused'); ++$checks;

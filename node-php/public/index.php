@@ -53,7 +53,7 @@ try {
         $response = StatusPage::render($facts, $method);
     }
     elseif ($asset !== null) { $response = $asset; }
-    elseif (str_starts_with($target, '/onion-service-discovery/relay/')) {
+    elseif (str_starts_with($target, '/onion-service-discovery/relay/') && in_array($config->role, ['client-host', 'combined'], true)) {
         $relay = new ClientHostRelay($config);
         // Visitor-chosen Nodes draw on a separate, smaller budget; abuse cannot starve operator-configured sources.
         $budget = $relay->isVisitorSource($target) ? new PublicRequestBudget($config->exportPath . '/.visitor-relay-budget', 64, 1.0) : new PublicRequestBudget($config->exportPath . '/.relay-budget');

@@ -56,6 +56,7 @@ def main() -> int:
         ('php-announcement-schedule', php + ['node-php/tests/announcement-schedule.php'], ROOT),
         ('php-operator-commands', php + ['node-php/tests/operator-commands.php'], ROOT),
         ('php-visitor-relay-http', php + ['node-php/tests/visitor-relay-http.php'], ROOT),
+        ('php-secret-paths-http', php + ['node-php/tests/secret-paths-http.php'], ROOT),
         ('php-node-status', php + ['node-php/tests/node-status.php'], ROOT),
         ('php-publisher-lifecycle', php + ['node-php/tests/publisher-lifecycle.php'], ROOT),
         ('php-configuration-reference', php + ['node-php/tests/configuration-reference.php'], ROOT),

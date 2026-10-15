@@ -12,6 +12,9 @@ $store=new PublicBlobStore($root,false,100);$files=glob($root.'/*.json');if(coun
 foreach(PublicBlobStore::CONTROL_FILES as $control){if($control!=='.writer.lock')file_put_contents($root.'/'.$control,'SYNTHETIC RATE STATE');}
 $result=$store->pruneUnreferenced([$hash]);if($result['blobs_removed']!==0||$store->get($hash)!==$before)throw new RuntimeException('current blob deleted');
 try{$store->pruneUnreferenced(['sha256:'.str_repeat('0',64)]);throw new RuntimeException('missing keep set allowed');}catch(StorageException){}
+// Automatic pruning spares blobs written within the grace period: a snapshot may be writing them.
+$result=$store->pruneUnreferenced([],time()-3600);if($result['blobs_removed']!==0)throw new RuntimeException('fresh orphan pruned');
+foreach(glob($root.'/*.json') as $blob){touch($blob,time()-7200);}
 $result=$store->pruneUnreferenced([]);if($result['blobs_removed']!==1||$result['bytes_freed']!==80)throw new RuntimeException('orphan cleanup failed');
 foreach(PublicBlobStore::CONTROL_FILES as $control){if($control!=='.writer.lock'&&!is_file($root.'/'.$control))throw new RuntimeException('control file pruned: '.$control);}
 foreach(new DirectoryIterator($root) as $file){if(!$file->isDot())unlink($file->getPathname());}rmdir($root);

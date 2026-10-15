@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+- Browser client on slow devices: a record already verified in this session is
+  not verified again when another Node serves the same bytes, so loading three
+  Nodes costs little more than loading one. The 90-second limit per source now
+  counts network time only; signature checking stays bounded by the record and
+  byte limits, each loading source shows how many records it has checked, and
+  Cancel takes effect within 64 records. Without JIT (Tor Browser's Safer
+  level) checking took about twice as long as with it in a local measurement.
+- Deployment: the nginx, Apache, PHP-FPM and systemd templates are hardened
+  (no server version, header and body limits, no uploads or remote includes,
+  no core dumps, empty capability sets, kernel and namespace protections, file
+  limits). New snippets add only the OSD routes to an existing website, and
+  static examples serve a self-hosted browser client with the same headers as
+  the PHP host. A test requests 39 likely secret paths for every role and
+  expects refusals without content. Relay paths exist only for the Client Host
+  and combined roles: a publisher answered them with 503 instead of 404. New
+  documents: the hardening matrix (spec 18 section 55), an incident runbook for
+  lost or exposed keys, conflicting peers, damaged stores and leaked passphrase
+  files, and the privacy data inventory and data flow; `PRIVACY.md` describes
+  the current runtime.
+- A Client Host can vouch for the keys of the Nodes it lists: the optional
+  `source_node_keys` (written by `init --source ONION KEY`) reaches the browser
+  client, which fills in those keys read-only and refuses a source that signs
+  with another key from the first load on, instead of trusting first contact in
+  every new session.
+- Operator CLI: failures print `detail` (where, for example the configuration key
+  path and rule; never the value), `meaning` from the error registry and a `help`
+  page; `config:validate` names every refused key. `status` works for publishers
+  and shows the role, Onion and Node facts; `status --check` treats the new
+  waiting states as waiting. `storage:verify` (also `db:verify`, `restore:verify`)
+  is read-only and reports a pending recovery instead of repairing it.
+  `quarantine:list` includes quarantined peers with their evidence hashes;
+  `sync:run CONFIG` steps the peer that is due first. `release:info` identifies
+  the build from the package metadata. `doctor` reports export usage and timer
+  freshness from stored times; `security:check` adds focused findings with
+  remediations (file modes, Tor keys near OSD files, web root contents, packaged
+  files changed since packaging). `node:maintain` prunes unreferenced export
+  blobs older than one hour, so the export directory no longer fills up.
 - Browser client evidence: every result says how many loaded sources include
   its current revision; the details name the sources that supplied it, those
   that still serve an older revision and those that do not list it, the

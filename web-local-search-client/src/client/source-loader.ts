@@ -1,7 +1,7 @@
 import { validateOnionAddress } from '../protocol/onion-address.ts';
 import { publicKeyBytes } from '../protocol/encoding.ts';
 import { parseStrictJson } from '../protocol/strict-json.ts';
-import { verifyWire, requiredObject, requiredString, type VerifiedRecord, type CryptoProviders } from '../protocol/record-verifier.ts';
+import { verifyWire, requiredObject, requiredString, VerifiedRecordCache, type VerifiedRecord, type CryptoProviders } from '../protocol/record-verifier.ts';
 import { verifySnapshotChunk } from '../protocol/snapshot-verifier.ts';
 
 export interface SourceSelection { onion: string; expectedKey?: string; }
@@ -20,6 +20,10 @@ export interface LoadedSource { records: VerifiedRecord[]; checkpoint: VerifiedR
 const prefix = '/onion-service-discovery/v1/';
 export type DeliveryProfile='client-host-proxy'|'direct-cross-origin';
 type Endpoint = 'node' | 'state' | { snapshot: string } | { chunk: string };
+/** Time left for network transfers of one source load; signature checks are bounded by the work limits instead. */
+interface NetworkBudget { remainingMs: number; }
+/** Called after each verified chunk with the records checked so far and the checkpoint's record count. */
+export type LoadProgress = (records: number, total: number) => void;
 function hash(value: string): string { if (!/^sha256:[0-9a-f]{64}$/.test(value)) throw new Error('HASH_INVALID'); return value; }
 function path(endpoint: Endpoint): string {
   if (typeof endpoint === 'string') return prefix + endpoint;
@@ -28,12 +32,13 @@ function path(endpoint: Endpoint): string {
 }
 
 /** All outbound requests are generic, bounded and independent of search/pins. */
-async function fetchBytes(onion: string, endpoint: Endpoint, limit: number, parent: AbortSignal, deadline: number, delivery:DeliveryProfile): Promise<Uint8Array> {
-  if (performance.now() >= deadline) throw new Error('SOURCE_TIME_BUDGET_EXHAUSTED');
+async function fetchBytes(onion: string, endpoint: Endpoint, limit: number, parent: AbortSignal, budget: NetworkBudget, delivery:DeliveryProfile): Promise<Uint8Array> {
+  if (budget.remainingMs <= 0) throw new Error('SOURCE_TIME_BUDGET_EXHAUSTED');
+  const started = performance.now();
   const controller = new AbortController();
   const abort = () => controller.abort(); parent.addEventListener('abort', abort, { once: true });
   if (parent.aborted) controller.abort();
-  const timeout = setTimeout(abort, Math.min(15000, Math.max(1, deadline - performance.now())));
+  const timeout = setTimeout(abort, Math.min(15000, Math.max(1, budget.remainingMs)));
   try {
     const destination=delivery==='client-host-proxy'?new URL('relay/'+onion+'/'+path(endpoint).slice(prefix.length),new URL('./',import.meta.url)).href:'http://'+onion+path(endpoint);
     const response = await fetch(destination, { method: 'GET', credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer', cache: 'no-store', mode: 'cors', headers: { Accept: 'application/json' }, signal: controller.signal });
@@ -60,33 +65,37 @@ async function fetchBytes(onion: string, endpoint: Endpoint, limit: number, pare
   } catch (error) {
     if (error instanceof Error && /^(?:SOURCE_|HEADERS_|CONTENT_|RESPONSE_|STREAMING_)/.test(error.message)) throw error;
     throw new Error(parent.aborted ? 'SOURCE_CANCELLED' : controller.signal.aborted ? 'SOURCE_TIMEOUT' : 'SOURCE_FETCH_FAILED');
-  } finally { clearTimeout(timeout); parent.removeEventListener('abort', abort); }
+  } finally { clearTimeout(timeout); parent.removeEventListener('abort', abort); budget.remainingMs -= performance.now() - started; }
 }
 
 export class SourceLoader {
-  private readonly crypto:CryptoProviders; private readonly delivery:DeliveryProfile;
+  private readonly crypto:CryptoProviders; private readonly delivery:DeliveryProfile; private readonly networkBudgetMs:number;
   // Session-only verified walk cursors; never supplied by a peer or serialized.
   #ancestry = new Map<string,{nodeKey:string;targetHash:string;anchorHash:string;anchorGeneration:number;ancestor:VerifiedRecord}>();
-  constructor(crypto:CryptoProviders,delivery:DeliveryProfile='direct-cross-origin'){this.crypto=crypto;this.delivery=delivery;}
-  clear():void { this.#ancestry.clear(); }
+  // Records already verified in this session: most Nodes serve the same signed records.
+  #verified = new VerifiedRecordCache();
+  constructor(crypto:CryptoProviders,delivery:DeliveryProfile='direct-cross-origin',limits:{networkBudgetMs?:number}={}){this.crypto=crypto;this.delivery=delivery;this.networkBudgetMs=limits.networkBudgetMs??90000;}
+  clear():void { this.#ancestry.clear(); this.#verified.clear(); }
+  /** Drops the verified-record memory, for example when the local index is cleared. */
+  forgetVerified():void { this.#verified.clear(); }
   validate(selection: SourceSelection): SourceSelection {
     validateOnionAddress(selection.onion, this.crypto.sha3);
     if (selection.expectedKey !== undefined && !this.crypto.validateEd25519Point(publicKeyBytes(selection.expectedKey))) throw new Error('PUBLIC_KEY_INVALID');
     return selection;
   }
-  async load(selection: SourceSelection, prior: SourceLedger | undefined, signal: AbortSignal, observe: (ledger: SourceLedger, evidence: VerifiedRecord) => void = () => {}): Promise<LoadedSource> {
-    this.validate(selection); const deadline = performance.now() + 90000;
+  async load(selection: SourceSelection, prior: SourceLedger | undefined, signal: AbortSignal, observe: (ledger: SourceLedger, evidence: VerifiedRecord) => void = () => {}, progress: LoadProgress = () => {}): Promise<LoadedSource> {
+    this.validate(selection); const budget: NetworkBudget = { remainingMs: this.networkBudgetMs };
     if (prior?.equivocated) throw new Error('SOURCE_EQUIVOCATION_PRESERVED');
-    const descriptor = await verifyWire(await fetchBytes(selection.onion, 'node', 16384, signal, deadline,this.delivery), this.crypto);
+    const descriptor = await verifyWire(await fetchBytes(selection.onion, 'node', 16384, signal, budget,this.delivery), this.crypto);
     const node = requiredObject(parseStrictJson(new TextEncoder().encode(descriptor.canonicalWire), 16384));
     if (descriptor.type !== 'node_descriptor' || node.node_onion !== selection.onion) throw new Error('SOURCE_NODE_BINDING_MISMATCH');
     const nodeKey = requiredString(node.node_identity_public_key);
     if ((selection.expectedKey !== undefined && nodeKey !== selection.expectedKey) || (prior !== undefined && nodeKey !== prior.nodeKey)) throw new Error('SOURCE_NODE_KEY_CHANGED');
     if (prior !== undefined && (Number(node.descriptor_revision) < prior.descriptorRevision || (Number(node.descriptor_revision) === prior.descriptorRevision && descriptor.contentHash !== prior.descriptorHash))) throw new Error('SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK');
-    const remote = parseStrictJson(await fetchBytes(selection.onion, 'state', 16384, signal, deadline,this.delivery), 16384);
+    const remote = parseStrictJson(await fetchBytes(selection.onion, 'state', 16384, signal, budget,this.delivery), 16384);
     if (Object.keys(remote).length !== 6 || Object.keys(remote).some(key => !['protocol','protocol_version','checkpoint_hash','generation','cursor','node_identity_public_key'].includes(key)) || remote.protocol !== 'Onion Service Discovery' || remote.protocol_version !== 1 || remote.node_identity_public_key !== nodeKey) throw new Error('SCHEMA_INVALID');
     const checkpointHash = hash(requiredString(remote.checkpoint_hash));
-    const checkpoint = await verifyWire(await fetchBytes(selection.onion, { snapshot: checkpointHash }, 65536, signal, deadline,this.delivery), this.crypto);
+    const checkpoint = await verifyWire(await fetchBytes(selection.onion, { snapshot: checkpointHash }, 65536, signal, budget,this.delivery), this.crypto);
     const document = parseStrictJson(new TextEncoder().encode(checkpoint.canonicalWire), 65536);
     if (checkpoint.type !== 'snapshot_descriptor' || checkpoint.contentHash !== checkpointHash || document.node_identity_public_key !== nodeKey || document.generation !== remote.generation || document.cursor !== remote.cursor) throw new Error('SOURCE_CHECKPOINT_BINDING_MISMATCH');
     const ledger: SourceLedger = prior === undefined ? { nodeKey, generation: 0, seenGeneration:0, checkpointHash: '', descriptorRevision: Number(node.descriptor_revision), descriptorHash: descriptor.contentHash, equivocated: false, observed: Object.create(null) as { [position: string]: string[] } } : structuredClone(prior);
@@ -110,7 +119,7 @@ export class SourceLoader {
         if (Number(ancestor.generation) <= ledger.generation + 1) throw new Error('SOURCE_CHECKPOINT_CHAIN_BROKEN');
         if (++walks > 32) throw new Error('SOURCE_HISTORY_PROGRESS');
         const parentHash = hash(requiredString(ancestor.previous_checkpoint_hash));
-        const parent = await verifyWire(await fetchBytes(selection.onion, { snapshot: parentHash }, 65536, signal, deadline,this.delivery), this.crypto);
+        const parent = await verifyWire(await fetchBytes(selection.onion, { snapshot: parentHash }, 65536, signal, budget,this.delivery), this.crypto);
         const value = parseStrictJson(new TextEncoder().encode(parent.canonicalWire), 65536);
         if (parent.type !== 'snapshot_descriptor' || parent.contentHash !== parentHash || value.node_identity_public_key !== nodeKey || Number(value.generation) !== Number(ancestor.generation) - 1) throw new Error('SOURCE_CHECKPOINT_CHAIN_BROKEN');
         ledger.equivocated ||= (ledger.observed[String(value.generation)]??[]).some(known=>known!==parent.contentHash);
@@ -125,9 +134,11 @@ export class SourceLoader {
     const records: VerifiedRecord[] = [descriptor]; let count = 0; let lastHash: string | null = null;
     for (let index = 0; index < document.chunks.length; ++index) {
       const metadata = requiredObject(document.chunks[index]);
-      const verified = await verifySnapshotChunk(await fetchBytes(selection.onion, { chunk: hash(requiredString(metadata.hash)) }, Number(metadata.bytes), signal, deadline,this.delivery), checkpoint, index, this.crypto, lastHash);
+      const verified = await verifySnapshotChunk(await fetchBytes(selection.onion, { chunk: hash(requiredString(metadata.hash)) }, Number(metadata.bytes), signal, budget,this.delivery), checkpoint, index, this.crypto, lastHash, { cache: this.#verified, signal });
       records.push(...verified.records); count += verified.records.length; lastHash = verified.lastHash;
+      progress(count, Number(document.record_count));
       await new Promise(resolve => setTimeout(resolve, 0));
+      if (signal.aborted) throw new Error('SOURCE_CANCELLED');
     }
     if (count !== document.record_count) throw new Error('SOURCE_RECORD_COUNT_INVALID');
     if (prior !== undefined && Number(node.descriptor_revision) > prior.descriptorRevision) {

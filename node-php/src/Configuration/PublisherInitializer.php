@@ -18,8 +18,9 @@ final class PublisherInitializer
      * configuration's own owner-only directory. Creates no key, store or network request.
      * @param list<OnionAddress> $sources
      * @param list<array{0:OnionAddress,1:string}> $publisherNodes Discovery Nodes the publisher checks, each with its expected Node key.
+     * @param array<string,string> $sourceKeys Expected Node keys of some listed sources, by onion address.
      */
-    public static function createForRole(string $path, string $role, ?OnionAddress $onion, bool $publish = false, array $sources = [], bool $visitorSources = false, string $backend = 'filesystem', array $publisherNodes = []): NodeConfig
+    public static function createForRole(string $path, string $role, ?OnionAddress $onion, bool $publish = false, array $sources = [], bool $visitorSources = false, string $backend = 'filesystem', array $publisherNodes = [], array $sourceKeys = []): NodeConfig
     {
         $directory = dirname($path);
         $resolved = realpath($directory);
@@ -47,6 +48,7 @@ final class PublisherInitializer
         if (in_array($role, ['publisher', 'combined'], true)) {
             $data['publisher_nodes'] = array_map(static fn (array $node): array => ['onion' => $node[0]->hostname, 'expected_node_key' => $node[1]], $publisherNodes);
         }
+        if ($sourceKeys !== []) { $data['source_node_keys'] = $sourceKeys; }
         $bytes = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n";
         $oldMask = umask(0077);
         try { $file = @fopen($path, 'xb'); } finally { umask($oldMask); }

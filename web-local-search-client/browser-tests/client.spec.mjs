@@ -156,6 +156,7 @@ test('cancel marks unfinished sources as cancelled, never as loading forever',as
   await page.route('**/relay/**',async route=>{await new Promise(resolve=>setTimeout(resolve,800));await route.continue();});
   await page.getByRole('button',{name:'Load directory',exact:true}).click();
   await expect(page.locator('.source-status').first()).toContainText('Loading');
+  await expect(page.locator('.source-status').first()).toContainText('Downloading the signed checkpoint and history.');
   await page.getByRole('button',{name:'Cancel',exact:true}).click();
   await expect(page.getByRole('button',{name:'Load directory',exact:true})).toBeEnabled();
   await expect(page.locator('.source-status strong')).toHaveText(['Cancelled','Cancelled','Cancelled']);
@@ -228,4 +229,18 @@ test('results and sources show where the data came from and when it was signed',
   await page.locator('.result-card details summary').first().click();
   await expect(page.locator('.result-card details').first()).toContainText('Current revision supplied by');
   await expect(page.locator('.result-card details').first()).toContainText('Signed Manifest of revision');
+});
+
+test('expected Node keys from the Client Host are used from the first load on',async({page})=>{
+  const [first,second,third]=fixtures.sources;const keyOf=source=>source.node_descriptor.node_identity_public_key;
+  clientConfig={client_config_version:1,mode:'client-host',allowed_sources:[first.onion,second.onion,third.onion],minimum_distinct_keys:3,delivery_profile:'client-host-proxy',expected_node_keys:{[first.onion]:keyOf(first),[second.onion]:keyOf(second),[third.onion]:keyOf(first)}};
+  try{
+    await page.goto(origin+'/onion-service-discovery/');await page.getByText('Source selection and expected keys').click();
+    await expect(page.locator('#source-0-key')).toHaveValue(keyOf(first));await expect(page.locator('#source-0-key')).toHaveAttribute('readonly','');
+    await expect(page.locator('label[for="source-2-key"]')).toContainText('provided by this Client Host');
+    await page.getByRole('button',{name:'Load directory',exact:true}).click();
+    // The third source signs with its own key, not the one the host vouched for: refused, not trusted on first contact.
+    await expect(page.locator('.source-status').filter({hasText:third.onion})).toContainText('SOURCE_NODE_KEY_CHANGED');
+    await expect(page.locator('#coverage')).toContainText('2 distinct fresh signing keys');
+  }finally{clientConfig=null;}
 });

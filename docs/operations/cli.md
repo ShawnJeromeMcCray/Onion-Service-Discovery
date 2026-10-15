@@ -1,19 +1,40 @@
 # Operator CLI contract
 
-Entry point: `php node-php/bin/onion-service-discovery help`. All output is JSON;
+Entry point: `php node-php/bin/onion-service-discovery help`; `help COMMAND` shows
+that command's syntax and whether it makes Tor requests, writes local state,
+saves status evidence or reads a private key. All output is JSON;
 `--json` and `--no-interaction` are accepted. No command waits for an interactive
-confirmation. Explicit commands/flags choose side effects, roles and trusted
+confirmation. A failure prints `{"status":"FAIL","error":CODE}` plus `detail`
+(where it happened, for example `transport.timeout_ms: must be an integer from 100
+to 60000`; never the value itself), `meaning` (the plain-language entry of the
+[error registry](error-codes.md)) and `help` (the page to read). Explicit commands/flags choose side effects, roles and trusted
 backup handling; publication, sync, server search and announcement acceptance
 default false (`init --role node|combined` enables mirroring and direct checks). Private signing
 passphrases come only from owner-private files or service-manager credentials.
 Do not send passphrases in command arguments or ordinary environment variables.
 
 Read-only commands include config:validate, doctor, security:check, node:status,
-release:info, candidate:list, quarantine:list and sync:status. Doctor checks the
-actual selected store without repair, reports pending recovery, and never
-probes Tor or decrypts keys. Unsupported/unobserved checks are explicitly marked:
-Tor connectivity, scheduler, backup freshness, deployed headers and independent
-security/release review are not inferred from local configuration. Use separate
+release:info, storage:verify, candidate:list, quarantine:list and sync:status.
+Doctor checks the actual selected store without repair, reports pending recovery,
+and never probes Tor or decrypts keys. It reports `manifest_state` and the
+publication for a publishing installation, `export_usage` (blob files and bytes
+against the 4,096-file and 256 MiB export limits; WARN from 80 %) and
+`scheduler_state` derived from stored times: a published checkpoint older than
+two days (`SNAPSHOT_TIMER_STALE`) or publisher checks older than 36 hours
+(`PUBLISHER_TIMER_STALE`) mean the timer stopped. Unsupported/unobserved checks
+are explicitly marked: Tor connectivity, backup freshness, deployed headers and
+independent security/release review are not inferred from local configuration.
+`security:check` adds focused findings, each with a remediation: configuration
+file and directory modes, Tor secret keys next to OSD files, unexpected files in
+`node-php/public`, packaged files changed since packaging (against
+`release/FILE-MANIFEST.json` when present) and the absence of remote
+administration.
+
+`status CONFIG` (alias of `node:status`) reports the role, the own Onion and the
+roles in use: for a publisher the publication state and next action, for a Node
+its store counts plus identity, snapshot generation and last direct check and
+sync. `status CONFIG --check` prints the full status page facts and exits 0 when
+nothing needs attention, 6 while waiting or degraded, 4 on an error or conflict. Use separate
 transport/browser tests and operator acceptance to establish those properties.
 The ordinary data/status web routes open a read-only store and do not repair
 journals. The default-off experimental announcement route alone opens the
@@ -21,24 +42,29 @@ selected writable store for bounded queue admission; it has no signer or
 outbound transport capability. Filesystem format 2 uses the journal COMMIT as durable authority before HEAD.
 Read-only opening refuses unresolved recovery rather than repairing it.
 
-`storage:check` is a separate explicit integrity/recovery command.
+`storage:check` is a separate explicit integrity/recovery command; it completes
+an interrupted write. `storage:verify BACKEND PATH` (also `db:verify` and
+`restore:verify`) opens the store read-only and never repairs, migrates or
+changes the SQLite journal mode: a pending recovery is reported as
+`STORAGE_RECOVERY_REQUIRED` with exit 6.
 `storage:backup`/`backup:create` captures trusted private records and operational
 state; `backup:verify FILE` validates it without restoring. `storage:restore`
 requires a fresh staging path and `--trusted-private-backup`.
-`restore:verify`/`db:verify` use the backend/path integrity command.
 `db:migrate BACKEND PATH` checks current schema 1 without mutation; there is no
 invented migration from an unknown schema. Future migrations need explicit code,
 fixtures and review.
 
 Aliases: status=node:status, peer:list=peers:list, peer:add=peers:add,
 peer:disable=peers:disable, manifest:show=protocol:inspect,
-backup:create=storage:backup, db:verify/restore:verify=storage:check,
+backup:create=storage:backup, db:verify/restore:verify=storage:verify,
 manifest:generate=manifest:init and sync:run=sync:peer-step.
 The key:service:generate/key:node:generate commands select the corresponding
 key:create role; they require the same private passphrase-file flag.
 The alias retains the underlying command's argument contract. `release:info`
-reports development status and the machine-readable gate matrix, not a stable
-release assertion. Release verification is the separate mature Python TUF tool.
+reports development status, the machine-readable gate matrix and the build:
+`SOURCE_CHECKOUT`, or for a package the `source_commit`, profile and SHA-256 of
+`release/BUILD-METADATA.json`, `SBOM.cdx.json` and `FILE-MANIFEST.json` to compare
+with the GitHub build provenance. It is not a stable release assertion. Release verification is the separate mature Python TUF tool.
 
 Manifest commands prepare genesis/revision/withdrawal/rotation/migration drafts,
 then record:sign signs only an allowlisted role/domain. Rotation collects old/new
@@ -52,6 +78,12 @@ has no Service-style Node key-rotation proof. Do not simulate one by editing row
 
 List commands show at most 256 entries and indicate truncation. `peers:list
 CONFIG` shows every configured peer with its state, failures and next attempt.
+`sync:run CONFIG` without a peer performs one bounded step for the peer that is
+due first (`NOTHING_DUE` with the next due time otherwise), so one timer can serve
+every peer; `sync:run CONFIG ONION` still steps one named peer.
+`quarantine:list CONFIG` lists quarantined candidates and quarantined peers; a
+peer row carries the hashes of the conflicting signed checkpoints kept as
+evidence.
 `peers:retry CONFIG ONION --acknowledge-quarantine` returns a quarantined or
 disabled peer to `CANDIDATE` for the next sync step; quarantine is explicit and
 source high-water marks/conflicts are not erased by retry.
@@ -69,7 +101,11 @@ Protocol tools for implementers, all offline: `protocol:inspect FILE
 document as hex; `protocol:apply-sequence FILE` derives the identity state of a
 `{"records": [...]}` sequence (at most 256 records) exactly as a Node would.
 `node:maintain` expires bounded remote hints and checkpoints SQLite WAL.
-`exports:prune --workers-stopped` is an operator-only quiescent action; it removes
+`node:maintain` also prunes export blobs that the current published snapshot and
+the derived indexes do not reference, once they are older than one hour (a
+running snapshot may be writing newer ones), at most 256 per run, so the export
+directory no longer fills up until snapshots fail with `EXPORT_BUDGET_EXHAUSTED`.
+`exports:prune --workers-stopped` is the immediate operator-only action; it removes
 at most 256 unreferenced derived blobs, not signed identity/fork records.
 No command executes a downloaded software artifact.
 
@@ -167,12 +203,13 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
 
 ## Specification command names and support commands
 
-- `storage:verify` = `storage:check`; `snapshot:build` = `node:snapshot`;
+- `snapshot:build` = `node:snapshot`;
   `peer:remove` = `peers:disable` (the peer is deactivated, its evidence and
   high-water marks are preserved); `key:service:rotate` = `manifest:rotate`.
 - `key:node:rotate` always fails with `NODE_KEY_ROTATION_UNSUPPORTED` (exit 3):
-  protocol v1 has no Node key-rotation proof. Create a new Node key and have
-  peers pin the new Node explicitly.
+  protocol v1 has no Node key-rotation proof. Create a new Node identity, a new
+  key on a new Onion with a new store, and have peers pin it explicitly; see the
+  [incident runbook](incident-runbook.md#2-node-key-compromised-or-lost).
 - `storage:migrate-backend FROM_BACKEND FROM_PATH TO_BACKEND NEW_STAGING_PATH`
   copies records and operational state through the private backup format into a
   fresh staging store, opens the source read-only and removes its temporary

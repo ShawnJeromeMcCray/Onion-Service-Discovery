@@ -9,7 +9,7 @@ import { CLIENT_VERSION, PROTOCOL_VERSION } from './version.ts';
 interface SourceStatus {onion:string;status:string;nodeKey:string|null;generation:number|null;createdAt:string|null;error:string|null;baselineHistoryProven:boolean;evidenceAvailable:boolean;}
 interface VisitorSource {onion:string;expectedKey:string;}
 interface ViewMessage {type:'view';view:ClientView;sources:SourceStatus[];synthetic:boolean;busy:boolean;witnessCount:number;visitorSources:VisitorSource[];}
-type WorkerMessage=ViewMessage|{type:'evidence';onion:string;wires:string[]}|{type:'error';code:string;op:string;origin:'profile'|'backup'|null}|{type:'visitor-error';code:string}|{type:'pin-preview';pins:{pin:LocalPin;status:PinImportStatus}[]}|{type:'pins-restored';origin:'profile'|'backup';added:number;updated:number;skipped:number};
+type WorkerMessage=ViewMessage|{type:'evidence';onion:string;wires:string[]}|{type:'error';code:string;op:string;origin:'profile'|'backup'|null}|{type:'visitor-error';code:string}|{type:'pin-preview';pins:{pin:LocalPin;status:PinImportStatus}[]}|{type:'pins-restored';origin:'profile'|'backup';added:number;updated:number;skipped:number}|{type:'progress';onion:string;records:number;total:number};
 const storageKey='onion-service-discovery-pins-v1';
 const sourceStorageKey='onion-service-discovery-sources-v1';
 const visitorErrors:{[code:string]:string}={ADDRESS_INVALID:'Check the onion address: it must be a 56-character v3 address ending in .onion.',PUBLIC_KEY_INVALID:'Check the expected Node key: it starts with ed25519: followed by 43 characters.',EXPECTED_NODE_KEY_REQUIRED:'Enter the Node’s expected public key. Without it, a different Node could answer in its place.',SOURCE_ALREADY_CONFIGURED:'This Node is already listed by this Client Host.',SOURCE_ALREADY_ADDED:'You have already added this Node.',VISITOR_SOURCE_LIMIT:'You can add up to 8 Nodes. Remove one first.',VISITOR_SOURCES_DISABLED:'This Client Host does not load visitor-chosen Nodes.'};
@@ -187,6 +187,7 @@ function renderSources(sources:SourceStatus[]):void {
     if(source.generation!==null&&source.createdAt!==null) card.append(text('div','Signed checkpoint generation '+source.generation+', created '+when(source.createdAt)+'.','muted'));
     if(source.status==='QUARANTINED'&&source.evidenceAvailable) card.append(button('Save the conflicting signed records',()=>worker.postMessage({op:'export-evidence',onion:source.onion}),'evidence:'+source.onion,'Save the conflicting signed records of '+source.onion));
     if(source.error!==null) card.append(text('div',sourceMessage(source.error),'problem'),text('div','Code: '+source.error,'muted'));
+    if(source.status==='LOADING') { const progress=text('div','Downloading the signed checkpoint and history.','muted source-progress'); progress.dataset.progressFor=source.onion; card.append(progress); }
     if(source.status==='CANCELLED') card.append(text('div','You cancelled loading before this source finished. Nothing from it changed.'));
     if(source.status==='COMPLETE'&&!source.baselineHistoryProven) card.append(text('div','First-contact baseline; earlier Node checkpoint history is not proven.','problem'));
     if(source.status==='STALE') card.append(text('div','Old checkpoint or clock discrepancy. Historical signatures remain evidence, not freshness.','problem'));
@@ -236,6 +237,11 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
     operation('Conflict evidence saved on this device: the two conflicting signed records of '+message.onion+'. It contains no pins or searches.'); return;
   }
   if(message.type==='visitor-error') { el('visitor-status').textContent='Node not added: '+(visitorErrors[message.code]??message.code); return; }
+  if(message.type==='progress') {
+    // Updates one line of the loading source in place: no rebuild, no announcement, focus untouched.
+    for(const line of el('source-statuses').querySelectorAll<HTMLElement>('.source-progress')) if(line.dataset.progressFor===message.onion) line.textContent='Checked the signatures of '+message.records.toLocaleString('en')+' of '+message.total.toLocaleString('en')+' records.';
+    return;
+  }
   if(message.type==='pin-preview') {
     const statusText:{[status:string]:string}={NEW:'New pin',SAME:'Already pinned; nothing changes',UPDATES_REVISION:'Already pinned; remembers a newer revision',CONFLICT_KEEPS_EXISTING:'Conflicts with your existing pin; yours is kept and this one is skipped'};
     const preview=el('pin-preview'); preview.replaceChildren(); for(const {pin,status} of message.pins) { const item=text('div','','preview-pin'+(status==='CONFLICT_KEEPS_EXISTING'?' conflict':'')); item.append(text('strong',pin.label)); for(const warning of metadataWarnings(pin.label,'')) item.append(notice('attention',warning)); item.append(text('div',statusText[status]??status),text('div',pin.genesisKey,'key-value'),text('div',pin.contextOnion,'onion-address')); preview.append(item); }
@@ -347,12 +353,17 @@ async function configure():Promise<void>{
   try {
     const value=parseStrictJson(await localResource('config.json',16384),16384);
     const visitorCapable='visitor_sources'in value;
-    if(Object.keys(value).length!==(visitorCapable?6:5)||(visitorCapable&&typeof value.visitor_sources!=='boolean')||!('allowed_sources'in value)||!Array.isArray(value.allowed_sources)||value.allowed_sources.length>16||value.allowed_sources.some(source=>typeof source!=='string')||!('client_config_version'in value)||value.client_config_version!==1||!['client-host-proxy','direct-cross-origin'].includes(String(value.delivery_profile))||value.minimum_distinct_keys!==3)throw new Error('CONFIGURATION_INVALID');
+    // Optional expected Node keys the Client Host vouches for: a source signing with another key is refused from the first load on.
+    const hostKeys=value.expected_node_keys??{};
+    if(typeof hostKeys!=='object'||hostKeys===null||Array.isArray(hostKeys)||Object.entries(hostKeys).some(([onion,key])=>typeof key!=='string'||!Array.isArray(value.allowed_sources)||!value.allowed_sources.includes(onion)))throw new Error('CONFIGURATION_INVALID');
+    if(Object.keys(value).length!==5+(visitorCapable?1:0)+('expected_node_keys'in value?1:0)||(visitorCapable&&typeof value.visitor_sources!=='boolean')||!('allowed_sources'in value)||!Array.isArray(value.allowed_sources)||value.allowed_sources.length>16||value.allowed_sources.some(source=>typeof source!=='string')||!('client_config_version'in value)||value.client_config_version!==1||!['client-host-proxy','direct-cross-origin'].includes(String(value.delivery_profile))||value.minimum_distinct_keys!==3)throw new Error('CONFIGURATION_INVALID');
     const sources=value.allowed_sources as string[]; const container=el('source-options');container.replaceChildren();el('source-empty').hidden=sources.length>0;configuredSourceCount=sources.length;
     const visitorSources=value.visitor_sources===true&&value.delivery_profile==='client-host-proxy';el('visitor-form').hidden=!visitorSources;el('visitor-disabled').hidden=visitorSources;
     // Relay delivery: the Client Host fetches for the visitor, so the page says what it learns.
     el('relay-note').hidden=value.delivery_profile!=='client-host-proxy';
-    sources.forEach((onion,index)=>{const item=text('div','','source-option');const check=document.createElement('input');check.type='checkbox';check.checked=true;check.dataset.source=onion;check.id='source-'+index;const label=document.createElement('label');label.className='check-label';label.append(check,text('span',onion));const key=document.createElement('input');key.type='text';key.id=check.id+'-key';key.maxLength=51;key.placeholder='Optional expected Node public key';key.autocomplete='off';const keyLabel=document.createElement('label');keyLabel.htmlFor=key.id;keyLabel.textContent='Expected Node key for source '+(index+1)+' (optional)';item.append(label,keyLabel,key);container.append(item);});
+    sources.forEach((onion,index)=>{const item=text('div','','source-option');const check=document.createElement('input');check.type='checkbox';check.checked=true;check.dataset.source=onion;check.id='source-'+index;const label=document.createElement('label');label.className='check-label';label.append(check,text('span',onion));const key=document.createElement('input');key.type='text';key.id=check.id+'-key';key.maxLength=51;key.placeholder='Optional expected Node public key';key.autocomplete='off';const keyLabel=document.createElement('label');keyLabel.htmlFor=key.id;keyLabel.textContent='Expected Node key for source '+(index+1)+' (optional)';
+      const vouched=(hostKeys as {[onion:string]:unknown})[onion];if(typeof vouched==='string'){key.value=vouched;key.readOnly=true;keyLabel.textContent='Expected Node key for source '+(index+1)+', provided by this Client Host';}
+      item.append(label,keyLabel,key);container.append(item);});
     if('mode'in value&&value.mode==='combined')el('host-boundary').textContent='Combined deployment: this serving Node controls the page’s code and its data. A separate self-hosted Client Host gives stronger separation.';
     worker.postMessage({op:'configure',allowedSources:sources,deliveryProfile:value.delivery_profile,visitorSources});
     if(visitorSources) restoreVisitorSources();
