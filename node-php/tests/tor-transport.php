@@ -101,7 +101,7 @@ foreach ($cases as $name => [$response, $expected]) {
     $expectedExit = $name === 'cli-invalid' ? 3 : (in_array($name, ['cli-redirect','cli-announce-false-proof','cli-announce-rate-limit'], true) ? 5 : 0);
     $actual = json_decode($output, true);
     // CLI failures also carry the registry meaning and a help page; the typed code is what is compared.
-    if (is_array($actual) && ($actual['status'] ?? null) === 'FAIL') { if (($actual['help'] ?? null) !== 'docs/operations/error-codes.md') { throw new RuntimeException('failure without help: ' . $name); } unset($actual['meaning'], $actual['help']); }
+    if (is_array($actual) && ($actual['status'] ?? null) === 'FAIL') { if (($actual['help'] ?? null) !== 'docs/operations/error-codes.md' || !is_string($actual['meaning'] ?? null) || $actual['meaning'] === '') { throw new RuntimeException('failure without meaning or help: ' . $name); } unset($actual['meaning'], $actual['help']); }
     if ($exit !== $expectedExit || $stderr !== '' || $actual !== $expected) { throw new RuntimeException('transport case ' . $name . ': ' . $output . $stderr); }
     ++$checks;
 }

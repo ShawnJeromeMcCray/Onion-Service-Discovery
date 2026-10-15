@@ -16,62 +16,62 @@ for remedies.
 | `ADDRESS_INVALID` | browser client, input parsing | 3 | Not a canonical, checksum-valid v3 Onion address (56 lowercase characters plus .onion). |
 | `ANNOUNCEMENT_RATE_LIMITED` | Tor transport | 5 | The Node answered 429: its shared announcement budget is exhausted. The bounded schedule retries no earlier than a day later. |
 | `ANNOUNCEMENT_RESPONSE_INVALID` | Tor transport | 5 | The Node did not answer with exactly HINT_RECEIVED_UNCONFIRMED; no other claim is accepted as an announcement result. |
-| `ARCHIVE_BUDGET_EXHAUSTED` | storage | 4 | The code name states the condition; see the raising component. |
-| `ARCHIVE_INVALID` | storage | 4 | The code name states the condition; see the raising component. |
-| `ARCHIVE_PATH_INVALID` | storage | 4 | The code name states the condition; see the raising component. |
-| `ARCHIVE_UNAVAILABLE` | storage | 4 | The code name states the condition; see the raising component. |
-| `ASSERTION_STATE_INVALID` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `BACKUP_BUDGET_EXHAUSTED` | storage | 4 | The code name states the condition; see the raising component. |
-| `BACKUP_INVALID` | storage | 4 | The code name states the condition; see the raising component. |
-| `BACKUP_PATH_INVALID` | storage | 4 | The code name states the condition; see the raising component. |
-| `BACKUP_RESTORE_MISMATCH` | storage | 4 | The code name states the condition; see the raising component. |
-| `BACKUP_UNAVAILABLE` | storage | 4 | The code name states the condition; see the raising component. |
+| `ARCHIVE_BUDGET_EXHAUSTED` | storage | 4 | The archive given to storage:import is larger than the 256 MiB import limit, so nothing was imported. |
+| `ARCHIVE_INVALID` | storage | 4 | The public record archive is malformed (a wrong header or more than 10000 records, a non-canonical, duplicate, overlong or unterminated record line, or a wrong footer checksum or count), so nothing was imported. |
+| `ARCHIVE_PATH_INVALID` | storage | 4 | The archive path is a URL or names a Tor private key file, or for storage:import it is a symlink or not an existing regular file. |
+| `ARCHIVE_UNAVAILABLE` | storage | 4 | The archive file could not be created, written, synced or opened (storage:export never overwrites an existing file), or storage:import could not write a temporary file; use a new path or check permissions and free space. |
+| `ASSERTION_STATE_INVALID` | Node worker | 3 | node:maintain found a stored remote-provenance assertion without its expected kind or source list, so it stopped without changing anything. |
+| `BACKUP_BUDGET_EXHAUSTED` | storage | 4 | The private backup exceeds its size limits of 32 MiB for the store state or 256 MiB in total. |
+| `BACKUP_INVALID` | storage | 4 | The private backup is malformed (a wrong header or store state, a record that does not match its listed hash or type, an overlong or unterminated line, or a wrong footer checksum or count), so nothing was restored. |
+| `BACKUP_PATH_INVALID` | storage | 4 | The backup path is a URL, a symlink or a Tor private key file name, or the backup to verify or restore is not an owner-only regular file of at most 256 MiB. |
+| `BACKUP_RESTORE_MISMATCH` | storage | 4 | After storage:restore, the staging store did not match the records and operational state recorded in the backup, so the restore failed; discard that staging store. |
+| `BACKUP_UNAVAILABLE` | storage | 4 | The backup file could not be created, written, synced or opened (storage:backup never overwrites an existing file), or a temporary file for checking it could not be written; use a new path or check permissions and free space. |
 | `CANDIDATE_BUSY` | Node worker | 3 | A worker is checking this candidate right now; run candidate:retry again after its lease ends. |
-| `CANDIDATE_CLAIM_LOST` | Node worker | 3 | The code name states the condition; see the raising component. |
+| `CANDIDATE_CLAIM_LOST` | Node worker | 3 | This worker’s 2-minute claim on the candidate expired and another worker run released it before the result was saved, so the result was dropped and the candidate is checked again later. |
 | `CANDIDATE_NOT_FOUND` | Node worker | 3 | The candidate is not queued on this Node; candidate:add queues it first. |
-| `CHECKPOINT_NODE_MISMATCH` | browser client, protocol | 3 | The code name states the condition; see the raising component. |
-| `CLIENT_BUILD_UNAVAILABLE` | web routes | – | The code name states the condition; see the raising component. |
-| `CLIENT_BUSY` | browser client | – | The code name states the condition; see the raising component. |
-| `CLIENT_CONFIGURATION_INVALID` | browser client | – | The code name states the condition; see the raising component. |
-| `CLIENT_MARKUP_INVALID` | browser client | – | The code name states the condition; see the raising component. |
-| `CLIENT_ORIGIN_INVALID` | configuration and status | 3 | The code name states the condition; see the raising component. |
-| `CLIENT_RECORD_BUDGET_EXHAUSTED` | browser client | – | The code name states the condition; see the raising component. |
-| `CLOCK_INVALID` | Node worker, signing, web routes | 3, 4 | The code name states the condition; see the raising component. |
-| `CLOCK_ROLLBACK` | Node worker | 3 | The code name states the condition; see the raising component. |
+| `CHECKPOINT_NODE_MISMATCH` | browser client, protocol | 3 | The snapshot checkpoint used for a membership check is not a snapshot descriptor signed with the expected Node key given for that Node; check the expected Node key. |
+| `CLIENT_BUILD_UNAVAILABLE` | web routes | – | The Client Host answered 503 because a browser client file is missing from web-local-search-client/dist, is a symlink or exceeds 2 MiB; build it with npm --prefix web-local-search-client run build. |
+| `CLIENT_BUSY` | browser client | – | Another load, import or clear operation is still running in this page, so the new one was not started; wait for it or cancel it first. |
+| `CLIENT_CONFIGURATION_INVALID` | browser client | – | The browser client got an unusable source setup (over 16 Nodes, an unknown delivery profile or a change during a load) or a load request with no Node, over 16 Nodes or one Node twice. |
+| `CLIENT_MARKUP_INVALID` | browser client | – | The client page lacks an element its script expects, so the served index.html does not match client.js; serve both from the same client build. |
+| `CLIENT_ORIGIN_INVALID` | configuration and status | 3 | An allowed_client_origins entry is not exactly http:// followed by a v3 Onion address (no https, port, path or trailing slash); the detail names the entry. |
+| `CLIENT_RECORD_BUDGET_EXHAUSTED` | browser client | – | Admitting these records would grow the browser’s local index beyond 10000 signed records, so none of them were added; clear the index before loading more. |
+| `CLOCK_INVALID` | Node worker, signing, web routes | 3, 4 | The system clock reports a time before 1970 or beyond the supported range (the year 9999 for signed timestamps), so the operation was refused; correct the system clock. |
+| `CLOCK_ROLLBACK` | Node worker | 3 | The system clock is earlier than the creation time of the last published snapshot, so node:snapshot refused to publish; correct the clock, then run node:snapshot again. |
 | `COMMAND_UNKNOWN` | CLI | 3 | help knows no command of that name; run help without arguments for the list. |
-| `CONFIGURATION_CREATE_REFUSED` | configuration and status | 3 | The code name states the condition; see the raising component. |
+| `CONFIGURATION_CREATE_REFUSED` | configuration and status | 3 | init could not create the configuration file because it already exists or the directory does not allow it; init never overwrites a configuration; choose a new path. |
 | `CONFIGURATION_INVALID` | browser client, configuration and status, storage | 3, 4 | The configuration file has a missing, unknown or wrongly typed key; see the configuration reference. |
-| `CONFIGURATION_PATH_INVALID` | configuration and status | 3 | The code name states the condition; see the raising component. |
-| `CONFIGURATION_PATH_UNSAFE` | configuration and status | 3 | The code name states the condition; see the raising component. |
+| `CONFIGURATION_PATH_INVALID` | configuration and status | 3 | storage.path, export_path or node.key_path is not an absolute path of at most 1024 bytes without . or .. segments, control characters or ://, or it cannot be resolved; the detail names the key. |
+| `CONFIGURATION_PATH_UNSAFE` | configuration and status | 3 | init refused the configuration path: it must be an absolute path of at most 1024 bytes in an existing, non-symlinked, owner-only (0700) directory outside node-php/public. |
 | `CONFIGURATION_UNAVAILABLE` | configuration and status | 3 | The configuration file is missing, unreadable, a symlink or larger than 16 KiB. |
-| `CONFIGURATION_WRITE_FAILED` | configuration and status | 3 | The code name states the condition; see the raising component. |
-| `CONTENT_ENCODING_REJECTED` | Tor transport, browser client | 5 | The code name states the condition; see the raising component. |
+| `CONFIGURATION_WRITE_FAILED` | configuration and status | 3 | init created the configuration file but could not write or sync it or sync its directory, so the file may be incomplete; check free space, remove the file and run init again. |
+| `CONTENT_ENCODING_REJECTED` | Tor transport, browser client | 5 | A Node or Service answered with a Content-Encoding other than identity (a compressed answer), which OSD does not accept, so nothing from it was verified; serve the OSD paths without compression. |
 | `CONTENT_TYPE_REJECTED` | Tor transport, browser client | 5 | A Node or Service answered without application/json; nothing was verified. |
-| `CRYPTO_ALGORITHM_UNSUPPORTED` | browser client | – | The code name states the condition; see the raising component. |
-| `CURSOR_INVALID` | Tor transport, web routes | 3, 5 | The code name states the condition; see the raising component. |
-| `DISCOVERY_DISABLED` | CLI | 3 | The code name states the condition; see the raising component. |
+| `CRYPTO_ALGORITHM_UNSUPPORTED` | browser client | – | An internal browser check failed: without Web Crypto, the client’s built-in hash fallback supports only SHA-256, and another algorithm was requested. |
+| `CURSOR_INVALID` | Tor transport, web routes | 3, 5 | A changes cursor is out of range: beyond this Node’s last record sequence number (HTTP 400 on the changes route), or negative or above the largest safe integer; use a cursor the Node returned, or 0. |
+| `DISCOVERY_DISABLED` | CLI | 3 | Service discovery is off for this configuration (features.discover_services is false or the role is client-host), so candidate:add, candidate:retry and node:work-one refuse to run; use a node or combined configuration with it enabled. |
 | `DOCUMENT_TOO_LARGE` | CLI, JSON parsing, browser client, protocol | 3 | An input file exceeds the limit for its record type. |
-| `ENCODING_INVALID` | JSON parsing, browser client, encoding | 3 | The code name states the condition; see the raising component. |
-| `ERROR_CODE_INVALID` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `EVIDENCE_CHANGED_RETRY` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `EVIDENCE_PATH_UNSAFE` | configuration and status | 3 | The code name states the condition; see the raising component. |
-| `EVIDENCE_TOO_LARGE` | configuration and status | 3 | The code name states the condition; see the raising component. |
+| `ENCODING_INVALID` | JSON parsing, browser client, encoding | 3 | JSON input was rejected for its encoding: a byte order mark, invalid UTF-8, a lone surrogate or a NUL character in a property name; save it as UTF-8 without a byte order mark. |
+| `ERROR_CODE_INVALID` | Node worker | 3 | An internal check failed: a candidate check ended with an error that is not a plain uppercase code, so the failure could not be recorded on the candidate. |
+| `EVIDENCE_CHANGED_RETRY` | Node worker | 3 | Other evidence was committed to the store while node:init, node:snapshot or node:work-one prepared its result, so that result was not saved (node:work-one backs off and retries the candidate); run node:init or node:snapshot again. |
+| `EVIDENCE_PATH_UNSAFE` | configuration and status | 3 | The saved status evidence file beside the configuration (NAME.discoverability.json) is a symlink, so --save-status and --if-due runs refused to write it; remove the symlink. |
+| `EVIDENCE_TOO_LARGE` | configuration and status | 3 | Saving this status evidence would make the evidence file beside the configuration larger than 16 KiB, so the update was not saved. |
 | `EVIDENCE_UNAVAILABLE` | browser client | – | The browser keeps no pair of conflicting signed records for this Node, so there is nothing to save. |
 | `EVIDENCE_WRITE_FAILED` | configuration and status | 3 | Saved status evidence could not be written beside the configuration; check directory permissions. |
-| `EXISTING_MANIFEST_INVALID` | signing | 3 | The code name states the condition; see the raising component. |
+| `EXISTING_MANIFEST_INVALID` | signing | 3 | The Manifest installed at WEBROOT/.well-known/onion-service-discovery.json is missing (for history commands), larger than 16 KiB, unreadable or not a Service Manifest; check it with manifest:verify. |
 | `EXPECTED_NODE_KEY_REQUIRED` | browser client | – | A visitor-chosen Node needs its expected public key. |
-| `EXPORT_BUDGET_EXHAUSTED` | storage | 4 | The code name states the condition; see the raising component. |
+| `EXPORT_BUDGET_EXHAUSTED` | storage | 4 | The public export directory reached its limit of 4096 files or 256 MiB, or a single export file would exceed 512 KiB; remove unreferenced files with exports:prune or node:maintain. |
 | `EXPORT_BUDGET_NEARLY_EXHAUSTED` | doctor | 6 | doctor warning: the export directory uses at least 80 % of its 4,096-file or 256 MiB limit; check that the maintenance timer runs (node:maintain prunes old blobs). |
-| `EXPORT_BUSY` | storage | 4 | The code name states the condition; see the raising component. |
+| `EXPORT_BUSY` | storage | 4 | Another process held the export directory’s writer lock for more than 2 seconds, so this write or prune did not run; run it again when the other command has finished. |
 | `EXPORT_CORRUPT` | CLI, configuration and status, storage, web routes | 3, 4 | Published snapshot files do not match their signed hashes; rebuild with node:snapshot --rebuild-derived. |
-| `EXPORT_DIRECTORY_UNSAFE` | storage | 4 | The code name states the condition; see the raising component. |
-| `EXPORT_UNAVAILABLE` | storage | 4 | The code name states the condition; see the raising component. |
+| `EXPORT_DIRECTORY_UNSAFE` | storage | 4 | The export directory (export_path) is a URL, a symlink, missing or open to group or others, or it contains a symlink, a subdirectory or a file that is not an OSD export file; node:init or client:init creates it with mode 0700. |
+| `EXPORT_UNAVAILABLE` | storage | 4 | An export file or the export directory’s lock file could not be created, written, synced, renamed, read or deleted; check the ownership and free space of export_path. |
 | `FILESYSTEM_FORMAT_MIGRATION_REQUIRED` | doctor | 6 | doctor: the filesystem store uses format 1; plan storage:migrate. |
-| `FILESYSTEM_SEMANTICS_UNSUPPORTED` | signing, storage | 3, 4 | The code name states the condition; see the raising component. |
-| `FILE_TOO_LARGE` | browser client | – | The code name states the condition; see the raising component. |
-| `FORKED` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `HASH_INVALID` | Tor transport, browser client, encoding | 3, 5 | The code name states the condition; see the raising component. |
-| `HEADERS_TOO_LARGE` | browser client | – | The code name states the condition; see the raising component. |
+| `FILESYSTEM_SEMANTICS_UNSUPPORTED` | signing, storage | 3, 4 | After an atomic rename, the directory holding the store, the exports or the installed public records could not be opened or synced, so the write is not known to be durable; use a local filesystem that supports syncing directories. |
+| `FILE_TOO_LARGE` | browser client | – | The chosen file is larger than the browser client accepts (1 MiB for a signed record bundle, 256 KiB for a pin backup), so it was not read. |
+| `FORKED` | Node worker | 3 | Not an error: FORKED is the state of an identity, search result or pin when two different signed Manifests share a revision number or rotation or migration proofs conflict, so no current Manifest is selected. |
+| `HASH_INVALID` | Tor transport, browser client, encoding | 3, 5 | A value that must be a content hash (for example a checkpoint or chunk hash a Node served) is not sha256: followed by 64 lowercase hex digits. |
+| `HEADERS_TOO_LARGE` | browser client | – | A Node or Service answered with more than 8 KiB of response headers (or, for the PHP transport, a header line over 2 KiB), so nothing from it was used. |
 | `HISTORY_BUNDLE_INVALID` | browser client, protocol, signing | 3 | The PCP-004 history bundle is malformed, too large or contains a record type it must not contain. |
 | `HISTORY_INCOMPLETE` | Node worker, signing | 3 | The current Manifest does not connect to its history: the Service serves no or an incomplete history bundle (history:install), or a proof is missing. |
 | `HTTP_NOT_FOUND` | Tor transport | 5 | The Onion answered 404: its web server does not pass this path to the OSD front controller, or the Node does not offer the endpoint. |
@@ -80,161 +80,161 @@ for remedies.
 | `HTTP_STATUS_REJECTED` | Tor transport | 5 | The remote answered with an unexpected HTTP status other than 404, a redirect or 5xx; nothing was verified. |
 | `IDENTITY_CHANGED` | Node worker | 3 | Another Service identity now answers at an address this Node already knew; the old evidence is preserved. |
 | `IDENTITY_FORKED` | Node worker | 3 | Two different signed revisions with the same number exist; the fork stays visible. |
-| `IMPORT_FORMAT_INVALID` | browser client | – | The code name states the condition; see the raising component. |
-| `IMPORT_REQUIRES_EMPTY_STAGING_STORE` | storage | 4 | The code name states the condition; see the raising component. |
-| `INPUT_FILE_UNAVAILABLE` | CLI, signing | 3 | The code name states the condition; see the raising component. |
+| `IMPORT_FORMAT_INVALID` | browser client | – | The imported file is neither a single signed record nor a record bundle (bundle_version 1 with a records list), so nothing was imported. |
+| `IMPORT_REQUIRES_EMPTY_STAGING_STORE` | storage | 4 | storage:import writes only into a new, empty store, and the given staging store already holds records or changes; give a new staging path. |
+| `INPUT_FILE_UNAVAILABLE` | CLI, signing | 3 | An input file is missing, not a regular file, unreadable or given as a URL; check the path and read permission. |
 | `INTERNAL_ERROR` | CLI | 8 | An unexpected internal failure; details are withheld on purpose. Run storage:check if a store was involved and attach the reviewed diagnostics:export output when reporting it. |
-| `JSON_DEPTH_EXCEEDED` | browser client, encoding | 3 | The code name states the condition; see the raising component. |
-| `KEY_DIRECTORY_UNSAFE` | signing | 4 | The code name states the condition; see the raising component. |
-| `KEY_ENVELOPE_INVALID` | signing | 4 | The code name states the condition; see the raising component. |
-| `KEY_FILE_UNAVAILABLE` | signing | 4 | The code name states the condition; see the raising component. |
+| `JSON_DEPTH_EXCEEDED` | browser client, encoding | 3 | The JSON nests objects or arrays more than 16 levels deep, beyond what the protocol allows. |
+| `KEY_DIRECTORY_UNSAFE` | signing | 4 | key:create refused the key path because it is a URL or its directory is a symlink, missing or open to group or others; create the directory with mode 0700 first. |
+| `KEY_ENVELOPE_INVALID` | signing | 4 | The key file is not a valid key envelope for this role (for example a service key used as a Node key) or is damaged, so the key was not unlocked; use the key file key:create made for this role. |
+| `KEY_FILE_UNAVAILABLE` | signing | 4 | The key file is missing, a symlink, not a regular file, open to group or others, larger than 4 KiB or unreadable, or key:create found an existing file or could not write it; keys must be owner-only (0600) regular files. |
 | `KEY_ROTATION_INVALID` | browser client, protocol, signing | 3 | A key change without a valid rotation proof for exactly this predecessor and revision. |
-| `KEY_UNAVAILABLE` | signing | 4 | The code name states the condition; see the raising component. |
+| `KEY_UNAVAILABLE` | signing | 4 | An internal check failed: the unlocked signing key was no longer in memory when a record was to be signed, so nothing was signed. |
 | `KEY_UNLOCK_FAILED` | signing | 4 | Wrong passphrase or damaged key envelope. |
 | `LOCAL_CONTINUITY_INCOMPLETE` | browser client, configuration and status, protocol | 3 | Your own history files do not form one complete identity; include every revision and proof. |
 | `LOCAL_IDENTITY_CONFLICT` | browser client, configuration and status, protocol | 3 | Your own history contains a fork; resolve which branch you published before checking Nodes. |
-| `LOCAL_RESOURCE_TOO_LARGE` | browser client | – | The code name states the condition; see the raising component. |
-| `LOCAL_RESOURCE_UNAVAILABLE` | browser client | – | The code name states the condition; see the raising component. |
-| `MANIFEST_INVALID` | configuration and status | 3 | The code name states the condition; see the raising component. |
-| `METADATA_INVALID` | signing | 3 | The code name states the condition; see the raising component. |
-| `METHOD_NOT_ALLOWED` | front controller, web routes | – | The code name states the condition; see the raising component. |
+| `LOCAL_RESOURCE_TOO_LARGE` | browser client | – | The Client Host’s config.json exceeds 16 KiB or its demo.json exceeds 1 MiB, so the browser client stopped reading it. |
+| `LOCAL_RESOURCE_UNAVAILABLE` | browser client | – | The browser client could not load config.json or demo.json from its Client Host as a successful JSON response; without config.json no configured Nodes are offered. |
+| `MANIFEST_INVALID` | configuration and status | 3 | The installed public Manifest file holds a validly signed record that is not a Service Manifest, so the status page and publisher:status report the Manifest as invalid; install a signed Service Manifest with manifest:install. |
+| `METADATA_INVALID` | signing | 3 | The metadata file for manifest:init or manifest:revise is not a JSON object with a service member and no members other than service, links and discovery. |
+| `METHOD_NOT_ALLOWED` | front controller, web routes | – | The route does not accept the request method (HTTP 405): the data, relay and client routes take GET or HEAD, and the announcement route takes only POST. |
 | `MIGRATION_INVALID` | browser client, protocol, signing | 3 | An address change without a valid migration proof for exactly this predecessor and revision. |
-| `MIRROR_DISABLED` | CLI | 3 | The code name states the condition; see the raising component. |
-| `NODE_DESCRIPTOR_HISTORY_INCOMPLETE` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `NODE_DESCRIPTOR_INVALID` | configuration and status, doctor | 3, 4 | The code name states the condition; see the raising component. |
-| `NODE_DESCRIPTOR_ROLLBACK_OR_FORK` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `NODE_IDENTITY_CHANGED` | CLI | 3 | The code name states the condition; see the raising component. |
-| `NODE_IDENTITY_CHANGE_REQUIRES_MIGRATION` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `NODE_KEY_ENVELOPE_INVALID` | doctor | 4 | The code name states the condition; see the raising component. |
+| `MIRROR_DISABLED` | CLI | 3 | node:snapshot refused to run because features.mirror_directory and features.server_search are both off in this configuration; enable the feature it needs in a node or combined configuration. |
+| `NODE_DESCRIPTOR_HISTORY_INCOMPLETE` | Node worker | 3 | A peer’s new Node descriptor skips a revision or does not name the previously seen descriptor as its predecessor, so the peer was quarantined; after checking, release it with peers:retry. |
+| `NODE_DESCRIPTOR_INVALID` | configuration and status, doctor | 3, 4 | The Node descriptor in the store does not verify or names another Onion than node.onion (doctor also reports a published snapshot that fails verification this way); check that storage.path and node.onion belong to this Node. |
+| `NODE_DESCRIPTOR_ROLLBACK_OR_FORK` | Node worker | 3 | A peer served an older Node descriptor than seen before, or two different descriptors with the same revision, so the peer was quarantined and the descriptors were kept as evidence; quarantine:list shows the evidence. |
+| `NODE_IDENTITY_CHANGED` | CLI | 3 | The Node descriptor in the store names another Node key or Onion than the unlocked key file and node.onion, so node:snapshot or node:work-one refused to run; use the original key and Onion. |
+| `NODE_IDENTITY_CHANGE_REQUIRES_MIGRATION` | Node worker | 3 | node:init found a Node descriptor in the store with another Node key or Onion than this key file and node.onion, and protocol v1 cannot change a Node identity; use the original key and Onion or set up a new Node. |
+| `NODE_KEY_ENVELOPE_INVALID` | doctor | 4 | doctor: the Node key file at node.key_path is unreadable or its unencrypted header is not a valid Node key envelope (for example a service key); the passphrase was not checked. |
 | `NODE_KEY_MISSING_OR_UNSAFE` | doctor | 6 | doctor: the Node key file is missing or readable by others (needs 0600). |
 | `NODE_KEY_ROTATION_UNSUPPORTED` | CLI | 3 | Protocol v1 cannot rotate a Node key; create a new Node identity and have peers pin it explicitly. |
 | `NODE_NOT_INITIALIZED` | CLI, doctor, web routes | 3, 6 | Run node:init before this command. |
-| `NODE_UNAVAILABLE` | front controller | – | The code name states the condition; see the raising component. |
+| `NODE_UNAVAILABLE` | front controller | – | The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable store or export directory, or a relayed Node that could not be fetched; operators run doctor. |
 | `NOT_FOUND` | front controller, web routes | 3 | The route or record does not exist on this installation. |
 | `ONION_BINDING_MISMATCH` | browser client, protocol, signing | 3 | The signed Manifest belongs to a different Onion than the one it was fetched from or installed for. |
 | `ONION_UNREACHABLE` | Tor transport | 5 | Tor answered with a SOCKS error: it could not reach the Onion (still bootstrapping, Service offline or descriptor not published). |
-| `OUTPUT_DIRECTORY_UNAVAILABLE` | CLI | 3 | The code name states the condition; see the raising component. |
+| `OUTPUT_DIRECTORY_UNAVAILABLE` | CLI | 3 | The --output-dir given to manifest:rotate or manifest:migrate is a URL, a symlink, missing or not writable; create a writable directory first. |
 | `OUTPUT_FILE_EXISTS_OR_UNAVAILABLE` | CLI | 3 | The draft file already exists or cannot be created; drafts are never overwritten. |
 | `PASSPHRASE_FILE_UNSAFE` | CLI | 3 | The passphrase file must be a regular owner-only (0600) file. |
-| `PASSPHRASE_POLICY` | CLI, signing | 3, 4 | The code name states the condition; see the raising component. |
-| `PEER_BINDING_MISMATCH` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `PEER_BUSY` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `PEER_CLAIM_LOST` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `PEER_KEY_CHANGE_REQUIRES_EXPLICIT_RESET` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `PEER_NOT_CONFIGURED` | CLI, Node worker | 3 | The code name states the condition; see the raising component. |
-| `PEER_POOL_FULL` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `PIN_BACKUP_INVALID` | browser client | – | The code name states the condition; see the raising component. |
-| `PIN_BUDGET_EXHAUSTED` | browser client | – | The code name states the condition; see the raising component. |
-| `PIN_CONTEXT_UNAVAILABLE` | browser client | – | The code name states the condition; see the raising component. |
+| `PASSPHRASE_POLICY` | CLI, signing | 3, 4 | The passphrase file holds an empty passphrase or one longer than 1024 bytes (one trailing newline is ignored), or key:create got one shorter than 12 bytes. |
+| `PEER_BINDING_MISMATCH` | Node worker | 3 | The peer’s Node descriptor names another Onion or is signed by another key than the one pinned with peers:add, so the peer was quarantined; check the key, then release it with peers:retry. |
+| `PEER_BUSY` | Node worker | 3 | A sync step has claimed this peer, so peers:group did not change its group; run peers:group again when the step has finished. |
+| `PEER_CLAIM_LOST` | Node worker | 3 | This sync step lost its claim on the peer because its 5-minute lease ended and another step took over, or peers:disable or peers:retry reset the peer, so it stopped without saving more. |
+| `PEER_KEY_CHANGE_REQUIRES_EXPLICIT_RESET` | Node worker | 3 | This Onion is already a peer pinned to another Node key, and peers:add never replaces a pinned key, so nothing was changed; a Node with a new key is added under its new Onion (incident runbook). |
+| `PEER_NOT_CONFIGURED` | CLI, Node worker | 3 | The Onion is not in this Node’s peer list, so the peer command or sync step had nothing to act on; add it with peers:add first. |
+| `PEER_POOL_FULL` | Node worker | 3 | This Node already lists 256 peers, the maximum, counting disabled peers too, so no peer was added. |
+| `PIN_BACKUP_INVALID` | browser client | – | The file is not a valid pin backup from this client: it needs pin_backup_version 1 and at most 256 distinct pins, each with a valid key, Onion, hashes, revision and a label of at most 128 characters. |
+| `PIN_BUDGET_EXHAUSTED` | browser client | – | Restoring these pins would exceed the limit of 256 pins, so none were restored; remove some pins before importing more. |
+| `PIN_CONTEXT_UNAVAILABLE` | browser client | – | This identity cannot be pinned: it is not in the loaded index, is withdrawn or forked, or has no current Onion, or 256 pins already exist. |
 | `PRIVATE_PATH_IN_WEBROOT` | configuration and status | 3 | A private file or directory is inside the public web root; move it out. |
-| `PROTOCOL_UNSUPPORTED` | browser client, protocol | 3 | The code name states the condition; see the raising component. |
+| `PROTOCOL_UNSUPPORTED` | browser client, protocol | 3 | The record does not declare protocol Onion Service Discovery with protocol_version 1, the only version this software supports. |
 | `PUBLIC_HOSTNAME_FILE_REQUIRED` | signing | 3 | manifest:install needs the public Tor hostname file, named hostname. |
 | `PUBLIC_KEY_INVALID` | browser client, encoding | 3 | Not a canonical ed25519: public key (43 base64url characters after the prefix). |
-| `PUBLIC_MANIFEST_PATH_UNSAFE` | signing | 3 | The code name states the condition; see the raising component. |
-| `PUBLIC_MANIFEST_WRITE_FAILED` | signing | 3 | The code name states the condition; see the raising component. |
+| `PUBLIC_MANIFEST_PATH_UNSAFE` | signing | 3 | The public Manifest file or the publisher lock file in WEBROOT/.well-known is a symlink, so the publisher command refused to write there; remove the symlink and install again. |
+| `PUBLIC_MANIFEST_WRITE_FAILED` | signing | 3 | The publisher lock, the new Manifest or the history bundle could not be created, written, synced or renamed in WEBROOT/.well-known; check that the installing user can write there. |
 | `PUBLISHER_BUSY` | configuration and status, signing | 3 | Another publisher command holds the lock on the same files; run it again when that command has finished. |
 | `PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT` | doctor | 6 | doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page. |
 | `PUBLISHER_NODES_NOT_CONFIGURED` | CLI, doctor | 3, 6 | No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key. |
 | `PUBLISHER_TIMER_STALE` | doctor | 6 | doctor warning: the last saved publisher check is older than 36 hours although the timer runs every six hours; check osd-publisher-check.timer. |
 | `PUBLISHING_DISABLED` | CLI | 3 | Publishing is off in the configuration or the Manifest withdraws publication. |
-| `RATE_LIMIT_CONFIGURATION_INVALID` | web routes | 4 | The code name states the condition; see the raising component. |
-| `RATE_LIMIT_CORRUPT` | web routes | 4 | The code name states the condition; see the raising component. |
-| `RATE_LIMIT_UNAVAILABLE` | web routes | 4 | The code name states the condition; see the raising component. |
+| `RATE_LIMIT_CONFIGURATION_INVALID` | web routes | 4 | A request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is a symlink or its limits are invalid, so requests fail with HTTP 503; remove the symlink. |
+| `RATE_LIMIT_CORRUPT` | web routes | 4 | A request budget file in the export directory is larger than 1 KiB or holds no valid budget state, so requests fail with HTTP 503; delete the file; it is recreated with a full budget. |
+| `RATE_LIMIT_UNAVAILABLE` | web routes | 4 | A request budget file in the export directory cannot be created or written or is open to group or others, so requests fail with HTTP 503; let the web server user own it with mode 0600. |
 | `REQUEST_BUDGET_EXHAUSTED` | front controller | – | The shared request budget is used up; retry after a second. |
-| `REQUEST_INVALID` | web routes | – | The code name states the condition; see the raising component. |
-| `REQUEST_TOO_LARGE` | front controller | – | The code name states the condition; see the raising component. |
+| `REQUEST_INVALID` | web routes | – | The request is malformed (HTTP 400): a path over 256 bytes or with spaces or control characters, an invalid Onion address in the path, or an announcement that is not the exact hint JSON. |
+| `REQUEST_TOO_LARGE` | front controller | – | An announcement request declared or sent more than 256 bytes, or its Content-Length is malformed (HTTP 413). |
 | `RESPONSE_TOO_LARGE` | browser client, web routes | 3 | A response exceeded its byte limit and was discarded. |
 | `RESTORE_REQUIRES_EMPTY_STAGING_STORE` | storage | 4 | Restores and migrations write only into a new, empty store path. |
 | `REVISION_CHAIN_BROKEN` | signing | 3 | The new Manifest is not the next revision of the installed one. |
-| `REVISION_DOWNGRADE` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `REVISION_EXHAUSTED` | signing | 3 | The code name states the condition; see the raising component. |
+| `REVISION_DOWNGRADE` | Node worker | 3 | A Service or source served an older Manifest revision than one already known for that identity (node:work-one quarantines the candidate; a browser pin keeps the newer revision); load other sources. |
+| `REVISION_EXHAUSTED` | signing | 3 | The current Manifest already has the highest possible revision (9007199254740991), so no successor revision can be drafted. |
 | `ROLE_CONFIGURATION_INVALID` | CLI, Node worker, configuration and status | 3 | The command or feature is not available for this configuration role. |
 | `RUNTIME_DEPENDENCIES_MISSING` | CLI, front controller | 3 | PHP dependencies are missing: use the development runtime package, which bundles them, or run the locked Composer install. |
 | `RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX` | doctor | 6 | doctor: this PHP minor version is outside the tested 8.4/8.5 matrix. |
 | `SCHEMA_INVALID` | CLI, Node worker, browser client, encoding, input parsing, protocol, signing, web routes | 3 | The record does not match its draft schema. |
-| `SEARCH_INDEX_CORRUPT` | server search | 3 | The code name states the condition; see the raising component. |
-| `SEARCH_INDEX_STALE` | server search | 3 | The code name states the condition; see the raising component. |
-| `SEARCH_INDEX_UNAVAILABLE` | server search | 3 | The code name states the condition; see the raising component. |
-| `SEARCH_REQUEST_INVALID` | server search, web routes | 3 | The code name states the condition; see the raising component. |
-| `SEARCH_TEXT_INVALID` | server search | 3 | The code name states the condition; see the raising component. |
-| `SEARCH_WORK_BUDGET_EXHAUSTED` | server search, web routes | 3 | The code name states the condition; see the raising component. |
-| `SEARCH_WORK_LIMIT` | browser client, server search | 3 | The code name states the condition; see the raising component. |
+| `SEARCH_INDEX_CORRUPT` | server search | 3 | The server search index files in the export directory are missing, altered or malformed or do not match the published snapshot, so server search is unavailable; rebuild them with node:snapshot --rebuild-derived. |
+| `SEARCH_INDEX_STALE` | server search | 3 | The server search index was built for another snapshot than the one now published, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived. |
+| `SEARCH_INDEX_UNAVAILABLE` | server search | 3 | Server search has no index because no snapshot was published or it was published with server search off, so server search is unavailable; run node:snapshot with server_search enabled. |
+| `SEARCH_REQUEST_INVALID` | server search, web routes | 3 | The server search form submission is malformed (wrong media type, unknown or repeated fields, a query over 256 UTF-16 units, or an invalid language, category or adult value), so it was rejected; use the search form. |
+| `SEARCH_TEXT_INVALID` | server search | 3 | Text given to search normalization is not valid UTF-8, exceeds 1 MiB or contains an invalid code point, so it was refused. |
+| `SEARCH_WORK_BUDGET_EXHAUSTED` | server search, web routes | 3 | Server search exceeded a work limit: a search ran longer than 0.5 seconds and returned no partial result, or node:snapshot found more than 10000 services, 16 MiB or 128 chunks for the index. |
+| `SEARCH_WORK_LIMIT` | browser client, server search | 3 | Search text exceeds the Unicode normalization limit of 65536 UTF-16 units, or 262144 code points before or after decomposition, so it was refused; shorten the text. |
 | `SELF_VERIFICATION_ONION_MISMATCH` | CLI | 3 | --save-status self-checks only the Onion configured for this installation. |
 | `SERVER_SEARCH_ENABLED_QUERIES_SENT_TO_NODE` | doctor | 6 | doctor: server search is on, so search terms reach this Node. |
-| `SERVER_SEARCH_INDEX_UNAVAILABLE_OR_CORRUPT` | doctor | 4 | The code name states the condition; see the raising component. |
-| `SERVICE_INDEX_NOT_READY` | web routes | – | The code name states the condition; see the raising component. |
+| `SERVER_SEARCH_INDEX_UNAVAILABLE_OR_CORRUPT` | doctor | 4 | doctor: server search is on, but its index cannot be loaded because it is missing, stale or corrupt, so the search page answers 503; rebuild it with node:snapshot --rebuild-derived. |
+| `SERVICE_INDEX_NOT_READY` | web routes | – | This Node has not yet published a snapshot with the current (version 2) service lookup index, so service lookups answer 503; the operator runs node:snapshot. |
 | `SIGNATURE_INVALID` | browser client, protocol | 3 | The signature does not verify; the record was changed after signing or signed by another key. |
-| `SIGNER_BINDING_MISMATCH` | Node worker | 3 | The code name states the condition; see the raising component. |
-| `SIGNER_KEY_MISMATCH` | signing | 4 | The code name states the condition; see the raising component. |
-| `SIGNER_ROLE_INVALID` | signing | 4 | The code name states the condition; see the raising component. |
-| `SIGNER_ROLE_MISMATCH` | Node worker, signing | 3, 4 | The code name states the condition; see the raising component. |
-| `SNAPSHOT_CHUNK_HASH_INVALID` | browser client, protocol | 3 | The code name states the condition; see the raising component. |
+| `SIGNER_BINDING_MISMATCH` | Node worker | 3 | The last published snapshot was signed by another Node key than the one unlocked, so node:snapshot refused to publish; use the Node key that signed this store’s snapshots. |
+| `SIGNER_KEY_MISMATCH` | signing | 4 | The record names another public key for its signer (new_public_key with --rotation-confirmation) than the key in this key file, so record:sign signed nothing; sign with the key the record names. |
+| `SIGNER_ROLE_INVALID` | signing | 4 | The key role is neither service nor node, so key:create or record:sign did nothing. |
+| `SIGNER_ROLE_MISMATCH` | Node worker, signing | 3, 4 | The key role cannot sign this record type (service keys sign Manifests, rotations and migrations; Node keys sign Node descriptors, observations and snapshots), or --rotation-confirmation was used on another record. |
+| `SNAPSHOT_CHUNK_HASH_INVALID` | browser client, protocol | 3 | A snapshot chunk’s size or hash does not match the signed checkpoint, so the chunk was rejected. |
 | `SNAPSHOT_INCOMPLETE` | CLI, browser client, protocol | 3 | A snapshot chunk is missing; the snapshot was not used. |
 | `SNAPSHOT_NOT_PUBLISHED` | doctor | 6 | doctor: directory mirroring is on but no snapshot was published yet (node:snapshot). |
-| `SNAPSHOT_RECORD_ORDER_INVALID` | browser client, protocol | 3 | The code name states the condition; see the raising component. |
+| `SNAPSHOT_RECORD_ORDER_INVALID` | browser client, protocol | 3 | A snapshot chunk contains a snapshot descriptor, or its records are not in strictly ascending content-hash order across the snapshot, so the chunk was rejected. |
 | `SNAPSHOT_TIMER_STALE` | doctor | 6 | doctor warning: the published checkpoint is older than two days although snapshots refresh daily; check the snapshot timer and run node:snapshot. |
-| `SNAPSHOT_UNAVAILABLE` | CLI, web routes | 3 | The code name states the condition; see the raising component. |
+| `SNAPSHOT_UNAVAILABLE` | CLI, web routes | 3 | No snapshot has been published yet, so the Node has no state to serve (HTTP 503 on the state route) and no exports to prune; run node:snapshot first. |
 | `SOURCE_ALREADY_ADDED` | browser client | – | You already added this Node. |
 | `SOURCE_ALREADY_CONFIGURED` | browser client | – | This Node is already listed by the Client Host. |
-| `SOURCE_CANCELLED` | browser client | – | The code name states the condition; see the raising component. |
+| `SOURCE_CANCELLED` | browser client | – | The visitor cancelled loading, so nothing from the Node being loaded was used and Nodes not yet started are shown as cancelled. |
 | `SOURCE_CHECKPOINT_BINDING_MISMATCH` | Node worker, browser client, configuration and status | 3 | The Node's state and its signed checkpoint disagree (hash, generation or cursor); nothing from it was used. |
 | `SOURCE_CHECKPOINT_CHAIN_BROKEN` | Node worker, browser client, configuration and status | 3 | The Node's checkpoints do not form one chain back to the one seen before (D-052); its evidence is not used. |
 | `SOURCE_CHECKPOINT_EQUIVOCATION` | Node worker, browser client, configuration and status | 3 | The Node signed two different checkpoints for the same generation; a peer is quarantined, a publisher check rejects that Node. |
 | `SOURCE_CHECKPOINT_ROLLBACK` | Node worker, browser client, configuration and status | 3 | The Node served an older checkpoint than already seen; a peer is quarantined, a publisher check rejects that Node. |
-| `SOURCE_DESCRIPTOR_EQUIVOCATION` | browser client | – | The code name states the condition; see the raising component. |
-| `SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE` | browser client | – | The code name states the condition; see the raising component. |
-| `SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK` | browser client | – | The code name states the condition; see the raising component. |
+| `SOURCE_DESCRIPTOR_EQUIVOCATION` | browser client | – | The Node signed two different Node descriptors with the same revision, so the browser set its data aside and kept both signed records as evidence; save them with Save the conflicting signed records. |
+| `SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE` | browser client | – | The Node’s newer descriptor does not connect revision by revision to the one seen before through the descriptors in its snapshot, so its data from this load was not used. |
+| `SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK` | browser client | – | The Node served an older Node descriptor than this browser saw before, or a different one with the same revision, so its data was set aside. |
 | `SOURCE_DUPLICATE` | CLI, configuration and status | 3 | The same Node was listed twice. |
-| `SOURCE_EQUIVOCATION_PRESERVED` | browser client | – | The code name states the condition; see the raising component. |
+| `SOURCE_EQUIVOCATION_PRESERVED` | browser client | – | This browser already holds proof that the Node signed two conflicting states, so the Node was not loaded again and the evidence was kept. |
 | `SOURCE_FETCH_FAILED` | browser client | – | The Node could not be reached through the relay or Tor. |
-| `SOURCE_GROUP_ASSIGNMENTS_INCONSISTENT` | doctor | 6 | The code name states the condition; see the raising component. |
-| `SOURCE_GROUP_INVALID` | Node worker | 3 | The code name states the condition; see the raising component. |
+| `SOURCE_GROUP_ASSIGNMENTS_INCONSISTENT` | doctor | 6 | doctor warning: active peers that share one Node key are in different local source groups, or only some of them have a group; give them one group with peers:group. |
+| `SOURCE_GROUP_INVALID` | Node worker | 3 | A source group name is not 1 to 32 lowercase letters, digits or inner hyphens, or a stored peer has an invalid group or Node key. |
 | `SOURCE_HISTORY_PROGRESS` | browser client | – | Long-absence history is verified in bounded steps; load again to continue. |
-| `SOURCE_HTTP_STATUS_REJECTED` | browser client | – | The code name states the condition; see the raising component. |
-| `SOURCE_INVALID` | Node worker | 3 | The code name states the condition; see the raising component. |
+| `SOURCE_HTTP_STATUS_REJECTED` | browser client | – | The Node or the Client Host relay answered with an HTTP status other than 200, so nothing from it was used; try again later. |
+| `SOURCE_INVALID` | Node worker | 3 | An internal check failed: the label recording where a candidate came from is not 1 to 96 letters, digits, underscores, dots, colons or hyphens, so the candidate was not queued. |
 | `SOURCE_KEY_MISMATCH` | configuration and status | 3 | The Node signs with a different key than the one you supplied. |
-| `SOURCE_NODE_BINDING_MISMATCH` | browser client | – | The code name states the condition; see the raising component. |
+| `SOURCE_NODE_BINDING_MISMATCH` | browser client | – | The record served at the Node’s node route is not a Node descriptor for the Onion address that was loaded, so nothing from that Node was used. |
 | `SOURCE_NODE_KEY_CHANGED` | browser client | – | The Node signed with a different key than expected; check the key or treat it as another Node. |
 | `SOURCE_NOT_IN_HOST_ALLOWLIST` | browser client | – | The Client Host does not relay this Node. |
-| `SOURCE_RECORD_COUNT_INVALID` | Node worker, browser client | 3 | The code name states the condition; see the raising component. |
+| `SOURCE_RECORD_COUNT_INVALID` | Node worker, browser client | 3 | The Node’s snapshot chunks held a different number of records than its signed checkpoint declares (the browser discards the load; a Node worker quarantines the peer). |
 | `SOURCE_SET_CONCENTRATED` | doctor | 6 | doctor: most configured peers share one source group; diversity is low. |
-| `SOURCE_STATE_INVALID` | configuration and status | 3 | The code name states the condition; see the raising component. |
+| `SOURCE_STATE_INVALID` | configuration and status | 3 | The Node’s state answer has no valid sha256 checkpoint hash, so service:membership rejected that Node’s evidence. |
 | `SOURCE_TIMEOUT` | browser client | – | The Node did not answer in time; the existing local index is unchanged. |
-| `SOURCE_TIME_BUDGET_EXHAUSTED` | browser client | – | The code name states the condition; see the raising component. |
-| `SOURCE_WORK_BUDGET_EXHAUSTED` | Node worker, browser client | 3 | The code name states the condition; see the raising component. |
-| `SQLITE_DRIVER_UNAVAILABLE` | storage | 4 | The code name states the condition; see the raising component. |
-| `STORAGE_ADDRESS_INVALID` | storage | 4 | The code name states the condition; see the raising component. |
-| `STORAGE_BACKEND_INVALID` | CLI, configuration and status | 3 | The code name states the condition; see the raising component. |
+| `SOURCE_TIME_BUDGET_EXHAUSTED` | browser client | – | Loading and checking this Node took longer than the browser’s 90-second limit, so nothing partial was used; try again on a faster connection or device. |
+| `SOURCE_WORK_BUDGET_EXHAUSTED` | Node worker, browser client | 3 | The Node’s signed snapshot exceeds the checking limits (over 10000 records or 32 MiB of chunks, or over 64 chunks in the browser), so the browser discards the load and a Node worker quarantines the peer. |
+| `SQLITE_DRIVER_UNAVAILABLE` | storage | 4 | The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend. |
+| `STORAGE_ADDRESS_INVALID` | storage | 4 | A record or export address is not sha256: followed by 64 lowercase hex digits, or an operational table or key name is invalid, so the store refused the request. |
+| `STORAGE_BACKEND_INVALID` | CLI, configuration and status | 3 | The storage backend, given as a command argument or as storage.backend in the configuration, is neither filesystem nor sqlite. |
 | `STORAGE_BUDGET_EXHAUSTED` | storage | 4 | The local store reached its record or byte quota; existing evidence is preserved. |
 | `STORAGE_BUSY` | storage | 4 | Another worker holds the store lock; let it finish. |
 | `STORAGE_CORRUPT` | CLI, Node worker, configuration and status, storage, web routes | 3, 4 | Stored data failed verification; run storage:check and restore from backup if needed. |
-| `STORAGE_ENCODING_INVALID` | storage | 4 | The code name states the condition; see the raising component. |
-| `STORAGE_ERROR` | storage | 4 | The code name states the condition; see the raising component. |
+| `STORAGE_ENCODING_INVALID` | storage | 4 | A value could not be put into the store’s strict internal JSON form (nesting over 32 levels, invalid UTF-8, a string over 64 KiB, an unsafe key or an unsupported type), so it was not written. |
+| `STORAGE_ERROR` | storage | 4 | A store operation failed at the operating-system or SQLite level (for example a write or sync on a full disk); data committed before is kept; free space or fix permissions and run the command again. |
 | `STORAGE_MIGRATION_REQUIRED` | storage | 4 | This store uses an older format; stop workers, back up, run storage:migrate. |
-| `STORAGE_MODE_INVALID` | storage | 4 | The code name states the condition; see the raising component. |
-| `STORAGE_NOT_REQUIRED_FOR_PUBLISHER` | configuration and status | 3 | The code name states the condition; see the raising component. |
-| `STORAGE_PATH_UNSAFE` | storage | 4 | The code name states the condition; see the raising component. |
-| `STORAGE_PERMISSIONS_UNSAFE` | storage | 4 | The code name states the condition; see the raising component. |
-| `STORAGE_READ_ONLY` | storage | 4 | The code name states the condition; see the raising component. |
+| `STORAGE_MODE_INVALID` | storage | 4 | An internal check failed: a store cannot be opened for creation and read-only at the same time, so it was not opened. |
+| `STORAGE_NOT_REQUIRED_FOR_PUBLISHER` | configuration and status | 3 | The command needs a Node store, but this is a publisher configuration, which keeps none; use a node or combined configuration. |
+| `STORAGE_PATH_UNSAFE` | storage | 4 | The filesystem store path is a URL or a symlink; point it at the real directory. |
+| `STORAGE_PERMISSIONS_UNSAFE` | storage | 4 | The store directory, one of its subdirectories or the SQLite database file is open to group or others; chmod 700 the directories and 600 the SQLite file. |
+| `STORAGE_READ_ONLY` | storage | 4 | An internal check failed: a write was attempted on a store opened read-only, so nothing was changed. |
 | `STORAGE_RECOVERY_REQUIRED` | storage | 4 | An interrupted write must be recovered with storage:check before read-only use. |
-| `STORAGE_UNAVAILABLE` | storage | 4 | The code name states the condition; see the raising component. |
-| `STORAGE_VERSION_UNSUPPORTED` | storage | 4 | The code name states the condition; see the raising component. |
-| `STREAMING_UNAVAILABLE` | browser client | – | The code name states the condition; see the raising component. |
-| `SYNC_DISABLED` | CLI | 3 | The code name states the condition; see the raising component. |
-| `TOO_LARGE` | signing | 3 | The code name states the condition; see the raising component. |
+| `STORAGE_UNAVAILABLE` | storage | 4 | The store path does not exist (and this command does not create it), is a symlink or URL, or the store or one of its files or directories cannot be created or opened; check storage.path; node:init or storage:init creates a store. |
+| `STORAGE_VERSION_UNSUPPORTED` | storage | 4 | The store has a format this release cannot open: a filesystem storage-version other than 1 or 2, or a SQLite schema version other than 1 or SQLite without foreign-key support. |
+| `STREAMING_UNAVAILABLE` | browser client | – | The browser returned the Node’s answer without a readable body stream, which the bounded download requires, so nothing from it was used. |
+| `SYNC_DISABLED` | CLI | 3 | Peer sync is off in this configuration (features.sync_with_peers is false), so sync:run and sync:peer-step refused to run; enable it to sync with peers. |
+| `TOO_LARGE` | signing | 3 | Not an error: manifest:install reports the history state TOO_LARGE when the connected history exceeds 256 records or 1 MiB, so the history bundle was not updated. |
 | `TOR_KEY_ACCESS_FORBIDDEN` | CLI, signing | 3, 4 | Commands never read Tor private key files. |
 | `TOR_PROXY_UNREACHABLE` | Tor transport | 5 | Nothing accepted a connection on the configured Tor SOCKS port: Tor is not running or transport.proxy_port is wrong. |
 | `TOR_REQUEST_FAILED` | Tor transport | 5 | Tor connected, but the HTTP exchange with the Onion failed (connection reset, empty or malformed reply). |
 | `TOR_REQUEST_TIMEOUT` | Tor transport | 5 | The Onion did not answer within transport.timeout_ms; first contact can be slow, retry or raise the limit (at most 60000). |
-| `TRANSPORT_CONFIGURATION_INVALID` | Tor transport | 5 | The code name states the condition; see the raising component. |
-| `TRANSPORT_UNAVAILABLE` | Tor transport | 5 | The code name states the condition; see the raising component. |
-| `UNVERIFIED_RECORD` | browser client | – | The code name states the condition; see the raising component. |
+| `TRANSPORT_CONFIGURATION_INVALID` | Tor transport | 5 | The Tor transport could not start: the PHP curl extension is missing, or the SOCKS host, port or timeout is outside 127.0.0.1 or ::1, 1 to 65535, or 100 to 60000 ms. |
+| `TRANSPORT_UNAVAILABLE` | Tor transport | 5 | PHP curl could not prepare the request through Tor (its handle or a required option could not be set), so nothing was sent; check the curl extension of this PHP runtime. |
+| `UNVERIFIED_RECORD` | browser client | – | An internal browser check failed: a record reached a step that accepts only records this page verified itself, so it was refused. |
 | `USAGE_ERROR` | CLI, configuration and status | 2 | Wrong arguments; run help for the exact syntax. |
 | `VISITOR_SOURCES_DISABLED` | browser client | – | This Client Host does not relay visitor-chosen Nodes. |
 | `VISITOR_SOURCE_LIMIT` | browser client | – | At most 8 visitor-chosen Nodes can be added. |
 | `VISITOR_SOURCE_RELAY_ENABLED_OUTBOUND_TO_VISITOR_CHOSEN_NODES` | doctor | 6 | doctor: the Client Host relays Nodes chosen by visitors. |
-| `WEBROOT_INVALID` | signing | 3 | The code name states the condition; see the raising component. |
-| `WITNESS_BUDGET_EXHAUSTED` | browser client | – | The code name states the condition; see the raising component. |
-| `WITNESS_CONFIGURATION_INVALID` | browser client | – | The code name states the condition; see the raising component. |
-| `WITNESS_TYPE_INVALID` | browser client | – | The code name states the condition; see the raising component. |
+| `WEBROOT_INVALID` | signing | 3 | The webroot is a URL, a symlink or not a directory, or its .well-known directory is a symlink, missing (history:install) or cannot be created (manifest:install). |
+| `WITNESS_BUDGET_EXHAUSTED` | browser client | – | The browser’s memory for Node evidence is full (512 signed checkpoints and descriptors, or fork evidence for 16 Nodes) and never drops proofs, so further Node data was refused; save any evidence you need, then reload the page. |
+| `WITNESS_CONFIGURATION_INVALID` | browser client | – | An internal browser check failed: the memory for Node evidence was created with limits outside 1 to 512 records or 1 to 16 forks. |
+| `WITNESS_TYPE_INVALID` | browser client | – | An internal browser check failed: only signed checkpoints and Node descriptors can be kept as Node evidence, and another record type was offered. |
 | `WORK_BUDGET_EXHAUSTED` | Node worker, browser client, protocol, storage | 3, 4 | The input exceeds a bounded work limit and was refused. |

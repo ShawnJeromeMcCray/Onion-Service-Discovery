@@ -35,7 +35,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The archive given to storage:import is larger than the 256 MiB import limit, so nothing was imported."
   },
   "ARCHIVE_INVALID": {
    "cli_exit": [
@@ -44,7 +44,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The public record archive is malformed (a wrong header or more than 10000 records, a non-canonical, duplicate, overlong or unterminated record line, or a wrong footer checksum or count), so nothing was imported."
   },
   "ARCHIVE_PATH_INVALID": {
    "cli_exit": [
@@ -53,7 +53,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The archive path is a URL or names a Tor private key file, or for storage:import it is a symlink or not an existing regular file."
   },
   "ARCHIVE_UNAVAILABLE": {
    "cli_exit": [
@@ -62,7 +62,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The archive file could not be created, written, synced or opened (storage:export never overwrites an existing file), or storage:import could not write a temporary file; use a new path or check permissions and free space."
   },
   "ASSERTION_STATE_INVALID": {
    "cli_exit": [
@@ -71,7 +71,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "node:maintain found a stored remote-provenance assertion without its expected kind or source list, so it stopped without changing anything."
   },
   "BACKUP_BUDGET_EXHAUSTED": {
    "cli_exit": [
@@ -80,7 +80,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The private backup exceeds its size limits of 32 MiB for the store state or 256 MiB in total."
   },
   "BACKUP_INVALID": {
    "cli_exit": [
@@ -89,7 +89,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The private backup is malformed (a wrong header or store state, a record that does not match its listed hash or type, an overlong or unterminated line, or a wrong footer checksum or count), so nothing was restored."
   },
   "BACKUP_PATH_INVALID": {
    "cli_exit": [
@@ -98,7 +98,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The backup path is a URL, a symlink or a Tor private key file name, or the backup to verify or restore is not an owner-only regular file of at most 256 MiB."
   },
   "BACKUP_RESTORE_MISMATCH": {
    "cli_exit": [
@@ -107,7 +107,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "After storage:restore, the staging store did not match the records and operational state recorded in the backup, so the restore failed; discard that staging store."
   },
   "BACKUP_UNAVAILABLE": {
    "cli_exit": [
@@ -116,7 +116,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The backup file could not be created, written, synced or opened (storage:backup never overwrites an existing file), or a temporary file for checking it could not be written; use a new path or check permissions and free space."
   },
   "CANDIDATE_BUSY": {
    "cli_exit": [
@@ -134,7 +134,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "This worker\u2019s 2-minute claim on the candidate expired and another worker run released it before the result was saved, so the result was dropped and the candidate is checked again later."
   },
   "CANDIDATE_NOT_FOUND": {
    "cli_exit": [
@@ -153,35 +153,35 @@
     "browser client",
     "protocol"
    ],
-   "meaning": null
+   "meaning": "The snapshot checkpoint used for a membership check is not a snapshot descriptor signed with the expected Node key given for that Node; check the expected Node key."
   },
   "CLIENT_BUILD_UNAVAILABLE": {
    "cli_exit": [],
    "components": [
     "web routes"
    ],
-   "meaning": null
+   "meaning": "The Client Host answered 503 because a browser client file is missing from web-local-search-client/dist, is a symlink or exceeds 2 MiB; build it with npm --prefix web-local-search-client run build."
   },
   "CLIENT_BUSY": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "Another load, import or clear operation is still running in this page, so the new one was not started; wait for it or cancel it first."
   },
   "CLIENT_CONFIGURATION_INVALID": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The browser client got an unusable source setup (over 16 Nodes, an unknown delivery profile or a change during a load) or a load request with no Node, over 16 Nodes or one Node twice."
   },
   "CLIENT_MARKUP_INVALID": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The client page lacks an element its script expects, so the served index.html does not match client.js; serve both from the same client build."
   },
   "CLIENT_ORIGIN_INVALID": {
    "cli_exit": [
@@ -190,14 +190,14 @@
    "components": [
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "An allowed_client_origins entry is not exactly http:// followed by a v3 Onion address (no https, port, path or trailing slash); the detail names the entry."
   },
   "CLIENT_RECORD_BUDGET_EXHAUSTED": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "Admitting these records would grow the browser\u2019s local index beyond 10000 signed records, so none of them were added; clear the index before loading more."
   },
   "CLOCK_INVALID": {
    "cli_exit": [
@@ -209,7 +209,7 @@
     "signing",
     "web routes"
    ],
-   "meaning": null
+   "meaning": "The system clock reports a time before 1970 or beyond the supported range (the year 9999 for signed timestamps), so the operation was refused; correct the system clock."
   },
   "CLOCK_ROLLBACK": {
    "cli_exit": [
@@ -218,7 +218,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "The system clock is earlier than the creation time of the last published snapshot, so node:snapshot refused to publish; correct the clock, then run node:snapshot again."
   },
   "COMMAND_UNKNOWN": {
    "cli_exit": [
@@ -236,7 +236,7 @@
    "components": [
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "init could not create the configuration file because it already exists or the directory does not allow it; init never overwrites a configuration; choose a new path."
   },
   "CONFIGURATION_INVALID": {
    "cli_exit": [
@@ -257,7 +257,7 @@
    "components": [
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "storage.path, export_path or node.key_path is not an absolute path of at most 1024 bytes without . or .. segments, control characters or ://, or it cannot be resolved; the detail names the key."
   },
   "CONFIGURATION_PATH_UNSAFE": {
    "cli_exit": [
@@ -266,7 +266,7 @@
    "components": [
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "init refused the configuration path: it must be an absolute path of at most 1024 bytes in an existing, non-symlinked, owner-only (0700) directory outside node-php/public."
   },
   "CONFIGURATION_UNAVAILABLE": {
    "cli_exit": [
@@ -284,7 +284,7 @@
    "components": [
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "init created the configuration file but could not write or sync it or sync its directory, so the file may be incomplete; check free space, remove the file and run init again."
   },
   "CONTENT_ENCODING_REJECTED": {
    "cli_exit": [
@@ -294,7 +294,7 @@
     "Tor transport",
     "browser client"
    ],
-   "meaning": null
+   "meaning": "A Node or Service answered with a Content-Encoding other than identity (a compressed answer), which OSD does not accept, so nothing from it was verified; serve the OSD paths without compression."
   },
   "CONTENT_TYPE_REJECTED": {
    "cli_exit": [
@@ -311,7 +311,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "An internal browser check failed: without Web Crypto, the client\u2019s built-in hash fallback supports only SHA-256, and another algorithm was requested."
   },
   "CURSOR_INVALID": {
    "cli_exit": [
@@ -322,7 +322,7 @@
     "Tor transport",
     "web routes"
    ],
-   "meaning": null
+   "meaning": "A changes cursor is out of range: beyond this Node\u2019s last record sequence number (HTTP 400 on the changes route), or negative or above the largest safe integer; use a cursor the Node returned, or 0."
   },
   "DISCOVERY_DISABLED": {
    "cli_exit": [
@@ -331,7 +331,7 @@
    "components": [
     "CLI"
    ],
-   "meaning": null
+   "meaning": "Service discovery is off for this configuration (features.discover_services is false or the role is client-host), so candidate:add, candidate:retry and node:work-one refuse to run; use a node or combined configuration with it enabled."
   },
   "DOCUMENT_TOO_LARGE": {
    "cli_exit": [
@@ -354,7 +354,7 @@
     "browser client",
     "encoding"
    ],
-   "meaning": null
+   "meaning": "JSON input was rejected for its encoding: a byte order mark, invalid UTF-8, a lone surrogate or a NUL character in a property name; save it as UTF-8 without a byte order mark."
   },
   "ERROR_CODE_INVALID": {
    "cli_exit": [
@@ -363,7 +363,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "An internal check failed: a candidate check ended with an error that is not a plain uppercase code, so the failure could not be recorded on the candidate."
   },
   "EVIDENCE_CHANGED_RETRY": {
    "cli_exit": [
@@ -372,7 +372,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "Other evidence was committed to the store while node:init, node:snapshot or node:work-one prepared its result, so that result was not saved (node:work-one backs off and retries the candidate); run node:init or node:snapshot again."
   },
   "EVIDENCE_PATH_UNSAFE": {
    "cli_exit": [
@@ -381,7 +381,7 @@
    "components": [
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "The saved status evidence file beside the configuration (NAME.discoverability.json) is a symlink, so --save-status and --if-due runs refused to write it; remove the symlink."
   },
   "EVIDENCE_TOO_LARGE": {
    "cli_exit": [
@@ -390,7 +390,7 @@
    "components": [
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "Saving this status evidence would make the evidence file beside the configuration larger than 16 KiB, so the update was not saved."
   },
   "EVIDENCE_UNAVAILABLE": {
    "cli_exit": [],
@@ -415,7 +415,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "The Manifest installed at WEBROOT/.well-known/onion-service-discovery.json is missing (for history commands), larger than 16 KiB, unreadable or not a Service Manifest; check it with manifest:verify."
   },
   "EXPECTED_NODE_KEY_REQUIRED": {
    "cli_exit": [],
@@ -431,7 +431,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The public export directory reached its limit of 4096 files or 256 MiB, or a single export file would exceed 512 KiB; remove unreferenced files with exports:prune or node:maintain."
   },
   "EXPORT_BUDGET_NEARLY_EXHAUSTED": {
    "cli_exit": [
@@ -449,7 +449,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "Another process held the export directory\u2019s writer lock for more than 2 seconds, so this write or prune did not run; run it again when the other command has finished."
   },
   "EXPORT_CORRUPT": {
    "cli_exit": [
@@ -471,7 +471,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The export directory (export_path) is a URL, a symlink, missing or open to group or others, or it contains a symlink, a subdirectory or a file that is not an OSD export file; node:init or client:init creates it with mode 0700."
   },
   "EXPORT_UNAVAILABLE": {
    "cli_exit": [
@@ -480,7 +480,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "An export file or the export directory\u2019s lock file could not be created, written, synced, renamed, read or deleted; check the ownership and free space of export_path."
   },
   "FILESYSTEM_FORMAT_MIGRATION_REQUIRED": {
    "cli_exit": [
@@ -500,14 +500,14 @@
     "signing",
     "storage"
    ],
-   "meaning": null
+   "meaning": "After an atomic rename, the directory holding the store, the exports or the installed public records could not be opened or synced, so the write is not known to be durable; use a local filesystem that supports syncing directories."
   },
   "FILE_TOO_LARGE": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The chosen file is larger than the browser client accepts (1 MiB for a signed record bundle, 256 KiB for a pin backup), so it was not read."
   },
   "FORKED": {
    "cli_exit": [
@@ -516,7 +516,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "Not an error: FORKED is the state of an identity, search result or pin when two different signed Manifests share a revision number or rotation or migration proofs conflict, so no current Manifest is selected."
   },
   "HASH_INVALID": {
    "cli_exit": [
@@ -528,14 +528,14 @@
     "browser client",
     "encoding"
    ],
-   "meaning": null
+   "meaning": "A value that must be a content hash (for example a checkpoint or chunk hash a Node served) is not sha256: followed by 64 lowercase hex digits."
   },
   "HEADERS_TOO_LARGE": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "A Node or Service answered with more than 8 KiB of response headers (or, for the PHP transport, a header line over 2 KiB), so nothing from it was used."
   },
   "HISTORY_BUNDLE_INVALID": {
    "cli_exit": [
@@ -617,7 +617,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The imported file is neither a single signed record nor a record bundle (bundle_version 1 with a records list), so nothing was imported."
   },
   "IMPORT_REQUIRES_EMPTY_STAGING_STORE": {
    "cli_exit": [
@@ -626,7 +626,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "storage:import writes only into a new, empty store, and the given staging store already holds records or changes; give a new staging path."
   },
   "INPUT_FILE_UNAVAILABLE": {
    "cli_exit": [
@@ -636,7 +636,7 @@
     "CLI",
     "signing"
    ],
-   "meaning": null
+   "meaning": "An input file is missing, not a regular file, unreadable or given as a URL; check the path and read permission."
   },
   "INTERNAL_ERROR": {
    "cli_exit": [
@@ -655,7 +655,7 @@
     "browser client",
     "encoding"
    ],
-   "meaning": null
+   "meaning": "The JSON nests objects or arrays more than 16 levels deep, beyond what the protocol allows."
   },
   "KEY_DIRECTORY_UNSAFE": {
    "cli_exit": [
@@ -664,7 +664,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "key:create refused the key path because it is a URL or its directory is a symlink, missing or open to group or others; create the directory with mode 0700 first."
   },
   "KEY_ENVELOPE_INVALID": {
    "cli_exit": [
@@ -673,7 +673,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "The key file is not a valid key envelope for this role (for example a service key used as a Node key) or is damaged, so the key was not unlocked; use the key file key:create made for this role."
   },
   "KEY_FILE_UNAVAILABLE": {
    "cli_exit": [
@@ -682,7 +682,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "The key file is missing, a symlink, not a regular file, open to group or others, larger than 4 KiB or unreadable, or key:create found an existing file or could not write it; keys must be owner-only (0600) regular files."
   },
   "KEY_ROTATION_INVALID": {
    "cli_exit": [
@@ -702,7 +702,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "An internal check failed: the unlocked signing key was no longer in memory when a record was to be signed, so nothing was signed."
   },
   "KEY_UNLOCK_FAILED": {
    "cli_exit": [
@@ -740,14 +740,14 @@
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The Client Host\u2019s config.json exceeds 16 KiB or its demo.json exceeds 1 MiB, so the browser client stopped reading it."
   },
   "LOCAL_RESOURCE_UNAVAILABLE": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The browser client could not load config.json or demo.json from its Client Host as a successful JSON response; without config.json no configured Nodes are offered."
   },
   "MANIFEST_INVALID": {
    "cli_exit": [
@@ -756,7 +756,7 @@
    "components": [
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "The installed public Manifest file holds a validly signed record that is not a Service Manifest, so the status page and publisher:status report the Manifest as invalid; install a signed Service Manifest with manifest:install."
   },
   "METADATA_INVALID": {
    "cli_exit": [
@@ -765,7 +765,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "The metadata file for manifest:init or manifest:revise is not a JSON object with a service member and no members other than service, links and discovery."
   },
   "METHOD_NOT_ALLOWED": {
    "cli_exit": [],
@@ -773,7 +773,7 @@
     "front controller",
     "web routes"
    ],
-   "meaning": null
+   "meaning": "The route does not accept the request method (HTTP 405): the data, relay and client routes take GET or HEAD, and the announcement route takes only POST."
   },
   "MIGRATION_INVALID": {
    "cli_exit": [
@@ -793,7 +793,7 @@
    "components": [
     "CLI"
    ],
-   "meaning": null
+   "meaning": "node:snapshot refused to run because features.mirror_directory and features.server_search are both off in this configuration; enable the feature it needs in a node or combined configuration."
   },
   "NODE_DESCRIPTOR_HISTORY_INCOMPLETE": {
    "cli_exit": [
@@ -802,7 +802,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "A peer\u2019s new Node descriptor skips a revision or does not name the previously seen descriptor as its predecessor, so the peer was quarantined; after checking, release it with peers:retry."
   },
   "NODE_DESCRIPTOR_INVALID": {
    "cli_exit": [
@@ -813,7 +813,7 @@
     "configuration and status",
     "doctor"
    ],
-   "meaning": null
+   "meaning": "The Node descriptor in the store does not verify or names another Onion than node.onion (doctor also reports a published snapshot that fails verification this way); check that storage.path and node.onion belong to this Node."
   },
   "NODE_DESCRIPTOR_ROLLBACK_OR_FORK": {
    "cli_exit": [
@@ -822,7 +822,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "A peer served an older Node descriptor than seen before, or two different descriptors with the same revision, so the peer was quarantined and the descriptors were kept as evidence; quarantine:list shows the evidence."
   },
   "NODE_IDENTITY_CHANGED": {
    "cli_exit": [
@@ -831,7 +831,7 @@
    "components": [
     "CLI"
    ],
-   "meaning": null
+   "meaning": "The Node descriptor in the store names another Node key or Onion than the unlocked key file and node.onion, so node:snapshot or node:work-one refused to run; use the original key and Onion."
   },
   "NODE_IDENTITY_CHANGE_REQUIRES_MIGRATION": {
    "cli_exit": [
@@ -840,7 +840,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "node:init found a Node descriptor in the store with another Node key or Onion than this key file and node.onion, and protocol v1 cannot change a Node identity; use the original key and Onion or set up a new Node."
   },
   "NODE_KEY_ENVELOPE_INVALID": {
    "cli_exit": [
@@ -849,7 +849,7 @@
    "components": [
     "doctor"
    ],
-   "meaning": null
+   "meaning": "doctor: the Node key file at node.key_path is unreadable or its unencrypted header is not a valid Node key envelope (for example a service key); the passphrase was not checked."
   },
   "NODE_KEY_MISSING_OR_UNSAFE": {
    "cli_exit": [
@@ -886,7 +886,7 @@
    "components": [
     "front controller"
    ],
-   "meaning": null
+   "meaning": "The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable store or export directory, or a relayed Node that could not be fetched; operators run doctor."
   },
   "NOT_FOUND": {
    "cli_exit": [
@@ -925,7 +925,7 @@
    "components": [
     "CLI"
    ],
-   "meaning": null
+   "meaning": "The --output-dir given to manifest:rotate or manifest:migrate is a URL, a symlink, missing or not writable; create a writable directory first."
   },
   "OUTPUT_FILE_EXISTS_OR_UNAVAILABLE": {
    "cli_exit": [
@@ -954,7 +954,7 @@
     "CLI",
     "signing"
    ],
-   "meaning": null
+   "meaning": "The passphrase file holds an empty passphrase or one longer than 1024 bytes (one trailing newline is ignored), or key:create got one shorter than 12 bytes."
   },
   "PEER_BINDING_MISMATCH": {
    "cli_exit": [
@@ -963,7 +963,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "The peer\u2019s Node descriptor names another Onion or is signed by another key than the one pinned with peers:add, so the peer was quarantined; check the key, then release it with peers:retry."
   },
   "PEER_BUSY": {
    "cli_exit": [
@@ -972,7 +972,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "A sync step has claimed this peer, so peers:group did not change its group; run peers:group again when the step has finished."
   },
   "PEER_CLAIM_LOST": {
    "cli_exit": [
@@ -981,7 +981,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "This sync step lost its claim on the peer because its 5-minute lease ended and another step took over, or peers:disable or peers:retry reset the peer, so it stopped without saving more."
   },
   "PEER_KEY_CHANGE_REQUIRES_EXPLICIT_RESET": {
    "cli_exit": [
@@ -990,7 +990,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "This Onion is already a peer pinned to another Node key, and peers:add never replaces a pinned key, so nothing was changed; a Node with a new key is added under its new Onion (incident runbook)."
   },
   "PEER_NOT_CONFIGURED": {
    "cli_exit": [
@@ -1000,7 +1000,7 @@
     "CLI",
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "The Onion is not in this Node\u2019s peer list, so the peer command or sync step had nothing to act on; add it with peers:add first."
   },
   "PEER_POOL_FULL": {
    "cli_exit": [
@@ -1009,28 +1009,28 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "This Node already lists 256 peers, the maximum, counting disabled peers too, so no peer was added."
   },
   "PIN_BACKUP_INVALID": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The file is not a valid pin backup from this client: it needs pin_backup_version 1 and at most 256 distinct pins, each with a valid key, Onion, hashes, revision and a label of at most 128 characters."
   },
   "PIN_BUDGET_EXHAUSTED": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "Restoring these pins would exceed the limit of 256 pins, so none were restored; remove some pins before importing more."
   },
   "PIN_CONTEXT_UNAVAILABLE": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "This identity cannot be pinned: it is not in the loaded index, is withdrawn or forked, or has no current Onion, or 256 pins already exist."
   },
   "PRIVATE_PATH_IN_WEBROOT": {
    "cli_exit": [
@@ -1049,7 +1049,7 @@
     "browser client",
     "protocol"
    ],
-   "meaning": null
+   "meaning": "The record does not declare protocol Onion Service Discovery with protocol_version 1, the only version this software supports."
   },
   "PUBLIC_HOSTNAME_FILE_REQUIRED": {
    "cli_exit": [
@@ -1077,7 +1077,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "The public Manifest file or the publisher lock file in WEBROOT/.well-known is a symlink, so the publisher command refused to write there; remove the symlink and install again."
   },
   "PUBLIC_MANIFEST_WRITE_FAILED": {
    "cli_exit": [
@@ -1086,7 +1086,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "The publisher lock, the new Manifest or the history bundle could not be created, written, synced or renamed in WEBROOT/.well-known; check that the installing user can write there."
   },
   "PUBLISHER_BUSY": {
    "cli_exit": [
@@ -1143,7 +1143,7 @@
    "components": [
     "web routes"
    ],
-   "meaning": null
+   "meaning": "A request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is a symlink or its limits are invalid, so requests fail with HTTP 503; remove the symlink."
   },
   "RATE_LIMIT_CORRUPT": {
    "cli_exit": [
@@ -1152,7 +1152,7 @@
    "components": [
     "web routes"
    ],
-   "meaning": null
+   "meaning": "A request budget file in the export directory is larger than 1 KiB or holds no valid budget state, so requests fail with HTTP 503; delete the file; it is recreated with a full budget."
   },
   "RATE_LIMIT_UNAVAILABLE": {
    "cli_exit": [
@@ -1161,7 +1161,7 @@
    "components": [
     "web routes"
    ],
-   "meaning": null
+   "meaning": "A request budget file in the export directory cannot be created or written or is open to group or others, so requests fail with HTTP 503; let the web server user own it with mode 0600."
   },
   "REQUEST_BUDGET_EXHAUSTED": {
    "cli_exit": [],
@@ -1175,14 +1175,14 @@
    "components": [
     "web routes"
    ],
-   "meaning": null
+   "meaning": "The request is malformed (HTTP 400): a path over 256 bytes or with spaces or control characters, an invalid Onion address in the path, or an announcement that is not the exact hint JSON."
   },
   "REQUEST_TOO_LARGE": {
    "cli_exit": [],
    "components": [
     "front controller"
    ],
-   "meaning": null
+   "meaning": "An announcement request declared or sent more than 256 bytes, or its Content-Length is malformed (HTTP 413)."
   },
   "RESPONSE_TOO_LARGE": {
    "cli_exit": [
@@ -1219,7 +1219,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "A Service or source served an older Manifest revision than one already known for that identity (node:work-one quarantines the candidate; a browser pin keeps the newer revision); load other sources."
   },
   "REVISION_EXHAUSTED": {
    "cli_exit": [
@@ -1228,7 +1228,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "The current Manifest already has the highest possible revision (9007199254740991), so no successor revision can be drafted."
   },
   "ROLE_CONFIGURATION_INVALID": {
    "cli_exit": [
@@ -1283,7 +1283,7 @@
    "components": [
     "server search"
    ],
-   "meaning": null
+   "meaning": "The server search index files in the export directory are missing, altered or malformed or do not match the published snapshot, so server search is unavailable; rebuild them with node:snapshot --rebuild-derived."
   },
   "SEARCH_INDEX_STALE": {
    "cli_exit": [
@@ -1292,7 +1292,7 @@
    "components": [
     "server search"
    ],
-   "meaning": null
+   "meaning": "The server search index was built for another snapshot than the one now published, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived."
   },
   "SEARCH_INDEX_UNAVAILABLE": {
    "cli_exit": [
@@ -1301,7 +1301,7 @@
    "components": [
     "server search"
    ],
-   "meaning": null
+   "meaning": "Server search has no index because no snapshot was published or it was published with server search off, so server search is unavailable; run node:snapshot with server_search enabled."
   },
   "SEARCH_REQUEST_INVALID": {
    "cli_exit": [
@@ -1311,7 +1311,7 @@
     "server search",
     "web routes"
    ],
-   "meaning": null
+   "meaning": "The server search form submission is malformed (wrong media type, unknown or repeated fields, a query over 256 UTF-16 units, or an invalid language, category or adult value), so it was rejected; use the search form."
   },
   "SEARCH_TEXT_INVALID": {
    "cli_exit": [
@@ -1320,7 +1320,7 @@
    "components": [
     "server search"
    ],
-   "meaning": null
+   "meaning": "Text given to search normalization is not valid UTF-8, exceeds 1 MiB or contains an invalid code point, so it was refused."
   },
   "SEARCH_WORK_BUDGET_EXHAUSTED": {
    "cli_exit": [
@@ -1330,7 +1330,7 @@
     "server search",
     "web routes"
    ],
-   "meaning": null
+   "meaning": "Server search exceeded a work limit: a search ran longer than 0.5 seconds and returned no partial result, or node:snapshot found more than 10000 services, 16 MiB or 128 chunks for the index."
   },
   "SEARCH_WORK_LIMIT": {
    "cli_exit": [
@@ -1340,7 +1340,7 @@
     "browser client",
     "server search"
    ],
-   "meaning": null
+   "meaning": "Search text exceeds the Unicode normalization limit of 65536 UTF-16 units, or 262144 code points before or after decomposition, so it was refused; shorten the text."
   },
   "SELF_VERIFICATION_ONION_MISMATCH": {
    "cli_exit": [
@@ -1367,14 +1367,14 @@
    "components": [
     "doctor"
    ],
-   "meaning": null
+   "meaning": "doctor: server search is on, but its index cannot be loaded because it is missing, stale or corrupt, so the search page answers 503; rebuild it with node:snapshot --rebuild-derived."
   },
   "SERVICE_INDEX_NOT_READY": {
    "cli_exit": [],
    "components": [
     "web routes"
    ],
-   "meaning": null
+   "meaning": "This Node has not yet published a snapshot with the current (version 2) service lookup index, so service lookups answer 503; the operator runs node:snapshot."
   },
   "SIGNATURE_INVALID": {
    "cli_exit": [
@@ -1393,7 +1393,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "The last published snapshot was signed by another Node key than the one unlocked, so node:snapshot refused to publish; use the Node key that signed this store\u2019s snapshots."
   },
   "SIGNER_KEY_MISMATCH": {
    "cli_exit": [
@@ -1402,7 +1402,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "The record names another public key for its signer (new_public_key with --rotation-confirmation) than the key in this key file, so record:sign signed nothing; sign with the key the record names."
   },
   "SIGNER_ROLE_INVALID": {
    "cli_exit": [
@@ -1411,7 +1411,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "The key role is neither service nor node, so key:create or record:sign did nothing."
   },
   "SIGNER_ROLE_MISMATCH": {
    "cli_exit": [
@@ -1422,7 +1422,7 @@
     "Node worker",
     "signing"
    ],
-   "meaning": null
+   "meaning": "The key role cannot sign this record type (service keys sign Manifests, rotations and migrations; Node keys sign Node descriptors, observations and snapshots), or --rotation-confirmation was used on another record."
   },
   "SNAPSHOT_CHUNK_HASH_INVALID": {
    "cli_exit": [
@@ -1432,7 +1432,7 @@
     "browser client",
     "protocol"
    ],
-   "meaning": null
+   "meaning": "A snapshot chunk\u2019s size or hash does not match the signed checkpoint, so the chunk was rejected."
   },
   "SNAPSHOT_INCOMPLETE": {
    "cli_exit": [
@@ -1462,7 +1462,7 @@
     "browser client",
     "protocol"
    ],
-   "meaning": null
+   "meaning": "A snapshot chunk contains a snapshot descriptor, or its records are not in strictly ascending content-hash order across the snapshot, so the chunk was rejected."
   },
   "SNAPSHOT_TIMER_STALE": {
    "cli_exit": [
@@ -1481,7 +1481,7 @@
     "CLI",
     "web routes"
    ],
-   "meaning": null
+   "meaning": "No snapshot has been published yet, so the Node has no state to serve (HTTP 503 on the state route) and no exports to prune; run node:snapshot first."
   },
   "SOURCE_ALREADY_ADDED": {
    "cli_exit": [],
@@ -1502,7 +1502,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The visitor cancelled loading, so nothing from the Node being loaded was used and Nodes not yet started are shown as cancelled."
   },
   "SOURCE_CHECKPOINT_BINDING_MISMATCH": {
    "cli_exit": [
@@ -1553,21 +1553,21 @@
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The Node signed two different Node descriptors with the same revision, so the browser set its data aside and kept both signed records as evidence; save them with Save the conflicting signed records."
   },
   "SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The Node\u2019s newer descriptor does not connect revision by revision to the one seen before through the descriptors in its snapshot, so its data from this load was not used."
   },
   "SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The Node served an older Node descriptor than this browser saw before, or a different one with the same revision, so its data was set aside."
   },
   "SOURCE_DUPLICATE": {
    "cli_exit": [
@@ -1584,7 +1584,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "This browser already holds proof that the Node signed two conflicting states, so the Node was not loaded again and the evidence was kept."
   },
   "SOURCE_FETCH_FAILED": {
    "cli_exit": [],
@@ -1600,7 +1600,7 @@
    "components": [
     "doctor"
    ],
-   "meaning": null
+   "meaning": "doctor warning: active peers that share one Node key are in different local source groups, or only some of them have a group; give them one group with peers:group."
   },
   "SOURCE_GROUP_INVALID": {
    "cli_exit": [
@@ -1609,7 +1609,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "A source group name is not 1 to 32 lowercase letters, digits or inner hyphens, or a stored peer has an invalid group or Node key."
   },
   "SOURCE_HISTORY_PROGRESS": {
    "cli_exit": [],
@@ -1623,7 +1623,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The Node or the Client Host relay answered with an HTTP status other than 200, so nothing from it was used; try again later."
   },
   "SOURCE_INVALID": {
    "cli_exit": [
@@ -1632,7 +1632,7 @@
    "components": [
     "Node worker"
    ],
-   "meaning": null
+   "meaning": "An internal check failed: the label recording where a candidate came from is not 1 to 96 letters, digits, underscores, dots, colons or hyphens, so the candidate was not queued."
   },
   "SOURCE_KEY_MISMATCH": {
    "cli_exit": [
@@ -1648,7 +1648,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The record served at the Node\u2019s node route is not a Node descriptor for the Onion address that was loaded, so nothing from that Node was used."
   },
   "SOURCE_NODE_KEY_CHANGED": {
    "cli_exit": [],
@@ -1672,7 +1672,7 @@
     "Node worker",
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The Node\u2019s snapshot chunks held a different number of records than its signed checkpoint declares (the browser discards the load; a Node worker quarantines the peer)."
   },
   "SOURCE_SET_CONCENTRATED": {
    "cli_exit": [
@@ -1690,7 +1690,7 @@
    "components": [
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "The Node\u2019s state answer has no valid sha256 checkpoint hash, so service:membership rejected that Node\u2019s evidence."
   },
   "SOURCE_TIMEOUT": {
    "cli_exit": [],
@@ -1704,7 +1704,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "Loading and checking this Node took longer than the browser\u2019s 90-second limit, so nothing partial was used; try again on a faster connection or device."
   },
   "SOURCE_WORK_BUDGET_EXHAUSTED": {
    "cli_exit": [
@@ -1714,7 +1714,7 @@
     "Node worker",
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The Node\u2019s signed snapshot exceeds the checking limits (over 10000 records or 32 MiB of chunks, or over 64 chunks in the browser), so the browser discards the load and a Node worker quarantines the peer."
   },
   "SQLITE_DRIVER_UNAVAILABLE": {
    "cli_exit": [
@@ -1723,7 +1723,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend."
   },
   "STORAGE_ADDRESS_INVALID": {
    "cli_exit": [
@@ -1732,7 +1732,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "A record or export address is not sha256: followed by 64 lowercase hex digits, or an operational table or key name is invalid, so the store refused the request."
   },
   "STORAGE_BACKEND_INVALID": {
    "cli_exit": [
@@ -1742,7 +1742,7 @@
     "CLI",
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "The storage backend, given as a command argument or as storage.backend in the configuration, is neither filesystem nor sqlite."
   },
   "STORAGE_BUDGET_EXHAUSTED": {
    "cli_exit": [
@@ -1783,7 +1783,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "A value could not be put into the store\u2019s strict internal JSON form (nesting over 32 levels, invalid UTF-8, a string over 64 KiB, an unsafe key or an unsupported type), so it was not written."
   },
   "STORAGE_ERROR": {
    "cli_exit": [
@@ -1792,7 +1792,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "A store operation failed at the operating-system or SQLite level (for example a write or sync on a full disk); data committed before is kept; free space or fix permissions and run the command again."
   },
   "STORAGE_MIGRATION_REQUIRED": {
    "cli_exit": [
@@ -1810,7 +1810,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "An internal check failed: a store cannot be opened for creation and read-only at the same time, so it was not opened."
   },
   "STORAGE_NOT_REQUIRED_FOR_PUBLISHER": {
    "cli_exit": [
@@ -1819,7 +1819,7 @@
    "components": [
     "configuration and status"
    ],
-   "meaning": null
+   "meaning": "The command needs a Node store, but this is a publisher configuration, which keeps none; use a node or combined configuration."
   },
   "STORAGE_PATH_UNSAFE": {
    "cli_exit": [
@@ -1828,7 +1828,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The filesystem store path is a URL or a symlink; point it at the real directory."
   },
   "STORAGE_PERMISSIONS_UNSAFE": {
    "cli_exit": [
@@ -1837,7 +1837,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The store directory, one of its subdirectories or the SQLite database file is open to group or others; chmod 700 the directories and 600 the SQLite file."
   },
   "STORAGE_READ_ONLY": {
    "cli_exit": [
@@ -1846,7 +1846,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "An internal check failed: a write was attempted on a store opened read-only, so nothing was changed."
   },
   "STORAGE_RECOVERY_REQUIRED": {
    "cli_exit": [
@@ -1864,7 +1864,7 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The store path does not exist (and this command does not create it), is a symlink or URL, or the store or one of its files or directories cannot be created or opened; check storage.path; node:init or storage:init creates a store."
   },
   "STORAGE_VERSION_UNSUPPORTED": {
    "cli_exit": [
@@ -1873,14 +1873,14 @@
    "components": [
     "storage"
    ],
-   "meaning": null
+   "meaning": "The store has a format this release cannot open: a filesystem storage-version other than 1 or 2, or a SQLite schema version other than 1 or SQLite without foreign-key support."
   },
   "STREAMING_UNAVAILABLE": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The browser returned the Node\u2019s answer without a readable body stream, which the bounded download requires, so nothing from it was used."
   },
   "SYNC_DISABLED": {
    "cli_exit": [
@@ -1889,7 +1889,7 @@
    "components": [
     "CLI"
    ],
-   "meaning": null
+   "meaning": "Peer sync is off in this configuration (features.sync_with_peers is false), so sync:run and sync:peer-step refused to run; enable it to sync with peers."
   },
   "TOO_LARGE": {
    "cli_exit": [
@@ -1898,7 +1898,7 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "Not an error: manifest:install reports the history state TOO_LARGE when the connected history exceeds 256 records or 1 MiB, so the history bundle was not updated."
   },
   "TOR_KEY_ACCESS_FORBIDDEN": {
    "cli_exit": [
@@ -1945,7 +1945,7 @@
    "components": [
     "Tor transport"
    ],
-   "meaning": null
+   "meaning": "The Tor transport could not start: the PHP curl extension is missing, or the SOCKS host, port or timeout is outside 127.0.0.1 or ::1, 1 to 65535, or 100 to 60000 ms."
   },
   "TRANSPORT_UNAVAILABLE": {
    "cli_exit": [
@@ -1954,14 +1954,14 @@
    "components": [
     "Tor transport"
    ],
-   "meaning": null
+   "meaning": "PHP curl could not prepare the request through Tor (its handle or a required option could not be set), so nothing was sent; check the curl extension of this PHP runtime."
   },
   "UNVERIFIED_RECORD": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "An internal browser check failed: a record reached a step that accepts only records this page verified itself, so it was refused."
   },
   "USAGE_ERROR": {
    "cli_exit": [
@@ -2003,28 +2003,28 @@
    "components": [
     "signing"
    ],
-   "meaning": null
+   "meaning": "The webroot is a URL, a symlink or not a directory, or its .well-known directory is a symlink, missing (history:install) or cannot be created (manifest:install)."
   },
   "WITNESS_BUDGET_EXHAUSTED": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "The browser\u2019s memory for Node evidence is full (512 signed checkpoints and descriptors, or fork evidence for 16 Nodes) and never drops proofs, so further Node data was refused; save any evidence you need, then reload the page."
   },
   "WITNESS_CONFIGURATION_INVALID": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "An internal browser check failed: the memory for Node evidence was created with limits outside 1 to 512 records or 1 to 16 forks."
   },
   "WITNESS_TYPE_INVALID": {
    "cli_exit": [],
    "components": [
     "browser client"
    ],
-   "meaning": null
+   "meaning": "An internal browser check failed: only signed checkpoints and Node descriptors can be kept as Node evidence, and another record type was offered."
   },
   "WORK_BUDGET_EXHAUSTED": {
    "cli_exit": [

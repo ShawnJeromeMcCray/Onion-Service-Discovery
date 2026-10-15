@@ -28,7 +28,10 @@ try {
         fclose($pipes[1]); fclose($pipes[2]); $exit = proc_close($process);
         $actual = json_decode($output, true, 64, JSON_THROW_ON_ERROR);
         // Failures also carry the registry meaning and a help page; the typed code is what is compared.
-        if (($actual['status'] ?? null) === 'FAIL') { unset($actual['meaning'], $actual['help'], $actual['detail']); }
+        if (($actual['status'] ?? null) === 'FAIL') {
+            if (!is_string($actual['meaning'] ?? null) || $actual['meaning'] === '') { throw new RuntimeException('Offline membership CLI failure without a meaning: ' . $case['id']); }
+            unset($actual['meaning'], $actual['help'], $actual['detail']);
+        }
         $expected = isset($case['error']) ? ['status' => 'FAIL', 'error' => $case['error']] : $case['expected'];
         if ($exit !== $selected[$case['id']] || $error !== '' || $actual !== $expected) { throw new RuntimeException('Offline membership CLI case failed: ' . $case['id']); }
     }

@@ -13,7 +13,7 @@ const sourceMessages:{[code:string]:string}={
   SOURCE_CHECKPOINT_CHAIN_BROKEN:'This Node’s states do not connect to the one it showed before. Its data is set aside.',
   SOURCE_NODE_KEY_CHANGED:'This Node signed with a different key than expected. Check the key you entered; if it is right, another service may be answering at this address.',
   SOURCE_NODE_BINDING_MISMATCH:'The data does not belong to the Node at this address. Nothing from it was used.',
-  SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE:'This Node’s earlier states could not be connected yet. Load again to continue.',
+  SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE:'This Node’s current description does not connect to the one this browser saw earlier, so nothing from it was used. Loading again helps only once the Node serves the missing history.',
   SOURCE_NOT_IN_HOST_ALLOWLIST:'This Node is not listed by this Client Host and was not added by you.',
 };
 const operationMessages:{[code:string]:string}={
