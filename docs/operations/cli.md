@@ -1,6 +1,8 @@
 # Operator CLI contract
 
-Entry point: `php node-php/bin/onion-service-discovery help`. All output is JSON;
+Entry point: `php node-php/bin/onion-service-discovery help`; `help COMMAND` shows
+that command's syntax and whether it makes Tor requests, writes local state,
+saves status evidence or reads a private key. All output is JSON;
 `--json` and `--no-interaction` are accepted. No command waits for an interactive
 confirmation. A failure prints `{"status":"FAIL","error":CODE}` plus `detail`
 (where it happened, for example `transport.timeout_ms: must be an integer from 100

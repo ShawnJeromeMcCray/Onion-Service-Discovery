@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-224 codes.
+225 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -38,6 +38,7 @@ for remedies.
 | `CLIENT_RECORD_BUDGET_EXHAUSTED` | browser client | – | The code name states the condition; see the raising component. |
 | `CLOCK_INVALID` | Node worker, signing, web routes | 3, 4 | The code name states the condition; see the raising component. |
 | `CLOCK_ROLLBACK` | Node worker | 3 | The code name states the condition; see the raising component. |
+| `COMMAND_UNKNOWN` | CLI | 3 | help knows no command of that name; run help without arguments for the list. |
 | `CONFIGURATION_CREATE_REFUSED` | configuration and status | 3 | The code name states the condition; see the raising component. |
 | `CONFIGURATION_INVALID` | browser client, configuration and status, storage | 3, 4 | The configuration file has a missing, unknown or wrongly typed key; see the configuration reference. |
 | `CONFIGURATION_PATH_INVALID` | configuration and status | 3 | The code name states the condition; see the raising component. |

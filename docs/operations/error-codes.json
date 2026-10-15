@@ -220,6 +220,15 @@
    ],
    "meaning": null
   },
+  "COMMAND_UNKNOWN": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "CLI"
+   ],
+   "meaning": "help knows no command of that name; run help without arguments for the list."
+  },
   "CONFIGURATION_CREATE_REFUSED": {
    "cli_exit": [
     "3"
