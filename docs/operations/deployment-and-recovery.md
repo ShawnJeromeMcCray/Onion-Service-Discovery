@@ -159,8 +159,10 @@ To remove the application, stop/disable schedules, stop its web pool and remove
 its web routing/application directory. Leave Tor and operator data/keys intact
 until the operator separately chooses their disposition. Publish a signed
 withdrawal before removing discovery if desired; removal alone is downtime and
-cannot erase copies held by independent Nodes. Do not delete or rotate keys
-blindly during an incident. Preserve bounded evidence and error codes first.
+cannot erase copies held by independent Nodes. For a lost or compromised key,
+a corrupted store, conflicting peer checkpoints or a leaked passphrase file,
+follow the [incident runbook](incident-runbook.md): it preserves evidence first
+and names what protocol v1 cannot undo.
 
 Actual disk-full development evidence: `node-php/tests/storage-disk-full.php`
 runs only on an explicitly provisioned tiny `/fault` tmpfs, never a normal host

@@ -46,7 +46,7 @@ your Logical Service Identifier (the genesis public key) and history are.
 | Withdraw | `manifest:withdraw`, sign, install | Expect every independent copy to disappear |
 | Rotate your Service key | `manifest:rotate` with both keys, test, install | Start a new genesis and call it the same service |
 | Move to a new Onion | `manifest:migrate`, sign, install on both addresses | Just change the Onion field |
-| React to a key compromise | Stop publishing, preserve evidence, follow [recovery](deployment-and-recovery.md) | Delete or rewrite old revisions |
+| React to a key compromise | Stop publishing, preserve evidence, follow the [incident runbook](incident-runbook.md) | Delete or rewrite old revisions |
 
 Going offline is not withdrawing: Nodes keep your last valid state and may show
 it as stale or unreachable.
@@ -111,7 +111,9 @@ Additional for a Node ([Node guide](../getting-started/node.md)):
 Do not rotate or delete blindly. Note the software version, current revision and
 hash, Logical Service Identifier, current key and key epoch, and the exact error
 code, then run `diagnostics:export CONFIG` and follow
-[troubleshooting](../getting-started/troubleshooting.md).
+[troubleshooting](../getting-started/troubleshooting.md). For a lost or
+compromised key, a damaged store or a conflicting peer, follow the
+[incident runbook](incident-runbook.md).
 
 By publishing, you deliberately make your Service's discovery metadata public
 and mirrorable. You keep control of your Service key and future revisions, but

@@ -207,8 +207,9 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
   `peer:remove` = `peers:disable` (the peer is deactivated, its evidence and
   high-water marks are preserved); `key:service:rotate` = `manifest:rotate`.
 - `key:node:rotate` always fails with `NODE_KEY_ROTATION_UNSUPPORTED` (exit 3):
-  protocol v1 has no Node key-rotation proof. Create a new Node key and have
-  peers pin the new Node explicitly.
+  protocol v1 has no Node key-rotation proof. Create a new Node identity, a new
+  key on a new Onion with a new store, and have peers pin it explicitly; see the
+  [incident runbook](incident-runbook.md#2-node-key-compromised-or-lost).
 - `storage:migrate-backend FROM_BACKEND FROM_PATH TO_BACKEND NEW_STAGING_PATH`
   copies records and operational state through the private backup format into a
   fresh staging store, opens the source read-only and removes its temporary
