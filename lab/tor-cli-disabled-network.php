@@ -22,11 +22,12 @@ try{
  $cases=json_decode(file_get_contents($project.'/protocol/test-vectors/identity-sequences.json'),true,64,JSON_THROW_ON_ERROR);$onion=$cases['cases'][0]['records'][0]['onion'];
  $trap=stream_socket_server('tcp://127.0.0.1:0');$trapPort=(int)substr(strrchr(stream_socket_get_name($trap,false),':'),1);putenv('NO_PROXY=*');putenv('HTTP_PROXY=http://127.0.0.1:'.$trapPort);
  $error=null;$started=microtime(true);try{(new TorTransport('127.0.0.1',$port,1000))->get(OnionAddress::parse($onion),ProtocolEndpoint::manifest());}catch(TransportException $failure){$error=$failure->getMessage();}
- if($error!=='TOR_REQUEST_FAILED')throw new RuntimeException('Real Tor unavailable request not normalized');
+ // With DisableNetwork 1 Tor opens no SOCKS listener: the failure names the local listener.
+ if($error!=='TOR_PROXY_UNREACHABLE')throw new RuntimeException('Real Tor unavailable request not normalized: '.$error);
  $v=json_decode(file_get_contents($project.'/node-php/config/node.example.json'),true,32,JSON_THROW_ON_ERROR);$v['storage']['path']=$root.'/store';$v['export_path']=$root.'/exports';$v['node']['key_path']=$root.'/node.key';$v['transport']['proxy_port']=$port;$v['transport']['timeout_ms']=1000;
  file_put_contents($root.'/node.json',json_encode($v));chmod($root.'/node.json',0600);
  $cli=proc_open([PHP_BINARY,$project.'/node-php/bin/onion-service-discovery','service:verify',$root.'/node.json',$onion,'--json','--no-interaction'],[['pipe','r'],['pipe','w'],['pipe','w']],$cp);fclose($cp[0]);$out=stream_get_contents($cp[1]);$err=stream_get_contents($cp[2]);fclose($cp[1]);fclose($cp[2]);$exit=proc_close($cli);
- if($exit!==5||$err!==''||json_decode($out,true)!==['status'=>'FAIL','error'=>'TOR_REQUEST_FAILED'])throw new RuntimeException('CLI real Tor failure contract invalid');
+ if($exit!==5||$err!==''||json_decode($out,true)!==['status'=>'FAIL','error'=>'TOR_PROXY_UNREACHABLE'])throw new RuntimeException('CLI real Tor failure contract invalid');
  if(is_dir($root.'/store')||is_dir($root.'/exports')||is_file($root.'/node.key'))throw new RuntimeException('Read-only probe created application state');
  if(@stream_socket_accept($trap,0)!==false)throw new RuntimeException('Direct HTTP proxy fallback detected');fclose($trap);
  echo json_encode(['status'=>'PASS_DEVELOPMENT','tor_version'=>$version[1],'checks'=>['REAL_TOR_CONFIG_VALID','REAL_TOR_DAEMON_CONTROL_CONFIRMED','DISABLE_NETWORK_CONFIRMED','TOR_DISABLED_LISTENER_FAILURE_NORMALIZED','CLI_EXIT_5_TYPED_JSON','NO_DIRECT_HTTP_PROXY_FALLBACK','NO_APPLICATION_STATE_OR_KEYS_CREATED'],'duration_ms'=>round((microtime(true)-$started)*1000),'network_mode'=>'Docker network none and Tor DisableNetwork 1','live_tor_bootstrap_verified'=>false,'onion_fetch_verified'=>false,'browser_verified'=>false,'production_approved'=>false],JSON_THROW_ON_ERROR),PHP_EOL;

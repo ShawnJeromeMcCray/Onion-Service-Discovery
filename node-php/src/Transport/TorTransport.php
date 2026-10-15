@@ -34,7 +34,8 @@ final readonly class TorTransport
             CURLOPT_PROXYUSERNAME => '<torS0X>0', CURLOPT_PROXYPASSWORD => $isolation,
             CURLOPT_NOPROXY => '', CURLOPT_FOLLOWLOCATION => false, CURLOPT_MAXREDIRS => 0,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP, CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP,
-            CURLOPT_CONNECTTIMEOUT_MS => min(10000, $this->timeoutMilliseconds), CURLOPT_TIMEOUT_MS => $this->timeoutMilliseconds,
+            // The SOCKS connect phase includes Tor's circuit to the Onion, which can take most of the limit on first contact.
+            CURLOPT_CONNECTTIMEOUT_MS => $this->timeoutMilliseconds, CURLOPT_TIMEOUT_MS => $this->timeoutMilliseconds,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1, CURLOPT_HTTP_CONTENT_DECODING => false,
             CURLOPT_HTTPHEADER => ['Accept: application/json', 'Accept-Encoding: identity', 'Connection: close'],
             CURLOPT_USERAGENT => 'Onion-Service-Discovery/1', CURLOPT_NETRC => CURL_NETRC_IGNORED,
@@ -66,10 +67,26 @@ final readonly class TorTransport
             $success = curl_exec($handle);
             $status = curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
             if ($rejected !== null) { throw new TransportException($rejected); }
-            if ($success === false) { throw new TransportException('TOR_REQUEST_FAILED'); }
+            // Typed failures tell the operator what to fix (spec 47 section 16): the local Tor SOCKS listener,
+            // the Onion behind Tor (SOCKS reply failure), or the time limit.
+            if ($success === false) {
+                throw new TransportException(match (curl_errno($handle)) {
+                    CURLE_COULDNT_RESOLVE_PROXY, CURLE_COULDNT_CONNECT => 'TOR_PROXY_UNREACHABLE',
+                    CURLE_PROXY => 'ONION_UNREACHABLE',
+                    CURLE_OPERATION_TIMEDOUT => 'TOR_REQUEST_TIMEOUT',
+                    default => 'TOR_REQUEST_FAILED',
+                });
+            }
             // A rate-limited announcement is reported separately so the publisher can show it (spec 47 section 23).
             if ($status === 429 && $requestBody !== null) { throw new TransportException('ANNOUNCEMENT_RATE_LIMITED'); }
-            if ($status !== $expectedStatus) { throw new TransportException('HTTP_STATUS_REJECTED'); }
+            if ($status !== $expectedStatus) {
+                throw new TransportException(match (true) {
+                    $status === 404 => 'HTTP_NOT_FOUND',
+                    $status >= 300 && $status < 400 => 'HTTP_REDIRECT_REJECTED',
+                    $status >= 500 && $status < 600 => 'HTTP_SERVER_ERROR',
+                    default => 'HTTP_STATUS_REJECTED',
+                });
+            }
             if (isset($headers['content-encoding']) && strtolower($headers['content-encoding']) !== 'identity') { throw new TransportException('CONTENT_ENCODING_REJECTED'); }
             if (preg_match('/\Aapplication\/json(?:\s*;\s*charset=utf-8)?\z/iD', $headers['content-type'] ?? '') !== 1) { throw new TransportException('CONTENT_TYPE_REJECTED'); }
             return $body;

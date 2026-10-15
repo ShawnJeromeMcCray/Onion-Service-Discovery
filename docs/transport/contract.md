@@ -12,11 +12,21 @@ users. Configure Tor's SOCKSPort with `IsolateSOCKSAuth`.
 
 Headers are limited to 8 KiB total and 2 KiB per line. Responses use the endpoint
 registry limits, including 16 KiB manifests and 512 KiB chunks. Timeouts are
-bounded; JSON content type is mandatory. Transport errors expose normalized
-codes, not destinations, response bodies or search terms. Controlled SOCKS tests
-check domain-name addressing, credentials, ambient proxy bypass resistance,
-redirect refusal, encoding refusal, header ambiguity and byte limits. These are
-not tests against a running Tor daemon or an external Onion Service.
+bounded: one limit (`transport.timeout_ms`, at most 60 s) covers the whole request,
+including the SOCKS connect phase in which Tor builds the circuit to the Onion.
+JSON content type is mandatory. Transport errors expose normalized codes, not
+destinations, response bodies or search terms, and name what failed:
+`TOR_PROXY_UNREACHABLE` (nothing accepted a connection on the configured SOCKS
+port), `ONION_UNREACHABLE` (Tor answered with a SOCKS error: it could not reach
+the Onion), `TOR_REQUEST_TIMEOUT`, `TOR_REQUEST_FAILED` (any other exchange
+failure), `HTTP_NOT_FOUND`, `HTTP_REDIRECT_REJECTED`, `HTTP_SERVER_ERROR` and
+`HTTP_STATUS_REJECTED` (any other unexpected status). Workers treat all of these
+as transient and retry with backoff. Controlled SOCKS tests check domain-name
+addressing, credentials, ambient proxy bypass resistance, redirect refusal,
+encoding refusal, header ambiguity, byte limits and each typed failure. The lab
+scripts in `lab/` also run against a real Tor daemon without network access
+(`lab/real-tor-cli.md`). None of these is a test against the public Tor network
+or an external Onion Service.
 
 The CLI configures `node`, `client-host` and `combined` roles explicitly.
 Publishing, peer sync, server search, announcement acceptance and visitor-chosen

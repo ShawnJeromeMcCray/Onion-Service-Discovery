@@ -185,13 +185,14 @@ try {
         && !str_contains(json_encode($evidence, JSON_THROW_ON_ERROR), $nodes['included']['onion']) && (fileperms($root . '/publisher.discoverability.json') & 0077) === 0, 'saved aggregate evidence'); ++$checks;
     $assert(cli(['network:announce', $root . '/publisher.json'], 2)['error'] === 'USAGE_ERROR', 'network:announce alias'); ++$checks;
     // Failed self-verification and announcement are recorded as typed failures, never as success.
-    $assert(cli(['service:verify', $root . '/publisher.json', $genesis->document()->onion, '--save-status'], 5)['error'] === 'TOR_REQUEST_FAILED', 'self-verification failure'); ++$checks;
+    // Nothing listens on the configured SOCKS port: the failure names the local Tor listener (spec 47 section 16).
+    $assert(cli(['service:verify', $root . '/publisher.json', $genesis->document()->onion, '--save-status'], 5)['error'] === 'TOR_PROXY_UNREACHABLE', 'self-verification failure'); ++$checks;
     $assert(cli(['service:verify', $root . '/publisher.json', $unreachable, '--save-status'], 3)['error'] === 'SELF_VERIFICATION_ONION_MISMATCH', 'foreign self-verification'); ++$checks;
     file_put_contents($root . '/current.json', json_encode($current->document(), JSON_THROW_ON_ERROR));
-    $assert(cli(['network:announce', $root . '/publisher.json', $root . '/current.json', $unreachable, '--save-status'], 5)['error'] === 'TOR_REQUEST_FAILED', 'announcement failure'); ++$checks;
+    $assert(cli(['network:announce', $root . '/publisher.json', $root . '/current.json', $unreachable, '--save-status'], 5)['error'] === 'TOR_PROXY_UNREACHABLE', 'announcement failure'); ++$checks;
     $evidence = json_decode((string) file_get_contents($root . '/publisher.discoverability.json'), true, 8, JSON_THROW_ON_ERROR);
-    $assert($evidence['self_verification']['result'] === 'TOR_REQUEST_FAILED' && $evidence['self_verification']['manifest_hash'] === null
-        && array_values($evidence['announcement']['nodes'])[0]['result'] === 'TOR_REQUEST_FAILED' && isset($evidence['membership'])
+    $assert($evidence['self_verification']['result'] === 'TOR_PROXY_UNREACHABLE' && $evidence['self_verification']['manifest_hash'] === null
+        && array_values($evidence['announcement']['nodes'])[0]['result'] === 'TOR_PROXY_UNREACHABLE' && isset($evidence['membership'])
         && !str_contains(json_encode($evidence, JSON_THROW_ON_ERROR), $unreachable), 'recorded failures'); ++$checks;
     $assert(!file_exists($root . '/must-not-be-created') && !file_exists($root . '/exports-must-not-be-created'), 'publisher storage created'); ++$checks;
     $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json'], 2)['error'] === 'USAGE_ERROR', 'no sources'); ++$checks;

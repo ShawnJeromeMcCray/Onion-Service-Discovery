@@ -11,9 +11,9 @@ use OnionServiceDiscovery\Protocol\RecordVerifier;
 final class SupportBundle
 {
     /** @return array<string,mixed> */
-    public static function create(NodeConfig $config, RecordVerifier $verifier, string $configPath): array
+    public static function create(NodeConfig $config, RecordVerifier $verifier, string $configPath, ?string $manifestPath = null): array
     {
-        $diagnostics = Diagnostics::inspect($config, $verifier);
+        $diagnostics = Diagnostics::inspect($config, $verifier, $manifestPath, $configPath);
         $extensions = [];
         foreach (['json', 'sodium', 'iconv', 'curl', 'pdo_sqlite', 'mbstring', 'intl'] as $extension) { $extensions[$extension] = extension_loaded($extension); }
         $bundle = [

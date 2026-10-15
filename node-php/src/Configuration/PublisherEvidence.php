@@ -32,13 +32,17 @@ final class PublisherEvidence
     {
         $expected = $result['expected_state'];
         // Per-Node categories let the bounded announcement skip Nodes that already include this revision.
-        $nodes = [];
-        foreach ($result['sources'] as $source) { $nodes[self::nodeKey(OnionAddress::parse($source['node_onion']))] = $source['category']; }
-        self::locked($configPath, static function () use ($configPath, $now, $expected, $result, $nodes): void {
+        $nodes = []; $conflicts = 0;
+        foreach ($result['sources'] as $source) {
+            $nodes[self::nodeKey(OnionAddress::parse($source['node_onion']))] = $source['category'];
+            // The status page names D-052 integrity rejections separately from ordinary failures (spec 47 section 79).
+            if ($source['category'] === 'rejected' && in_array($source['error'] ?? null, PublisherStatus::CHECKPOINT_CONFLICT_ERRORS, true)) { ++$conflicts; }
+        }
+        self::locked($configPath, static function () use ($configPath, $now, $expected, $result, $nodes, $conflicts): void {
             self::write($configPath, 'membership', ['checked_at' => self::time($now), 'manifest_hash' => $expected['manifest_hash'],
                 'logical_service_id' => $expected['logical_service_id'], 'revision' => $expected['revision'], 'key_epoch' => $expected['key_epoch'],
                 'selected_sources' => $result['selected_sources'], 'distinct_node_keys' => $result['distinct_node_keys'],
-                'included_with_node_direct_observation' => $result['included_with_node_direct_observation']] + $result['counts'] + ['nodes' => $nodes]);
+                'included_with_node_direct_observation' => $result['included_with_node_direct_observation']] + $result['counts'] + ['nodes' => $nodes, 'checkpoint_conflicts' => $conflicts]);
             // D-052 anchors: the checkpoint each consistent Node served. A rejected or unreachable Node keeps its
             // previous anchor, so a rollback or equivocation stays visible until the operator acts.
             $anchors = self::load($configPath)['checkpoints'] ?? [];
@@ -205,8 +209,8 @@ final class PublisherEvidence
     /** @param array<array-key,mixed> $m */
     private static function validMembership(array $m): bool
     {
-        // Evidence saved before per-Node categories existed has 14 members and stays valid.
-        if (count($m) !== (array_key_exists('nodes', $m) ? 15 : 14) || !self::isTime($m['checked_at'] ?? null) || !self::isHash($m['manifest_hash'] ?? null) ||
+        // Evidence saved before per-Node categories (nodes) and integrity counts (checkpoint_conflicts) existed stays valid.
+        if (count($m) !== 14 + (array_key_exists('nodes', $m) ? 1 : 0) + (array_key_exists('checkpoint_conflicts', $m) ? 1 : 0) || !self::isTime($m['checked_at'] ?? null) || !self::isHash($m['manifest_hash'] ?? null) ||
             !is_string($m['logical_service_id'] ?? null) || preg_match('/\Aed25519:[A-Za-z0-9_-]{43}\z/D', $m['logical_service_id']) !== 1) { return false; }
         foreach (self::MEMBERSHIP_COUNTS as $field) { if (!is_int($m[$field] ?? null) || $m[$field] < 0 || $m[$field] > 1000000) { return false; } }
         if (array_key_exists('nodes', $m)) {
@@ -215,6 +219,7 @@ final class PublisherEvidence
             $categories = array_count_values($m['nodes']);
             foreach (self::CATEGORIES as $category) { if (($categories[$category] ?? 0) !== $m[$category]) { return false; } }
         }
+        if (array_key_exists('checkpoint_conflicts', $m) && (!is_int($m['checkpoint_conflicts']) || $m['checkpoint_conflicts'] < 0 || $m['checkpoint_conflicts'] > $m['rejected'])) { return false; }
         return $m['included'] + $m['stale'] + $m['not_present'] + $m['contradictory'] + $m['unavailable'] + $m['rejected'] === $m['selected_sources']
             && $m['selected_sources'] <= PublisherMembership::MAX_SOURCES && $m['included_with_node_direct_observation'] <= $m['included'] && $m['key_epoch'] >= 1;
     }

@@ -205,6 +205,25 @@ The page then lists ten steps (installation, configuration, identity, Manifest,
 self-verification, bootstrap connectivity, announcement, external observation,
 searchable state, redundancy/freshness), each PASS, PENDING, WARN, FAIL or
 NOT_APPLICABLE, and answers YES, NOT YET, NO, DEGRADED or PROBLEM at the top.
+The state below the answer tells where a new revision stands:
+
+| State | Answer | Meaning |
+| --- | --- | --- |
+| `READY_LOCALLY` | NOT YET | A valid Manifest is installed; no self-check through your Onion has passed yet |
+| `CONNECTING` | NOT YET | The self-check passed; no Node has accepted an announcement or included it yet |
+| `ANNOUNCED_PENDING_VERIFICATION` | NOT YET | A Node accepted the announcement of this revision and will verify it itself |
+| `EXTERNALLY_OBSERVED` | NOT YET | A checked Node holds your Service, but an older revision or without its own observation |
+| `DISCOVERABLE` | YES | A checked Node includes this revision and observed it directly |
+| `DISCOVERABLE_DEGRADED` | DEGRADED | As above, but the evidence is older than seven days |
+| `IDENTITY_CONFLICT` | PROBLEM | A checked Node holds a conflicting signed state for your identity |
+| `CONFIGURED_NOT_PUBLISHED`, `WITHDRAWN`, `ERROR` | NO | Publishing is off, the Manifest withdraws the Service, or it is invalid |
+
+The next action names the most urgent step. A failing self-check comes first
+and names its cause: the local Tor SOCKS listener (`TOR_PROXY_UNREACHABLE`), the
+Onion behind Tor (`ONION_UNREACHABLE`, `TOR_REQUEST_TIMEOUT`), or your web server
+(`HTTP_NOT_FOUND`, `HTTP_REDIRECT_REJECTED`, `HTTP_SERVER_ERROR`). A **Warning**
+section appears when a checked Node contradicted the checkpoint it served at your
+previous check. `doctor CONFIG` reports the same publication facts.
 To keep it current and announce automatically, adapt
 `deployment/systemd/osd-publisher-check.service`, put your Onion and Node list
 into `/etc/onion-service-discovery/publisher-check.env`:

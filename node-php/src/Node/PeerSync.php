@@ -116,7 +116,7 @@ final class PeerSync
         } catch (TransportException | \InvalidArgumentException | StorageException $error) {
             if ($error->getMessage() === 'PEER_CLAIM_LOST') { return ['status' => 'CLAIM_LOST']; }
             $localFailure = $error instanceof StorageException;
-            $transient = $localFailure || in_array($error->getMessage(), ['TOR_REQUEST_FAILED','HTTP_STATUS_REJECTED'], true);
+            $transient = $localFailure || ($error instanceof TransportException && in_array($error->getMessage(), TransportException::TRANSIENT, true));
             $failureState = $this->store->transaction(function (StorageTransaction $tx) use ($onion,$claim,$now,$error,$transient,$localFailure): string {
                 $row = $this->claimed($tx,$onion,$claim);
                 // Local quota/disk failures are not authenticated peer misconduct.

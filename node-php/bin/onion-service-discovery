@@ -306,7 +306,7 @@ try {
     } elseif ($command === 'diagnostics:export') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
-        $output = \OnionServiceDiscovery\Configuration\SupportBundle::create($config, $verifier, $arguments[0]);
+        $output = \OnionServiceDiscovery\Configuration\SupportBundle::create($config, $verifier, $arguments[0], dirname(__DIR__) . '/public/.well-known/onion-service-discovery.json');
     } elseif ($command === 'service:verify') {
         $save = in_array('--save-status', $arguments, true);
         $arguments = array_values(array_filter($arguments, static fn (string $value): bool => $value !== '--save-status'));
@@ -375,7 +375,7 @@ try {
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         $output = ['status' => 'PASS', 'role' => $config->role, 'storage_backend' => $config->backend, 'features' => $config->features, 'source_count' => count($config->sources), 'network_side_effects' => false];
         if ($command !== 'config:validate') {
-            $output = \OnionServiceDiscovery\Configuration\Diagnostics::inspect($config, $verifier);
+            $output = \OnionServiceDiscovery\Configuration\Diagnostics::inspect($config, $verifier, dirname(__DIR__) . '/public/.well-known/onion-service-discovery.json', $arguments[0]);
             $exitCode = $output['status'] === 'FAIL' ? 4 : ($output['status'] === 'WARN' ? 6 : 0);
         }
     } elseif ($command === 'peers:group') {

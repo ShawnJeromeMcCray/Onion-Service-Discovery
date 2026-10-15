@@ -7,13 +7,38 @@ use OnionServiceDiscovery\Storage\StorageException;
 /** Read-only local diagnostics. No Tor probing, key decryption, recovery or network requests. */
 final class Diagnostics
 {
-    /** @return array<string,mixed> */
-    public static function inspect(NodeConfig $config, RecordVerifier $verifier): array
+    private const EXTENSIONS = ['json', 'sodium', 'iconv', 'curl'];
+
+    /** PASS on a tested 64-bit runtime with every required extension, WARN outside the tested minor versions. */
+    public static function runtimeState(): string
+    {
+        if (PHP_INT_SIZE !== 8) { return 'FAIL'; }
+        foreach (self::EXTENSIONS as $extension) { if (!extension_loaded($extension)) { return 'FAIL'; } }
+        return str_starts_with(PHP_VERSION, '8.4.') || str_starts_with(PHP_VERSION, '8.5.') ? 'PASS' : 'WARN';
+    }
+
+    /**
+     * @param string|null $manifestPath The installed public Manifest; with it a publishing installation
+     *                                  also reports its manifest state (spec 32 sections 8 and 10).
+     * @param string|null $configPath   Locates the saved publisher evidence beside the configuration.
+     * @return array<string,mixed>
+     */
+    public static function inspect(NodeConfig $config, RecordVerifier $verifier, ?string $manifestPath = null, ?string $configPath = null): array
     {
         $checks = []; $warnings = []; $failures = [];
         $checks['runtime'] = PHP_INT_SIZE === 8 ? 'PASS' : 'FAIL';
-        foreach (['json','sodium','iconv','curl'] as $extension) { $checks['extension_' . $extension] = extension_loaded($extension) ? 'PASS' : 'FAIL'; }
+        foreach (self::EXTENSIONS as $extension) { $checks['extension_' . $extension] = extension_loaded($extension) ? 'PASS' : 'FAIL'; }
         if (!str_starts_with(PHP_VERSION, '8.4.') && !str_starts_with(PHP_VERSION, '8.5.')) { $warnings[] = 'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX'; }
+        $publication = null;
+        if ($manifestPath !== null && $config->nodeOnion !== null && $config->features['publish_service']) {
+            $facts = PublisherStatus::inspect($config, $verifier, $manifestPath, $configPath);
+            $publication = ['overall' => $facts['overall'], 'manifest_state' => $facts['manifest']['state'], 'revision' => $facts['manifest']['revision'] ?? null,
+                'manifest_hash' => $facts['manifest']['hash'] ?? null, 'self_verification' => $facts['self_verification'], 'announcement' => $facts['announcement'],
+                'active_index_membership' => $facts['active_index_membership'], 'source_integrity' => $facts['source_integrity'] ?? 'NOT_CHECKED'];
+            $state = $facts['manifest']['state'];
+            $checks['publisher_manifest'] = $state === 'SIGNATURE_VALID' ? 'PASS' : 'FAIL';
+            if (($facts['source_integrity'] ?? null) !== null && $facts['source_integrity'] !== 'NO_CONFLICT_DETECTED') { $warnings[] = 'PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT'; }
+        }
         if (!in_array($config->role, ['client-host','publisher'], true) && $config->backend === 'sqlite') {
             $checks['sqlite_driver'] = class_exists(\PDO::class) && in_array('sqlite', \PDO::getAvailableDrivers(), true) ? 'PASS' : 'FAIL';
         }
@@ -81,6 +106,6 @@ final class Diagnostics
         if ($concentration['concentrated']) { $warnings[] = 'SOURCE_SET_CONCENTRATED'; }
         if ($concentration['grouping_inconsistent']) { $warnings[] = 'SOURCE_GROUP_ASSIGNMENTS_INCONSISTENT'; }
         $checks['source_concentration'] = $concentration['concentrated'] || $concentration['grouping_inconsistent'] ? 'WARN' : 'PASS';
-        return ['status' => $failures !== [] ? 'FAIL' : ($warnings !== [] ? 'WARN' : 'PASS'), 'software_version' => '0.1.0-dev', 'php_version' => PHP_VERSION, 'protocol_versions' => [1], 'db_schema' => $state['storage_schema'] ?? null, 'role' => $config->role, 'config_state' => 'PASS', 'crypto_state' => 'RUNTIME_EXTENSIONS_ONLY', 'key_authentication_state' => 'NOT_UNLOCKED_UNAUTHENTICATED_HEADER', 'tor_transport_state' => 'CONFIGURED_NOT_PROBED', 'sync_state' => ['latest_sync_epoch' => $latestSync, 'quarantined_peers' => $quarantined], 'source_concentration' => $concentration, 'scheduler_state' => 'NOT_OBSERVED', 'backup_state' => 'NOT_OBSERVED', 'disk_state' => ['free_bytes' => is_dir($config->exportPath) ? disk_free_space($config->exportPath) : null], 'security_check_summary' => $checks, 'warnings' => $warnings, 'failures' => array_values(array_unique($failures)), 'generated_at' => gmdate('Y-m-d\TH:i:s\Z'), 'network_side_effects' => false, 'production_approval' => 'OPEN'];
+        return ['status' => $failures !== [] ? 'FAIL' : ($warnings !== [] ? 'WARN' : 'PASS'), 'software_version' => '0.1.0-dev', 'php_version' => PHP_VERSION, 'protocol_versions' => [1], 'db_schema' => $state['storage_schema'] ?? null, 'role' => $config->role, 'config_state' => 'PASS', 'crypto_state' => 'RUNTIME_EXTENSIONS_ONLY', 'key_authentication_state' => 'NOT_UNLOCKED_UNAUTHENTICATED_HEADER', 'tor_transport_state' => 'CONFIGURED_NOT_PROBED', 'manifest_state' => $publication['manifest_state'] ?? 'NOT_APPLICABLE', 'publication' => $publication, 'sync_state' => ['latest_sync_epoch' => $latestSync, 'quarantined_peers' => $quarantined], 'source_concentration' => $concentration, 'scheduler_state' => 'NOT_OBSERVED', 'backup_state' => 'NOT_OBSERVED', 'disk_state' => ['free_bytes' => is_dir($config->exportPath) ? disk_free_space($config->exportPath) : null], 'security_check_summary' => $checks, 'warnings' => $warnings, 'failures' => array_values(array_unique($failures)), 'generated_at' => gmdate('Y-m-d\TH:i:s\Z'), 'network_side_effects' => false, 'production_approval' => 'OPEN'];
     }
 }

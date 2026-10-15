@@ -12,7 +12,13 @@ $fixtures = json_decode(file_get_contents(dirname(__DIR__, 2) . '/protocol/test-
 foreach ($fixtures->cases as $case) { if ($case->id === 'fork-same-revision') { $onion = $case->records[0]->onion; break; } }
 $cases = [
     'valid' => ["HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{}", ['body' => '{}']],
-    'redirect' => ["HTTP/1.1 302 Found\r\nLocation: http://example.org/\r\nContent-Length: 0\r\n\r\n", ['error' => 'HTTP_STATUS_REJECTED']],
+    'redirect' => ["HTTP/1.1 302 Found\r\nLocation: http://example.org/\r\nContent-Length: 0\r\n\r\n", ['error' => 'HTTP_REDIRECT_REJECTED']],
+    // Typed failures name what to fix (spec 47 section 16).
+    'not-found' => ["HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{}", ['error' => 'HTTP_NOT_FOUND']],
+    'server-error' => ["HTTP/1.1 503 Service Unavailable\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{}", ['error' => 'HTTP_SERVER_ERROR']],
+    'forbidden' => ["HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n", ['error' => 'HTTP_STATUS_REJECTED']],
+    'socks-host-unreachable' => [null, ['error' => 'ONION_UNREACHABLE']],
+    'timeout' => [null, ['error' => 'TOR_REQUEST_TIMEOUT']],
     'encoding' => ["HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Encoding: gzip\r\nContent-Length: 2\r\n\r\n{}", ['error' => 'CONTENT_ENCODING_REJECTED']],
     'type' => ["HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 2\r\n\r\n{}", ['error' => 'CONTENT_TYPE_REJECTED']],
     'oversize' => ["HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 16385\r\n\r\n" . str_repeat('x', 16385), ['error' => 'RESPONSE_TOO_LARGE']],
@@ -23,7 +29,7 @@ $verified = (new \OnionServiceDiscovery\Protocol\RecordVerifier(dirname(__DIR__,
 $wire = json_encode($manifest, JSON_THROW_ON_ERROR);
 $cases['cli-valid'] = ["HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " . strlen($wire) . "\r\n\r\n" . $wire, ['status'=>'SIGNATURE_AND_BINDING_VALID','history_bundle'=>'NOT_SERVED_GENESIS_NEEDS_NONE','onion'=>$onion,'manifest_hash'=>$verified->contentHash,'service_identity_public_key'=>$manifest->service_identity_public_key,'revision'=>$manifest->revision,'publish_service'=>$manifest->discovery->publish_service,'identity_state'=>'NOT_DERIVED','state_mutated'=>false,'network_side_effects'=>true]];
 $cases['cli-invalid'] = [$cases['valid'][0], ['status'=>'FAIL','error'=>'PROTOCOL_UNSUPPORTED']];
-$cases['cli-redirect'] = [$cases['redirect'][0], ['status'=>'FAIL','error'=>'HTTP_STATUS_REJECTED']];
+$cases['cli-redirect'] = [$cases['redirect'][0], ['status'=>'FAIL','error'=>'HTTP_REDIRECT_REJECTED']];
 $hintReply = '{"status":"HINT_RECEIVED_UNCONFIRMED"}';
 $cases['cli-announce'] = ["HTTP/1.1 202 Accepted\r\nContent-Type: application/json\r\nContent-Length: " . strlen($hintReply) . "\r\n\r\n" . $hintReply, ['status'=>'HINT_RECEIVED_UNCONFIRMED','direct_observation'=>'NOT_CONFIRMED','index_membership'=>'NOT_CONFIRMED','state_mutated'=>false,'network_side_effects'=>true]];
 $falseReply = '{"status":"CURRENT_STATE_INCLUDED"}';
@@ -66,6 +72,13 @@ foreach ($cases as $name => [$response, $expected]) {
     if ($request !== "\x05\x01\x00\x03") { throw new RuntimeException('hostname was not resolved through SOCKS'); }
     $hostname = readExact($socket, ord(readExact($socket, 1))); $destinationPort = unpack('nport', readExact($socket, 2))['port'];
     if ($hostname !== $onion || $destinationPort !== 80) { throw new RuntimeException('destination mismatch'); }
+    if ($name === 'socks-host-unreachable') {
+        // Tor answers a failed Onion connection with a SOCKS5 error reply (here: host unreachable).
+        fwrite($socket, "\x05\x04\x00\x01\x00\x00\x00\x00\x00\x00"); fclose($socket); fclose($server);
+        $output = stream_get_contents($pipes[1]); $stderr = stream_get_contents($pipes[2]); fclose($pipes[1]); fclose($pipes[2]);
+        if (proc_close($process) !== 0 || $stderr !== '' || json_decode($output, true) !== $expected) { throw new RuntimeException('transport case ' . $name . ': ' . $output . $stderr); }
+        ++$checks; continue;
+    }
     fwrite($socket, "\x05\x00\x00\x01\x7f\x00\x00\x01\x00\x50");
     $requestLines = ''; while (!str_contains($requestLines, "\r\n\r\n")) { $line = fgets($socket); if ($line === false) { throw new RuntimeException('HTTP request missing'); } $requestLines .= $line; }
     if (str_starts_with($name, 'cli-announce')) {
@@ -74,8 +87,11 @@ foreach ($cases as $name => [$response, $expected]) {
         if (strlen($hint)>256 || json_decode($hint,true)!==['protocol_version'=>1,'onion'=>$onion]) { throw new RuntimeException('announcement contains more than a hint'); }
     } elseif (!str_starts_with($requestLines, "GET /.well-known/onion-service-discovery.json HTTP/1.1\r\n")) { throw new RuntimeException('unexpected HTTP request'); }
     if (str_contains(strtolower($requestLines), 'cookie:')) { throw new RuntimeException('cookie exposed'); }
-    fwrite($socket, $response); fclose($socket); fclose($server);
+    // Without a response the worker's own time limit (1.5 s) ends the request.
+    if ($response !== null) { fwrite($socket, $response); fclose($socket); }
     $output = stream_get_contents($pipes[1]); $stderr = stream_get_contents($pipes[2]); fclose($pipes[1]); fclose($pipes[2]);
+    if ($response === null) { fclose($socket); }
+    fclose($server);
     $exit = proc_close($process);
     if ($private !== null) {
         if (is_dir($private.'/data') || is_dir($private.'/exports') || is_file($private.'/node.key')) { throw new RuntimeException('read-only CLI probe created runtime state'); }
@@ -86,6 +102,10 @@ foreach ($cases as $name => [$response, $expected]) {
     if ($exit !== $expectedExit || $stderr !== '' || json_decode($output, true) !== $expected) { throw new RuntimeException('transport case ' . $name . ': ' . $output . $stderr); }
     ++$checks;
 }
+// No SOCKS listener at all: the local Tor is named, not the Onion.
+$closed = stream_socket_server('tcp://127.0.0.1:0'); $closedPort = (int) substr(strrchr(stream_socket_get_name($closed, false), ':'), 1); fclose($closed);
+try { (new TorTransport('127.0.0.1', $closedPort, 1500))->get(OnionAddress::parse($onion), ProtocolEndpoint::manifest()); throw new RuntimeException('closed proxy accepted'); }
+catch (TransportException $error) { if ($error->getMessage() !== 'TOR_PROXY_UNREACHABLE') { throw new RuntimeException('closed proxy reported as ' . $error->getMessage()); } ++$checks; }
 try { new TorTransport('example.org'); throw new RuntimeException('remote proxy accepted'); } catch (TransportException) { ++$checks; }
 try { ProtocolEndpoint::changes(-1); throw new RuntimeException('negative cursor accepted'); } catch (TransportException) { ++$checks; }
 try { ProtocolEndpoint::chunk('../../file'); throw new RuntimeException('arbitrary path accepted'); } catch (TransportException) { ++$checks; }

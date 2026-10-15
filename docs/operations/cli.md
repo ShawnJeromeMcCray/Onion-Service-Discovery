@@ -146,7 +146,8 @@ atomically to `CONFIG_NAME.discoverability.json` beside the configuration, with
 the configuration file's group and at most its read permissions, so the web
 runtime that reads the configuration can also read the evidence.
 `service:verify CONFIG OWN_ONION --save-status` records the self-check result
-(also typed failures such as `TOR_REQUEST_FAILED`; another Onion is refused with
+(also typed failures such as `TOR_PROXY_UNREACHABLE`, `ONION_UNREACHABLE` or
+`HTTP_NOT_FOUND`, each with its own remedy on the status page; another Onion is refused with
 `SELF_VERIFICATION_ONION_MISMATCH`), and `service:announce … --save-status`
 records each Node's acknowledgement under a SHA-256 hash of its address, with
 the announced revision, the consecutive attempts and the earliest automatic

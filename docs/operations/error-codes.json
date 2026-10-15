@@ -533,6 +533,33 @@
    ],
    "meaning": "The current Manifest does not connect to its history: the Service serves no or an incomplete history bundle (history:install), or a proof is missing."
   },
+  "HTTP_NOT_FOUND": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": "The Onion answered 404: its web server does not pass this path to the OSD front controller, or the Node does not offer the endpoint."
+  },
+  "HTTP_REDIRECT_REJECTED": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": "The Onion answered with a redirect. OSD never follows redirects; serve the path directly over HTTP on the Onion."
+  },
+  "HTTP_SERVER_ERROR": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": "The Onion answered 5xx. For OSD itself this usually means the web server user cannot read the configuration."
+  },
   "HTTP_STATUS_REJECTED": {
    "cli_exit": [
     "5"
@@ -540,7 +567,7 @@
    "components": [
     "Tor transport"
    ],
-   "meaning": "The remote answered with an unexpected HTTP status; nothing was verified."
+   "meaning": "The remote answered with an unexpected HTTP status other than 404, a redirect or 5xx; nothing was verified."
   },
   "IDENTITY_CHANGED": {
    "cli_exit": [
@@ -857,6 +884,15 @@
    ],
    "meaning": "The signed Manifest belongs to a different Onion than the one it was fetched from or installed for."
   },
+  "ONION_UNREACHABLE": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": "Tor answered with a SOCKS error: it could not reach the Onion (still bootstrapping, Service offline or descriptor not published)."
+  },
   "OUTPUT_DIRECTORY_UNAVAILABLE": {
    "cli_exit": [
     "3"
@@ -1036,6 +1072,15 @@
     "signing"
    ],
    "meaning": "Another publisher command holds the lock on the same files; run it again when that command has finished."
+  },
+  "PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page."
   },
   "PUBLISHING_DISABLED": {
    "cli_exit": [
@@ -1812,6 +1857,15 @@
    ],
    "meaning": "Commands never read Tor private key files."
   },
+  "TOR_PROXY_UNREACHABLE": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": "Nothing accepted a connection on the configured Tor SOCKS port: Tor is not running or transport.proxy_port is wrong."
+  },
   "TOR_REQUEST_FAILED": {
    "cli_exit": [
     "5"
@@ -1819,7 +1873,16 @@
    "components": [
     "Tor transport"
    ],
-   "meaning": "Tor or its SOCKS port is unavailable, or the Onion did not answer."
+   "meaning": "Tor connected, but the HTTP exchange with the Onion failed (connection reset, empty or malformed reply)."
+  },
+  "TOR_REQUEST_TIMEOUT": {
+   "cli_exit": [
+    "5"
+   ],
+   "components": [
+    "Tor transport"
+   ],
+   "meaning": "The Onion did not answer within transport.timeout_ms; first contact can be slow, retry or raise the limit (at most 60000)."
   },
   "TRANSPORT_CONFIGURATION_INVALID": {
    "cli_exit": [

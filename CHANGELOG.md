@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Publisher dashboard follows the states of spec 47: `CONNECTING`,
+  `ANNOUNCED_PENDING_VERIFICATION` and `EXTERNALLY_OBSERVED` between
+  `READY_LOCALLY` and `DISCOVERABLE`, derived from the saved self-check,
+  announcements and Node checks. The next action is the most urgent one: a
+  failing self-check comes first and names its cause. Transport failures are
+  typed: `TOR_PROXY_UNREACHABLE`, `ONION_UNREACHABLE`, `TOR_REQUEST_TIMEOUT`,
+  `HTTP_NOT_FOUND`, `HTTP_REDIRECT_REJECTED`, `HTTP_SERVER_ERROR` (workers keep
+  treating them as transient). A self-check expires after seven days, one from
+  before the installed revision no longer counts, Nodes that contradicted their
+  previous checkpoint (D-052) raise a visible warning, a migrated Manifest names
+  the new Onion instead of "invalid", and the page links the public Manifest and
+  history bundle. `doctor` and `diagnostics:export` report the publication
+  (`manifest_state`) and fail on a missing or invalid Manifest. The SOCKS connect
+  phase may now use the whole `transport.timeout_ms`, because it includes Tor's
+  circuit to the Onion. Both real-Tor lab scripts pass with Tor 0.4.9.
 - One service user on a host: the publisher timer now runs as `osd-worker`, the
   same user as the PHP-FPM pool, and the guides run `init` and every check with
   `sudo -u osd-worker`, so the status page can read the evidence the checks save.
