@@ -10,7 +10,8 @@
   page and no longer makes the Service DISCOVERABLE.
 - PHP 8.3 is supported (owner decision D-002: 8.3+, 8.5 preferred), so the
   distribution PHP of Ubuntu 24.04 LTS works. `composer.json` requires `^8.3`,
-  `doctor` passes on 8.3 to 8.5 and fails below 8.3, and CI runs every PHP test,
+  Composer's platform check refuses an older PHP, `doctor` passes on 8.3 to 8.5
+  and warns on a newer untested minor version, and CI runs every PHP test,
   the protocol conformance suite and the fuzzer on a pinned `php:8.3-cli` image
   (8.3.35) besides 8.4 and 8.5.
 - Browser client on slow devices: a record already verified in this session is
