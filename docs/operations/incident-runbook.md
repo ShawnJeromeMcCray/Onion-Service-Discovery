@@ -126,8 +126,9 @@ checked with the CLI in a scratch directory on a development host.
    trust: restore a backup from before the compromise into a staging path with
    `storage:restore` and export from there, or skip this step and let the new
    Node learn from its peers.
-6. Create the key with a new passphrase file and initialize: `key:create node
-   NEW_KEY --passphrase-file NEW_PASSPHRASE_FILE`, `node:init NEW_CONFIG
+6. Create the key at the new configuration's `node.key_path` (NEW_KEY), with a
+   new passphrase file, and initialize: `key:create node NEW_KEY
+   --passphrase-file NEW_PASSPHRASE_FILE`, `node:init NEW_CONFIG
    --passphrase-file NEW_PASSPHRASE_FILE`, `node:snapshot NEW_CONFIG
    --passphrase-file NEW_PASSPHRASE_FILE`, then `node:identity NEW_CONFIG`.
 7. Queue the Services again: `candidate:add NEW_CONFIG ONION` for each Onion from
@@ -155,9 +156,9 @@ checked with the CLI in a scratch directory on a development host.
 `NODE_DESCRIPTOR_ROLLBACK_OR_FORK` or `PEER_BINDING_MISMATCH`. `peers:list
 CONFIG` shows the peer's state and error; `doctor CONFIG` counts quarantined
 peers. Publishers see `SOURCE_CHECKPOINT_…` codes for a checked Node, with a
-warning on their status page; browser visitors see the source set aside. `quarantine:list CONFIG`
-is a different list: Service candidates whose direct check failed, for example
-with `IDENTITY_FORKED` or `IDENTITY_CHANGED`.
+warning on their status page; browser visitors see the source set aside.
+`quarantine:list CONFIG` is a different list: Service candidates whose direct
+check failed, for example with `IDENTITY_FORKED` or `IDENTITY_CHANGED`.
 
 **What is kept.** Both signed checkpoints are stored as records. The store keeps
 up to eight checkpoint hashes per Node key and generation, and the last accepted
@@ -186,7 +187,7 @@ If peers or publishers report this about your own Node, stop
 **Interrupted write** (power loss, killed job, full disk). The filesystem store
 recovers the next time a writer opens it: it cuts a partial journal line, aborts
 an unfinished transaction and completes a committed one whose HEAD update was
-lost. Until then the read-only web routes refuse with
+lost. Until then the read-only web routes answer 503, and `doctor` reports
 `STORAGE_RECOVERY_REQUIRED`. SQLite recovers its own journal.
 
 1. Free disk space if it is full.
