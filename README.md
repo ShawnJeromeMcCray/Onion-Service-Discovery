@@ -115,7 +115,7 @@ No test count is an independent security audit or production approval.
 - [Add OSD to an existing website](docs/operations/existing-website.md), [deployment hardening matrix](docs/operations/hardening-matrix.md), [incident runbook](docs/operations/incident-runbook.md).
 - [Draft protocol handbook](docs/protocol/handbook.md), [browser contract](docs/browser/client-contract.md), [decision register](docs/governance/decision-register.md).
 - [Development package verification](docs/operations/release-candidate.md), [offline release verifier](release-tools/README.md).
-- [Support](SUPPORT.md), [security reporting](SECURITY.md), [contributing](CONTRIBUTING.md), [changelog](CHANGELOG.md).
+- [Support](SUPPORT.md), [security reporting](SECURITY.md), [privacy](PRIVACY.md) with its [data inventory](docs/privacy/data-inventory.md), [contributing](CONTRIBUTING.md), [changelog](CHANGELOG.md).
 
 ## License
 
