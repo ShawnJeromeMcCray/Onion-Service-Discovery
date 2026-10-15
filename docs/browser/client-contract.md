@@ -23,7 +23,8 @@ Visitor-chosen Nodes are kept in session memory unless the visitor opts into
 profile storage; Forget local data removes them. This same-origin
 reference profile keeps browser CORS closed. A static direct-cross-origin
 profile is separately supported with exact source origins in its CSP; each
-Data Node must explicitly permit the Client Host origin. Real Tor Browser
+Data Node must explicitly permit the Client Host origin (see
+[static self-hosting](#static-self-hosting)). Real Tor Browser
 behavior for both profiles remains a release gate.
 
 The page's search/filter operations run locally. No query appears in a request,
@@ -61,6 +62,42 @@ invariance, text-only hostile metadata, withdrawal filtering, local pin restore,
 explicit forgetting and unavailable-storage memory fallback. They are not Tor
 Browser Desktop/Android or independent accessibility/security UX approval.
 Those reviews and the external audit remain OPEN.
+
+## Static self-hosting
+
+`dist/` can be served without PHP. Build it with a configuration of exactly five
+keys: `"client_config_version": 1`, `"mode": "client-host"`,
+`"delivery_profile": "direct-cross-origin"`, `"minimum_distinct_keys": 3` and the
+Node Onions in `allowed_sources`. The build writes `http://NODE.onion` for each
+source into the page's meta CSP `connect-src`.
+
+Serve it with [nginx](../../deployment/nginx/static-client.conf.example) or
+[Apache](../../deployment/apache/static-client.conf.example). Both examples
+serve the six files the PHP host serves, at the same paths, for GET and HEAD
+only, without directory listing or symbolic links, and send the PHP host's
+headers from `node-php/src/Http/ClientAssets.php`: the CSP, `nosniff`,
+`no-referrer`, `X-Frame-Options: DENY`, the Permissions-Policy and
+`Cache-Control: no-store`. The header CSP adds what a meta tag cannot set:
+`frame-ancestors 'none'`.
+
+- **connect-src.** Copy the `connect-src` of the built `dist/index.html` into
+  the header. Browsers enforce the header policy as well as the meta policy, so
+  a header without the Node origins blocks the data requests.
+- **CORS.** Each Data Node must list the static host's origin
+  (`http://CLIENT.onion`) in `allowed_client_origins` and enable
+  `mirror_directory`. Only then does it answer with
+  `Access-Control-Allow-Origin` for that origin.
+- **No relay.** A static host has no `/onion-service-discovery/relay/`. The
+  `client-host-proxy` profile, visitor-chosen Nodes and the server-search link
+  are not available. Visitors' browsers connect to each Data Node over Tor
+  themselves: every Data Node sees these generic requests with the static
+  host's origin, never the searches or pins. The static host sees only the
+  requests for the page's files.
+
+The examples were checked with nginx 1.24.0 and Apache httpd 2.4.58 on a
+loopback listener: for all seven client URLs the content types and security
+headers matched the PHP host's, the bodies matched `dist/`, and no other file
+was served. Real Tor Browser behavior of the static profile is not verified.
 
 ## Optional explicit NoJS profile
 
