@@ -16,8 +16,9 @@ final readonly class NodeConfig
      * @param array<array-key, mixed> $sources
      * @param list<string> $allowedClientOrigins
      * @param list<array{onion:string,expected_node_key:string}> $publisherNodes Discovery Nodes a publisher checks and announces to.
+     * @param array<string,string> $sourceNodeKeys Expected Node keys of listed sources, handed to the browser client.
      */
-    private function __construct(public string $role, public string $backend, public string $storagePath, public string $exportPath, public ?string $nodeOnion, public ?string $nodeKeyPath, public array $features, public array $sources, public array $allowedClientOrigins, private string $proxyHost, private int $proxyPort, private int $timeout, public array $publisherNodes = []) {}
+    private function __construct(public string $role, public string $backend, public string $storagePath, public string $exportPath, public ?string $nodeOnion, public ?string $nodeKeyPath, public array $features, public array $sources, public array $allowedClientOrigins, private string $proxyHost, private int $proxyPort, private int $timeout, public array $publisherNodes = [], public array $sourceNodeKeys = []) {}
     public static function load(string $path): self
     {
         if (str_contains($path, '://') || is_link($path) || !is_file($path) || filesize($path) > 16384) { throw new ProtocolException('CONFIGURATION_UNAVAILABLE'); }
@@ -28,7 +29,7 @@ final readonly class NodeConfig
         $v = StrictJson::parse($bytes, 16384);
         // Every refusal names the key path and the rule (spec 32 section 12), never the value.
         // publisher_nodes is a later, optional addition; files without it stay valid.
-        $known = ['configuration_version','role','storage','export_path','node','features','transport','sources','allowed_client_origins','publisher_nodes'];
+        $known = ['configuration_version','role','storage','export_path','node','features','transport','sources','allowed_client_origins','publisher_nodes','source_node_keys'];
         foreach (array_keys(get_object_vars($v)) as $key) { if (!in_array($key, $known, true)) { throw self::invalid((string) $key, 'unknown key'); } }
         foreach (array_slice($known, 0, 9) as $key) { if (!property_exists($v, $key)) { throw self::invalid($key, 'missing'); } }
         if ($v->configuration_version !== 1) { throw self::invalid('configuration_version', 'must be 1'); }
@@ -58,6 +59,7 @@ final readonly class NodeConfig
         }
         if (count(array_unique($v->allowed_client_origins)) !== count($v->allowed_client_origins)) { throw self::invalid('allowed_client_origins', 'entries must be distinct'); }
         $publisherNodes = self::publisherNodes($v->publisher_nodes ?? [], $v->role);
+        $sourceNodeKeys = self::sourceNodeKeys($v->source_node_keys ?? new \stdClass(), $v->sources, $v->role);
         if ($v->role === 'client-host') {
             // A Client Host has no Node features; only the visitor-source relay switch may be enabled.
             if ($v->node->onion !== null || $v->node->key_path !== null || array_keys(array_filter(get_object_vars($v->features))) !== array_keys(array_filter(['visitor_sources' => $v->features->visitor_sources]))) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID', 'role client-host: node.onion and node.key_path must be null and only features.visitor_sources may be true'); }
@@ -76,7 +78,7 @@ final readonly class NodeConfig
         foreach (['storage.path' => $v->storage->path, 'export_path' => $v->export_path, 'node.key_path' => $v->node->key_path] as $key => $privatePath) {
             if ($privatePath !== null && $public !== false && (self::resolvedPath($privatePath) === $public || str_starts_with(self::resolvedPath($privatePath), $public . '/'))) { throw new ProtocolException('PRIVATE_PATH_IN_WEBROOT', $key . ': inside node-php/public'); }
         }
-        return new self($v->role, $v->storage->backend, $v->storage->path, $v->export_path, $v->node->onion, $v->node->key_path, get_object_vars($v->features), $v->sources, $v->allowed_client_origins, $v->transport->proxy_host, $v->transport->proxy_port, $v->transport->timeout_ms, $publisherNodes);
+        return new self($v->role, $v->storage->backend, $v->storage->path, $v->export_path, $v->node->onion, $v->node->key_path, get_object_vars($v->features), $v->sources, $v->allowed_client_origins, $v->transport->proxy_host, $v->transport->proxy_port, $v->transport->timeout_ms, $publisherNodes, $sourceNodeKeys);
     }
     public function store(bool $create = false, bool $readOnly = false): StorageBackend
     {
@@ -106,6 +108,26 @@ final readonly class NodeConfig
             $nodes[$onion] = ['onion' => $onion, 'expected_node_key' => $node->expected_node_key];
         }
         return array_values($nodes);
+    }
+    /**
+     * Optional expected Node keys for listed sources: the browser client then refuses a source that
+     * signs with another key from the first load on, instead of trusting its first contact.
+     * @param list<string> $sources
+     * @return array<string,string>
+     */
+    private static function sourceNodeKeys(mixed $value, array $sources, string $role): array
+    {
+        if (!$value instanceof \stdClass) { throw self::invalid('source_node_keys', 'must be an object of onion address to expected Node key'); }
+        $keys = get_object_vars($value);
+        if ($keys !== [] && !in_array($role, ['client-host', 'combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID', 'source_node_keys: only for the client-host and combined roles'); }
+        foreach ($keys as $onion => $key) {
+            if (!in_array($onion, $sources, true)) { throw self::invalid('source_node_keys.' . $onion, 'not listed in sources'); }
+            if (!is_string($key)) { throw self::invalid('source_node_keys.' . $onion, 'must be a string'); }
+            try { \OnionServiceDiscovery\Crypto\Encoding::publicKey($key); }
+            catch (\InvalidArgumentException $error) { throw new ProtocolException($error->getMessage(), 'source_node_keys.' . $onion . ': must be ed25519: followed by 43 base64url characters'); }
+        }
+        /** @var array<string,string> $keys */
+        return $keys;
     }
     private static function invalid(string $key, string $reason): ProtocolException { return new ProtocolException('CONFIGURATION_INVALID', $key . ': ' . $reason); }
     private static function onion(string $value, string $key): void

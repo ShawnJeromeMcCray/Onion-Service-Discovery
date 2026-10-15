@@ -118,18 +118,23 @@ This role needs no Service or Node signing key. From the repository root:
 ```sh
 umask 077
 mkdir -p /absolute/private/osd-client
-php node-php/bin/onion-service-discovery init /absolute/private/osd-client/config.json --role client-host --source FIRST_NODE.onion --source SECOND_NODE.onion
+php node-php/bin/onion-service-discovery init /absolute/private/osd-client/config.json --role client-host --source FIRST_NODE.onion ed25519:FIRST_NODE_KEY --source SECOND_NODE.onion ed25519:SECOND_NODE_KEY
 ```
 
 Replace `/absolute/private/osd-client` with a real absolute owner-private path
 and the sources with independently chosen Node addresses (up to 16, or none).
+The key after each source is optional but recommended: it is the Node's public
+key, obtained independently of the Node. `init` writes it to
+`source_node_keys`, and the browser client then refuses a source that signs
+with another key from the very first load, instead of trusting whatever key
+answers at first contact in every new browser session.
 Add `--visitor-sources` to let visitors add their own Nodes (see below). `init`
 refuses to overwrite a file. The generated file follows these rules, explained
 in the [configuration reference](../operations/configuration.md):
 
 - Keep `role` as `client-host`, `node.onion` and `node.key_path` null, and all features false except, optionally, `visitor_sources` (see below).
 - Set `export_path` to `/absolute/private/osd-client/exports` and the unused storage path to `/absolute/private/osd-client/data`.
-- Put independently chosen canonical v3 Node addresses in `sources` (maximum 16).
+- Put independently chosen canonical v3 Node addresses in `sources` (maximum 16) and, optionally, their expected keys in `source_node_keys`.
 - Set the actual loopback Tor SOCKS port, normally 9050. Tor Browser's separate SOCKS listener is not automatically a persistent server runtime.
 - Leave `allowed_client_origins` empty for the same-origin relay deployment.
 
@@ -150,8 +155,9 @@ ONION_SERVICE_DISCOVERY_CONFIG=/absolute/private/osd-client/config.json php -S 1
 Open `http://127.0.0.1:8080/onion-service-discovery/`. The PHP development server
 is a single-worker local staging tool; do not use it for public operation or a
 combined self-relaying Node. Persistent hosting uses the reviewed FPM/nginx path.
-Sources are selected in the UI; enter independently obtained expected Node keys
-before loading. The default minimum is three distinct signing keys, not three
+Sources are selected in the UI. Keys from `source_node_keys` are filled in and
+read-only; for other sources, visitors can enter independently obtained expected
+Node keys before loading. The default minimum is three distinct signing keys, not three
 proven independent operators. Fewer sources require explicit limited coverage.
 
 An empty source list still allows the synthetic demo but provides no live results.

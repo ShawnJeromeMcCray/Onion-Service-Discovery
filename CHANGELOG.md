@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A Client Host can vouch for the keys of the Nodes it lists: the optional
+  `source_node_keys` (written by `init --source ONION KEY`) reaches the browser
+  client, which fills in those keys read-only and refuses a source that signs
+  with another key from the first load on, instead of trusting first contact in
+  every new session.
 - Operator CLI: failures print `detail` (where, for example the configuration key
   path and rule; never the value), `meaning` from the error registry and a `help`
   page; `config:validate` names every refused key. `status` works for publishers

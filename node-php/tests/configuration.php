@@ -71,6 +71,24 @@ foreach (['client-role' => 'ROLE_CONFIGURATION_INVALID', 'duplicate' => 'SOURCE_
     catch (InvalidArgumentException $error) { if ($error->getMessage() !== $expected) { throw new RuntimeException($case . ' gave ' . $error->getMessage()); } ++$checks; }
 }
 file_put_contents($path, json_encode($original, JSON_THROW_ON_ERROR));
+// source_node_keys: optional expected keys for listed sources, Client Host and combined roles only.
+$client = $original; $client['sources'] = ['32o2tuiv2yycgn2o5qv5ff4tfsb7ytiats25pzx2i4gvrjl3tyop7mqd.onion'];
+$client['source_node_keys'] = ['32o2tuiv2yycgn2o5qv5ff4tfsb7ytiats25pzx2i4gvrjl3tyop7mqd.onion' => $nodeKey];
+file_put_contents($path, json_encode($client, JSON_THROW_ON_ERROR));
+if (NodeConfig::load($path)->sourceNodeKeys !== $client['source_node_keys']) { throw new RuntimeException('source_node_keys'); } ++$checks;
+foreach (['unlisted' => ['CONFIGURATION_INVALID', 'source_node_keys.6dbhk5ifmrbtv4whwf2kv7hlfbhm6qzy2pyoltpou72boq5bif5m6oqd.onion: not listed in sources'], 'key' => ['PUBLIC_KEY_INVALID', null], 'list' => ['CONFIGURATION_INVALID', null], 'role' => ['ROLE_CONFIGURATION_INVALID', null]] as $case => [$code, $detail]) {
+    $v = $client;
+    match ($case) {
+        'unlisted' => $v['source_node_keys'] = ['6dbhk5ifmrbtv4whwf2kv7hlfbhm6qzy2pyoltpou72boq5bif5m6oqd.onion' => $nodeKey],
+        'key' => $v['source_node_keys'] = [$client['sources'][0] => 'ed25519:short'],
+        'list' => $v['source_node_keys'] = [$nodeKey],
+        'role' => [$v = $publisher, $v['sources'] = $client['sources'], $v['source_node_keys'] = $client['source_node_keys']],
+    };
+    file_put_contents($path, json_encode($v, JSON_THROW_ON_ERROR));
+    try { NodeConfig::load($path); throw new RuntimeException('source_node_keys accepted: ' . $case); }
+    catch (\OnionServiceDiscovery\Protocol\ProtocolException $error) { if ($error->errorCode !== $code || ($detail !== null && $error->detail !== $detail)) { throw new RuntimeException($case . ': ' . $error->errorCode . ' ' . $error->detail); } ++$checks; }
+}
+file_put_contents($path, json_encode($original, JSON_THROW_ON_ERROR));
 $alias = sys_get_temp_dir() . '/osd-public-alias-' . bin2hex(random_bytes(12)); symlink($root . '/node-php/public', $alias);
 foreach ([$root . '/node-php/public/index.php', $alias . '/index.php'] as $publicConfig) {
     try { NodeConfig::load($publicConfig); throw new RuntimeException('public configuration path accepted'); }

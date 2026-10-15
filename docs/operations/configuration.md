@@ -5,8 +5,8 @@ refuses `PRIVATE_PATH_IN_WEBROOT`), owner-private, and point the web runtime at
 it with `ONION_SERVICE_DISCOVERY_CONFIG`. It contains no passwords or keys.
 Validate every change with `config:validate CONFIG`. Unknown keys, missing keys
 and wrong types are rejected (`CONFIGURATION_INVALID`); the only keys that may be
-absent are the three later additions marked *optional*, which then default to
-`false` or an empty list. Examples: [`example.json`](../../node-php/config/example.json) (Client
+absent are the four later additions marked *optional*, which then default to
+`false` or empty. Examples: [`example.json`](../../node-php/config/example.json) (Client
 Host), [`node.example.json`](../../node-php/config/node.example.json) and
 [`combined.example.json`](../../node-php/config/combined.example.json);
 `init CONFIG ONION [--publish] [--node ONION KEY]...` writes a publisher file and
@@ -39,6 +39,7 @@ is missing from this page.
 | `transport.timeout_ms` | 100–60000 | Per-request time limit. |
 | `sources` | up to 16 distinct canonical v3 Onions | Nodes a Client Host or combined installation offers and relays. |
 | `allowed_client_origins` | up to 16 `http://<v3 onion>` origins | Client Hosts allowed to read this Node's data cross-origin (direct-fetch profile only). |
+| `source_node_keys` | object, *optional*: `{"<v3 onion from sources>": "ed25519:…"}` | Expected Node keys the browser client uses for these sources from the first load on; a source signing with another key is refused. client-host and combined roles only; `init --source ONION KEY` writes it. |
 | `publisher_nodes` | list, *optional*, up to 16 objects `{"onion": <v3 onion>, "expected_node_key": "ed25519:…"}` with distinct Onions | Discovery Nodes a publisher checks and announces to when `service:membership` or `service:announce` get no `--node` (the publisher timer relies on it). Obtain each key independently of the Node. publisher and combined roles only. |
 
 ## Role rules

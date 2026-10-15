@@ -9,6 +9,11 @@ $path=sys_get_temp_dir().'/osd-client-config-'.bin2hex(random_bytes(12)).'.json'
 $response=$assets->handle('GET','/onion-service-discovery/');if($response===null||$response['status']!==200||!str_contains($response['body'],'Onion Service Discovery')||!str_contains($response['headers']['Content-Security-Policy'],"connect-src 'self';"))throw new RuntimeException('Client Host assets');
 $public=json_decode($assets->handle('GET','/onion-service-discovery/config.json')['body'],true);if($public['delivery_profile']!=='client-host-proxy'||$public['allowed_sources']!==$v['sources']||isset($public['node'])||isset($public['storage']))throw new RuntimeException('configuration disclosure');
 if($assets->handle('GET','/onion-service-discovery/../../node.key')!==null||$assets->handle('POST','/onion-service-discovery/')['status']!==405)throw new RuntimeException('asset route boundary');
+// Expected Node keys the host vouches for reach the browser only when configured.
+if(isset($public['expected_node_keys']))throw new RuntimeException('expected keys invented');
+$keyed=$v;$keyed['source_node_keys']=[$v['sources'][0]=>$fixture['sources'][0]['node_descriptor']['node_identity_public_key']];file_put_contents($path,json_encode($keyed,JSON_THROW_ON_ERROR));
+if(json_decode((new ClientAssets(NodeConfig::load($path),$project.'/web-local-search-client/dist'))->handle('GET','/onion-service-discovery/config.json')['body'],true)['expected_node_keys']!==$keyed['source_node_keys'])throw new RuntimeException('expected keys not handed to the client');
+file_put_contents($path,json_encode($v,JSON_THROW_ON_ERROR));
 $relay=new ClientHostRelay($config);$onion=$v['sources'][0];
 foreach(['/onion-service-discovery/relay/'.$onion.'/node?query=sensitive','/onion-service-discovery/relay/'.$onion.'/services/'.$onion,'/onion-service-discovery/relay/127.0.0.1/node','/onion-service-discovery/relay/'.$onion.'/chunks/../../file'] as $target){$response=$relay->handle('GET',$target);if($response['status']!==404||str_contains($response['body'],'sensitive'))throw new RuntimeException('generic relay boundary');}
 if($relay->handle('POST','/onion-service-discovery/relay/'.$onion.'/node')['status']!==405)throw new RuntimeException('relay mutation method');
