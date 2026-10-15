@@ -26,20 +26,37 @@ export interface ServiceRow {
   rotationCount: number;
   migrationCount: number;
   currentHash: string | null;
+  /** The key that signs the current Manifest; differs from genesisKey after a rotation. */
+  currentKey: string | null;
+  /** Onion addresses of earlier revisions, in revision order. */
+  previousOnions: string[];
+  /** Node keys whose signed direct observation names the current Manifest, and the latest time. */
+  observers: string[];
+  latestObservationAt: string | null;
+  /** Where the current Manifest came from: loaded Node onions, 'local file' or 'demonstration'. */
+  sources: string[];
+  /** For every origin that supplied any revision of this identity, the highest one. */
+  sourceRevisions: { source: string; revision: number }[];
+  /** Every origin of the current Manifest was later set aside for conflicting signed data. */
+  onlyQuarantinedSources: boolean;
 }
+/** Session facts the worker knows beyond the signed records themselves. */
+export interface ViewContext { provenance?: ReadonlyMap<string, ReadonlySet<string>>; quarantined?: ReadonlySet<string>; }
 export interface PinRow { pin: LocalPin; status: 'CONTINUITY_VALID'|'MIGRATED'|'WITHDRAWN'|'FORKED'|'HISTORY_INCOMPLETE'|'REVISION_DOWNGRADE'|'IDENTITY_CHANGED'|'NOT_IN_INDEX'; onion: string | null; }
 export interface ClientView { services: ServiceRow[]; pins: PinRow[]; recordCount: number; pendingCount: number; }
 function strings(value: unknown): string[] { return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []; }
 
-export function buildView(records: readonly VerifiedRecord[], pins: readonly LocalPin[]): ClientView {
+export function buildView(records: readonly VerifiedRecord[], pins: readonly LocalPin[], context: ViewContext = {}): ClientView {
   const identities = deriveIdentities(records,10000); const byHash = new Map(records.map(record => [record.contentHash,record]));
   const documents = new Map(records.map(record => [record.contentHash,parseStrictJson(new TextEncoder().encode(record.canonicalWire),65536)]));
-  const observations = new Map<string,Set<string>>();
+  const observations = new Map<string,Set<string>>(); const latestObservation = new Map<string,string>();
   for (const record of records) {
     if (record.type !== 'direct_observation') continue;
     const document = documents.get(record.contentHash)!; const manifestHash = requiredString(document.manifest_hash);
     if (!observations.has(manifestHash)) observations.set(manifestHash,new Set());
     observations.get(manifestHash)!.add(requiredString(document.node_identity_public_key));
+    const observedAt = requiredString(document.observed_at);
+    if ((latestObservation.get(manifestHash) ?? '') < observedAt) latestObservation.set(manifestHash,observedAt);
   }
   const rows: ServiceRow[] = []; const owners = new Map<string,Set<string>>();
   for (const identity of identities.identities) {
@@ -48,7 +65,20 @@ export function buildView(records: readonly VerifiedRecord[], pins: readonly Loc
     const onion = current === null ? historical === undefined ? null : requiredString(historical.onion) : requiredString(current.onion);
     if (onion !== null) { if(!owners.has(onion)) owners.set(onion,new Set()); owners.get(onion)!.add(identity.genesis_key); }
     const service = current === null ? null : requiredObject(current.service);
-    rows.push({ genesisKey: identity.genesis_key, name: service === null ? 'Conflicting identity history' : requiredString(service.name), description: service === null ? 'Multiple signed branches exist. No current manifest is selected.' : requiredString(service.description ?? ''), onion, revision: identity.highest_revision, status: identity.identity_state==='FORKED'?'FORKED':identity.discoverability==='PUBLISHED'?'PUBLISHED':'WITHDRAWN', addressConflict:false, languages:service===null?[]:strings(service.languages), categories:service===null?[]:strings(service.categories), observationClaims:identity.current_hash===null?0:observations.get(identity.current_hash)?.size??0, rotationCount:identity.rotation_hashes.length, migrationCount:identity.migration_hashes.length, currentHash:identity.current_hash });
+    const observers = identity.current_hash === null ? [] : [...(observations.get(identity.current_hash) ?? [])].sort();
+    const previousOnions: string[] = [];
+    const revisionsBySource = new Map<string,number>();
+    for (const hash of identity.history_hashes) {
+      const document = documents.get(hash); if (document === undefined) continue;
+      const earlier = requiredString(document.onion); if (earlier !== onion && !previousOnions.includes(earlier)) previousOnions.push(earlier);
+      const revision = typeof document.revision === 'number' ? document.revision : 0;
+      for (const source of context.provenance?.get(hash) ?? []) revisionsBySource.set(source,Math.max(revisionsBySource.get(source) ?? 0,revision));
+    }
+    const sources = identity.current_hash === null ? [] : [...(context.provenance?.get(identity.current_hash) ?? [])].sort();
+    rows.push({ genesisKey: identity.genesis_key, name: service === null ? 'Conflicting identity history' : requiredString(service.name), description: service === null ? 'Multiple signed branches exist. No current manifest is selected.' : requiredString(service.description ?? ''), onion, revision: identity.highest_revision, status: identity.identity_state==='FORKED'?'FORKED':identity.discoverability==='PUBLISHED'?'PUBLISHED':'WITHDRAWN', addressConflict:false, languages:service===null?[]:strings(service.languages), categories:service===null?[]:strings(service.categories), observationClaims:observers.length, rotationCount:identity.rotation_hashes.length, migrationCount:identity.migration_hashes.length, currentHash:identity.current_hash,
+      currentKey: current === null ? null : requiredString(current.service_identity_public_key), previousOnions, observers, latestObservationAt: identity.current_hash === null ? null : latestObservation.get(identity.current_hash) ?? null,
+      sources, sourceRevisions: [...revisionsBySource].map(([source,revision]) => ({source,revision})).sort((a,b) => a.source < b.source ? -1 : a.source > b.source ? 1 : 0),
+      onlyQuarantinedSources: sources.length > 0 && sources.every(source => context.quarantined?.has(source) === true) });
   }
   for(const row of rows) row.addressConflict=row.onion!==null&&(owners.get(row.onion)?.size??0)>1;
   const roots=new Map(identities.identities.map(identity=>[identity.genesis_key,identity]));

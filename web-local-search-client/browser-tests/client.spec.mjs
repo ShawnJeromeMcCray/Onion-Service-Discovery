@@ -218,3 +218,14 @@ test('keyboard focus survives updates, warnings are announced once and controls 
     return (Math.max(border,panel)+0.05)/(Math.min(border,panel)+0.05);});
   expect(ratio).toBeGreaterThanOrEqual(3);
 });
+
+test('results and sources show where the data came from and when it was signed',async({page})=>{
+  await page.goto(origin+'/onion-service-discovery/');
+  await expect(page.locator('#client-version')).toHaveText('Client 0.1.0-dev · protocol version 1');
+  await page.getByRole('button',{name:'Load directory',exact:true}).click();await expect(page.locator('.result-card')).toHaveCount(3);
+  await expect(page.locator('.result-card').first()).toContainText(/Current revision included by [1-3] of 3 loaded sources/);
+  await expect(page.locator('.source-status').first()).toContainText(/Signed checkpoint generation \d+, created \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC \(60 minutes ago\)/);
+  await page.locator('.result-card details summary').first().click();
+  await expect(page.locator('.result-card details').first()).toContainText('Current revision supplied by');
+  await expect(page.locator('.result-card details').first()).toContainText('Signed Manifest of revision');
+});

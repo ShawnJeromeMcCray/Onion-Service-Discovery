@@ -95,3 +95,20 @@ test('direction controls and mixed writing systems are reported',()=>{
   assert.ok(metadataWarnings('L\u0456brary','').some(warning=>warning.includes('writing systems')));
   assert.deepEqual(metadataWarnings('Library','A plain description'),[]);
 });
+test('the view says which source supplied which revision, the current key, earlier onions and observers',async()=>{
+  const genesis=await verifyRecord(stories.genesis,crypto);const rotation=await verifyRecord(stories.rotation,crypto);const rotated=await verifyRecord(stories.rotated,crypto);
+  const provenance=new Map([[genesis.contentHash,new Set(['a.onion','b.onion'])],[rotation.contentHash,new Set(['a.onion'])],[rotated.contentHash,new Set(['a.onion'])]]);
+  const row=buildView([genesis,rotation,rotated],[],{provenance,quarantined:new Set(['a.onion'])}).services[0];
+  assert.equal(row.revision,2);assert.notEqual(row.currentKey,row.genesisKey);assert.equal(row.currentKey,stories.rotated.service_identity_public_key);
+  assert.deepEqual(row.sources,['a.onion']);assert.deepEqual(row.sourceRevisions,[{source:'a.onion',revision:2},{source:'b.onion',revision:1}]);
+  assert.equal(row.onlyQuarantinedSources,true);
+  assert.equal(buildView([genesis,rotation,rotated],[],{provenance}).services[0].onlyQuarantinedSources,false);
+  assert.deepEqual(buildView([genesis],[]).services[0].sources,[]);
+  const moved=buildView([genesis,await verifyRecord(stories.migration,crypto),await verifyRecord(stories.migrated,crypto)],[]).services[0];
+  assert.equal(moved.onion,stories.migrated.onion);assert.deepEqual(moved.previousOnions,[stories.genesis.onion]);
+  const sequences=JSON.parse(readFileSync(new URL('../../protocol/test-vectors/identity-sequences.json',import.meta.url),'utf8')).cases;
+  const records=await Promise.all(sequences.find(item=>item.id==='imported-observation-does-not-change-identity').records.map(record=>verifyRecord(record,crypto)));
+  const observation=JSON.parse(records.find(record=>record.type==='direct_observation').canonicalWire);
+  const observed=buildView(records,[]).services[0];
+  assert.deepEqual(observed.observers,[observation.node_identity_public_key]);assert.equal(observed.latestObservationAt,observation.observed_at);assert.equal(observed.observationClaims,1);
+});

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Browser client evidence: every result says how many loaded sources include
+  its current revision; the details name the sources that supplied it, those
+  that still serve an older revision and those that do not list it, the
+  current signing key after a rotation, earlier onion addresses, the Manifest
+  hash and the Nodes that observed the revision (with the latest observation
+  time). Entries supplied only by Nodes later set aside are flagged. Each source
+  shows its signed checkpoint generation and age; a Node that signed two
+  conflicting records can be reported with a saved evidence bundle. The footer
+  and `build-manifest.json` carry the client and protocol version.
 - Browser client accessibility and identity safety: without JavaScript only an
   explanation and the server-search option are shown; load results and search
   counts are announced once instead of on every update, and high-risk pin

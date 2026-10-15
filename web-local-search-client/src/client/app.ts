@@ -5,10 +5,11 @@ import { parseStrictJson } from '../protocol/strict-json.ts';
 import { serializePins, type PinImportStatus } from './pins.ts';
 import { operationMessage, sourceMessage } from './messages.ts';
 import type { SourceSelection } from './source-loader.ts';
-interface SourceStatus {onion:string;status:string;nodeKey:string|null;generation:number|null;error:string|null;baselineHistoryProven:boolean;}
+import { CLIENT_VERSION, PROTOCOL_VERSION } from './version.ts';
+interface SourceStatus {onion:string;status:string;nodeKey:string|null;generation:number|null;createdAt:string|null;error:string|null;baselineHistoryProven:boolean;evidenceAvailable:boolean;}
 interface VisitorSource {onion:string;expectedKey:string;}
 interface ViewMessage {type:'view';view:ClientView;sources:SourceStatus[];synthetic:boolean;busy:boolean;witnessCount:number;visitorSources:VisitorSource[];}
-type WorkerMessage=ViewMessage|{type:'error';code:string;op:string;origin:'profile'|'backup'|null}|{type:'visitor-error';code:string}|{type:'pin-preview';pins:{pin:LocalPin;status:PinImportStatus}[]}|{type:'pins-restored';origin:'profile'|'backup';added:number;updated:number;skipped:number};
+type WorkerMessage=ViewMessage|{type:'evidence';onion:string;wires:string[]}|{type:'error';code:string;op:string;origin:'profile'|'backup'|null}|{type:'visitor-error';code:string}|{type:'pin-preview';pins:{pin:LocalPin;status:PinImportStatus}[]}|{type:'pins-restored';origin:'profile'|'backup';added:number;updated:number;skipped:number};
 const storageKey='onion-service-discovery-pins-v1';
 const sourceStorageKey='onion-service-discovery-sources-v1';
 const visitorErrors:{[code:string]:string}={ADDRESS_INVALID:'Check the onion address: it must be a 56-character v3 address ending in .onion.',PUBLIC_KEY_INVALID:'Check the expected Node key: it starts with ed25519: followed by 43 characters.',EXPECTED_NODE_KEY_REQUIRED:'Enter the Node’s expected public key. Without it, a different Node could answer in its place.',SOURCE_ALREADY_CONFIGURED:'This Node is already listed by this Client Host.',SOURCE_ALREADY_ADDED:'You have already added this Node.',VISITOR_SOURCE_LIMIT:'You can add up to 8 Nodes. Remove one first.',VISITOR_SOURCES_DISABLED:'This Client Host does not load visitor-chosen Nodes.'};
@@ -46,6 +47,18 @@ function copy(value:string,what:string):void {
   if(navigator.clipboard===undefined){failed();return;}
   void navigator.clipboard.writeText(value).then(()=>announce(what+' copied.'),failed);
 }
+/** Short, human-comparable start of a key; the full key is in the details. */
+function short(key:string):string { return key.length>24?key.slice(0,24)+'…':key; }
+function ago(iso:string):string {
+  const seconds=Math.round((Date.now()-Date.parse(iso))/1000); if(!Number.isFinite(seconds)) return 'time unknown';
+  if(seconds< -300) return 'in the future: clock difference'; if(seconds<90) return 'just now';
+  const minutes=Math.round(seconds/60); if(minutes<90) return minutes+' minutes ago';
+  const hours=Math.round(minutes/60); return hours<36?hours+' hours ago':Math.round(hours/24)+' days ago';
+}
+function when(iso:string):string { return iso.replace('T',' ').replace(/(\.\d+)?Z$/u,' UTC')+' ('+ago(iso)+')'; }
+function download(blob:Blob,name:string):void { const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download=name;anchor.rel='noreferrer';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000); }
+/** Sources of the latest load that delivered verified data. */
+let loadedSources:string[]=[];
 function copyRow(value:string,className:string,label:string,focusKey:string):HTMLElement {
   const row=text('div','','copy-row'); row.append(text('p',value,className),button(label,()=>copy(value,label.replace(/^Copy /u,'')),focusKey)); return row;
 }
@@ -80,13 +93,29 @@ function renderResults(resetPage=true):void {
     const tags=text('div','','tags'); for(const tag of [...row.categories,...row.languages]) tags.append(text('span',tag,'tag')); card.append(tags);
     card.append(text('p',row.status==='FORKED'?'No current manifest selected':'Service-key signature validated · revision '+row.revision,'evidence-label'));
     card.append(text('p','Host presence is not confirmed by this browser. '+row.observationClaims+' signed Node statements are claims, not independent proof.','muted'));
+    // Spec 49 section 12: how many of the loaded sources include this revision.
+    const including=row.sources.filter(source=>loadedSources.includes(source)).length;
+    if(loadedSources.length>0) card.append(text('p','Current revision included by '+including+' of '+loadedSources.length+' loaded sources.','muted'));
+    else if(row.sources.length>0) card.append(text('p','From '+row.sources.join(' and ')+'.','muted'));
+    if(row.onlyQuarantinedSources) card.append(notice('attention','Only Nodes that were set aside for conflicting signed data supplied this entry. Treat it with care until another source confirms it.'));
     if(row.addressConflict) card.append(notice('danger','Different Service identities claim this onion address. A pinned key is never replaced by source agreement.'));
     if(row.status==='FORKED') card.append(notice('danger','Fork evidence is retained. Faster responses or more Nodes do not resolve it.'));
     const details=document.createElement('details'); details.dataset.key='details:'+row.genesisKey;
     details.append(text('summary','Identity and continuity details'),text('p','Identity key: the Service’s own signing key. It is neither the Tor key of the onion address nor proof of who runs the Service.'));
     details.append(copyRow(row.genesisKey,'key-value','Copy identity key','copy-key:'+row.genesisKey));
     if(row.onion!==null) details.append(copyRow(row.onion,'onion-address','Copy onion address','copy-onion:'+row.genesisKey));
+    if(row.currentKey!==null&&row.currentKey!==row.genesisKey) details.append(text('p','Current signing key after '+row.rotationCount+' signed key rotation(s):'),copyRow(row.currentKey,'key-value','Copy current signing key','copy-current:'+row.genesisKey));
+    if(row.currentHash!==null) details.append(text('p','Signed Manifest of revision '+row.revision+':'),copyRow(row.currentHash,'key-value','Copy Manifest hash','copy-hash:'+row.genesisKey));
+    if(row.previousOnions.length>0) details.append(text('p','Earlier onion addresses: '+row.previousOnions.join(', ')+'. The move is covered by signed migration proofs.','onion-address'));
     details.append(text('p',row.rotationCount+' key-rotation proofs · '+row.migrationCount+' migration proofs. These do not establish an operator’s real-world identity.'));
+    details.append(text('p',row.observers.length===0?'No Node exported a signed direct observation of this revision.'
+      :'Signed direct observations of this revision by '+row.observers.length+' Node key(s)'+(row.latestObservationAt===null?'':', latest '+when(row.latestObservationAt))+': '+row.observers.map(short).join(', ')+'. Several keys can belong to one operator.'));
+    const coverage:string[]=[];
+    if(row.sources.length>0) coverage.push('Current revision supplied by '+row.sources.join(', ')+'.');
+    for(const item of row.sourceRevisions) if(item.revision<row.revision&&!row.sources.includes(item.source)) coverage.push(item.source+' still serves revision '+item.revision+'.');
+    const missing=loadedSources.filter(onion=>!row.sourceRevisions.some(item=>item.source===onion));
+    if(missing.length>0) coverage.push('Not listed by '+missing.join(', ')+'.');
+    for(const line of coverage) details.append(text('p',line,'onion-address'));
     details.open=opened.has(details.dataset.key); card.append(details);
     const actions=text('div','','actions');
     if(row.status==='PUBLISHED') {
@@ -155,6 +184,8 @@ function renderSources(sources:SourceStatus[]):void {
     const marker=text('span',severity==='danger'?'⚠':severity==='ok'?'✓':'!','status-marker'); marker.setAttribute('aria-hidden','true');
     head.append(marker,text('strong',sourceStatusLabels[source.status]??source.status)); card.append(head,text('div',source.onion));
     if(source.nodeKey!==null) card.append(text('div',source.nodeKey,'key-value'));
+    if(source.generation!==null&&source.createdAt!==null) card.append(text('div','Signed checkpoint generation '+source.generation+', created '+when(source.createdAt)+'.','muted'));
+    if(source.status==='QUARANTINED'&&source.evidenceAvailable) card.append(button('Save the conflicting signed records',()=>worker.postMessage({op:'export-evidence',onion:source.onion}),'evidence:'+source.onion,'Save the conflicting signed records of '+source.onion));
     if(source.error!==null) card.append(text('div',sourceMessage(source.error),'problem'),text('div','Code: '+source.error,'muted'));
     if(source.status==='CANCELLED') card.append(text('div','You cancelled loading before this source finished. Nothing from it changed.'));
     if(source.status==='COMPLETE'&&!source.baselineHistoryProven) card.append(text('div','First-contact baseline; earlier Node checkpoint history is not proven.','problem'));
@@ -198,6 +229,12 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
     if(message.origin==='profile') { profilePins='restored'; persistPins(); return; }
     operation('Pin import: '+message.added+' added, '+message.updated+' updated to a newer remembered revision, '+message.skipped+' skipped because they conflict with your existing pins, which were kept.'); return;
   }
+  if(message.type==='evidence') {
+    // Two signed records by one Node key for the same position: reportable proof, without pins or searches.
+    const records=message.wires.map(wire=>JSON.parse(wire) as unknown);
+    download(new Blob([JSON.stringify({bundle_version:1,records},null,2)+'\n'],{type:'application/json'}),'onion-service-discovery-conflict-evidence.json');
+    operation('Conflict evidence saved on this device: the two conflicting signed records of '+message.onion+'. It contains no pins or searches.'); return;
+  }
   if(message.type==='visitor-error') { el('visitor-status').textContent='Node not added: '+(visitorErrors[message.code]??message.code); return; }
   if(message.type==='pin-preview') {
     const statusText:{[status:string]:string}={NEW:'New pin',SAME:'Already pinned; nothing changes',UPDATES_REVISION:'Already pinned; remembers a newer revision',CONFLICT_KEEPS_EXISTING:'Conflicts with your existing pin; yours is kept and this one is skipped'};
@@ -207,6 +244,7 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
   el('client-startup-notice').hidden=true;
   const focus=focusKeyNow();
   view=message.view; synthetic=message.synthetic; busy=message.busy; el('synthetic-notice').hidden=!synthetic;
+  loadedSources=message.sources.filter(source=>['COMPLETE','STALE','PARTIAL'].includes(source.status)).map(source=>source.onion);
   for(const id of ['load-sources','load-demo','clear-index','forget-all']) el<HTMLButtonElement>(id).disabled=busy;
   el<HTMLButtonElement>('cancel-load').disabled=!busy; el('record-count').textContent=view.recordCount+' signed records';
   const language=el<HTMLSelectElement>('language'); const selected=language.value; const options=[...new Set(view.services.flatMap(row=>row.languages))].sort(); language.replaceChildren();
@@ -278,7 +316,7 @@ el('remember-sources').addEventListener('change',()=>{
 el('export-pins').addEventListener('click',()=>{el('export-count').textContent=String(view.pins.length);el<HTMLDialogElement>('export-dialog').showModal();});
 el('export-dialog').addEventListener('close',()=>{
   if(el<HTMLDialogElement>('export-dialog').returnValue!=='confirm') return;
-  const blob=new Blob([serializePins(view.pins.map(row=>row.pin))],{type:'application/json'});const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download='onion-service-discovery-pins.json';anchor.rel='noreferrer';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000);operation('Pin backup downloaded locally. It has not been uploaded.');
+  download(new Blob([serializePins(view.pins.map(row=>row.pin))],{type:'application/json'}),'onion-service-discovery-pins.json');operation('Pin backup downloaded locally. It has not been uploaded.');
 });
 // The input is cleared at once so choosing the same file again after Cancel works.
 async function fileBytes(input:HTMLInputElement,max:number):Promise<ArrayBuffer|null>{const file=input.files?.[0];input.value='';if(file===undefined)return null;if(file.size>max)throw new Error('FILE_TOO_LARGE');return file.arrayBuffer();}
@@ -331,5 +369,5 @@ function verifierStopped():void {
 worker.addEventListener('error',event=>{event.preventDefault();verifierStopped();});
 worker.addEventListener('messageerror',verifierStopped);
 // Scripting runs: show the application. Without it, only the explanation and the server-search option remain.
-el('app').hidden=false;
+el('app').hidden=false; el('client-version').textContent='Client '+CLIENT_VERSION+' · protocol version '+PROTOCOL_VERSION;
 void configure();
