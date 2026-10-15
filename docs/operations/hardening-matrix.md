@@ -15,10 +15,12 @@ Status:
 - **Operator**: a documented duty. Nothing in OSD checks it.
 - **Open**: not provided, or not verified.
 
-Template files: nginx `deployment/nginx/onion-service-discovery.conf` (nginx),
-Apache `deployment/apache/onion-service-discovery.conf` (Apache), the PHP-FPM
-pool `deployment/php-fpm-pool.conf` (FPM) and `deployment/systemd/*.service`
-(systemd). The [existing-website](existing-website.md) snippets and the
+In the tables, `nginx:26` means line 26 of
+`deployment/nginx/onion-service-discovery.conf`. Likewise `Apache:` refers to
+`deployment/apache/onion-service-discovery.conf`, `FPM:` to
+`deployment/php-fpm-pool.conf` and `CLI:` to `node-php/bin/onion-service-discovery`;
+"systemd" means the units in `deployment/systemd/`. The
+[existing-website](existing-website.md) snippets and the
 [static client](../browser/client-contract.md#static-self-hosting) examples
 repeat the relevant web server rows.
 
