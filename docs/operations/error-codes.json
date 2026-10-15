@@ -1258,7 +1258,7 @@
    "components": [
     "doctor"
    ],
-   "meaning": "doctor: this PHP minor version is outside the tested 8.4/8.5 matrix."
+   "meaning": "doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it."
   },
   "SCHEMA_INVALID": {
    "cli_exit": [

@@ -2,12 +2,12 @@
 
 Source: specification document 24. No approval has been inferred from the request to implement the project; every approval below quotes an explicit owner answer. Protocol v1 is owner-frozen as implemented (D-005 to D-017, D-052); independent review and production approval remain open.
 
-D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrestricted use and relinquish rights. Runtime versions (D-002) are not yet decided.
+D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrestricted use and relinquish rights. Runtime versions (D-002): PHP 8.3, 8.4 and 8.5, 8.5 preferred (owner decision 2026-10-15).
 
 | ID | Decision | State | Owner | Release blocker | Source recommendation |
 | --- | --- | --- | --- | --- | --- |
 | D-001 | Project License | APPROVED | Project owner / reviewer | YES | See source decision |
-| D-002 | Minimum/Preferred PHP Version | UNRESOLVED | Project owner / reviewer | YES | PHP 8.5 preferred as of October 2026; only supported branches. |
+| D-002 | Minimum/Preferred PHP Version | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | YES | PHP 8.3+ supported, 8.5 preferred: 8.3, 8.4 and 8.5 each run the full PHP suite in CI; 8.3 support ends with its upstream security support (end of 2027). Ubuntu 24.04 LTS and Debian 13 work with their distribution PHP. |
 | D-003 | Web Local Search Browser Compatibility Baseline | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-004 | Web Local Search Origin Trust and Server-Fallback Policy | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-005 | Canonical JSON Implementation | OWNER-APPROVED v1 (2026-10-14) / CRYPTO-REVIEW-OPEN | Project owner / reviewer | YES | As implemented: RFC 8785 serialization over the integer-only JSON subset ([ADR 002](../adr/002-integer-json-and-signed-byte-construction.md)). |

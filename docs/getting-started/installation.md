@@ -9,7 +9,7 @@ A public installation needs the remaining [release gates](project-status.md).
 
 | Component | Requirement | When needed |
 | --- | --- | --- |
-| PHP | 64-bit PHP 8.4+, JSON, sodium, iconv, curl | Publisher, Node and Client Host |
+| PHP | 64-bit PHP 8.3+ (8.5 preferred), JSON, sodium, iconv, curl | Publisher, Node and Client Host |
 | PDO SQLite | PHP SQLite driver | SQLite backend only |
 | Composer | Composer 2; respects committed lock | Install PHP runtime dependencies from source; not needed with the development runtime package |
 | Node.js/npm | Node 24+ and bundled npm | Build browser assets from source; local demo; not needed with the development runtime package |
@@ -17,16 +17,17 @@ A public installation needs the remaining [release gates](project-status.md).
 | Web server | PHP-FPM plus reviewed routing: nginx or Apache httpd 2.4 templates | Persistent staging web hosting |
 | Python | 3.11+ and locked virtual environment | Developer validators; not ordinary PHP operation |
 
+PHP 8.3, 8.4 and 8.5 are supported (owner decision D-002); CI runs every PHP test
+on each of them, and 8.5 is preferred. Support for 8.3 ends with its upstream
+security support at the end of 2027. The distribution PHP of Ubuntu 24.04 LTS
+(8.3) and Debian 13 (8.4) therefore works without third-party packages.
 Executed reference versions include PHP 8.4.26/8.5.11, Node 24.19.0 and Tor
 0.4.9.11. These are evidence points, not a guarantee for every Linux distribution.
-Ubuntu 24.04 LTS ships PHP 8.3, which this project does not support; use a
-distribution release that ships PHP 8.4 or newer (for example Debian 13) or a
-PHP build from a source you trust.
 Install supported packages through your OS package manager. Distribution package
 names and FPM socket locations differ. Check PHP before provisioning:
 
 ```sh
-php -r 'foreach (["json","sodium","iconv","curl"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR,"Missing extension: $e\n"); exit(1); } } if (PHP_INT_SIZE !== 8 || PHP_VERSION_ID < 80400) { fwrite(STDERR,"64-bit PHP 8.4+ required, found ".PHP_VERSION."\n"); exit(1); } echo "PHP runtime prerequisites present\n";'
+php -r 'foreach (["json","sodium","iconv","curl"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR,"Missing extension: $e\n"); exit(1); } } if (PHP_INT_SIZE !== 8 || PHP_VERSION_ID < 80300) { fwrite(STDERR,"64-bit PHP 8.3+ required, found ".PHP_VERSION."\n"); exit(1); } echo "PHP runtime prerequisites present\n";'
 composer --version   # only when you build from source
 ```
 
@@ -48,7 +49,7 @@ Expect JSON help with `status: DEVELOPMENT`. Record the commit you inspected.
 
 Alternatively, every merge to `main` produces an unsigned **development runtime
 package** with the PHP dependencies and the built browser client already
-included, so Composer and npm are not needed; PHP 8.4+ still is. Download it,
+included, so Composer and npm are not needed; PHP 8.3+ still is. Download it,
 verify its GitHub build provenance and extract it as described in
 [development runtime package](../operations/release-candidate.md#development-runtime-package-d-029),
 then continue below from the extracted `onion-service-discovery` directory.

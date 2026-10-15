@@ -7,7 +7,7 @@ its public `hostname` file. The application never provisions or reads Tor keys.
 
 ## Install
 
-1. Provision 64-bit PHP 8.4+ with json, sodium, iconv and curl. SQLite additionally
+1. Provision 64-bit PHP 8.3+ (8.5 preferred) with json, sodium, iconv and curl. SQLite additionally
    needs PDO SQLite. Current executed evidence is PHP 8.5.11; the full supported
    OS/PHP/Tor matrix is not yet certified. Provision a Tor SOCKS listener on
    loopback with remote hostname resolution and stream isolation support.

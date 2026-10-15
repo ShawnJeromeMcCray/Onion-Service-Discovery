@@ -150,7 +150,7 @@ for remedies.
 | `REVISION_EXHAUSTED` | signing | 3 | The current Manifest already has the highest possible revision (9007199254740991), so no successor revision can be drafted. |
 | `ROLE_CONFIGURATION_INVALID` | CLI, Node worker, configuration and status | 3 | The command or feature is not available for this configuration role. |
 | `RUNTIME_DEPENDENCIES_MISSING` | CLI, front controller | 3 | PHP dependencies are missing: use the development runtime package, which bundles them, or run the locked Composer install. |
-| `RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX` | doctor | 6 | doctor: this PHP minor version is outside the tested 8.4/8.5 matrix. |
+| `RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX` | doctor | 6 | doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it. |
 | `SCHEMA_INVALID` | CLI, Node worker, browser client, encoding, input parsing, protocol, signing, web routes | 3 | The record does not match its draft schema. |
 | `SEARCH_INDEX_CORRUPT` | server search | 3 | The server search index files in the export directory are missing, altered or malformed or do not match the published snapshot, so server search is unavailable; rebuild them with node:snapshot --rebuild-derived. |
 | `SEARCH_INDEX_STALE` | server search | 3 | The server search index was built for another snapshot than the one now published, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived. |

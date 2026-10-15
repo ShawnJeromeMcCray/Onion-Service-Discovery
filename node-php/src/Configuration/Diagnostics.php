@@ -15,12 +15,15 @@ final class Diagnostics
     private const SNAPSHOT_STALE_AFTER_SECONDS = 172800;
     private const PUBLISHER_EVIDENCE_STALE_AFTER_SECONDS = 129600;
 
-    /** PASS on a tested 64-bit runtime with every required extension, WARN outside the tested minor versions. */
+    /** Supported PHP minor versions (D-002): 8.3 and newer, 8.5 preferred; each one runs in CI. */
+    private const TESTED_MINORS = ['8.3', '8.4', '8.5'];
+
+    /** PASS on a tested 64-bit runtime with every required extension, WARN on a newer untested minor version. */
     public static function runtimeState(): string
     {
-        if (PHP_INT_SIZE !== 8) { return 'FAIL'; }
+        if (PHP_INT_SIZE !== 8 || PHP_VERSION_ID < 80300) { return 'FAIL'; }
         foreach (self::EXTENSIONS as $extension) { if (!extension_loaded($extension)) { return 'FAIL'; } }
-        return str_starts_with(PHP_VERSION, '8.4.') || str_starts_with(PHP_VERSION, '8.5.') ? 'PASS' : 'WARN';
+        return in_array(PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION, self::TESTED_MINORS, true) ? 'PASS' : 'WARN';
     }
 
     /**
@@ -32,9 +35,9 @@ final class Diagnostics
     public static function inspect(NodeConfig $config, RecordVerifier $verifier, ?string $manifestPath = null, ?string $configPath = null): array
     {
         $checks = []; $warnings = []; $failures = [];
-        $checks['runtime'] = PHP_INT_SIZE === 8 ? 'PASS' : 'FAIL';
+        $checks['runtime'] = PHP_INT_SIZE === 8 && PHP_VERSION_ID >= 80300 ? 'PASS' : 'FAIL';
         foreach (self::EXTENSIONS as $extension) { $checks['extension_' . $extension] = extension_loaded($extension) ? 'PASS' : 'FAIL'; }
-        if (!str_starts_with(PHP_VERSION, '8.4.') && !str_starts_with(PHP_VERSION, '8.5.')) { $warnings[] = 'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX'; }
+        if (PHP_VERSION_ID >= 80300 && !in_array(PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION, self::TESTED_MINORS, true)) { $warnings[] = 'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX'; }
         $publication = null; $scheduler = []; $exportUsage = null;
         if ($manifestPath !== null && $config->nodeOnion !== null && $config->features['publish_service']) {
             $facts = PublisherStatus::inspect($config, $verifier, $manifestPath, $configPath);

@@ -109,7 +109,7 @@ DESCRIPTIONS = {
     'WORK_BUDGET_EXHAUSTED': 'The input exceeds a bounded work limit and was refused.',
     'FILESYSTEM_FORMAT_MIGRATION_REQUIRED': 'doctor: the filesystem store uses format 1; plan storage:migrate.',
     'NODE_KEY_MISSING_OR_UNSAFE': 'doctor: the Node key file is missing or readable by others (needs 0600).',
-    'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX': 'doctor: this PHP minor version is outside the tested 8.4/8.5 matrix.',
+    'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX': 'doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it.',
     'SERVER_SEARCH_ENABLED_QUERIES_SENT_TO_NODE': 'doctor: server search is on, so search terms reach this Node.',
     'SNAPSHOT_NOT_PUBLISHED': 'doctor: directory mirroring is on but no snapshot was published yet (node:snapshot).',
     'SOURCE_SET_CONCENTRATED': 'doctor: most configured peers share one source group; diversity is low.',
