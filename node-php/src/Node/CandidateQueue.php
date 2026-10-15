@@ -8,6 +8,8 @@ use OnionServiceDiscovery\Protocol\ProtocolException;
 
 final readonly class CandidateQueue
 {
+    /** Provisional default (D-041 review): a target that failed verification is checked again after a week. */
+    public const QUARANTINE_RECHECK_SECONDS = 604800;
     public function __construct(private StorageBackend $store) {}
     public function enqueue(OnionAddress $onion, string $source = 'manual', ?int $now = null): bool
     {
@@ -38,7 +40,8 @@ final readonly class CandidateQueue
                 if ($row['state'] === 'DIRECT_CHECK_PENDING' && $row['lease_until'] <= $now) {
                     $row['state'] = 'BACKOFF'; $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $now + 60; $row['error'] = 'WORKER_INTERRUPTED'; $tx->set('candidates', $key, $row); continue;
                 }
-                if (!in_array($row['state'], ['QUEUED', 'BACKOFF', 'VERIFIED'], true) || $row['next_attempt'] > $now) { continue; }
+                // A quarantined target is long backoff, not a permanent verdict: it is checked again after a week.
+                if (!in_array($row['state'], ['QUEUED', 'BACKOFF', 'VERIFIED', 'QUARANTINED'], true) || $row['next_attempt'] > $now) { continue; }
                 if ($row['state'] === 'VERIFIED') { $row['attempts'] = 0; }
                 OnionAddress::parse($key);
                 if (!CandidateAdmission::claimBudget($tx, $now)) { return null; }
@@ -48,6 +51,17 @@ final readonly class CandidateQueue
             }
             $tx->set('maintenance', 'candidate-scan', ['offset' => ($scan + min(256, $count)) % $count]);
             return null;
+        });
+    }
+    /** Operator release: the target is checked at the next worker run; its sources are kept. */
+    public function retry(OnionAddress $onion): void
+    {
+        $this->store->transaction(static function (StorageTransaction $tx) use ($onion): void {
+            $row = $tx->get('candidates', $onion->hostname);
+            if ($row === null) { throw new ProtocolException('CANDIDATE_NOT_FOUND'); }
+            if ($row['state'] === 'DIRECT_CHECK_PENDING') { throw new ProtocolException('CANDIDATE_BUSY'); }
+            $row['state'] = 'QUEUED'; $row['attempts'] = 0; $row['next_attempt'] = 0; $row['claim'] = null; $row['lease_until'] = 0; $row['error'] = null;
+            $tx->set('candidates', $onion->hostname, $row);
         });
     }
     /**
@@ -60,7 +74,8 @@ final readonly class CandidateQueue
         $this->store->transaction(static function (StorageTransaction $tx) use ($job, $now, $error, $quarantine): void {
             $row = self::claimedRow($tx, $job);
             $row['state'] = $quarantine ? 'QUARANTINED' : 'BACKOFF';
-            $row['error'] = $error; $row['next_attempt'] = $now + min(86400, 60 * (2 ** min(10, $row['attempts'] - 1))) + random_int(0, 30);
+            $row['error'] = $error;
+            $row['next_attempt'] = $now + ($quarantine ? self::QUARANTINE_RECHECK_SECONDS + random_int(0, 3600) : min(86400, 60 * (2 ** min(10, $row['attempts'] - 1))) + random_int(0, 30));
             $row['lease_until'] = 0; $row['claim'] = null; $tx->set('candidates', $job['onion'], $row);
         });
     }

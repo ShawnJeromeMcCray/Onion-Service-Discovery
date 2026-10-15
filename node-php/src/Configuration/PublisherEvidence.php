@@ -115,6 +115,13 @@ final class PublisherEvidence
         });
     }
 
+    /** True when saved evidence exists but this process cannot read it (checks run as another user). */
+    public static function unreadable(string $configPath): bool
+    {
+        $path = self::path($configPath);
+        return is_file($path) && !is_readable($path);
+    }
+
     /** @return array<string,mixed> Validated sections; an invalid section is dropped, never trusted. */
     public static function load(string $configPath): array
     {

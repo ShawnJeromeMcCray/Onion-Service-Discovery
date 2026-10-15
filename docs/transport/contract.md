@@ -30,8 +30,11 @@ observation evidence only after the controlled direct fetch. Imported Node
 observations never populate the local-observation table. Unavailable Services
 do not erase identity history. Successful candidates are scheduled for another
 check after roughly a day, without manual Service renewal; transient failures
-use positive exponential backoff and jitter. Quarantine requires explicit
-resolution. A crashed worker lease is recovered with backoff.
+use positive exponential backoff and jitter. A candidate quarantined by a failed
+verification is checked again after about seven days, or at the next worker run
+after `candidate:retry … --acknowledge-quarantine`; neither erases stored evidence.
+A quarantined peer still requires explicit `peers:retry`. A crashed worker lease
+is recovered with backoff.
 
 `node:snapshot` builds deterministic hash-sorted chunks of immutable signed
 records, excluding snapshot descriptors to avoid self-referential content.

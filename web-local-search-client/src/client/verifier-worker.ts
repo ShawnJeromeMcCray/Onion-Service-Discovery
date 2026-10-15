@@ -3,17 +3,17 @@ import { parseStrictJson } from '../protocol/strict-json.ts';
 import { verifyRecord, requiredObject, type VerifiedRecord } from '../protocol/record-verifier.ts';
 import { SourceLoader, type SourceSelection, type SourceLedger, type DeliveryProfile } from './source-loader.ts';
 import { buildView, pinIdentity, type LocalPin } from './view-model.ts';
-import { parsePinBackup } from './pins.ts';
+import { classifyPinImport, mergePins, parsePinBackup } from './pins.ts';
 import { SourceWitnesses } from './source-witnesses.ts';
 
-type Command = {op:'configure';allowedSources:string[];deliveryProfile:DeliveryProfile;visitorSources?:boolean}|{op:'add-source';onion:string;expectedKey:string}|{op:'remove-source';onion:string}|{op:'load';sources:SourceSelection[]}|{op:'cancel'}|{op:'import-records';bytes:ArrayBuffer;synthetic?:boolean}|{op:'pin';genesisKey:string}|{op:'unpin';genesisKey:string}|{op:'restore-pins';bytes:ArrayBuffer}|{op:'preview-pins';bytes:ArrayBuffer}|{op:'clear-index'}|{op:'clear-all'};
+type Command = {op:'configure';allowedSources:string[];deliveryProfile:DeliveryProfile;visitorSources?:boolean}|{op:'add-source';onion:string;expectedKey:string}|{op:'remove-source';onion:string}|{op:'load';sources:SourceSelection[]}|{op:'cancel'}|{op:'import-records';bytes:ArrayBuffer;synthetic?:boolean}|{op:'pin';genesisKey:string}|{op:'unpin';genesisKey:string}|{op:'restore-pins';bytes:ArrayBuffer;origin:'profile'|'backup'}|{op:'preview-pins';bytes:ArrayBuffer}|{op:'clear-index'}|{op:'clear-all'};
 const scope=globalThis as unknown as {onmessage:((event:MessageEvent<Command>)=>void)|null;postMessage:(data:unknown)=>void};
 const crypto=browserCryptoProviders(); let loader=new SourceLoader(crypto);
 const records=new Map<string,VerifiedRecord>(); const ledgers=new Map<string,SourceLedger>(); const witnesses=new SourceWitnesses();
 // Visitor-chosen Nodes (onion -> expected key) exist only when the Client Host explicitly relays them.
 const MAX_VISITOR_SOURCES=8; const visitor=new Map<string,string>(); let visitorEnabled=false;
 let pins:LocalPin[]=[]; let allowed=new Set<string>(); let controller:AbortController|null=null; let busy=false; let synthetic=false;
-interface SourceStatus {onion:string;status:'LOADING'|'PARTIAL'|'COMPLETE'|'STALE'|'FAILED'|'QUARANTINED';nodeKey:string|null;generation:number|null;error:string|null;baselineHistoryProven:boolean;}
+interface SourceStatus {onion:string;status:'LOADING'|'PARTIAL'|'COMPLETE'|'STALE'|'FAILED'|'QUARANTINED'|'CANCELLED'|'NOT_STARTED';nodeKey:string|null;generation:number|null;error:string|null;baselineHistoryProven:boolean;}
 let statuses:SourceStatus[]=[];
 function code(error:unknown):string { return error instanceof Error&&/^[A-Z_]{1,80}$/.test(error.message)?error.message:'CLIENT_OPERATION_FAILED'; }
 function publish():void {
@@ -56,15 +56,12 @@ async function command(message:Command):Promise<void> {
   if(message.op==='unpin') { pins=pins.filter(pin=>pin.genesisKey!==message.genesisKey); publish(); return; }
   if(message.op==='restore-pins'||message.op==='preview-pins') {
     const imported=parsePinBackup(new Uint8Array(message.bytes),crypto);
-    if(message.op==='preview-pins') { scope.postMessage({type:'pin-preview',pins:imported}); return; }
-    const merged=new Map(pins.map(pin=>[pin.genesisKey,pin]));
-    for(const pin of imported) {
-      const existing=merged.get(pin.genesisKey);
-      if(existing===undefined) merged.set(pin.genesisKey,pin);
-      else if(existing.latestHash===pin.latestHash&&existing.contextOnion===pin.contextOnion) merged.set(pin.genesisKey,{...existing,highestRevision:Math.max(existing.highestRevision,pin.highestRevision),conflicted:existing.conflicted||pin.conflicted});
-      else throw new Error('PIN_IMPORT_CONFLICT');
+    if(message.op==='preview-pins') {
+      const held=new Map(pins.map(pin=>[pin.genesisKey,pin]));
+      scope.postMessage({type:'pin-preview',pins:imported.map(pin=>({pin,status:classifyPinImport(held.get(pin.genesisKey),pin)}))}); return;
     }
-    if(merged.size>256) throw new Error('PIN_BUDGET_EXHAUSTED'); pins=[...merged.values()]; publish(); return;
+    const result=mergePins(pins,imported); pins=result.pins; publish();
+    scope.postMessage({type:'pins-restored',origin:message.origin,added:result.added,updated:result.updated,skipped:result.skipped}); return;
   }
   if(busy) throw new Error('CLIENT_BUSY');
   if(message.op==='clear-all') { records.clear(); ledgers.clear(); witnesses.clear(); loader.clear(); pins=[]; statuses=[]; synthetic=false; visitor.clear(); publish(); return; }
@@ -85,17 +82,23 @@ async function command(message:Command):Promise<void> {
       for(const selection of message.sources) { loader.validate(selection); if(!allowed.has(selection.onion)&&!(visitorEnabled&&visitor.get(selection.onion)!==undefined&&visitor.get(selection.onion)===selection.expectedKey)) throw new Error('SOURCE_NOT_IN_HOST_ALLOWLIST'); }
       if(synthetic) { records.clear(); synthetic=false; }
       controller=new AbortController();
-      statuses=message.sources.map(selection=>({onion:selection.onion,status:'LOADING',nodeKey:null,generation:null,error:null,baselineHistoryProven:false}));
+      statuses=message.sources.map(selection=>({onion:selection.onion,status:'NOT_STARTED',nodeKey:null,generation:null,error:null,baselineHistoryProven:false}));
       for(let index=0;index<message.sources.length;++index) {
-        const selection=message.sources[index]!; const status=statuses[index]!;
+        const selection=message.sources[index]!; const status=statuses[index]!; status.status='LOADING'; publish();
         try {
           const result=await loader.load(selection,ledgers.get(selection.onion),controller.signal,(ledger,evidence)=>{const fork=witnesses.observe(evidence);ledger.equivocated ||= fork;ledgers.set(selection.onion,structuredClone(ledger));if(ledger.equivocated)throw new Error(evidence.type==='node_descriptor'?'SOURCE_DESCRIPTOR_EQUIVOCATION':'SOURCE_CHECKPOINT_EQUIVOCATION');});
           admit(result.records); ledgers.set(selection.onion,result.ledger);
           const age=Date.now()-Date.parse(result.createdAt); status.status=age>604800000||age< -300000?'STALE':'COMPLETE'; status.nodeKey=result.ledger.nodeKey; status.generation=result.ledger.generation; status.baselineHistoryProven=result.baselineHistoryProven;
-        } catch(error) { status.error=code(error); status.status=status.error==='SOURCE_HISTORY_PROGRESS'?'PARTIAL':/EQUIVOCATION|ROLLBACK|FORK|KEY_CHANGED/.test(status.error)?'QUARANTINED':'FAILED'; }
+        } catch(error) {
+          status.error=code(error);
+          status.status=status.error==='SOURCE_CANCELLED'?'CANCELLED':status.error==='SOURCE_HISTORY_PROGRESS'?'PARTIAL':/EQUIVOCATION|ROLLBACK|FORK|KEY_CHANGED|CHAIN_BROKEN/.test(status.error)?'QUARANTINED':'FAILED';
+          if(status.status==='CANCELLED') status.error=null;
+        }
         publish(); if(controller.signal.aborted) break;
       }
+      // Sources the user's cancel stopped before they began are reported as such, not as loading.
+      for(const status of statuses) if(status.status==='NOT_STARTED') status.status='CANCELLED';
     }
   } finally { controller=null; busy=false; publish(); }
 }
-scope.onmessage=event=>{void command(event.data).catch(error=>{scope.postMessage({type:'error',code:code(error)});});};
+scope.onmessage=event=>{void command(event.data).catch(error=>{scope.postMessage({type:'error',code:code(error),op:event.data.op,origin:event.data.op==='restore-pins'?event.data.origin:null});});};

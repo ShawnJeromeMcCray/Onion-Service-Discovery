@@ -79,15 +79,22 @@ machine; later offline membership checks need the complete owner history.
 
 Transfer the signed `manifest.json` and public `hostname` to the staging web
 host. Never transfer the Service key or its passphrase. Create a private
-configuration directory, then run from that host's repository root:
+configuration directory owned by the service user of the PHP-FPM pool that will
+serve OSD (the templates use `osd-worker`), then run from that host's repository
+root:
 
 ```sh
-umask 077
-mkdir -p /absolute/private/osd-publisher
-php node-php/bin/onion-service-discovery init /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion --publish
+sudo install -d -m 0700 -o osd-worker -g osd /absolute/private/osd-publisher
+sudo -u osd-worker php node-php/bin/onion-service-discovery init /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion --publish
 php node-php/bin/onion-service-discovery manifest:install /absolute/public-transfer/manifest.json /absolute/public-transfer/hostname /absolute/app/Onion-Service-Discovery/node-php/public
-php node-php/bin/onion-service-discovery publisher:status /absolute/private/osd-publisher/config.json
+sudo -u osd-worker php node-php/bin/onion-service-discovery publisher:status /absolute/private/osd-publisher/config.json
 ```
+
+Run `init`, the status command and every later check as that same user: the web
+server must be able to read the configuration and the evidence the checks save
+([owners and modes](installation.md#files-and-permissions)). Run
+`manifest:install` as the user that may write the checkout's `node-php/public`;
+it writes world-readable public files only, and later installs need the same user.
 
 `init` creates configuration only; expected status is `CONFIGURED`. Installation
 verifies the signature and exact public-hostname binding before atomic replacement;
@@ -112,7 +119,7 @@ Set the actual loopback SOCKS port in the private configuration. Explicitly fetc
 and verify your own published Manifest through Tor:
 
 ```sh
-php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion
+sudo -u osd-worker php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion
 ```
 
 Expect `SIGNATURE_AND_BINDING_VALID`. This establishes the fetched signature and
@@ -135,7 +142,7 @@ directly, and for a Service that has only its genesis Manifest, the signed
 `manifest.json` itself:
 
 ```sh
-php node-php/bin/onion-service-discovery service:membership /absolute/private/osd-publisher/config.json /absolute/private/osd-service/history.json \
+sudo -u osd-worker php node-php/bin/onion-service-discovery service:membership /absolute/private/osd-publisher/config.json node-php/public/.well-known/onion-service-discovery-history.json \
   --node FIRST_NODE.onion ed25519:FIRST_NODE_PUBLIC_KEY \
   --node SECOND_NODE.onion ed25519:SECOND_NODE_PUBLIC_KEY \
   --node THIRD_NODE.onion ed25519:THIRD_NODE_PUBLIC_KEY
@@ -189,8 +196,8 @@ an older revision is ignored, and evidence older than seven days shows
 For a complete status page also save the self-check and announcement results:
 
 ```sh
-php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion --save-status
-php node-php/bin/onion-service-discovery network:announce /absolute/private/osd-publisher/config.json /absolute/public-transfer/manifest.json \
+sudo -u osd-worker php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion --save-status
+sudo -u osd-worker php node-php/bin/onion-service-discovery network:announce /absolute/private/osd-publisher/config.json /absolute/public-transfer/manifest.json \
   --node FIRST_NODE.onion ed25519:FIRST_NODE_PUBLIC_KEY --node SECOND_NODE.onion ed25519:SECOND_NODE_PUBLIC_KEY --save-status
 ```
 

@@ -27,6 +27,9 @@ final readonly class PublicBlobStore
             return $action();
         } finally { flock($lock, LOCK_UN); fclose($lock); }
     }
+    /** Lock and request-budget files the front controller keeps beside the blobs; never pruned. */
+    public const CONTROL_FILES = ['.writer.lock', '.http-budget', '.request-budget', '.relay-budget', '.visitor-relay-budget'];
+
     /** Operator-only quiescent cleanup: keep all current references, delete at most 256 blobs.
      * @param list<string> $keep
      * @return array<string,int>
@@ -39,7 +42,7 @@ final readonly class PublicBlobStore
         return $this->withWriterLock(function () use ($names): array {
             $removed = 0; $freed = 0; $scanned = 0;
             foreach (new \DirectoryIterator($this->directory) as $file) {
-                if ($file->isDot() || in_array($file->getFilename(), ['.writer.lock', '.http-budget', '.request-budget', '.relay-budget'], true)) { continue; }
+                if ($file->isDot() || in_array($file->getFilename(), self::CONTROL_FILES, true)) { continue; }
                 if ($file->isLink() || !$file->isFile() || ++$scanned > 4096) { throw new StorageException('EXPORT_DIRECTORY_UNSAFE'); }
                 $name = $file->getFilename();
                 if (preg_match('/\A[0-9a-f]{64}\.json\z/D', $name) !== 1 && preg_match('/\A\.tmp-[0-9a-f]{24}\z/D', $name) !== 1) { throw new StorageException('EXPORT_DIRECTORY_UNSAFE'); }

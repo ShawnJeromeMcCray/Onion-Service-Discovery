@@ -78,7 +78,7 @@ export function buildView(records: readonly VerifiedRecord[], pins: readonly Loc
 
 export function pinIdentity(identity:ServiceRow,label=identity.name):LocalPin {
   if(identity.status!=='PUBLISHED'||identity.onion===null||identity.currentHash===null) throw new Error('PIN_CONTEXT_UNAVAILABLE');
-  return {genesisKey:identity.genesisKey,contextOnion:identity.onion,anchorHash:identity.currentHash,latestHash:identity.currentHash,highestRevision:identity.revision,label:label.slice(0,128),conflicted:false};
+  return {genesisKey:identity.genesisKey,contextOnion:identity.onion,anchorHash:identity.currentHash,latestHash:identity.currentHash,highestRevision:identity.revision,label:[...label].slice(0,128).join(''),conflicted:false}; // code points: never split a surrogate pair
 }
 export type AdultVisibility = 'show' | 'de-emphasize' | 'hide';
 // Derived presentation data only. Weak keys release old views; comparing the

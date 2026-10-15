@@ -26,6 +26,8 @@ COMPONENTS = {
 }
 DESCRIPTIONS = {
     'ADDRESS_INVALID': 'Not a canonical, checksum-valid v3 Onion address (56 lowercase characters plus .onion).',
+    'CANDIDATE_BUSY': 'A worker is checking this candidate right now; run candidate:retry again after its lease ends.',
+    'CANDIDATE_NOT_FOUND': 'The candidate is not queued on this Node; candidate:add queues it first.',
     'CONFIGURATION_INVALID': 'The configuration file has a missing, unknown or wrongly typed key; see the configuration reference.',
     'CONFIGURATION_UNAVAILABLE': 'The configuration file is missing, unreadable, a symlink or larger than 16 KiB.',
     'CONTENT_TYPE_REJECTED': 'A Node or Service answered without application/json; nothing was verified.',

@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- One service user on a host: the publisher timer now runs as `osd-worker`, the
+  same user as the PHP-FPM pool, and the guides run `init` and every check with
+  `sudo -u osd-worker`, so the status page can read the evidence the checks save.
+  An owner/mode table is in the installation guide; the status page says so when
+  saved evidence exists but the web server cannot read it.
+- Candidate quarantine is a long backoff, not a permanent exclusion: a Service
+  whose Manifest failed verification is checked again after about seven days.
+  Transport failures (Tor, HTTP status, media type, size) only back off.
+  `candidate:retry CONFIG ONION --acknowledge-quarantine` checks one candidate at
+  the next worker run; sources and evidence are kept (`CANDIDATE_NOT_FOUND`,
+  `CANDIDATE_BUSY`).
+- `exports:prune` no longer refuses the export directory of a Client Host with
+  visitor-chosen Nodes (it treated the visitor relay budget file as unsafe).
+- The black-box conformance runner sends larger suites in batches of at most 256
+  requests and 1 MiB per adapter run instead of refusing them.
+- Browser client: saved pins can no longer be wiped by a failed restore (labels
+  are cut at code points; nothing is written before pins were restored), pin
+  import keeps existing pins and reports skipped conflicts, a crashed verifier
+  is reported instead of hanging, cancel marks unstarted sources, and typed codes
+  are explained in plain language.
+- SQLite: a failed write now rolls back its SQL-started transaction on PHP 8.3
+  too, instead of leaving the connection inside an open transaction.
 - Checkpoint ancestry in the publisher's Node checks (owner-approved D-052):
   `network:discoverability-check` compares each Node's checkpoint with the one
   saved at the previous `--save-status` check and rejects rollback, equivocation

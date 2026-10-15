@@ -94,8 +94,9 @@ final readonly class DirectVerifier
             return ['status' => 'VERIFIED', 'onion' => $address->hostname, 'manifest_hash' => $manifest->contentHash, 'unchanged' => $unchanged];
         } catch (TransportException | \InvalidArgumentException $error) {
             if ($error->getMessage() === 'CANDIDATE_CLAIM_LOST') { return ['status' => 'CLAIM_LOST']; }
-            // Missing or invalid history is recoverable by the publisher (PCP-004): retry with bounded backoff.
-            $quarantine = !in_array($error->getMessage(), ['TOR_REQUEST_FAILED', 'HTTP_STATUS_REJECTED', 'EVIDENCE_CHANGED_RETRY', 'HISTORY_INCOMPLETE', 'HISTORY_BUNDLE_INVALID'], true);
+            // Transport failures (Tor, HTTP status, media type, size) and history the publisher can fix
+            // (PCP-004) back off with bounded retries. Only a failed verification quarantines, for a week.
+            $quarantine = !$error instanceof TransportException && !in_array($error->getMessage(), ['EVIDENCE_CHANGED_RETRY', 'HISTORY_INCOMPLETE', 'HISTORY_BUNDLE_INVALID'], true);
             $queue->fail($job, $now, $error->getMessage(), $quarantine);
             return ['status' => $quarantine ? 'QUARANTINED' : 'BACKOFF', 'error' => $error->getMessage()];
         }

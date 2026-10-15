@@ -134,3 +134,51 @@ test('visitor-chosen Nodes need the host switch and the expected key, and persis
     await page.reload();await page.getByText('Source selection and expected keys').click();await expect(page.locator('#visitor-source-options .source-option')).toHaveCount(0);
   }finally{clientConfig=null;}
 });
+
+test('saved pins that cannot be read stay untouched until the visitor chooses to replace them',async({page})=>{
+  await page.goto(origin+'/onion-service-discovery/');
+  // A backup written by the earlier label cut: half an emoji is an escaped lone surrogate.
+  const unreadable='{"pin_backup_version":1,"pins":[{"genesisKey":"ed25519:'+'A'.repeat(43)+'","contextOnion":"'+fixtures.sources[0].onion+'","anchorHash":"sha256:'+'1'.repeat(64)+'","latestHash":"sha256:'+'1'.repeat(64)+'","highestRevision":1,"label":"A\\ud83d","conflicted":false}]}';
+  await page.evaluate(value=>localStorage.setItem('onion-service-discovery-pins-v1',value),unreadable);
+  await page.reload();
+  await expect(page.locator('#storage-status')).toContainText('could not be read');await expect(page.locator('#remember-pins')).not.toBeChecked();
+  await page.getByRole('button',{name:'Load directory',exact:true}).click();await expect(page.locator('#coverage')).toContainText('3 distinct fresh signing keys');
+  await page.locator('#query').fill('library');await expect(page.locator('.result-card')).toHaveCount(1);
+  await page.getByRole('button',{name:'Pin this identity',exact:true}).click();await expect(page.locator('.pin-card')).toHaveCount(1);
+  expect(await page.evaluate(()=>localStorage.getItem('onion-service-discovery-pins-v1'))).toBe(unreadable);
+  await page.locator('#remember-pins').check();await expect(page.locator('#storage-status')).toContainText('Pins saved');
+  const saved=JSON.parse(await page.evaluate(()=>localStorage.getItem('onion-service-discovery-pins-v1')));expect(saved.pins).toHaveLength(1);
+  await page.reload();await expect(page.locator('.pin-card')).toHaveCount(1);await expect(page.locator('#remember-pins')).toBeChecked();
+});
+
+test('cancel marks unfinished sources as cancelled, never as loading forever',async({page})=>{
+  await page.goto(origin+'/onion-service-discovery/');
+  await page.route('**/relay/**',async route=>{await new Promise(resolve=>setTimeout(resolve,800));await route.continue();});
+  await page.getByRole('button',{name:'Load directory',exact:true}).click();
+  await expect(page.locator('.source-status').first()).toContainText('Loading');
+  await page.getByRole('button',{name:'Cancel',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Load directory',exact:true})).toBeEnabled();
+  await expect(page.locator('.source-status strong')).toHaveText(['Cancelled','Cancelled','Cancelled']);
+});
+
+test('pin import keeps existing pins, adds new ones and reports skipped conflicts',async({page})=>{
+  await page.goto(origin+'/onion-service-discovery/');
+  await page.getByRole('button',{name:'Load directory',exact:true}).click();await expect(page.locator('.result-card')).toHaveCount(3);
+  await page.locator('#query').fill('library');await expect(page.locator('.result-card')).toHaveCount(1);
+  await page.getByRole('button',{name:'Pin this identity',exact:true}).click();
+  await page.locator('#remember-pins').check();
+  const held=JSON.parse(await page.evaluate(()=>localStorage.getItem('onion-service-discovery-pins-v1'))).pins[0];
+  await page.locator('#query').fill('');await expect(page.locator('.result-card')).toHaveCount(3);
+  const other=page.locator('.result-card').filter({hasNotText:'Library'}).first();
+  const otherKey=await other.locator('.key-value').textContent();const otherOnion=await other.locator('.onion-address').textContent();
+  const backup={pin_backup_version:1,pins:[{...held,anchorHash:'sha256:'+'2'.repeat(64),label:'Imported impostor'},{genesisKey:otherKey,contextOnion:otherOnion,anchorHash:'sha256:'+'3'.repeat(64),latestHash:'sha256:'+'3'.repeat(64),highestRevision:1,label:'Imported pin',conflicted:false}]};
+  await page.locator('#import-pins').setInputFiles({name:'pins.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+  await expect(page.locator('#pin-import-dialog')).toBeVisible();
+  await expect(page.locator('.preview-pin.conflict')).toContainText('yours is kept');await expect(page.locator('.preview-pin').filter({hasText:'Imported pin'})).toContainText('New pin');
+  await page.getByRole('button',{name:'Import reviewed pins',exact:true}).click();
+  await expect(page.locator('#operation-status')).toContainText('1 added, 0 updated to a newer remembered revision, 1 skipped');
+  await expect(page.locator('.pin-card')).toHaveCount(2);await expect(page.locator('.pin-card').filter({hasText:'Imported impostor'})).toHaveCount(0);
+  // The same file can be chosen again after the input was cleared.
+  await page.locator('#import-pins').setInputFiles({name:'pins.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+  await expect(page.locator('#pin-import-dialog')).toBeVisible();await page.getByRole('button',{name:'Cancel',exact:true}).last().click();
+});

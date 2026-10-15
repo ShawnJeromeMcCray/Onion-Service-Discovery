@@ -4,9 +4,9 @@ After=tor.service
 
 [Service]
 Type=oneshot
-# Must own the publisher configuration or share its group; the status page reads
-# the saved aggregate evidence with the configuration's group permissions.
-User=osd-publisher
+# The same service user as the PHP-FPM pool that serves the status page: it owns the
+# private configuration (0700 directory, 0600 file) and writes the evidence the page reads.
+User=osd-worker
 Group=osd
 WorkingDirectory=/opt/onion-service-discovery
 # OSD_ONION=<your canonical v3 Onion>

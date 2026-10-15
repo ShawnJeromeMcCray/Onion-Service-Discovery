@@ -16,6 +16,7 @@ Current provisional local defaults, requiring D-041 sizing/review:
 | Direct-check claims per shared window | 60 |
 | Simultaneous unexpired direct-check leases | 2 |
 | Retained pinned peer rows | 256 |
+| Recheck of a candidate quarantined by a failed verification | 7 days plus up to 1 hour jitter |
 
 Source identifiers hash into a fixed number of buckets. Collisions can reduce
 availability; buckets do not establish distinct operators or independent
@@ -24,7 +25,10 @@ identities. Counters live in the same store transaction as admission/claim,
 survive process restart, and refuse clock rollback. They measure claims, not
 successful requests. Failed checks consume work budget too.
 
-Repeated targets preserve backoff, attempt count, lease and quarantine. At most
+Repeated targets preserve backoff, attempt count, lease and quarantine. Only the
+operator's `candidate:retry` resets one target's backoff and attempt count; it
+changes no budget and erases no evidence. Rechecks of quarantined targets use the
+same claim budget as every other direct check. At most
 eight attribution strings are retained, without voting or ranking authority.
 Reaching a limit rejects admission/claim without evicting established entries.
 The CLI reports NOT_INSERTED when no new candidate was admitted, including
