@@ -18,8 +18,17 @@ $job = $queue->claim(1200); if ($job === null) { throw new RuntimeException('ret
 if ($queue->claim(1321) !== null || $queue->claim(1370) !== null) { throw new RuntimeException('interrupted worker backoff'); }
 $job = $queue->claim(1382); if ($job === null) { throw new RuntimeException('lease recovery missing'); }
 $queue->fail($job, 1382, 'SIGNATURE_INVALID', true);
-if ($queue->claim(100000) !== null) { throw new RuntimeException('quarantine auto retry'); }
+if ($queue->claim(100000) !== null) { throw new RuntimeException('quarantine retried before a week'); }
 $store->transaction(static function (StorageTransaction $tx) use ($onion): void { $row = $tx->get('candidates', $onion->hostname); if ($row['sources'] !== ['manual', 'peer-a'] || $row['state'] !== 'QUARANTINED') { throw new RuntimeException('provenance lost'); } });
+// A quarantine is a long backoff: after a week the target is checked again.
+$recheck = $queue->claim(1382 + CandidateQueue::QUARANTINE_RECHECK_SECONDS + 3601);
+if ($recheck === null || $recheck['attempt'] !== 4) { throw new RuntimeException('quarantine never rechecked'); }
+$queue->fail($recheck, 1382 + CandidateQueue::QUARANTINE_RECHECK_SECONDS + 3601, 'SIGNATURE_INVALID', true);
+// The operator can release it at once; the row keeps its sources and starts its attempts over.
+$queue->retry($onion);
+$released = $queue->claim(1382 + CandidateQueue::QUARANTINE_RECHECK_SECONDS + 3700);
+if ($released === null || $released['attempt'] !== 1) { throw new RuntimeException('operator retry'); }
+try { $queue->retry($onion); throw new RuntimeException('retry of a running check'); } catch (InvalidArgumentException $error) { if ($error->getMessage() !== 'CANDIDATE_BUSY') { throw $error; } }
 $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
 foreach ($iterator as $file) { $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname()); } rmdir($root);
 echo "PASS: candidate claims, provenance, positive backoff and lease recovery\n";

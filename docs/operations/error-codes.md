@@ -7,7 +7,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-210 codes.
+212 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -24,7 +24,9 @@ for remedies.
 | `BACKUP_PATH_INVALID` | storage | 4 | The code name states the condition; see the raising component. |
 | `BACKUP_RESTORE_MISMATCH` | storage | 4 | The code name states the condition; see the raising component. |
 | `BACKUP_UNAVAILABLE` | storage | 4 | The code name states the condition; see the raising component. |
+| `CANDIDATE_BUSY` | Node worker | 3 | A worker is checking this candidate right now; run candidate:retry again after its lease ends. |
 | `CANDIDATE_CLAIM_LOST` | Node worker | 3 | The code name states the condition; see the raising component. |
+| `CANDIDATE_NOT_FOUND` | Node worker | 3 | The candidate is not queued on this Node; candidate:add queues it first. |
 | `CHECKPOINT_NODE_MISMATCH` | browser client, protocol | 3 | The code name states the condition; see the raising component. |
 | `CLIENT_BUILD_UNAVAILABLE` | web routes | – | The code name states the condition; see the raising component. |
 | `CLIENT_BUSY` | browser client | – | The code name states the condition; see the raising component. |

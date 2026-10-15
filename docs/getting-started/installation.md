@@ -69,6 +69,22 @@ Keep application code outside operational data. Serve **only `node-php/public`**
 through its front controller. Store configuration, data, export blobs, Node keys
 and passphrase files outside that public directory. Private directories require
 0700 and private files 0600; use a dedicated service user and `umask 077`.
+
+One service user owns everything OSD writes on a host. The templates call it
+`osd-worker` (group `osd`):
+
+| What | Owner | Mode | Used by |
+| --- | --- | --- | --- |
+| Application code (`/opt/onion-service-discovery`) | root | read-only for others | everyone |
+| Private configuration directory and file | `osd-worker` | 0700 / 0600 | PHP-FPM pool, all timers, your commands |
+| Saved publisher evidence (`CONFIG_NAME.discoverability.json`) | `osd-worker` | 0600 | written by checks, read by the status page |
+| Node store, export blobs, Node key, passphrase file | `osd-worker` | 0700 / 0600 | Node timers and PHP-FPM (read-only) |
+| Installed Manifest and history bundle in `node-php/public/.well-known/` | the user running `manifest:install` | 0644 | served publicly |
+
+Run `init` and every later command on the web host as that user, for example
+`sudo -u osd-worker php node-php/bin/onion-service-discovery …`. A command run as
+another user writes files the web server cannot read: the status page then shows
+no evidence, and an unreadable configuration makes every route answer 503.
 The Service identity key belongs on a separate offline administrator machine.
 
 Copy only Tor's **public `hostname`** to a suitable operator-controlled file when

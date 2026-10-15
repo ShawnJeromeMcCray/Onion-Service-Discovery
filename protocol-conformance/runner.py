@@ -49,6 +49,23 @@ def cases():
     return result
 
 
+def batches(fixtures):
+    """Each adapter run accepts at most 256 requests and 1 MiB of stdin; larger suites run in batches."""
+    batch, size = [], 0
+    for fixture in fixtures:
+        line = json.dumps(fixture[1], separators=(',', ':')) + '\n'
+        length = len(line.encode())
+        if length > 1048576:
+            raise RuntimeError('One fixture exceeds the adapter budget')
+        if batch and (len(batch) == 256 or size + length > 1048576):
+            yield batch
+            batch, size = [], 0
+        batch.append((fixture, line))
+        size += length
+    if batch:
+        yield batch
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--php-image', choices=['php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3', 'php@sha256:1d2cf2b7d715b5b3aa959f0150ccbcc7b71e0181b637e443abf40a7fb56bf79a'], default=PHP_IMAGE)
@@ -56,9 +73,7 @@ def main():
     parser.add_argument('--report', type=Path)
     args = parser.parse_args()
     fixtures = cases()
-    stdin = ''.join(json.dumps(body, separators=(',', ':')) + '\n' for _, body, _ in fixtures)
-    if len(stdin.encode()) > 1048576 or len(fixtures) > 256:
-        raise RuntimeError('Suite exceeds adapter budget; split into versioned batches')
+    runs = list(batches(fixtures))
     php = ['php', 'node-php/bin/conformance-adapter.php']
     if args.php_container:
         php = ['docker', 'run', '--rm', '-i', '--network', 'none', '--mount', f'type=bind,src={ROOT},dst=/app,readonly', '--workdir', '/app', args.php_image, 'php', 'node-php/bin/conformance-adapter.php']
@@ -67,13 +82,14 @@ def main():
     for implementation, command in commands.items():
         checks = []
         try:
-            completed = subprocess.run(command, input=stdin, text=True, capture_output=True, cwd=ROOT, timeout=120)
-            lines = completed.stdout.splitlines()
-            if completed.returncode != 0 or len(lines) != len(fixtures):
-                raise RuntimeError('Adapter exited or produced incorrect response count')
-            for (ident, _, expected), line in zip(fixtures, lines):
-                actual = json.loads(line)
-                checks.append({'id': ident, 'status': 'PASS' if actual == expected else 'FAIL'})
+            for batch in runs:
+                completed = subprocess.run(command, input=''.join(line for _, line in batch), text=True, capture_output=True, cwd=ROOT, timeout=120)
+                lines = completed.stdout.splitlines()
+                if completed.returncode != 0 or len(lines) != len(batch):
+                    raise RuntimeError('Adapter exited or produced incorrect response count')
+                for ((ident, _, expected), _), line in zip(batch, lines):
+                    actual = json.loads(line)
+                    checks.append({'id': ident, 'status': 'PASS' if actual == expected else 'FAIL'})
         except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
             checks.append({'id': 'ADAPTER_EXECUTION', 'status': 'FAIL', 'reason': type(error).__name__})
         passed = sum(check['status'] == 'PASS' for check in checks)
@@ -85,7 +101,7 @@ def main():
         results.append({'implementation': implementation, 'pass': passed, 'fail': failed, 'skip': 0, 'checks': checks})
     passed = all(result['fail'] == 0 and result['pass'] == len(fixtures) for result in results)
     report = {'profile': 'DRAFT_CORE', 'status': 'PASS' if passed else 'FAIL', 'generated_at': datetime.now(timezone.utc).isoformat(),
-              'fixture_count_per_implementation': len(fixtures), 'fixture_hashes': {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted((ROOT / 'protocol/test-vectors').glob('*.json'))},
+              'fixture_count_per_implementation': len(fixtures), 'adapter_batches': len(runs), 'fixture_hashes': {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted((ROOT / 'protocol/test-vectors').glob('*.json'))},
               'results': results, 'limits': ['Not Protocol Stable', 'No NODE/CLIENT network profile', 'Human crypto approval remains open']}
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)

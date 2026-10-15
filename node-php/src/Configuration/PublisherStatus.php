@@ -82,6 +82,9 @@ final class PublisherStatus
         }
         $evidence = $configPath === null ? [] : PublisherEvidence::load($configPath);
         if ($status['overall'] === 'READY_LOCALLY') { self::applyEvidence($status, $evidence, (string) $hash, $now); }
+        if ($status['overall'] === 'READY_LOCALLY' && $evidence === [] && $configPath !== null && PublisherEvidence::unreadable($configPath)) {
+            $status['next_action'] = 'Saved check results exist, but this web server cannot read them. Run the checks and the publisher timer as the same service user as the web server (the templates use osd-worker).';
+        }
         return self::finish($status, $config, $evidence, (string) $hash, $now);
     }
 

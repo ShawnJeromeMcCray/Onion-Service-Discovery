@@ -104,6 +104,15 @@ one unit of work; it is not a continuously running daemon. Inspect `candidate:li
 and `quarantine:list` for queue/error state. Do not erase conflict evidence to
 force a service into the index.
 
+Tor and HTTP failures and a missing history only back off (at most a day). A
+candidate whose Manifest failed verification is quarantined and checked again
+automatically after about seven days. When its publisher tells you the problem is
+fixed, check it at the next worker run instead:
+
+```sh
+php node-php/bin/onion-service-discovery candidate:retry /absolute/private/osd-node/config.json PUBLISHER_V3_ADDRESS.onion --acknowledge-quarantine
+```
+
 ## 4. Select and synchronize peers explicitly
 
 Obtain a peer Onion and expected Node key independently; never infer its key from

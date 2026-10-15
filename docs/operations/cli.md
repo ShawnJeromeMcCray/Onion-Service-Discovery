@@ -55,6 +55,12 @@ CONFIG` shows every configured peer with its state, failures and next attempt.
 `peers:retry CONFIG ONION --acknowledge-quarantine` returns a quarantined or
 disabled peer to `CANDIDATE` for the next sync step; quarantine is explicit and
 source high-water marks/conflicts are not erased by retry.
+`candidate:retry CONFIG ONION --acknowledge-quarantine` queues one quarantined or
+backed-off Service candidate for the next direct check (state `QUEUED`, attempts
+reset); its sources and all stored identity and conflict evidence are kept. It
+refuses a candidate that a worker is checking right now (`CANDIDATE_BUSY`). Without
+it, a candidate quarantined by a failed verification is checked again
+automatically after about seven days.
 
 Protocol tools for implementers, all offline: `protocol:inspect FILE
 [--expected-onion ONION]` and `protocol:hash FILE` verify any signed record

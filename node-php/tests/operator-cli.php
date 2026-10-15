@@ -23,6 +23,10 @@ $v['features']['discover_services'] = true; file_put_contents($config, json_enco
 $queued = command(['candidate:add', $config, $v['node']['onion']]);
 $duplicate = command(['candidate:add', $config, $v['node']['onion']]);
 if ($queued['status'] !== 'QUEUED' || !$queued['inserted'] || $duplicate['status'] !== 'NOT_INSERTED' || $duplicate['inserted']) { throw new RuntimeException('candidate CLI reported insertion without admission'); }
+// An operator can release a candidate for the next run; an unknown address is refused, nothing is created.
+if (command(['candidate:retry', $config, $v['node']['onion'], '--acknowledge-quarantine'])['status'] !== 'QUEUED') { throw new RuntimeException('candidate retry'); }
+if (command(['candidate:retry', $config, $v['node']['onion']], 2)['error'] !== 'USAGE_ERROR') { throw new RuntimeException('candidate retry without acknowledgement'); }
+if (command(['candidate:retry', $config, '32o2tuiv2yycgn2o5qv5ff4tfsb7ytiats25pzx2i4gvrjl3tyop7mqd.onion', '--acknowledge-quarantine'], 3)['error'] !== 'CANDIDATE_NOT_FOUND') { throw new RuntimeException('candidate retry created a row'); }
 $unchanged=command(['node:snapshot',$config,'--passphrase-file',$root.'/passphrase']);if($unchanged['status']!=='UNCHANGED')throw new RuntimeException('snapshot idempotence lost');
 command(['status',$config]);command(['candidate:list',$config]);command(['quarantine:list',$config]);command(['sync:status',$config]);command(['node:maintain',$config]);command(['exports:prune',$config,'--workers-stopped']);
 $backup=command(['backup:create','filesystem',$root.'/data',$root.'/backup.ndjson']);$verified=command(['backup:verify',$root.'/backup.ndjson']);if($backup['backup']['sha256']!==$verified['backup']['sha256'])throw new RuntimeException('backup verify mismatch');
