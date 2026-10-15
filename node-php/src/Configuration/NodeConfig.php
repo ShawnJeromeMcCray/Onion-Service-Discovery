@@ -26,44 +26,55 @@ final readonly class NodeConfig
         if ($realConfig === false || ($publicRoot !== false && str_starts_with($realConfig, $publicRoot . '/'))) { throw new ProtocolException('PRIVATE_PATH_IN_WEBROOT'); }
         $bytes = file_get_contents($path, false, null, 0, 16385); if ($bytes === false || strlen($bytes) > 16384) { throw new ProtocolException('CONFIGURATION_UNAVAILABLE'); }
         $v = StrictJson::parse($bytes, 16384);
+        // Every refusal names the key path and the rule (spec 32 section 12), never the value.
         // publisher_nodes is a later, optional addition; files without it stay valid.
-        if (count(get_object_vars($v)) !== (property_exists($v, 'publisher_nodes') ? 10 : 9) || array_diff(array_keys(get_object_vars($v)), ['configuration_version','role','storage','export_path','node','features','transport','sources','allowed_client_origins','publisher_nodes']) !== [] || ($v->configuration_version ?? null) !== 1 || !in_array($v->role ?? null, ['node','client-host','combined','publisher'], true)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
-        self::shape($v->storage, ['backend','path']); self::shape($v->node, ['onion','key_path']); self::shape($v->transport, ['proxy_host','proxy_port','timeout_ms']);
-        if (!$v->features instanceof \stdClass) { throw new ProtocolException('CONFIGURATION_INVALID'); }
+        $known = ['configuration_version','role','storage','export_path','node','features','transport','sources','allowed_client_origins','publisher_nodes'];
+        foreach (array_keys(get_object_vars($v)) as $key) { if (!in_array($key, $known, true)) { throw self::invalid((string) $key, 'unknown key'); } }
+        foreach (array_slice($known, 0, 9) as $key) { if (!property_exists($v, $key)) { throw self::invalid($key, 'missing'); } }
+        if ($v->configuration_version !== 1) { throw self::invalid('configuration_version', 'must be 1'); }
+        if (!in_array($v->role, ['node','client-host','combined','publisher'], true)) { throw self::invalid('role', 'must be publisher, node, combined or client-host'); }
+        self::shape($v->storage, ['backend','path'], 'storage'); self::shape($v->node, ['onion','key_path'], 'node'); self::shape($v->transport, ['proxy_host','proxy_port','timeout_ms'], 'transport');
+        if (!$v->features instanceof \stdClass) { throw self::invalid('features', 'must be an object'); }
         // Backward-compatible optional local receiver switch; disabled for existing configs.
         if (!property_exists($v->features, 'accept_announcements')) { $v->features->accept_announcements = false; }
         // Backward-compatible optional Client Host switch: relay visitor-chosen Nodes; disabled for existing configs.
         if (!property_exists($v->features, 'visitor_sources')) { $v->features->visitor_sources = false; }
-        self::shape($v->features, ['publish_service','mirror_directory','discover_services','sync_with_peers','server_search','accept_announcements','visitor_sources']);
-        foreach (get_object_vars($v->features) as $flag) { if (!is_bool($flag)) { throw new ProtocolException('CONFIGURATION_INVALID'); } }
-        if ($v->features->accept_announcements && (!in_array($v->role, ['node','combined'], true) || !$v->features->discover_services)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
-        if ($v->features->server_search && !in_array($v->role, ['node','combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
-        if ($v->features->visitor_sources && !in_array($v->role, ['client-host','combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
-        if (!in_array($v->storage->backend, ['filesystem','sqlite'], true)) { throw new ProtocolException('STORAGE_BACKEND_INVALID'); }
-        self::path($v->storage->path); self::path($v->export_path);
-        if (!is_array($v->sources) || !array_is_list($v->sources) || count($v->sources) > 16 || count(array_unique($v->sources, SORT_REGULAR)) !== count($v->sources)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
-        foreach ($v->sources as $source) { if (!is_string($source)) { throw new ProtocolException('CONFIGURATION_INVALID'); } OnionAddress::parse($source); }
-        if (!is_array($v->allowed_client_origins) || !array_is_list($v->allowed_client_origins) || count($v->allowed_client_origins) > 16) { throw new ProtocolException('CONFIGURATION_INVALID'); }
-        foreach ($v->allowed_client_origins as $origin) {
-            if (!is_string($origin) || preg_match('~\Ahttp://([a-z2-7]{56}\.onion)\z~D', $origin, $match) !== 1) { throw new ProtocolException('CLIENT_ORIGIN_INVALID'); }
-            OnionAddress::parse($match[1]);
+        self::shape($v->features, ['publish_service','mirror_directory','discover_services','sync_with_peers','server_search','accept_announcements','visitor_sources'], 'features');
+        foreach (get_object_vars($v->features) as $name => $flag) { if (!is_bool($flag)) { throw self::invalid('features.' . $name, 'must be true or false'); } }
+        if ($v->features->accept_announcements && (!in_array($v->role, ['node','combined'], true) || !$v->features->discover_services)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID', 'features.accept_announcements: needs features.discover_services and the node or combined role'); }
+        if ($v->features->server_search && !in_array($v->role, ['node','combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID', 'features.server_search: needs the node or combined role'); }
+        if ($v->features->visitor_sources && !in_array($v->role, ['client-host','combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID', 'features.visitor_sources: needs the client-host or combined role'); }
+        if (!in_array($v->storage->backend, ['filesystem','sqlite'], true)) { throw new ProtocolException('STORAGE_BACKEND_INVALID', 'storage.backend: must be filesystem or sqlite'); }
+        self::path($v->storage->path, 'storage.path'); self::path($v->export_path, 'export_path');
+        if (!is_array($v->sources) || !array_is_list($v->sources)) { throw self::invalid('sources', 'must be a list'); }
+        if (count($v->sources) > 16) { throw self::invalid('sources', 'at most 16 entries'); }
+        if (count(array_unique($v->sources, SORT_REGULAR)) !== count($v->sources)) { throw self::invalid('sources', 'entries must be distinct'); }
+        foreach ($v->sources as $index => $source) { if (!is_string($source)) { throw self::invalid('sources[' . $index . ']', 'must be a string'); } self::onion($source, 'sources[' . $index . ']'); }
+        if (!is_array($v->allowed_client_origins) || !array_is_list($v->allowed_client_origins)) { throw self::invalid('allowed_client_origins', 'must be a list'); }
+        if (count($v->allowed_client_origins) > 16) { throw self::invalid('allowed_client_origins', 'at most 16 entries'); }
+        foreach ($v->allowed_client_origins as $index => $origin) {
+            if (!is_string($origin) || preg_match('~\Ahttp://([a-z2-7]{56}\.onion)\z~D', $origin, $match) !== 1) { throw new ProtocolException('CLIENT_ORIGIN_INVALID', 'allowed_client_origins[' . $index . ']: must be http:// followed by a v3 onion address'); }
+            self::onion($match[1], 'allowed_client_origins[' . $index . ']');
         }
-        if (count(array_unique($v->allowed_client_origins)) !== count($v->allowed_client_origins)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
+        if (count(array_unique($v->allowed_client_origins)) !== count($v->allowed_client_origins)) { throw self::invalid('allowed_client_origins', 'entries must be distinct'); }
         $publisherNodes = self::publisherNodes($v->publisher_nodes ?? [], $v->role);
         if ($v->role === 'client-host') {
             // A Client Host has no Node features; only the visitor-source relay switch may be enabled.
-            if ($v->node->onion !== null || $v->node->key_path !== null || array_keys(array_filter(get_object_vars($v->features))) !== array_keys(array_filter(['visitor_sources' => $v->features->visitor_sources]))) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+            if ($v->node->onion !== null || $v->node->key_path !== null || array_keys(array_filter(get_object_vars($v->features))) !== array_keys(array_filter(['visitor_sources' => $v->features->visitor_sources]))) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID', 'role client-host: node.onion and node.key_path must be null and only features.visitor_sources may be true'); }
         } elseif ($v->role === 'publisher') {
-            if (!is_string($v->node->onion) || $v->node->key_path !== null || $v->features->mirror_directory || $v->features->discover_services || $v->features->sync_with_peers || $v->allowed_client_origins !== []) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
-            OnionAddress::parse($v->node->onion);
+            if (!is_string($v->node->onion) || $v->node->key_path !== null || $v->features->mirror_directory || $v->features->discover_services || $v->features->sync_with_peers || $v->allowed_client_origins !== []) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID', 'role publisher: needs node.onion, node.key_path null, no Node features and an empty allowed_client_origins'); }
+            self::onion($v->node->onion, 'node.onion');
         } else {
-            if (!is_string($v->node->onion)) { throw new ProtocolException('CONFIGURATION_INVALID'); } OnionAddress::parse($v->node->onion); self::path($v->node->key_path);
+            if (!is_string($v->node->onion)) { throw self::invalid('node.onion', 'required for the ' . $v->role . ' role'); }
+            self::onion($v->node->onion, 'node.onion'); self::path($v->node->key_path, 'node.key_path');
         }
-        if (!is_string($v->transport->proxy_host) || !in_array($v->transport->proxy_host, ['127.0.0.1','::1'], true) || !is_int($v->transport->proxy_port) || $v->transport->proxy_port < 1 || $v->transport->proxy_port > 65535 || !is_int($v->transport->timeout_ms) || $v->transport->timeout_ms < 100 || $v->transport->timeout_ms > 60000) { throw new ProtocolException('CONFIGURATION_INVALID'); }
+        if (!is_string($v->transport->proxy_host) || !in_array($v->transport->proxy_host, ['127.0.0.1','::1'], true)) { throw self::invalid('transport.proxy_host', 'must be 127.0.0.1 or ::1'); }
+        if (!is_int($v->transport->proxy_port) || $v->transport->proxy_port < 1 || $v->transport->proxy_port > 65535) { throw self::invalid('transport.proxy_port', 'must be an integer from 1 to 65535'); }
+        if (!is_int($v->transport->timeout_ms) || $v->transport->timeout_ms < 100 || $v->transport->timeout_ms > 60000) { throw self::invalid('transport.timeout_ms', 'must be an integer from 100 to 60000'); }
         // Reject placing persistent or signing material under the application public root.
         $public = realpath(dirname(__DIR__, 2) . '/public');
-        foreach ([$v->storage->path, $v->export_path, $v->node->key_path] as $privatePath) {
-            if ($privatePath !== null && $public !== false && (self::resolvedPath($privatePath) === $public || str_starts_with(self::resolvedPath($privatePath), $public . '/'))) { throw new ProtocolException('PRIVATE_PATH_IN_WEBROOT'); }
+        foreach (['storage.path' => $v->storage->path, 'export_path' => $v->export_path, 'node.key_path' => $v->node->key_path] as $key => $privatePath) {
+            if ($privatePath !== null && $public !== false && (self::resolvedPath($privatePath) === $public || str_starts_with(self::resolvedPath($privatePath), $public . '/'))) { throw new ProtocolException('PRIVATE_PATH_IN_WEBROOT', $key . ': inside node-php/public'); }
         }
         return new self($v->role, $v->storage->backend, $v->storage->path, $v->export_path, $v->node->onion, $v->node->key_path, get_object_vars($v->features), $v->sources, $v->allowed_client_origins, $v->transport->proxy_host, $v->transport->proxy_port, $v->transport->timeout_ms, $publisherNodes);
     }
@@ -79,24 +90,37 @@ final readonly class NodeConfig
      */
     private static function publisherNodes(mixed $value, string $role): array
     {
-        if (!is_array($value) || !array_is_list($value) || count($value) > \OnionServiceDiscovery\Configuration\PublisherMembership::MAX_SOURCES) { throw new ProtocolException('CONFIGURATION_INVALID'); }
-        if ($value !== [] && !in_array($role, ['publisher', 'combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        if (!is_array($value) || !array_is_list($value)) { throw self::invalid('publisher_nodes', 'must be a list'); }
+        if (count($value) > \OnionServiceDiscovery\Configuration\PublisherMembership::MAX_SOURCES) { throw self::invalid('publisher_nodes', 'at most 16 entries'); }
+        if ($value !== [] && !in_array($role, ['publisher', 'combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID', 'publisher_nodes: only for the publisher and combined roles'); }
         $nodes = [];
-        foreach ($value as $node) {
-            self::shape($node, ['onion', 'expected_node_key']);
-            if (!is_string($node->onion) || !is_string($node->expected_node_key)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
-            $onion = OnionAddress::parse($node->onion)->hostname; \OnionServiceDiscovery\Crypto\Encoding::publicKey($node->expected_node_key);
-            if (isset($nodes[$onion])) { throw new ProtocolException('SOURCE_DUPLICATE'); }
+        foreach ($value as $index => $node) {
+            $key = 'publisher_nodes[' . $index . ']';
+            self::shape($node, ['onion', 'expected_node_key'], $key);
+            if (!is_string($node->onion)) { throw self::invalid($key . '.onion', 'must be a string'); }
+            if (!is_string($node->expected_node_key)) { throw self::invalid($key . '.expected_node_key', 'must be a string'); }
+            self::onion($node->onion, $key . '.onion'); $onion = OnionAddress::parse($node->onion)->hostname;
+            try { \OnionServiceDiscovery\Crypto\Encoding::publicKey($node->expected_node_key); }
+            catch (\InvalidArgumentException $error) { throw new ProtocolException($error->getMessage(), $key . '.expected_node_key: must be ed25519: followed by 43 base64url characters'); }
+            if (isset($nodes[$onion])) { throw new ProtocolException('SOURCE_DUPLICATE', $key . '.onion: listed twice'); }
             $nodes[$onion] = ['onion' => $onion, 'expected_node_key' => $node->expected_node_key];
         }
         return array_values($nodes);
     }
-    /**
-     * @param array<array-key, mixed> $keys
-     */
-    private static function shape(mixed $value, array $keys): void
+    private static function invalid(string $key, string $reason): ProtocolException { return new ProtocolException('CONFIGURATION_INVALID', $key . ': ' . $reason); }
+    private static function onion(string $value, string $key): void
     {
-        if (!$value instanceof \stdClass || count(get_object_vars($value)) !== count($keys) || array_diff(array_keys(get_object_vars($value)), $keys) !== []) { throw new ProtocolException('CONFIGURATION_INVALID'); }
+        try { OnionAddress::parse($value); }
+        catch (\InvalidArgumentException $error) { throw new ProtocolException($error->getMessage(), $key . ': must be a canonical v3 onion address (56 lowercase characters and .onion)'); }
+    }
+    /**
+     * @param list<string> $keys
+     */
+    private static function shape(mixed $value, array $keys, string $name): void
+    {
+        if (!$value instanceof \stdClass) { throw self::invalid($name, 'must be an object'); }
+        foreach (array_keys(get_object_vars($value)) as $key) { if (!in_array($key, $keys, true)) { throw self::invalid($name . '.' . $key, 'unknown key'); } }
+        foreach ($keys as $key) { if (!property_exists($value, $key)) { throw self::invalid($name . '.' . $key, 'missing'); } }
     }
     private static function resolvedPath(string $path): string
     {
@@ -108,8 +132,10 @@ final readonly class NodeConfig
         if ($resolved === false) { throw new ProtocolException('CONFIGURATION_PATH_INVALID'); }
         return $remaining === [] ? $resolved : rtrim($resolved, '/') . '/' . implode('/', $remaining);
     }
-    private static function path(mixed $value): void
+    private static function path(mixed $value, string $key): void
     {
-        if (!is_string($value) || strlen($value) > 1024 || !str_starts_with($value, '/') || str_contains($value, '://') || preg_match('/[\x00-\x1f\x7f]/', $value) === 1 || in_array('..', explode('/', $value), true) || in_array('.', explode('/', $value), true)) { throw new ProtocolException('CONFIGURATION_PATH_INVALID'); }
+        if (!is_string($value) || strlen($value) > 1024 || !str_starts_with($value, '/') || str_contains($value, '://') || preg_match('/[\x00-\x1f\x7f]/', $value) === 1 || in_array('..', explode('/', $value), true) || in_array('.', explode('/', $value), true)) {
+            throw new ProtocolException('CONFIGURATION_PATH_INVALID', $key . ': must be an absolute path of at most 1024 bytes without . or .. segments');
+        }
     }
 }

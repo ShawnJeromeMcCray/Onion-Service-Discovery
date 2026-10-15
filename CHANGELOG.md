@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Operator CLI: failures print `detail` (where, for example the configuration key
+  path and rule; never the value), `meaning` from the error registry and a `help`
+  page; `config:validate` names every refused key. `status` works for publishers
+  and shows the role, Onion and Node facts; `status --check` treats the new
+  waiting states as waiting. `storage:verify` (also `db:verify`, `restore:verify`)
+  is read-only and reports a pending recovery instead of repairing it.
+  `quarantine:list` includes quarantined peers with their evidence hashes;
+  `sync:run CONFIG` steps the peer that is due first. `release:info` identifies
+  the build from the package metadata. `doctor` reports export usage and timer
+  freshness from stored times; `security:check` adds focused findings with
+  remediations (file modes, Tor keys near OSD files, web root contents, packaged
+  files changed since packaging). `node:maintain` prunes unreferenced export
+  blobs older than one hour, so the export directory no longer fills up.
 - Browser client evidence: every result says how many loaded sources include
   its current revision; the details name the sources that supplied it, those
   that still serve an older revision and those that do not list it, the

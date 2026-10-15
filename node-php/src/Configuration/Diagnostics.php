@@ -8,6 +8,12 @@ use OnionServiceDiscovery\Storage\StorageException;
 final class Diagnostics
 {
     private const EXTENSIONS = ['json', 'sodium', 'iconv', 'curl'];
+    /** Hard limits of the public export directory (PublicBlobStore). */
+    private const EXPORT_MAX_FILES = 4096;
+    private const EXPORT_MAX_BYTES = 268435456;
+    /** Timer templates refresh snapshots daily and publisher evidence every six hours. */
+    private const SNAPSHOT_STALE_AFTER_SECONDS = 172800;
+    private const PUBLISHER_EVIDENCE_STALE_AFTER_SECONDS = 129600;
 
     /** PASS on a tested 64-bit runtime with every required extension, WARN outside the tested minor versions. */
     public static function runtimeState(): string
@@ -29,7 +35,7 @@ final class Diagnostics
         $checks['runtime'] = PHP_INT_SIZE === 8 ? 'PASS' : 'FAIL';
         foreach (self::EXTENSIONS as $extension) { $checks['extension_' . $extension] = extension_loaded($extension) ? 'PASS' : 'FAIL'; }
         if (!str_starts_with(PHP_VERSION, '8.4.') && !str_starts_with(PHP_VERSION, '8.5.')) { $warnings[] = 'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX'; }
-        $publication = null;
+        $publication = null; $scheduler = []; $exportUsage = null;
         if ($manifestPath !== null && $config->nodeOnion !== null && $config->features['publish_service']) {
             $facts = PublisherStatus::inspect($config, $verifier, $manifestPath, $configPath);
             $publication = ['overall' => $facts['overall'], 'manifest_state' => $facts['manifest']['state'], 'revision' => $facts['manifest']['revision'] ?? null,
@@ -41,6 +47,10 @@ final class Diagnostics
             // Without chosen Nodes neither the timer nor a plain command can check or announce anything.
             $checks['publisher_nodes'] = $config->publisherNodes === [] ? 'WARN' : 'PASS';
             if ($config->publisherNodes === []) { $warnings[] = 'PUBLISHER_NODES_NOT_CONFIGURED'; }
+            // Scheduler freshness from saved timestamps (spec 32 section 8): the publisher timer runs every six hours.
+            $checkedAt = is_string($facts['self_verification_checked_at'] ?? null) ? (int) strtotime($facts['self_verification_checked_at']) : null;
+            $scheduler['publisher_checks'] = $checkedAt === null ? 'NOT_OBSERVED' : (time() - $checkedAt > self::PUBLISHER_EVIDENCE_STALE_AFTER_SECONDS ? 'STALE' : 'RECENT');
+            if ($scheduler['publisher_checks'] === 'STALE') { $warnings[] = 'PUBLISHER_TIMER_STALE'; }
         }
         if (!in_array($config->role, ['client-host','publisher'], true) && $config->backend === 'sqlite') {
             $checks['sqlite_driver'] = class_exists(\PDO::class) && in_array('sqlite', \PDO::getAvailableDrivers(), true) ? 'PASS' : 'FAIL';
@@ -50,6 +60,19 @@ final class Diagnostics
         if ($config->features['server_search']) { $warnings[] = 'SERVER_SEARCH_ENABLED_QUERIES_SENT_TO_NODE'; }
         if ($config->features['visitor_sources'] ?? false) { $checks['visitor_source_relay'] = 'WARN'; $warnings[] = 'VISITOR_SOURCE_RELAY_ENABLED_OUTBOUND_TO_VISITOR_CHOSEN_NODES'; }
         if ($config->role !== 'publisher') { $checks['export_directory'] = !is_link($config->exportPath) && is_dir($config->exportPath) && (fileperms($config->exportPath) & 0077) === 0 ? 'PASS' : 'FAIL'; }
+        if ($config->role !== 'publisher' && ($checks['export_directory'] ?? null) === 'PASS') {
+            // Export budget (spec 18 section 17): snapshots fail with EXPORT_BUDGET_EXHAUSTED at the limit.
+            $files = 0; $bytes = 0;
+            foreach (new \DirectoryIterator($config->exportPath) as $file) {
+                if ($file->isDot() || $file->isLink() || !$file->isFile() || preg_match('/\A[0-9a-f]{64}\.json\z/D', $file->getFilename()) !== 1) { continue; }
+                ++$files; $bytes += $file->getSize();
+                if ($files > self::EXPORT_MAX_FILES) { break; }
+            }
+            $usage = max($files / self::EXPORT_MAX_FILES, $bytes / self::EXPORT_MAX_BYTES);
+            $exportUsage = ['blob_files' => $files, 'blob_bytes' => $bytes, 'max_files' => self::EXPORT_MAX_FILES, 'max_bytes' => self::EXPORT_MAX_BYTES];
+            $checks['export_budget'] = $usage >= 1 ? 'FAIL' : ($usage >= 0.8 ? 'WARN' : 'PASS');
+            if ($checks['export_budget'] === 'WARN') { $warnings[] = 'EXPORT_BUDGET_NEARLY_EXHAUSTED'; }
+        }
         if ($config->nodeKeyPath !== null) {
             $checks['node_key_permissions'] = !is_link($config->nodeKeyPath) && is_file($config->nodeKeyPath) && (fileperms($config->nodeKeyPath) & 0077) === 0 ? 'PASS' : 'WARN';
             if ($checks['node_key_permissions'] === 'WARN') { $warnings[] = 'NODE_KEY_MISSING_OR_UNSAFE'; }
@@ -91,6 +114,10 @@ final class Diagnostics
                         if ($body === null || 'sha256:' . hash('sha256', "Onion Service Discovery/service-lookup/v1\0" . $body) !== $row['hash']) { throw new StorageException('EXPORT_CORRUPT'); }
                     }
                     $checks['snapshot_exports'] = 'PASS';
+                    // The snapshot timer republishes at least daily, so an older checkpoint means it stopped.
+                    $created = (int) strtotime((string) $checkpoint->document()->created_at);
+                    $scheduler['snapshot'] = time() - $created > self::SNAPSHOT_STALE_AFTER_SECONDS ? 'STALE' : 'RECENT';
+                    if ($scheduler['snapshot'] === 'STALE') { $warnings[] = 'SNAPSHOT_TIMER_STALE'; }
                     if ($config->features['server_search']) {
                         try {
                             \OnionServiceDiscovery\Search\SearchIndex::load($store, $blobs, $verifier, static function (): void {});
@@ -109,6 +136,57 @@ final class Diagnostics
         if ($concentration['concentrated']) { $warnings[] = 'SOURCE_SET_CONCENTRATED'; }
         if ($concentration['grouping_inconsistent']) { $warnings[] = 'SOURCE_GROUP_ASSIGNMENTS_INCONSISTENT'; }
         $checks['source_concentration'] = $concentration['concentrated'] || $concentration['grouping_inconsistent'] ? 'WARN' : 'PASS';
-        return ['status' => $failures !== [] ? 'FAIL' : ($warnings !== [] ? 'WARN' : 'PASS'), 'software_version' => '0.1.0-dev', 'php_version' => PHP_VERSION, 'protocol_versions' => [1], 'db_schema' => $state['storage_schema'] ?? null, 'role' => $config->role, 'config_state' => 'PASS', 'crypto_state' => 'RUNTIME_EXTENSIONS_ONLY', 'key_authentication_state' => 'NOT_UNLOCKED_UNAUTHENTICATED_HEADER', 'tor_transport_state' => 'CONFIGURED_NOT_PROBED', 'manifest_state' => $publication['manifest_state'] ?? 'NOT_APPLICABLE', 'publication' => $publication, 'sync_state' => ['latest_sync_epoch' => $latestSync, 'quarantined_peers' => $quarantined], 'source_concentration' => $concentration, 'scheduler_state' => 'NOT_OBSERVED', 'backup_state' => 'NOT_OBSERVED', 'disk_state' => ['free_bytes' => is_dir($config->exportPath) ? disk_free_space($config->exportPath) : null], 'security_check_summary' => $checks, 'warnings' => $warnings, 'failures' => array_values(array_unique($failures)), 'generated_at' => gmdate('Y-m-d\TH:i:s\Z'), 'network_side_effects' => false, 'production_approval' => 'OPEN'];
+        return ['status' => $failures !== [] ? 'FAIL' : ($warnings !== [] ? 'WARN' : 'PASS'), 'software_version' => '0.1.0-dev', 'php_version' => PHP_VERSION, 'protocol_versions' => [1], 'db_schema' => $state['storage_schema'] ?? null, 'role' => $config->role, 'config_state' => 'PASS', 'crypto_state' => 'RUNTIME_EXTENSIONS_ONLY', 'key_authentication_state' => 'NOT_UNLOCKED_UNAUTHENTICATED_HEADER', 'tor_transport_state' => 'CONFIGURED_NOT_PROBED', 'manifest_state' => $publication['manifest_state'] ?? 'NOT_APPLICABLE', 'publication' => $publication, 'sync_state' => ['latest_sync_epoch' => $latestSync, 'quarantined_peers' => $quarantined], 'source_concentration' => $concentration, 'scheduler_state' => $scheduler === [] ? 'NOT_OBSERVED' : $scheduler, 'export_usage' => $exportUsage, 'backup_state' => 'NOT_OBSERVED', 'disk_state' => ['free_bytes' => is_dir($config->exportPath) ? disk_free_space($config->exportPath) : null], 'security_check_summary' => $checks, 'warnings' => $warnings, 'failures' => array_values(array_unique($failures)), 'generated_at' => gmdate('Y-m-d\TH:i:s\Z'), 'network_side_effects' => false, 'production_approval' => 'OPEN'];
+    }
+
+    /**
+     * Focused security checks for security:check (spec 32 section 9, spec 18 section 53), each with a
+     * remediation. They read local files only; nothing is changed and no request is made.
+     * @return list<array{check:string,status:string,remediation:string}>
+     */
+    public static function security(NodeConfig $config, string $configPath, string $root): array
+    {
+        $findings = [];
+        $add = static function (string $check, string $status, string $remediation) use (&$findings): void { $findings[] = ['check' => $check, 'status' => $status, 'remediation' => $remediation]; };
+        $mode = @fileperms($configPath);
+        // The file holds no keys, but others must not change it, and paths in it describe the installation.
+        $add('configuration_file_private', $mode === false || ($mode & 0022) !== 0 ? 'FAIL' : (($mode & 0044) !== 0 ? 'WARN' : 'PASS'),
+            'chmod 600 the configuration file and own it by the service user that runs the web server and the timers.');
+        $directoryMode = @fileperms(dirname($configPath));
+        $add('configuration_directory_private', $directoryMode !== false && ($directoryMode & 0077) === 0 ? 'PASS' : 'WARN', 'chmod 700 the directory that holds the configuration.');
+        // Tor's own secret key never belongs near OSD files: OSD neither needs nor reads it.
+        $torKeys = 0;
+        foreach (array_unique([dirname($configPath), $config->storagePath, dirname($config->storagePath), $config->exportPath]) as $directory) {
+            foreach (['hs_ed25519_secret_key', 'private_key'] as $name) { if (file_exists($directory . '/' . $name)) { ++$torKeys; } }
+        }
+        $add('tor_secret_key_absent', $torKeys === 0 ? 'PASS' : 'FAIL', 'Move Tor’s hs_ed25519_secret_key out of every OSD directory; keep it only in the HiddenServiceDir that Tor reads.');
+        // Only the front controller and the installed public records belong in the web root.
+        $public = $root . '/node-php/public'; $unexpected = [];
+        foreach (is_dir($public) ? scandir($public) ?: [] : [] as $name) {
+            if (in_array($name, ['.', '..', 'index.php', '.well-known', '.gitkeep'], true)) { continue; }
+            $unexpected[] = $name;
+        }
+        foreach (is_dir($public . '/.well-known') ? scandir($public . '/.well-known') ?: [] : [] as $name) {
+            if (in_array($name, ['.', '..', 'onion-service-discovery.json', 'onion-service-discovery-history.json', '.publisher.lock'], true)) { continue; }
+            $unexpected[] = '.well-known/' . $name;
+        }
+        $add('web_root_contents', $unexpected === [] ? 'PASS' : 'WARN', $unexpected === [] ? 'node-php/public holds only the front controller and the installed public records.'
+            : 'Remove from node-php/public: ' . implode(', ', array_slice($unexpected, 0, 16)) . '. Keep configuration, keys, backups and stores outside the web root.');
+        // A release package lists the hash of every file it shipped.
+        $manifest = $root . '/release/FILE-MANIFEST.json';
+        if (is_file($manifest) && !is_link($manifest) && filesize($manifest) <= 8388608) {
+            $listed = json_decode((string) file_get_contents($manifest), true, 4, JSON_THROW_ON_ERROR); $changed = 0; $missing = 0;
+            foreach (is_array($listed) ? $listed : [] as $name => $hash) {
+                if (!is_string($name) || !is_string($hash) || str_contains($name, '..') || str_starts_with($name, 'release/')) { continue; }
+                $path = $root . '/' . $name;
+                if (!is_file($path)) { ++$missing; } elseif (hash_file('sha256', $path) !== $hash) { ++$changed; }
+            }
+            $add('release_files_unchanged', $changed === 0 && $missing === 0 ? 'PASS' : 'FAIL', $changed === 0 && $missing === 0 ? 'Every packaged file matches release/FILE-MANIFEST.json.'
+                : $changed . ' packaged file(s) changed and ' . $missing . ' missing since packaging. Reinstall the package from a verified download.');
+        } else {
+            $add('release_files_unchanged', 'NOT_APPLICABLE', 'A source checkout has no release/FILE-MANIFEST.json; verify the checkout with git instead.');
+        }
+        $add('remote_administration', 'PASS', 'OSD has no remote administration interface; every change is a local command.');
+        return $findings;
     }
 }

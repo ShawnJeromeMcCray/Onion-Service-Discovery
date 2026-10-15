@@ -383,6 +383,13 @@
    ],
    "meaning": null
   },
+  "EVIDENCE_UNAVAILABLE": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "The browser keeps no pair of conflicting signed records for this Node, so there is nothing to save."
+  },
   "EVIDENCE_WRITE_FAILED": {
    "cli_exit": [
     "3"
@@ -416,6 +423,15 @@
     "storage"
    ],
    "meaning": null
+  },
+  "EXPORT_BUDGET_NEARLY_EXHAUSTED": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: the export directory uses at least 80 % of its 4,096-file or 256 MiB limit; check that the maintenance timer runs (node:maintain prunes old blobs)."
   },
   "EXPORT_BUSY": {
    "cli_exit": [
@@ -1093,6 +1109,15 @@
    ],
    "meaning": "No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key."
   },
+  "PUBLISHER_TIMER_STALE": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: the last saved publisher check is older than 36 hours although the timer runs every six hours; check osd-publisher-check.timer."
+  },
   "PUBLISHING_DISABLED": {
    "cli_exit": [
     "3"
@@ -1429,6 +1454,15 @@
     "protocol"
    ],
    "meaning": null
+  },
+  "SNAPSHOT_TIMER_STALE": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: the published checkpoint is older than two days although snapshots refresh daily; check the snapshot timer and run node:snapshot."
   },
   "SNAPSHOT_UNAVAILABLE": {
    "cli_exit": [

@@ -139,7 +139,9 @@ Archive exports and stop publishers/web workers before running
 export blobs per call and retains all current chunks and derived indexes. Old
 signed checkpoints/identity/fork records remain in the database. The current API
 serves only current-checkpoint chunks; older checkpoint bytes for chain proof
-remain in record storage. This operator-only cleanup is not scheduled automatically. No automatic destruction
+remain in record storage. Besides this immediate operator action, `node:maintain`
+(the maintenance timer) prunes unreferenced blobs once they are older than one
+hour, at most 256 per run; `doctor` reports the export usage. No automatic destruction
 of conflict evidence or private keys is provided.
 
 Before upgrading, keep an authenticated full backup and verify the package.

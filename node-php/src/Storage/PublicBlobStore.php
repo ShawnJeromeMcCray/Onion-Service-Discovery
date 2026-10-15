@@ -30,23 +30,25 @@ final readonly class PublicBlobStore
     /** Lock and request-budget files the front controller keeps beside the blobs; never pruned. */
     public const CONTROL_FILES = ['.writer.lock', '.http-budget', '.request-budget', '.relay-budget', '.visitor-relay-budget'];
 
-    /** Operator-only quiescent cleanup: keep all current references, delete at most 256 blobs.
+    /** Cleanup that keeps all given references and deletes at most 256 other blobs. With $olderThan
+     * (a Unix time) only files last written before it are deleted, so a snapshot writing new blobs
+     * at the same time is never cut short; without it the operator has stopped the workers.
      * @param list<string> $keep
      * @return array<string,int>
      */
-    public function pruneUnreferenced(array $keep): array
+    public function pruneUnreferenced(array $keep, ?int $olderThan = null): array
     {
         if (count($keep) > 4096) { throw new StorageException('EXPORT_BUDGET_EXHAUSTED'); }
         $names = [];
         foreach ($keep as $hash) { $path = $this->path($hash); if (!is_file($path) || is_link($path)) { throw new StorageException('EXPORT_CORRUPT'); } $names[basename($path)] = true; }
-        return $this->withWriterLock(function () use ($names): array {
+        return $this->withWriterLock(function () use ($names, $olderThan): array {
             $removed = 0; $freed = 0; $scanned = 0;
             foreach (new \DirectoryIterator($this->directory) as $file) {
                 if ($file->isDot() || in_array($file->getFilename(), self::CONTROL_FILES, true)) { continue; }
                 if ($file->isLink() || !$file->isFile() || ++$scanned > 4096) { throw new StorageException('EXPORT_DIRECTORY_UNSAFE'); }
                 $name = $file->getFilename();
                 if (preg_match('/\A[0-9a-f]{64}\.json\z/D', $name) !== 1 && preg_match('/\A\.tmp-[0-9a-f]{24}\z/D', $name) !== 1) { throw new StorageException('EXPORT_DIRECTORY_UNSAFE'); }
-                if (isset($names[$name]) || $removed >= 256) { continue; }
+                if (isset($names[$name]) || $removed >= 256 || ($olderThan !== null && $file->getMTime() >= $olderThan)) { continue; }
                 $size = $file->getSize();
                 if (!unlink($file->getPathname())) { throw new StorageException('EXPORT_UNAVAILABLE'); }
                 ++$removed; $freed += $size;

@@ -23,6 +23,20 @@ foreach (['server-search', 'unknown', 'flag', 'role', 'path', 'proxy', 'source',
     file_put_contents($path, json_encode($v, JSON_THROW_ON_ERROR));
     try { NodeConfig::load($path); throw new RuntimeException('accepted ' . $case); } catch (InvalidArgumentException) { ++$checks; }
 }
+// Refusals name the key path and the rule, never the value (spec 32 section 12).
+foreach ([
+    'unknown' => [static function (array &$v): void { $v['extra'] = true; }, 'CONFIGURATION_INVALID', 'extra: unknown key'],
+    'missing' => [static function (array &$v): void { unset($v['transport']['timeout_ms']); }, 'CONFIGURATION_INVALID', 'transport.timeout_ms: missing'],
+    'timeout' => [static function (array &$v): void { $v['transport']['timeout_ms'] = 60001; }, 'CONFIGURATION_INVALID', 'transport.timeout_ms: must be an integer from 100 to 60000'],
+    'flag' => [static function (array &$v): void { $v['features']['server_search'] = 'yes'; }, 'CONFIGURATION_INVALID', 'features.server_search: must be true or false'],
+    'path' => [static function (array &$v): void { $v['export_path'] = 'relative/exports'; }, 'CONFIGURATION_PATH_INVALID', 'export_path: must be an absolute path of at most 1024 bytes without . or .. segments'],
+    'source' => [static function (array &$v): void { $v['sources'] = ['example.onion']; }, 'ADDRESS_INVALID', 'sources[0]: must be a canonical v3 onion address (56 lowercase characters and .onion)'],
+    'role' => [static function (array &$v): void { $v['features']['server_search'] = true; }, 'ROLE_CONFIGURATION_INVALID', 'features.server_search: needs the node or combined role'],
+] as $case => [$change, $code, $detail]) {
+    $v = $original; $change($v); file_put_contents($path, json_encode($v, JSON_THROW_ON_ERROR));
+    try { NodeConfig::load($path); throw new RuntimeException('accepted ' . $case); }
+    catch (\OnionServiceDiscovery\Protocol\ProtocolException $error) { if ($error->errorCode !== $code || $error->detail !== $detail) { throw new RuntimeException($case . ': ' . $error->errorCode . ' ' . $error->detail); } ++$checks; }
+}
 // visitor_sources: absent means off; only Client Host/combined roles may enable it; strictly boolean.
 file_put_contents($path, json_encode($original, JSON_THROW_ON_ERROR));
 if (NodeConfig::load($path)->features['visitor_sources'] !== false) { throw new RuntimeException('visitor sources default'); }
