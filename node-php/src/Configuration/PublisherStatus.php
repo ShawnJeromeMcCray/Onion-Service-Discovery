@@ -69,7 +69,7 @@ final class PublisherStatus
             $record = $verifier->verifyWire($wire, OnionAddress::parse($config->nodeOnion));
             if ($record->type !== 'service_manifest') { throw new \InvalidArgumentException('MANIFEST_INVALID'); }
             $doc = $record->document(); $hash = $record->contentHash;
-            $status['manifest'] = ['state' => 'SIGNATURE_VALID', 'revision' => $doc->revision, 'hash' => $record->contentHash, 'current_key' => $doc->service_identity_public_key, 'publish_service' => $doc->discovery->publish_service,
+            $status['manifest'] = ['state' => 'SIGNATURE_VALID', 'revision' => $doc->revision, 'hash' => $record->contentHash, 'current_key' => $doc->service_identity_public_key, 'current_key_fingerprint' => \OnionServiceDiscovery\Crypto\KeyFingerprint::of($doc->service_identity_public_key), 'publish_service' => $doc->discovery->publish_service,
                 'continuity' => $doc->revision === 1 ? 'GENESIS' : 'NOT_CHECKED',
                 'history_bundle' => is_file(dirname($manifestPath) . '/onion-service-discovery-history.json') ? 'INSTALLED' : 'NOT_INSTALLED'];
             // Do not invent a logical identifier or key epoch from a non-genesis record.

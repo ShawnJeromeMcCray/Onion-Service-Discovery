@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Keys have a human-comparable fingerprint (owner decision D-025): SHA-256 over
+  a domain and the raw key, 150 bits as six groups of five Base32 characters.
+  The browser shows it for identity keys, pins, the pin import preview, Node
+  keys of loaded sources and the keys of Client Host vouched or visitor-added
+  Nodes; the status page shows the Service and Node key fingerprints and
+  `node:identity` prints `node_key_fingerprint` and puts it in the visitor line.
+  Vectors are generated independently in Python and checked in PHP and the
+  browser.
 - Search results are ranked by text relevance (owner decision D-023) in the
   browser and in the server search alike: an exact normalized name first, then
   names that start with the query, names containing every term and finally

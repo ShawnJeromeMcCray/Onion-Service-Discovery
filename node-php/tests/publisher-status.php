@@ -42,6 +42,8 @@ try {
     // Saved aggregate evidence drives the dashboard only for the exact installed revision.
     $cfg = $temp . '/config.json'; $now = 1800000000; $hash = $facts['manifest']['hash'];
     $genesisKey = $facts['manifest']['current_key'];
+    $assert($facts['manifest']['current_key_fingerprint'] === \OnionServiceDiscovery\Crypto\KeyFingerprint::of($genesisKey)
+        && str_contains(StatusPage::render($facts)['body'], $facts['manifest']['current_key_fingerprint']), 'Service key fingerprint (D-025)'); ++$checks;
     // Synthetic membership results: Node n (seed n) gets the n-th category in the order given.
     $result = static function (array $counts, int $observed, ?string $h = null) use ($hash, $genesisKey): array {
         $sources = []; $seed = 1;

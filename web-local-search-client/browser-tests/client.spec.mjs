@@ -229,6 +229,12 @@ test('results and sources show where the data came from and when it was signed',
   await page.locator('.result-card details summary').first().click();
   await expect(page.locator('.result-card details').first()).toContainText('Current revision supplied by');
   await expect(page.locator('.result-card details').first()).toContainText('Signed Manifest of revision');
+  await expect(page.locator('.result-card details').first()).toContainText(/Identity key fingerprint: [A-Z2-7]{5}(-[A-Z2-7]{5}){5}/);
+  // D-025: the same fingerprint the shared vectors (and node:identity) give for this Node key.
+  const fingerprints=JSON.parse(await readFile(new URL('../../protocol/test-vectors/key-fingerprint-v1.json',import.meta.url),'utf8')).cases;
+  const nodeKey=fixtures.sources[0].node_descriptor.node_identity_public_key;const expected=fingerprints.find(item=>item.public_key===nodeKey);
+  expect(expected).toBeTruthy();
+  await expect(page.locator('.source-status').first()).toContainText('Node key fingerprint: '+expected.fingerprint);
 });
 
 test('expected Node keys from the Client Host are used from the first load on',async({page})=>{

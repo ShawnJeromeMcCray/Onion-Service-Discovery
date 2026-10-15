@@ -230,8 +230,8 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
   `HISTORY_INCOMPLETE` unless the result connects. `manifest:install` maintains
   the bundle automatically and reports `history` ([PCP-004](../protocol/proposals/PCP-004-continuity-bundle-draft.md)).
 - `node:identity CONFIG` prints the verified Node Onion and Node public key from
-  the signed descriptor, with ready-to-use lines for `--node`, `peers:add` and
-  visitors. Node and combined roles only; it fails with `NODE_NOT_INITIALIZED`
+  the signed descriptor, its `node_key_fingerprint` (D-025), and ready-to-use
+  lines for `--node`, `peers:add` and visitors. Node and combined roles only; it fails with `NODE_NOT_INITIALIZED`
   before `node:init`.
 - `manifest:rotate … --output-dir DIR` and `manifest:migrate … --output-dir DIR`
   write `rotation-draft.json`/`migration-draft.json` and `successor-draft.json`

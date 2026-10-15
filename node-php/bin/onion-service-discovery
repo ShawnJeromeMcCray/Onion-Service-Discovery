@@ -382,10 +382,11 @@ try {
         $identity = \OnionServiceDiscovery\Configuration\NodeStatus::identity($config, $verifier, $store, $store->snapshot());
         if ($identity === null) { throw new ProtocolException('NODE_NOT_INITIALIZED'); }
         [$onion, $key] = [$identity['node_onion'], $identity['node_identity_public_key']];
-        $output = ['status' => 'PASS'] + $identity + ['share' => [
+        $fingerprint = \OnionServiceDiscovery\Crypto\KeyFingerprint::of($key);
+        $output = ['status' => 'PASS'] + $identity + ['node_key_fingerprint' => $fingerprint, 'share' => [
             'publishers' => '--node ' . $onion . ' ' . $key,
             'peers' => 'peers:add CONFIG ' . $onion . ' --expected-node-key ' . $key,
-            'visitors' => 'Add a Node you chose: onion ' . $onion . ', expected Node key ' . $key,
+            'visitors' => 'Add a Node you chose: onion ' . $onion . ', expected Node key ' . $key . ' (fingerprint ' . $fingerprint . ')',
         ], 'advice' => 'Give these public values through a channel others trust. They prove which key signs this Node, not who operates it.', 'network_side_effects' => false];
     } elseif ($command === 'key:node:rotate') {
         // Protocol v1 has no Node key-rotation proof; a new key is a new, separately pinned source.

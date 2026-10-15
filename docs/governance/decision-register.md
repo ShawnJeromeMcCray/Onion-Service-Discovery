@@ -30,7 +30,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-022 | Clearnet Identity Proof | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | optional and separate from core identity. Needs outbound/privacy threat review. |
 | D-023 | Search Ranking Algorithm | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | YES | Deterministic text relevance, identical in browser and server search: exact normalized name, name prefix, every term in the name, other match; ties by normalized name without leading ASCII punctuation, then identity key; Node, observation or source counts never rank. Fixtures: `protocol/test-vectors/local-search-v2.json`. |
 | D-024 | Unicode Confusable Strategy | UNRESOLVED | Project owner / reviewer | YES | See source decision |
-| D-025 | Human Fingerprint Format | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
+| D-025 | Human Fingerprint Format | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | Grouped Base32 of SHA-256 (`Onion Service Discovery/key-fingerprint/v1`, zero byte, raw key): 150 bits as six groups of five characters; display aid only, full keys stay authoritative. Vectors: `protocol/test-vectors/key-fingerprint-v1.json`. |
 | D-026 | Client Source Bootstrap Set | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-027 | Node Seed Inclusion Policy | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-028 | Web Client Distribution and Asset Provenance | UNRESOLVED | Project owner / reviewer | YES | See source decision |

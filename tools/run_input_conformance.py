@@ -80,6 +80,7 @@ def main() -> int:
         ('php-peer-sync-controlled', php + ['node-php/tests/peer-sync.php'], ROOT),
         ('php-protected-signer', php + ['node-php/tests/protected-signer.php'], ROOT),
         ('php-identity-sequences', php + ['node-php/tests/identity-sequences.php'], ROOT),
+        ('php-key-fingerprint', php + ['node-php/tests/key-fingerprint.php'], ROOT),
         ('typescript-typecheck', ['npm', 'run', 'check'], ROOT / 'web-local-search-client'),
         ('typescript-vectors', ['npm', 'test'], ROOT / 'web-local-search-client'),
     ]

@@ -51,6 +51,7 @@ Ordinary Tor or Node outages are ATTENTION, never danger (spec 31 section 44).
 | RESULT.ONLY_QUARANTINED | every origin of the current Manifest set aside later | Note: Only Nodes that were set aside for conflicting signed data supplied this entry. Treat it with care until another source confirms it. | The Manifest signature is valid, but no trusted source delivered it | That the Service itself is bad | client-model "the view says which source…" |
 | RESULT.OBSERVERS | details | Signed direct observations of this revision by N Node key(s), latest TIME: KEYS. Several keys can belong to one operator. | Nodes that fetched the Manifest themselves | Independent confirmation | client-model "the view says which source…" |
 | RESULT.KEY_MEANING | details | Identity key: the Service's own signing key. It is neither the Tor key of the onion address nor proof of who runs the Service. | What the shown key is | Real-world identity | client.spec "keyboard focus…" (details open) |
+| KEY.FINGERPRINT | result details, pin cards, pin import preview, Node keys of sources and of Client Host vouched or visitor-added Nodes | Identity key fingerprint / Fingerprint / Node key fingerprint: six groups of five Base32 characters (D-025) | A comparable short form of exactly this key | That a matching fingerprint proves who operates the key, or that it replaces the full key | client.spec "results and sources show where the data came from…"; key-fingerprint vectors |
 
 ## Sources
 

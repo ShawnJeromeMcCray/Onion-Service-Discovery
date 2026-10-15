@@ -65,9 +65,12 @@ php node-php/bin/onion-service-discovery node:identity /absolute/private/osd-nod
 ```
 
 Give them through a channel others trust; they must not take the key from your
-Node's own answers. Your `/onion-service-discovery/status/` page shows the same
-two values plus aggregate snapshot, storage, queue and peer facts (never peer
-addresses or paths).
+Node's own answers. The output also has `node_key_fingerprint`, six groups of
+five characters (decision D-025) that are easier to read aloud or print than the
+key: a visitor's browser and your status page show the same fingerprint, so
+others can confirm they entered the right key. Your
+`/onion-service-discovery/status/` page shows the same values plus aggregate
+snapshot, storage, queue and peer facts (never peer addresses or paths).
 `node:init` initializes the selected store/export directory and signs the Node
 descriptor. Repeating it with unchanged capabilities does not invent a revision.
 The first snapshot has no discovered Services until evidence is admitted. An empty
