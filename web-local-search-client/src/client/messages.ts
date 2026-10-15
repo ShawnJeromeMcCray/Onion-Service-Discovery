@@ -3,7 +3,7 @@ const sourceMessages:{[code:string]:string}={
   SOURCE_FETCH_FAILED:'The Node did not answer. It may be offline or unreachable over Tor right now; try again later. The last verified local index stays available.',
   SOURCE_HTTP_STATUS_REJECTED:'The Node answered with an error page instead of signed data. Nothing from it was used; try again later.',
   SOURCE_TIMEOUT:'The Node answered too slowly. Nothing from this attempt was used; try again later.',
-  SOURCE_TIME_BUDGET_EXHAUSTED:'Checking this Node’s signatures took longer than the time limit, so nothing partial was used. Try again on a faster device or connection.',
+  SOURCE_TIME_BUDGET_EXHAUSTED:'Downloading this Node’s data took more than 90 seconds in total, so nothing partial was used. Try again later; the Node or the Tor connection may be slow.',
   SOURCE_WORK_BUDGET_EXHAUSTED:'This Node offered more data than this page checks at once. Nothing from it was used.',
   RESPONSE_TOO_LARGE:'This Node offered more data than this page checks at once. Nothing from it was used.',
   SOURCE_CHECKPOINT_EQUIVOCATION:'This Node signed two different states for the same moment. Its data is set aside and both signatures are kept as evidence.',

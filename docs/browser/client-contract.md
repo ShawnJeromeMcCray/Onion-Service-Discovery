@@ -51,13 +51,17 @@ No remote pin sync exists. Clearing index data preserves pins/witnesses; an
 explicit separate confirmation is required to forget continuity safeguards.
 
 Default limits: 16 allowlisted sources and 8 visitor-added Nodes, 10,000 local
-evidence records, 64 chunks and 32 MiB per source, 90 seconds per source, 15
-seconds per fetch, 256 pins, a 256-character local query with at most 16 terms,
+evidence records, 64 chunks and 32 MiB per source, 90 seconds of network time
+per source, 15 seconds per fetch, 256 pins, a 256-character local query with at most 16 terms,
 1 MiB per imported record bundle and 256 KiB per pin backup. Results are not
 capped: matching identities with the same normalized name, description and state
 form one group, groups are shown 25 per page with previous and next buttons, and
-a group's similar entries are paged 25 at a time. Resource refusal preserves the
-prior index. These are implementation profile limits, not a claim of unlimited
+a group's similar entries are paged 25 at a time. Signature checking is not
+timed: the record and byte limits bound it, each source shows how many records
+it has checked, and Cancel takes effect within 64 records. A record already
+verified in this session, for example one a second Node serves too, is not
+checked again; any differing byte is checked in full. Resource refusal preserves
+the prior index. These are implementation profile limits, not a claim of unlimited
 network coverage. Node statements are displayed as claims; this browser does not
 perform a direct Service check or establish liveness.
 

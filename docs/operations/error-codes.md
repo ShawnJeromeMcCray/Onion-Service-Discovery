@@ -200,7 +200,7 @@ for remedies.
 | `SOURCE_SET_CONCENTRATED` | doctor | 6 | doctor: most configured peers share one source group; diversity is low. |
 | `SOURCE_STATE_INVALID` | configuration and status | 3 | The Node’s state answer has no valid sha256 checkpoint hash, so service:membership rejected that Node’s evidence. |
 | `SOURCE_TIMEOUT` | browser client | – | The Node did not answer in time; the existing local index is unchanged. |
-| `SOURCE_TIME_BUDGET_EXHAUSTED` | browser client | – | Loading and checking this Node took longer than the browser’s 90-second limit, so nothing partial was used; try again on a faster connection or device. |
+| `SOURCE_TIME_BUDGET_EXHAUSTED` | browser client | – | Downloads from this Node took more than the browser’s 90 seconds of network time for one source, so nothing partial was used; try again later. Signature checking does not count against this limit. |
 | `SOURCE_WORK_BUDGET_EXHAUSTED` | Node worker, browser client | 3 | The Node’s signed snapshot exceeds the checking limits (over 10000 records or 32 MiB of chunks, or over 64 chunks in the browser), so the browser discards the load and a Node worker quarantines the peer. |
 | `SQLITE_DRIVER_UNAVAILABLE` | storage | 4 | The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend. |
 | `STORAGE_ADDRESS_INVALID` | storage | 4 | A record or export address is not sha256: followed by 64 lowercase hex digits, or an operational table or key name is invalid, so the store refused the request. |

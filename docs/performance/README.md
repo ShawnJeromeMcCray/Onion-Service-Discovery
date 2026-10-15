@@ -29,7 +29,17 @@ view derivations, and 100 local searches. It must not be described as a Tor
 Browser or Android benchmark. Point-subgroup validation caches only exact
 previously validated public encodings (maximum 10,000); every message signature
 is still checked. Cold verification remains material, and the observed Node RSS
-is too substantial to infer mobile suitability. Actual mobile/desktop browser
+is too substantial to infer mobile suitability.
+
+Without a JIT compiler (`node --jitless`, a rough stand-in for Tor Browser's
+Safer level, which turns JavaScript JIT off), verifying a 705-record S100 sample
+took 5.2 ms per record on this host instead of 2.5 ms, about 37 seconds for the
+7,005 S1000 records. A phone is slower still. The client therefore counts only
+network time against its 90-second per-source limit, shows checking progress per
+chunk, and skips records whose exact canonical bytes it already verified in the
+same session, so a second or third Node that serves the same records costs
+little more than its transfers. The benchmark above measures cold verification
+without that cache. Actual mobile/desktop browser
 memory, rendering and multi-source transfer measurements are still required.
 
 Remaining capacity gates: independent environment reproduction, TIER-M/L/XL

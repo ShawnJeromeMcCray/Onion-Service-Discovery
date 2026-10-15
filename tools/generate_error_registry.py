@@ -227,7 +227,7 @@ DESCRIPTIONS = {
     'SOURCE_NODE_BINDING_MISMATCH': 'The record served at the Node’s node route is not a Node descriptor for the Onion address that was loaded, so nothing from that Node was used.',
     'SOURCE_RECORD_COUNT_INVALID': 'The Node’s snapshot chunks held a different number of records than its signed checkpoint declares (the browser discards the load; a Node worker quarantines the peer).',
     'SOURCE_STATE_INVALID': 'The Node’s state answer has no valid sha256 checkpoint hash, so service:membership rejected that Node’s evidence.',
-    'SOURCE_TIME_BUDGET_EXHAUSTED': 'Loading and checking this Node took longer than the browser’s 90-second limit, so nothing partial was used; try again on a faster connection or device.',
+    'SOURCE_TIME_BUDGET_EXHAUSTED': 'Downloads from this Node took more than the browser’s 90 seconds of network time for one source, so nothing partial was used; try again later. Signature checking does not count against this limit.',
     'SOURCE_WORK_BUDGET_EXHAUSTED': 'The Node’s signed snapshot exceeds the checking limits (over 10000 records or 32 MiB of chunks, or over 64 chunks in the browser), so the browser discards the load and a Node worker quarantines the peer.',
     'SQLITE_DRIVER_UNAVAILABLE': 'The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend.',
     'STORAGE_ADDRESS_INVALID': 'A record or export address is not sha256: followed by 64 lowercase hex digits, or an operational table or key name is invalid, so the store refused the request.',

@@ -16,6 +16,8 @@ security texts themselves are listed in the
   result count after the reader changes the search. A separate alert region is
   used only when a pinned identity newly enters a high-risk state (another key
   on the pinned Onion, a fork). The page no longer re-announces every update.
+  While a source loads, its card shows how many records have been checked; that
+  line is updated in place and deliberately not announced.
 - **Focus**: views are rebuilt on every worker update, but keyboard focus returns
   to the same control (for example from "Pin this identity" to "Remove pin" of
   the same Service), opened details stay open and the result page is kept.

@@ -156,6 +156,7 @@ test('cancel marks unfinished sources as cancelled, never as loading forever',as
   await page.route('**/relay/**',async route=>{await new Promise(resolve=>setTimeout(resolve,800));await route.continue();});
   await page.getByRole('button',{name:'Load directory',exact:true}).click();
   await expect(page.locator('.source-status').first()).toContainText('Loading');
+  await expect(page.locator('.source-status').first()).toContainText('Downloading the signed checkpoint and history.');
   await page.getByRole('button',{name:'Cancel',exact:true}).click();
   await expect(page.getByRole('button',{name:'Load directory',exact:true})).toBeEnabled();
   await expect(page.locator('.source-status strong')).toHaveText(['Cancelled','Cancelled','Cancelled']);

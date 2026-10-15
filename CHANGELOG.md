@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Browser client on slow devices: a record already verified in this session is
+  not verified again when another Node serves the same bytes, so loading three
+  Nodes costs little more than loading one. The 90-second limit per source now
+  counts network time only; signature checking stays bounded by the record and
+  byte limits, each loading source shows how many records it has checked, and
+  Cancel takes effect within 64 records. Without JIT (Tor Browser's Safer
+  level) checking took about twice as long as with it in a local measurement.
 - Deployment: the nginx, Apache, PHP-FPM and systemd templates are hardened
   (no server version, header and body limits, no uploads or remote includes,
   no core dumps, empty capability sets, kernel and namespace protections, file

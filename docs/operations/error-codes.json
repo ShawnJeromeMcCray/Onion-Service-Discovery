@@ -1704,7 +1704,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": "Loading and checking this Node took longer than the browser\u2019s 90-second limit, so nothing partial was used; try again on a faster connection or device."
+   "meaning": "Downloads from this Node took more than the browser\u2019s 90 seconds of network time for one source, so nothing partial was used; try again later. Signature checking does not count against this limit."
   },
   "SOURCE_WORK_BUDGET_EXHAUSTED": {
    "cli_exit": [

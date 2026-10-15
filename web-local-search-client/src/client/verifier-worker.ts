@@ -75,7 +75,7 @@ async function command(message:Command):Promise<void> {
   }
   if(busy) throw new Error('CLIENT_BUSY');
   if(message.op==='clear-all') { records.clear(); provenance.clear(); ledgers.clear(); witnesses.clear(); loader.clear(); pins=[]; statuses=[]; synthetic=false; visitor.clear(); publish(); return; }
-  if(message.op==='clear-index') { records.clear(); provenance.clear(); statuses=[]; synthetic=false; publish(); return; }
+  if(message.op==='clear-index') { records.clear(); provenance.clear(); loader.forgetVerified(); statuses=[]; synthetic=false; publish(); return; }
   busy=true; publish();
   try {
     if(message.op==='import-records') {
@@ -96,7 +96,9 @@ async function command(message:Command):Promise<void> {
       for(let index=0;index<message.sources.length;++index) {
         const selection=message.sources[index]!; const status=statuses[index]!; status.status='LOADING'; publish();
         try {
-          const result=await loader.load(selection,ledgers.get(selection.onion),controller.signal,(ledger,evidence)=>{const fork=witnesses.observe(evidence);ledger.equivocated ||= fork;ledgers.set(selection.onion,structuredClone(ledger));if(ledger.equivocated)throw new Error(evidence.type==='node_descriptor'?'SOURCE_DESCRIPTOR_EQUIVOCATION':'SOURCE_CHECKPOINT_EQUIVOCATION');});
+          const result=await loader.load(selection,ledgers.get(selection.onion),controller.signal,(ledger,evidence)=>{const fork=witnesses.observe(evidence);ledger.equivocated ||= fork;ledgers.set(selection.onion,structuredClone(ledger));if(ledger.equivocated)throw new Error(evidence.type==='node_descriptor'?'SOURCE_DESCRIPTOR_EQUIVOCATION':'SOURCE_CHECKPOINT_EQUIVOCATION');},
+            // A small message per verified chunk; the full view is rebuilt only when the source ends.
+            (done,total)=>scope.postMessage({type:'progress',onion:selection.onion,records:done,total}));
           admit(result.records,selection.onion); ledgers.set(selection.onion,result.ledger);
           const age=Date.now()-Date.parse(result.createdAt); status.status=age>604800000||age< -300000?'STALE':'COMPLETE'; status.nodeKey=result.ledger.nodeKey; status.generation=result.ledger.generation; status.createdAt=result.createdAt; status.baselineHistoryProven=result.baselineHistoryProven;
         } catch(error) {
