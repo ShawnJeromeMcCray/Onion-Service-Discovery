@@ -18,6 +18,26 @@ ReadWritePaths=/var/lib/onion-service-discovery
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 IPAddressDeny=any
 IPAddressAllow=localhost
+# No capabilities, kernel or device access. MemoryDenyWriteExecute is left out on
+# purpose: it breaks the PCRE JIT that PHP uses.
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+# The unlocked Node key must not end up in a core dump.
+LimitCORE=0
+LimitNOFILE=256
 MemoryMax=256M
 TasksMax=16
 TimeoutStartSec=90

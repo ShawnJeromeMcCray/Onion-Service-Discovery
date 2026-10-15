@@ -1,0 +1,34 @@
+# Add Onion Service Discovery to an existing website (spec 47 sections 64-66).
+# Include this file inside the <VirtualHost> that serves your Onion. The rest of the
+# website stays as it is: only the three OSD routes reach the OSD front controller,
+# through its own PHP-FPM pool and socket (deployment/php-fpm-pool.conf). The
+# website's own PHP never runs OSD code, and OSD never sees other requests.
+# Requires mod_proxy and mod_proxy_fcgi (a2enmod proxy proxy_fcgi).
+# See docs/operations/existing-website.md.
+#
+# The first matching ProxyPass/ProxyPassMatch rule wins: include this file before
+# the site's own proxy rules. RewriteRule directives in the virtual host run before
+# ProxyPassMatch; if the site has a catch-all rewrite, exclude these paths first:
+#   RewriteRule "^/(?:\.well-known/onion-service-discovery(?:-history)?\.json$|onion-service-discovery/)" - [L]
+# Header limits (LimitRequestLine, LimitRequestFieldSize, LimitRequestFields) apply
+# per listener; onion-service-discovery.conf has the reference values.
+# Optional NoJS server search needs its own reviewed larger body limit; see
+# docs/operations/server-search.md. This file refuses bodies over 1 KiB.
+
+# Request paths can reveal what visitors look at. Apache cannot switch the access
+# log off for one location: this marks OSD requests (mod_setenvif), and you add
+# env=!osd_no_log to the site's CustomLog line, for example
+#   CustomLog ${APACHE_LOG_DIR}/access.log combined env=!osd_no_log
+SetEnvIf Request_URI "^/(?:\.well-known/onion-service-discovery(?:-history)?\.json$|onion-service-discovery/)" osd_no_log
+
+<LocationMatch "^/(?:\.well-known/onion-service-discovery(?:-history)?\.json$|onion-service-discovery/)">
+    # LimitRequestBody is not reliably enforced for proxied FastCGI requests (tested
+    # with httpd 2.4.58): refuse oversized or chunked bodies before they reach PHP.
+    LimitRequestBody 1024
+    <If "%{HTTP:Content-Length} -gt 1024 || -n %{HTTP:Transfer-Encoding}">
+        Require all denied
+    </If>
+    # Only OSD requests receive the configuration path; the site's PHP does not.
+    SetEnv ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/node.json
+</LocationMatch>
+ProxyPassMatch "^/(?:\.well-known/onion-service-discovery(?:-history)?\.json|onion-service-discovery/.*)$" "unix:/run/php/onion-service-discovery.sock|fcgi://localhost/opt/onion-service-discovery/node-php/public/index.php"

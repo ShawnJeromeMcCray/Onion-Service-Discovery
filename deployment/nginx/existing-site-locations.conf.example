@@ -1,0 +1,56 @@
+# Add Onion Service Discovery to an existing website (spec 47 sections 64-66).
+# Paste these three location blocks into the server block that serves your Onion.
+# The rest of the website stays as it is: only these routes reach the OSD front
+# controller, through its own PHP-FPM pool and socket (deployment/php-fpm-pool.conf).
+# The website's own PHP pool never runs OSD code, and OSD never sees other requests.
+# See docs/operations/existing-website.md.
+#
+# Exact (=) and ^~ prefix locations win over the site's regex locations, such as
+# "location ~ \.php$" or a rule that denies dot paths. Server-level rewrite, return
+# or if directives run before location matching: keep them away from these paths.
+# A location without its own add_header inherits the server's add_header lines; a
+# site-wide Content-Security-Policy would then apply to OSD pages as well, and
+# browsers enforce every policy they receive.
+# Header limits are server-wide (client_header_timeout, large_client_header_buffers);
+# onion-service-discovery.conf has the reference values.
+# Optional NoJS server search needs its own reviewed limits and pool: add the exact
+# location from server-search-location.conf.example next to these blocks.
+
+location = /.well-known/onion-service-discovery.json {
+    access_log off;
+    server_tokens off;
+    client_max_body_size 1k;
+    client_body_timeout 5s;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME /opt/onion-service-discovery/node-php/public/index.php;
+    fastcgi_param ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/node.json;
+    fastcgi_pass unix:/run/php/onion-service-discovery.sock;
+    fastcgi_read_timeout 65s;
+}
+
+location = /.well-known/onion-service-discovery-history.json {
+    access_log off;
+    server_tokens off;
+    client_max_body_size 1k;
+    client_body_timeout 5s;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME /opt/onion-service-discovery/node-php/public/index.php;
+    fastcgi_param ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/node.json;
+    fastcgi_pass unix:/run/php/onion-service-discovery.sock;
+    fastcgi_read_timeout 65s;
+}
+
+location ^~ /onion-service-discovery/ {
+    access_log off;
+    server_tokens off;
+    # nginx redirects /onion-service-discovery to this path; keep the redirect
+    # relative so it does not carry the loopback listener's port.
+    absolute_redirect off;
+    client_max_body_size 1k;
+    client_body_timeout 5s;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME /opt/onion-service-discovery/node-php/public/index.php;
+    fastcgi_param ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/node.json;
+    fastcgi_pass unix:/run/php/onion-service-discovery.sock;
+    fastcgi_read_timeout 65s;
+}

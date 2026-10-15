@@ -57,6 +57,8 @@ its public `hostname` file. The application never provisions or reads Tor keys.
    For a distinct Client Host, configure the allowed sources and use the generic
    proxy delivery profile. Configure Tor to forward public port 80 to the
    loopback listener yourself; keep its HiddenServiceDir inaccessible to OSD.
+   If the Onion already serves a website, keep it and add only the OSD routes:
+   see [existing website](existing-website.md).
 10. Verify through the actual Onion with the supported Tor Browser profiles before
     public rollout. Local mocked SOCKS/Chromium tests cannot substitute this step.
 

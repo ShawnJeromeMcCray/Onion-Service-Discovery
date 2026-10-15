@@ -14,8 +14,15 @@ pm.max_requests = 100
 clear_env = yes
 catch_workers_output = no
 request_terminate_timeout = 2s
+security.limit_extensions = .php
 php_admin_value[max_execution_time] = 1
 php_admin_value[memory_limit] = 128M
+; A search form body is at most 8 KiB (8192 bytes), like the web server limit and
+; the application's own cap.
+php_admin_value[post_max_size] = 8K
+php_admin_flag[file_uploads] = off
+php_admin_flag[allow_url_fopen] = off
+php_admin_flag[allow_url_include] = off
 php_admin_flag[display_errors] = off
 php_admin_flag[log_errors] = off
 php_admin_value[expose_php] = Off
