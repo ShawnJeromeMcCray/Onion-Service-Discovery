@@ -99,7 +99,7 @@ final class PublisherStatus
             return self::finish($status, $config, []);
         }
         $evidence = $configPath === null ? [] : PublisherEvidence::load($configPath);
-        if ($status['overall'] === 'READY_LOCALLY') { self::applyEvidence($status, $evidence, (string) $hash, $now, (int) @filemtime($manifestPath)); }
+        if ($status['overall'] === 'READY_LOCALLY') { self::applyEvidence($status, $evidence, (string) $hash, $now, (int) @filemtime($manifestPath), $config->publisherNodes !== []); }
         if ($status['overall'] === 'READY_LOCALLY' && $evidence === [] && $configPath !== null && PublisherEvidence::unreadable($configPath)) {
             $status['next_action'] = 'Saved check results exist, but this web server cannot read them. Run the checks and the publisher timer as the same service user as the web server (the templates use osd-worker).';
         }
@@ -113,7 +113,7 @@ final class PublisherStatus
      * @param array<string,mixed> $status
      * @param array<string,mixed> $evidence
      */
-    private static function applyEvidence(array &$status, array $evidence, string $currentHash, int $now, int $installedAt): void
+    private static function applyEvidence(array &$status, array $evidence, string $currentHash, int $now, int $installedAt, bool $nodesConfigured): void
     {
         $actions = []; // candidate next actions keyed by priority: the lowest key is shown
         $self = $evidence['self_verification'] ?? null;
@@ -225,7 +225,9 @@ final class PublisherStatus
                 $actions[85] = sprintf('%d Node(s) accepted the announcement of this revision. They fetch and verify your Manifest themselves, usually within a day. Then run network:discoverability-check --save-status; the publisher timer does both.', $accepted);
             } elseif (in_array($status['self_verification'], ['PASS', 'PASS_OUTDATED'], true)) {
                 $overall = 'CONNECTING';
-                $actions[85] = 'Your Manifest is reachable through your Onion. Next, announce it to the Nodes you selected and check them (network:announce … --save-status, then network:discoverability-check … --save-status), or enable the publisher timer, which does both.';
+                $actions[85] = $nodesConfigured
+                    ? 'Your Manifest is reachable through your Onion. Next, announce it to the Nodes you selected and check them (network:announce … --save-status, then network:discoverability-check … --save-status), or enable the publisher timer, which does both.'
+                    : 'Your Manifest is reachable through your Onion. Next, choose Discovery Nodes and put each Onion with its independently obtained Node key into publisher_nodes in the configuration; then announce it and check them, or enable the publisher timer, which does both.';
             }
         }
         $status['overall'] = $overall;

@@ -174,6 +174,15 @@ try {
         $out = cli(['service:membership', $root . '/publisher.json', $root . '/' . $file, '--node', $nodes['included']['onion'], $nodes['included']['key']], 6);
         $assert($out['status'] === 'CURRENT_STATE_NOT_CONFIRMED' && $out['counts']['unavailable'] === 1 && $out['network_side_effects'] === true, 'cli unavailable ' . $file); ++$checks;
     }
+    // Without --node the configured publisher_nodes are used; without them the command says what is missing.
+    $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json'], 3)['error'] === 'PUBLISHER_NODES_NOT_CONFIGURED', 'no configured Nodes'); ++$checks;
+    $configured = $v; $configured['publisher_nodes'] = [['onion' => $nodes['included']['onion'], 'expected_node_key' => $nodes['included']['key']]];
+    file_put_contents($root . '/configured.json', json_encode($configured, JSON_THROW_ON_ERROR)); chmod($root . '/configured.json', 0600);
+    $out = cli(['service:membership', $root . '/configured.json', $root . '/history.json'], 6);
+    $assert($out['status'] === 'CURRENT_STATE_NOT_CONFIRMED' && $out['counts']['unavailable'] === 1 && $out['sources'][0]['node_onion'] === $nodes['included']['onion'], 'configured Nodes'); ++$checks;
+    // The own Onion comes from node.onion when it is not given.
+    $assert(cli(['service:verify', $root . '/configured.json'], 5)['error'] === 'TOR_PROXY_UNREACHABLE', 'self-check of the configured Onion'); ++$checks;
+    unlink($root . '/configured.json');
     $bundle['bundle_type'] = 'checkpoint'; file_put_contents($root . '/bad-bundle.json', json_encode($bundle, JSON_THROW_ON_ERROR));
     $assert(cli(['service:membership', $root . '/publisher.json', $root . '/bad-bundle.json', '--node', $nodes['included']['onion'], $nodes['included']['key']], 3)['error'] === 'HISTORY_BUNDLE_INVALID', 'malformed bundle'); ++$checks;
     $assert(!file_exists($root . '/publisher.discoverability.json'), 'evidence saved without --save-status'); ++$checks;
@@ -195,7 +204,7 @@ try {
         && array_values($evidence['announcement']['nodes'])[0]['result'] === 'TOR_PROXY_UNREACHABLE' && isset($evidence['membership'])
         && !str_contains(json_encode($evidence, JSON_THROW_ON_ERROR), $unreachable), 'recorded failures'); ++$checks;
     $assert(!file_exists($root . '/must-not-be-created') && !file_exists($root . '/exports-must-not-be-created'), 'publisher storage created'); ++$checks;
-    $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json'], 2)['error'] === 'USAGE_ERROR', 'no sources'); ++$checks;
+    $assert(cli(['service:membership', $root . '/publisher.json'], 2)['error'] === 'USAGE_ERROR', 'no history'); ++$checks;
     $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json', '--peer', $unreachable, $nodes['included']['key']], 2)['error'] === 'USAGE_ERROR', 'wrong flag'); ++$checks;
     $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json', '--node', $unreachable, 'ed25519:invalid'], 3)['error'] === 'PUBLIC_KEY_INVALID', 'invalid key'); ++$checks;
 } finally {

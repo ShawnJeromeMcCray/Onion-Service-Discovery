@@ -7,7 +7,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-219 codes.
+220 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -129,6 +129,7 @@ for remedies.
 | `PUBLIC_MANIFEST_WRITE_FAILED` | signing | 3 | The code name states the condition; see the raising component. |
 | `PUBLISHER_BUSY` | configuration and status, signing | 3 | Another publisher command holds the lock on the same files; run it again when that command has finished. |
 | `PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT` | doctor | 6 | doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page. |
+| `PUBLISHER_NODES_NOT_CONFIGURED` | CLI, doctor | 3, 6 | No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key. |
 | `PUBLISHING_DISABLED` | CLI | 3 | Publishing is off in the configuration or the Manifest withdraws publication. |
 | `RATE_LIMIT_CONFIGURATION_INVALID` | web routes | 4 | The code name states the condition; see the raising component. |
 | `RATE_LIMIT_CORRUPT` | web routes | 4 | The code name states the condition; see the raising component. |

@@ -1082,6 +1082,17 @@
    ],
    "meaning": "doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page."
   },
+  "PUBLISHER_NODES_NOT_CONFIGURED": {
+   "cli_exit": [
+    "3",
+    "6"
+   ],
+   "components": [
+    "CLI",
+    "doctor"
+   ],
+   "meaning": "No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key."
+  },
   "PUBLISHING_DISABLED": {
    "cli_exit": [
     "3"

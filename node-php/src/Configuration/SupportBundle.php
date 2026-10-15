@@ -26,7 +26,7 @@ final class SupportBundle
             'configuration' => [
                 'role' => $config->role, 'storage_backend' => $config->backend, 'features' => $config->features,
                 'node_onion_configured' => $config->nodeOnion !== null, 'node_key_configured' => $config->nodeKeyPath !== null,
-                'source_count' => count($config->sources), 'allowed_client_origin_count' => count($config->allowedClientOrigins),
+                'source_count' => count($config->sources), 'publisher_node_count' => count($config->publisherNodes), 'allowed_client_origin_count' => count($config->allowedClientOrigins),
             ],
             'diagnostics' => $diagnostics,
             'excluded' => ['filesystem_paths', 'onion_addresses', 'public_and_private_keys', 'passphrases', 'peer_and_source_lists', 'identity_pins', 'search_queries', 'raw_logs'],

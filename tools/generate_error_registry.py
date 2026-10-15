@@ -36,6 +36,7 @@ DESCRIPTIONS = {
     'ANNOUNCEMENT_RATE_LIMITED': 'The Node answered 429: its shared announcement budget is exhausted. The bounded schedule retries no earlier than a day later.',
     'ANNOUNCEMENT_RESPONSE_INVALID': 'The Node did not answer with exactly HINT_RECEIVED_UNCONFIRMED; no other claim is accepted as an announcement result.',
     'PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT': 'doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page.',
+    'PUBLISHER_NODES_NOT_CONFIGURED': 'No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key.',
     'PUBLISHER_BUSY': 'Another publisher command holds the lock on the same files; run it again when that command has finished.',
     'EXPECTED_NODE_KEY_REQUIRED': 'A visitor-chosen Node needs its expected public key.',
     'EXPORT_CORRUPT': 'Published snapshot files do not match their signed hashes; rebuild with node:snapshot --rebuild-derived.',

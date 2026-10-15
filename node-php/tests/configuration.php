@@ -34,6 +34,28 @@ foreach (['node' => true, 'publisher' => true, 'string' => 'true'] as $role => $
     file_put_contents($path, json_encode($v, JSON_THROW_ON_ERROR));
     try { NodeConfig::load($path); throw new RuntimeException('visitor sources accepted for ' . $role); } catch (InvalidArgumentException) { ++$checks; }
 }
+// publisher_nodes: optional, publisher/combined only, distinct canonical Onions with valid Node keys.
+$nodeKey = 'ed25519:' . rtrim(strtr(base64_encode(sodium_crypto_sign_publickey(sodium_crypto_sign_seed_keypair(str_repeat("\x07", 32)))), '+/', '-_'), '=');
+$publisher = $original; $publisher['role'] = 'publisher'; $publisher['node']['onion'] = 'pg6mmjiyjmcrsslvykfwnntlaru7p5svn6y2ymmju6nubxndf4pscryd.onion'; $publisher['features']['publish_service'] = true;
+$entry = ['onion' => '32o2tuiv2yycgn2o5qv5ff4tfsb7ytiats25pzx2i4gvrjl3tyop7mqd.onion', 'expected_node_key' => $nodeKey];
+file_put_contents($path, json_encode($publisher, JSON_THROW_ON_ERROR));
+if (NodeConfig::load($path)->publisherNodes !== []) { throw new RuntimeException('publisher_nodes default'); } ++$checks;
+$v = $publisher; $v['publisher_nodes'] = [$entry]; file_put_contents($path, json_encode($v, JSON_THROW_ON_ERROR));
+if (NodeConfig::load($path)->publisherNodes !== [$entry]) { throw new RuntimeException('publisher_nodes'); } ++$checks;
+foreach (['client-role' => 'ROLE_CONFIGURATION_INVALID', 'duplicate' => 'SOURCE_DUPLICATE', 'key' => 'PUBLIC_KEY_INVALID', 'extra' => 'CONFIGURATION_INVALID', 'too-many' => 'CONFIGURATION_INVALID', 'object' => 'CONFIGURATION_INVALID'] as $case => $expected) {
+    $v = $publisher;
+    match ($case) {
+        'client-role' => [$v = $original, $v['publisher_nodes'] = [$entry]],
+        'duplicate' => $v['publisher_nodes'] = [$entry, $entry],
+        'key' => $v['publisher_nodes'] = [['onion' => $entry['onion'], 'expected_node_key' => 'ed25519:invalid']],
+        'extra' => $v['publisher_nodes'] = [$entry + ['label' => 'mine']],
+        'too-many' => $v['publisher_nodes'] = array_fill(0, 17, $entry),
+        'object' => $v['publisher_nodes'] = ['first' => $entry],
+    };
+    file_put_contents($path, json_encode($v, JSON_THROW_ON_ERROR));
+    try { NodeConfig::load($path); throw new RuntimeException('publisher_nodes accepted: ' . $case); }
+    catch (InvalidArgumentException $error) { if ($error->getMessage() !== $expected) { throw new RuntimeException($case . ' gave ' . $error->getMessage()); } ++$checks; }
+}
 file_put_contents($path, json_encode($original, JSON_THROW_ON_ERROR));
 $alias = sys_get_temp_dir() . '/osd-public-alias-' . bin2hex(random_bytes(12)); symlink($root . '/node-php/public', $alias);
 foreach ([$root . '/node-php/public/index.php', $alias . '/index.php'] as $publicConfig) {

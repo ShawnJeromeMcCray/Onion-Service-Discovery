@@ -15,8 +15,9 @@ final readonly class NodeConfig
      * @param array<array-key, mixed> $features
      * @param array<array-key, mixed> $sources
      * @param list<string> $allowedClientOrigins
+     * @param list<array{onion:string,expected_node_key:string}> $publisherNodes Discovery Nodes a publisher checks and announces to.
      */
-    private function __construct(public string $role, public string $backend, public string $storagePath, public string $exportPath, public ?string $nodeOnion, public ?string $nodeKeyPath, public array $features, public array $sources, public array $allowedClientOrigins, private string $proxyHost, private int $proxyPort, private int $timeout) {}
+    private function __construct(public string $role, public string $backend, public string $storagePath, public string $exportPath, public ?string $nodeOnion, public ?string $nodeKeyPath, public array $features, public array $sources, public array $allowedClientOrigins, private string $proxyHost, private int $proxyPort, private int $timeout, public array $publisherNodes = []) {}
     public static function load(string $path): self
     {
         if (str_contains($path, '://') || is_link($path) || !is_file($path) || filesize($path) > 16384) { throw new ProtocolException('CONFIGURATION_UNAVAILABLE'); }
@@ -25,7 +26,8 @@ final readonly class NodeConfig
         if ($realConfig === false || ($publicRoot !== false && str_starts_with($realConfig, $publicRoot . '/'))) { throw new ProtocolException('PRIVATE_PATH_IN_WEBROOT'); }
         $bytes = file_get_contents($path, false, null, 0, 16385); if ($bytes === false || strlen($bytes) > 16384) { throw new ProtocolException('CONFIGURATION_UNAVAILABLE'); }
         $v = StrictJson::parse($bytes, 16384);
-        if (count(get_object_vars($v)) !== 9 || array_diff(array_keys(get_object_vars($v)), ['configuration_version','role','storage','export_path','node','features','transport','sources','allowed_client_origins']) !== [] || ($v->configuration_version ?? null) !== 1 || !in_array($v->role ?? null, ['node','client-host','combined','publisher'], true)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
+        // publisher_nodes is a later, optional addition; files without it stay valid.
+        if (count(get_object_vars($v)) !== (property_exists($v, 'publisher_nodes') ? 10 : 9) || array_diff(array_keys(get_object_vars($v)), ['configuration_version','role','storage','export_path','node','features','transport','sources','allowed_client_origins','publisher_nodes']) !== [] || ($v->configuration_version ?? null) !== 1 || !in_array($v->role ?? null, ['node','client-host','combined','publisher'], true)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
         self::shape($v->storage, ['backend','path']); self::shape($v->node, ['onion','key_path']); self::shape($v->transport, ['proxy_host','proxy_port','timeout_ms']);
         if (!$v->features instanceof \stdClass) { throw new ProtocolException('CONFIGURATION_INVALID'); }
         // Backward-compatible optional local receiver switch; disabled for existing configs.
@@ -47,6 +49,7 @@ final readonly class NodeConfig
             OnionAddress::parse($match[1]);
         }
         if (count(array_unique($v->allowed_client_origins)) !== count($v->allowed_client_origins)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
+        $publisherNodes = self::publisherNodes($v->publisher_nodes ?? [], $v->role);
         if ($v->role === 'client-host') {
             // A Client Host has no Node features; only the visitor-source relay switch may be enabled.
             if ($v->node->onion !== null || $v->node->key_path !== null || array_keys(array_filter(get_object_vars($v->features))) !== array_keys(array_filter(['visitor_sources' => $v->features->visitor_sources]))) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
@@ -62,7 +65,7 @@ final readonly class NodeConfig
         foreach ([$v->storage->path, $v->export_path, $v->node->key_path] as $privatePath) {
             if ($privatePath !== null && $public !== false && (self::resolvedPath($privatePath) === $public || str_starts_with(self::resolvedPath($privatePath), $public . '/'))) { throw new ProtocolException('PRIVATE_PATH_IN_WEBROOT'); }
         }
-        return new self($v->role, $v->storage->backend, $v->storage->path, $v->export_path, $v->node->onion, $v->node->key_path, get_object_vars($v->features), $v->sources, $v->allowed_client_origins, $v->transport->proxy_host, $v->transport->proxy_port, $v->transport->timeout_ms);
+        return new self($v->role, $v->storage->backend, $v->storage->path, $v->export_path, $v->node->onion, $v->node->key_path, get_object_vars($v->features), $v->sources, $v->allowed_client_origins, $v->transport->proxy_host, $v->transport->proxy_port, $v->transport->timeout_ms, $publisherNodes);
     }
     public function store(bool $create = false, bool $readOnly = false): StorageBackend
     {
@@ -70,6 +73,24 @@ final readonly class NodeConfig
         return $this->backend === 'filesystem' ? new FilesystemStore($this->storagePath, create: $create, readOnly: $readOnly) : new SQLiteStore($this->storagePath, create: $create, readOnly: $readOnly);
     }
     public function transport(): TorTransport { return new TorTransport($this->proxyHost, $this->proxyPort, $this->timeout); }
+    /**
+     * The publisher's own choice of Discovery Nodes, each with the Node key obtained independently.
+     * @return list<array{onion:string,expected_node_key:string}>
+     */
+    private static function publisherNodes(mixed $value, string $role): array
+    {
+        if (!is_array($value) || !array_is_list($value) || count($value) > \OnionServiceDiscovery\Configuration\PublisherMembership::MAX_SOURCES) { throw new ProtocolException('CONFIGURATION_INVALID'); }
+        if ($value !== [] && !in_array($role, ['publisher', 'combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        $nodes = [];
+        foreach ($value as $node) {
+            self::shape($node, ['onion', 'expected_node_key']);
+            if (!is_string($node->onion) || !is_string($node->expected_node_key)) { throw new ProtocolException('CONFIGURATION_INVALID'); }
+            $onion = OnionAddress::parse($node->onion)->hostname; \OnionServiceDiscovery\Crypto\Encoding::publicKey($node->expected_node_key);
+            if (isset($nodes[$onion])) { throw new ProtocolException('SOURCE_DUPLICATE'); }
+            $nodes[$onion] = ['onion' => $onion, 'expected_node_key' => $node->expected_node_key];
+        }
+        return array_values($nodes);
+    }
     /**
      * @param array<array-key, mixed> $keys
      */

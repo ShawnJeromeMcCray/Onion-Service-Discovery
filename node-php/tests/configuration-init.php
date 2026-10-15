@@ -20,6 +20,17 @@ try {
     $publisher = $run(['init', $root . '/publisher/config.json', $onion, '--publish'], 0);
     $assert($publisher['role'] === 'publisher' && $publisher['publishing_opt_in'] === true && is_string($publisher['next_action']), 'publisher init unchanged'); ++$checks;
 
+    // Publisher Nodes go into the validated configuration; the plain file shows where they go.
+    $nodeKey = 'ed25519:' . rtrim(strtr(base64_encode(sodium_crypto_sign_publickey(sodium_crypto_sign_seed_keypair(str_repeat("\x07", 32)))), '+/', '-_'), '=');
+    mkdir($root . '/publisher-nodes', 0700);
+    $withNodes = $run(['init', $root . '/publisher-nodes/config.json', $onion, '--publish', '--node', $source, $nodeKey, '--node', $second, $nodeKey], 0);
+    $written = json_decode(file_get_contents($root . '/publisher-nodes/config.json'), true, 16, JSON_THROW_ON_ERROR);
+    $assert($withNodes['publisher_node_count'] === 2 && $written['publisher_nodes'] === [['onion' => $source, 'expected_node_key' => $nodeKey], ['onion' => $second, 'expected_node_key' => $nodeKey]]
+        && $run(['config:validate', $root . '/publisher-nodes/config.json'], 0)['publisher_node_count'] === 2, 'publisher init with Nodes'); ++$checks;
+    $assert(json_decode(file_get_contents($root . '/publisher/config.json'), true, 16, JSON_THROW_ON_ERROR)['publisher_nodes'] === [], 'empty publisher_nodes'); ++$checks;
+    $assert($run(['init', $root . '/usage/config.json', $onion, '--node', $source, 'ed25519:invalid'], 3)['error'] === 'PUBLIC_KEY_INVALID', 'bad Node key'); ++$checks;
+    $assert($run(['init', $root . '/usage/config.json', $onion, '--node', $source, $nodeKey, '--node', $source, $nodeKey], 3)['error'] === 'SOURCE_DUPLICATE', 'duplicate Node'); ++$checks;
+
     $node = $run(['init', $root . '/node/config.json', $onion, '--role', 'node'], 0);
     $written = json_decode(file_get_contents($root . '/node/config.json'), true, 16, JSON_THROW_ON_ERROR);
     $assert($node['role'] === 'node' && $written['node']['key_path'] === $root . '/node/node.key' && $written['storage']['path'] === $root . '/node/data'
@@ -45,7 +56,7 @@ try {
 
     $assert($run(['init', $root . '/unsafe/config.json', '--role', 'client-host'], 3)['error'] === 'CONFIGURATION_PATH_UNSAFE', 'shared directory refused'); ++$checks;
     $assert($run(['init', $root . '/client/config.json', '--role', 'client-host'], 3)['error'] === 'CONFIGURATION_CREATE_REFUSED', 'existing file never overwritten'); ++$checks;
-    foreach ([['--role', 'client-host', $onion], ['--role', 'node'], [$onion, '--role', 'publisher', '--source', $source], [$onion, '--role', 'node', '--visitor-sources'], [$onion, '--sqlite'], [$onion, '--role', 'relay'], [$onion, '--unknown']] as $invalid) {
+    foreach ([['--role', 'client-host', $onion], ['--role', 'node'], [$onion, '--role', 'publisher', '--source', $source], [$onion, '--role', 'node', '--node', $source, $nodeKey], [$onion, '--node', $source], [$onion, '--role', 'node', '--visitor-sources'], [$onion, '--sqlite'], [$onion, '--role', 'relay'], [$onion, '--unknown']] as $invalid) {
         $assert($run(['init', $root . '/usage/config.json', ...$invalid], 2)['error'] === 'USAGE_ERROR', 'invalid init accepted: ' . implode(' ', $invalid)); ++$checks;
     }
     $assert(!file_exists($root . '/usage/config.json'), 'refused init wrote a file'); ++$checks;

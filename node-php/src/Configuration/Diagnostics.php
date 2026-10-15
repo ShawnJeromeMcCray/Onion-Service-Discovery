@@ -38,6 +38,9 @@ final class Diagnostics
             $state = $facts['manifest']['state'];
             $checks['publisher_manifest'] = $state === 'SIGNATURE_VALID' ? 'PASS' : 'FAIL';
             if (($facts['source_integrity'] ?? null) !== null && $facts['source_integrity'] !== 'NO_CONFLICT_DETECTED') { $warnings[] = 'PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT'; }
+            // Without chosen Nodes neither the timer nor a plain command can check or announce anything.
+            $checks['publisher_nodes'] = $config->publisherNodes === [] ? 'WARN' : 'PASS';
+            if ($config->publisherNodes === []) { $warnings[] = 'PUBLISHER_NODES_NOT_CONFIGURED'; }
         }
         if (!in_array($config->role, ['client-host','publisher'], true) && $config->backend === 'sqlite') {
             $checks['sqlite_driver'] = class_exists(\PDO::class) && in_array('sqlite', \PDO::getAvailableDrivers(), true) ? 'PASS' : 'FAIL';

@@ -86,7 +86,7 @@ privilege separation, automatic authenticated backup custody and incident drills
 remain release gates. The reference systemd/nginx/FPM files are staging templates;
 no installer silently enables them or modifies the operator's Tor service.
 
-`service:verify CONFIG ONION` makes two bounded fixed-path requests through the
+`service:verify CONFIG [ONION]` (without ONION: `node.onion` of the configuration) makes two bounded fixed-path requests through the
 configured Tor SOCKS transport: it checks the manifest signature and exact Onion
 binding, then reports the served PCP-004 history bundle as `history_bundle`
 (`CONNECTED`, `INCOMPLETE`, `MISSING`, `NOT_SERVED_GENESIS_NEEDS_NONE` or
@@ -121,8 +121,10 @@ verifies exact current owner-state membership offline in a complete signed draft
 snapshot, including genesis continuity through rotation/migration. It evaluates
 neither freshness nor checkpoint ancestry. See [the contract](snapshot-membership.md).
 
-`service:membership CONFIG OWN_HISTORY --node NODE_ONION EXPECTED_NODE_KEY [--node ...]`
-fetches, for each of at most 16 explicitly selected Nodes, its current state,
+`service:membership CONFIG OWN_HISTORY [--node NODE_ONION EXPECTED_NODE_KEY]...`
+(without `--node`: the `publisher_nodes` of the configuration, otherwise
+`PUBLISHER_NODES_NOT_CONFIGURED`) fetches, for each of at most 16 explicitly
+selected Nodes, its current state,
 signed checkpoint and every chunk through the configured Tor SOCKS transport,
 then applies the same exact-state membership verifier as `index:verify-inclusion`.
 OWN_HISTORY is `{"records": [...]}`, the PCP-004 history bundle that
@@ -216,8 +218,9 @@ reads no signing key and mutates no local store. The exact response is
 `NOT_CONFIRMED`. Redirect, malformed acknowledgement and bare inclusion
 assertions fail; HTTP 429 fails as `ANNOUNCEMENT_RATE_LIMITED`.
 
-`service:announce CONFIG SIGNED_MANIFEST_FILE --node ONION KEY [--node ...]`
-takes the same Node list as `network:discoverability-check` (at most 16) and
+`service:announce CONFIG SIGNED_MANIFEST_FILE [--node ONION KEY]...`
+takes the same Node list as `network:discoverability-check` (at most 16; without
+`--node` the `publisher_nodes` of the configuration) and
 announces to each Node in turn; one failing Node does not stop the others. The
 JSON lists one row per Node and counts `accepted`, `rate_limited`, `unreachable`
 and `other_failure`; exit 0 when every hint was received, otherwise 6.

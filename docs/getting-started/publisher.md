@@ -115,11 +115,27 @@ outside the document root. The reference templates assume a dedicated OSD listen
 
 ## 5. Verify over Tor and check selected Nodes
 
-Set the actual loopback SOCKS port in the private configuration. Explicitly fetch
-and verify your own published Manifest through Tor:
+Set the actual loopback SOCKS port in the private configuration. Choose the
+Discovery Nodes you want to be found through, and obtain each Node's Onion and its
+expected Node public key through a channel you chose independently; never copy
+them from the Node's own response. Put them into `publisher_nodes` of the private
+configuration (at most 16), or pass them to `init` as `--node ONION KEY`:
+
+```json
+"publisher_nodes": [
+  {"onion": "FIRST_NODE.onion", "expected_node_key": "ed25519:FIRST_NODE_PUBLIC_KEY"},
+  {"onion": "SECOND_NODE.onion", "expected_node_key": "ed25519:SECOND_NODE_PUBLIC_KEY"},
+  {"onion": "THIRD_NODE.onion", "expected_node_key": "ed25519:THIRD_NODE_PUBLIC_KEY"}
+]
+```
+
+Run `config:validate CONFIG` after every edit: a typo then fails at once with
+`ADDRESS_INVALID` or `PUBLIC_KEY_INVALID` instead of in a nightly job. Explicitly
+fetch and verify your own published Manifest through Tor; without an Onion
+argument the command checks `node.onion` of the configuration:
 
 ```sh
-sudo -u osd-worker php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion
+sudo -u osd-worker php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json
 ```
 
 Expect `SIGNATURE_AND_BINDING_VALID`. This establishes the fetched signature and
@@ -131,9 +147,9 @@ accepts a hint: `network:announce CONFIG SIGNED_MANIFEST NODE_ONION` returns
 verifies your Manifest itself.
 
 Then check, in one bounded command, whether your exact current signed state is
-included at the Nodes you selected. Obtain each Node's Onion and its expected
-Node public key through a channel you chose independently; never copy them from
-the Node's own response. On the administrator machine, collect your complete
+included at the Nodes in `publisher_nodes`. To check other Nodes once, append
+`--node ONION KEY` triples instead; they replace the configured list for that
+run. On the administrator machine, collect your complete
 owner history (every signed revision and continuity proof) in
 `history.json` as `{"records": [ ... ]}`. On the web host the history bundle
 that `manifest:install` maintains,
@@ -142,10 +158,7 @@ directly, and for a Service that has only its genesis Manifest, the signed
 `manifest.json` itself:
 
 ```sh
-sudo -u osd-worker php node-php/bin/onion-service-discovery service:membership /absolute/private/osd-publisher/config.json node-php/public/.well-known/onion-service-discovery-history.json \
-  --node FIRST_NODE.onion ed25519:FIRST_NODE_PUBLIC_KEY \
-  --node SECOND_NODE.onion ed25519:SECOND_NODE_PUBLIC_KEY \
-  --node THIRD_NODE.onion ed25519:THIRD_NODE_PUBLIC_KEY
+sudo -u osd-worker php node-php/bin/onion-service-discovery service:membership /absolute/private/osd-publisher/config.json node-php/public/.well-known/onion-service-discovery-history.json
 ```
 
 The history contains only public signed records; it never needs the Service key.
@@ -196,9 +209,8 @@ an older revision is ignored, and evidence older than seven days shows
 For a complete status page also save the self-check and announcement results:
 
 ```sh
-sudo -u osd-worker php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion --save-status
-sudo -u osd-worker php node-php/bin/onion-service-discovery network:announce /absolute/private/osd-publisher/config.json /absolute/public-transfer/manifest.json \
-  --node FIRST_NODE.onion ed25519:FIRST_NODE_PUBLIC_KEY --node SECOND_NODE.onion ed25519:SECOND_NODE_PUBLIC_KEY --save-status
+sudo -u osd-worker php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json --save-status
+sudo -u osd-worker php node-php/bin/onion-service-discovery network:announce /absolute/private/osd-publisher/config.json node-php/public/.well-known/onion-service-discovery.json --save-status
 ```
 
 The page then lists ten steps (installation, configuration, identity, Manifest,
@@ -224,16 +236,10 @@ Onion behind Tor (`ONION_UNREACHABLE`, `TOR_REQUEST_TIMEOUT`), or your web serve
 (`HTTP_NOT_FOUND`, `HTTP_REDIRECT_REJECTED`, `HTTP_SERVER_ERROR`). A **Warning**
 section appears when a checked Node contradicted the checkpoint it served at your
 previous check. `doctor CONFIG` reports the same publication facts.
-To keep it current and announce automatically, adapt
-`deployment/systemd/osd-publisher-check.service`, put your Onion and Node list
-into `/etc/onion-service-discovery/publisher-check.env`:
-
-```sh
-OSD_ONION=YOUR_CANONICAL_V3_ADDRESS.onion
-OSD_NODES=--node FIRST_NODE.onion ed25519:FIRST_NODE_PUBLIC_KEY --node SECOND_NODE.onion ed25519:SECOND_NODE_PUBLIC_KEY
-```
-
-and enable `osd-publisher-check.timer`. Every six hours it verifies your own
+To keep it current and announce automatically, adapt the paths in
+`deployment/systemd/osd-publisher-check.service` and enable
+`osd-publisher-check.timer`. It reads your Onion and Nodes from the
+configuration; no other file is needed. Every six hours it verifies your own
 Onion, checks the Nodes and then runs `network:announce … --if-due`: a Node gets
 a hint only for a new revision or while it still lacks your current revision,
 at most once per day per Node, with backoff of 1, 2, 4 up to 32 days (decision

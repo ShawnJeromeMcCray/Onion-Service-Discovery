@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Publisher Nodes live in the validated configuration: the optional
+  `publisher_nodes` list (Onion plus independently obtained Node key, at most 16)
+  is checked by `config:validate`, written by `init … --node ONION KEY`, and used
+  by `service:membership` and `service:announce` when no `--node` is given;
+  `service:verify` checks `node.onion` when no Onion is given. The publisher
+  timer therefore needs no environment file, and a typo fails at validation
+  instead of silently in a nightly job. `doctor` warns when a publishing
+  installation has no Nodes. Explicit `--node` triples keep working.
 - Publisher dashboard follows the states of spec 47: `CONNECTING`,
   `ANNOUNCED_PENDING_VERIFICATION` and `EXTERNALLY_OBSERVED` between
   `READY_LOCALLY` and `DISCOVERABLE`, derived from the saved self-check,
