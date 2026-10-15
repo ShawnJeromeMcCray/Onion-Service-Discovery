@@ -51,7 +51,13 @@ try{
    $repaired=(new SnapshotProducer($store,$repair,$verifier,$signer,true,true))->publish(1700000002);
    if($repaired['status']!=='PUBLISHED'||$query('query=')['status']!==200||file_get_contents($path)!==$wire)throw new RuntimeException('explicit rebuild did not recover cache');
    unset($repair);}
-  $next=$producer->publish(1700100000);$store->transaction(static fn(StorageTransaction $tx)=>$tx->set('node','server-search-index',$pointer));
+  $next=$producer->publish(1700100000);
+  // An index built by an earlier release (format 1, before the D-023 ranking) is stale, not trusted.
+  $fresh=$store->snapshot()['tables']['node']['key:server-search-index'];
+  $store->transaction(static fn(StorageTransaction $tx)=>$tx->set('node','server-search-index',['format_version'=>1]+$fresh));
+  try{SearchIndex::load($store,$blobs,$verifier,static function():void{});throw new RuntimeException('format-1 index accepted');}catch(\OnionServiceDiscovery\Protocol\ProtocolException $error){if($error->getMessage()!=='SEARCH_INDEX_STALE')throw $error;}
+  if($query('query=')['status']!==503)throw new RuntimeException('format-1 index served');
+  $store->transaction(static fn(StorageTransaction $tx)=>$tx->set('node','server-search-index',$pointer));
   if($query('query=')['status']!==503)throw new RuntimeException('stale cache silently reused');
   $store->integrityCheck();unset($search,$producer,$store,$blobs);
  }}

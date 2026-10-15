@@ -153,7 +153,7 @@ for remedies.
 | `RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX` | doctor | 6 | doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it. |
 | `SCHEMA_INVALID` | CLI, Node worker, browser client, encoding, input parsing, protocol, signing, web routes | 3 | The record does not match its draft schema. |
 | `SEARCH_INDEX_CORRUPT` | server search | 3 | The server search index files in the export directory are missing, altered or malformed or do not match the published snapshot, so server search is unavailable; rebuild them with node:snapshot --rebuild-derived. |
-| `SEARCH_INDEX_STALE` | server search | 3 | The server search index was built for another snapshot than the one now published, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived. |
+| `SEARCH_INDEX_STALE` | server search | 3 | The server search index was built for another snapshot than the one now published, or by an earlier release in an older format, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived. |
 | `SEARCH_INDEX_UNAVAILABLE` | server search | 3 | Server search has no index because no snapshot was published or it was published with server search off, so server search is unavailable; run node:snapshot with server_search enabled. |
 | `SEARCH_REQUEST_INVALID` | server search, web routes | 3 | The server search form submission is malformed (wrong media type, unknown or repeated fields, a query over 256 UTF-16 units, or an invalid language, category or adult value), so it was rejected; use the search form. |
 | `SEARCH_TEXT_INVALID` | server search | 3 | Text given to search normalization is not valid UTF-8, exceeds 1 MiB or contains an invalid code point, so it was refused. |

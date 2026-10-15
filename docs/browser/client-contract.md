@@ -114,7 +114,9 @@ recovery link is available before verifier startup and without scripting when th
 Node explicitly enables the feature. The HTML form discloses query transfer before
 submission. Results are Node-controlled claims, without browser verification.
 Browser and PHP presentation share frozen Unicode 17 search semantics and golden
-ranking fixtures. See [operations contract](../operations/server-search.md).
+ranking fixtures: results are ordered by text relevance (decision D-023: exact
+name, name prefix, every term in the name, other matches), never by how many
+Nodes list or observe a Service. See [operations contract](../operations/server-search.md).
 
 ## Bounded long-absence refresh
 

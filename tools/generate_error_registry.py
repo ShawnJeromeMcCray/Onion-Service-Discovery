@@ -200,7 +200,7 @@ DESCRIPTIONS = {
     'REVISION_DOWNGRADE': 'A Service or source served an older Manifest revision than one already known for that identity (node:work-one quarantines the candidate; a browser pin keeps the newer revision); load other sources.',
     'REVISION_EXHAUSTED': 'The current Manifest already has the highest possible revision (9007199254740991), so no successor revision can be drafted.',
     'SEARCH_INDEX_CORRUPT': 'The server search index files in the export directory are missing, altered or malformed or do not match the published snapshot, so server search is unavailable; rebuild them with node:snapshot --rebuild-derived.',
-    'SEARCH_INDEX_STALE': 'The server search index was built for another snapshot than the one now published, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived.',
+    'SEARCH_INDEX_STALE': 'The server search index was built for another snapshot than the one now published, or by an earlier release in an older format, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived.',
     'SEARCH_INDEX_UNAVAILABLE': 'Server search has no index because no snapshot was published or it was published with server search off, so server search is unavailable; run node:snapshot with server_search enabled.',
     'SEARCH_REQUEST_INVALID': 'The server search form submission is malformed (wrong media type, unknown or repeated fields, a query over 256 UTF-16 units, or an invalid language, category or adult value), so it was rejected; use the search form.',
     'SEARCH_TEXT_INVALID': 'Text given to search normalization is not valid UTF-8, exceeds 1 MiB or contains an invalid code point, so it was refused.',

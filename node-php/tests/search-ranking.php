@@ -3,8 +3,8 @@ declare(strict_types=1);
 require __DIR__.'/../vendor/autoload.php';
 use OnionServiceDiscovery\Search\LocalSearch;
 use OnionServiceDiscovery\Search\UnicodeSearch;
-$v=json_decode(file_get_contents(dirname(__DIR__,2).'/protocol/test-vectors/local-search-v1.json'),true,64,JSON_THROW_ON_ERROR);
-$rows=$v['rows'];foreach($rows as &$row){$row['searchText']=UnicodeSearch::normalize(implode(' ',[$row['name'],$row['description'],$row['onion']??'',$row['genesisKey'],...$row['categories'],...$row['languages']]));}unset($row);
+$v=json_decode(file_get_contents(dirname(__DIR__,2).'/protocol/test-vectors/local-search-v2.json'),true,64,JSON_THROW_ON_ERROR);
+$rows=$v['rows'];foreach($rows as &$row){$row['searchText']=UnicodeSearch::normalize(implode(' ',[$row['name'],$row['description'],$row['onion']??'',$row['genesisKey'],...$row['categories'],...$row['languages']]));$row['searchName']=LocalSearch::collapse(UnicodeSearch::normalize($row['name']));}unset($row);
 $before=$rows;
 foreach($v['cases'] as $case){
  $result=LocalSearch::filter($rows,$case['query'],$case['language'],$case['category'],$case['adult']);

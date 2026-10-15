@@ -108,7 +108,7 @@ final readonly class SnapshotProducer
             $publicHashes[] = $descriptor->contentHash;
             foreach (array_chunk(array_values(array_unique($publicHashes)),64) as $index => $part) { $tx->set('node','public-index-' . $index,['hashes'=>$part]); }
             foreach ($serviceIndexes as $prefix => $hash) { $tx->set('node', 'service-index-' . $prefix, ['hash' => $hash]); }
-            if ($searchIndex !== null) { $tx->set('node', 'server-search-index', ['format_version' => 1, 'hash' => $searchIndex]); }
+            if ($searchIndex !== null) { $tx->set('node', 'server-search-index', ['format_version' => \OnionServiceDiscovery\Search\SearchIndex::FORMAT_VERSION, 'hash' => $searchIndex]); }
             else { $tx->deleteOperational('node', 'server-search-index'); }
             $tx->set('node', 'published-snapshot', ['hash' => $descriptor->contentHash, 'root_hash' => SnapshotFormat::rootHash($chunks), 'generation' => $generation, 'cursor' => (string) $publicCursor, 'service_index_version' => 2]);
         });

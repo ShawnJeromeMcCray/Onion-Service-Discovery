@@ -1,0 +1,614 @@
+{
+ "format_version": 2,
+ "ranking": "D-023 text relevance tiers: exact normalized name, name prefix, every term in the name, other match; ties by normalized name without leading ASCII punctuation, then identity key",
+ "scope": "abstract presentation rows; not signed protocol records or claimed real identities",
+ "rows": [
+  {
+   "genesisKey": "test:adult",
+   "name": "Adult Archive",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [
+    "adult"
+   ],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:c",
+   "name": "Café",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:fork",
+   "name": "Conflicting identity history",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "FORKED",
+   "addressConflict": false,
+   "languages": [],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": null
+  },
+  {
+   "genesisKey": "test:m",
+   "name": "Foo",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:a",
+   "name": "Library Alpha",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [
+    "books"
+   ],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:z",
+   "name": "Library Alpha",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en",
+    "de"
+   ],
+   "categories": [
+    "books",
+    "other"
+   ],
+   "observationClaims": 100,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:f",
+   "name": "Regex .* [a-z]",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:d",
+   "name": "ΟΣ",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:e",
+   "name": "ΟΣΑ",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:g",
+   "name": "😀",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:h",
+   "name": "",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:b",
+   "name": "Ｆｏｏ",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:withdrawn",
+   "name": "Withdrawn Library",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "WITHDRAWN",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:r1",
+   "name": "Library",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:r2",
+   "name": "!Library",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:r3",
+   "name": "LIBRARY",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 99,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:r4",
+   "name": "The Library Project",
+   "description": "Metadata",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "genesisKey": "test:r5",
+   "name": "Archive Mirror",
+   "description": "A library mirror",
+   "onion": null,
+   "revision": 1,
+   "status": "PUBLISHED",
+   "addressConflict": false,
+   "languages": [
+    "en"
+   ],
+   "categories": [],
+   "observationClaims": 0,
+   "rotationCount": 0,
+   "migrationCount": 0,
+   "currentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  }
+ ],
+ "cases": [
+  {
+   "id": "default",
+   "query": "",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:adult",
+    "test:r5",
+    "test:c",
+    "test:fork",
+    "test:b",
+    "test:m",
+    "test:r1",
+    "test:r2",
+    "test:r3",
+    "test:a",
+    "test:z",
+    "test:f",
+    "test:r4",
+    "test:d",
+    "test:e",
+    "test:g",
+    "test:h"
+   ]
+  },
+  {
+   "id": "ascii-case",
+   "query": "LIBRARY",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:r1",
+    "test:r3",
+    "test:a",
+    "test:z",
+    "test:r2",
+    "test:r4",
+    "test:r5"
+   ]
+  },
+  {
+   "id": "compatibility",
+   "query": "ＦＯＯ",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:b",
+    "test:m"
+   ]
+  },
+  {
+   "id": "composition",
+   "query": "café",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:c"
+   ]
+  },
+  {
+   "id": "sigma-context-final",
+   "query": "ΟΣ",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:d"
+   ]
+  },
+  {
+   "id": "sigma-context-prefix",
+   "query": "οσ",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:e"
+   ]
+  },
+  {
+   "id": "literal-regex-star",
+   "query": ".*",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:f"
+   ]
+  },
+  {
+   "id": "literal-regex-brackets",
+   "query": "[a-z]",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:f"
+   ]
+  },
+  {
+   "id": "category-no-count-advantage",
+   "query": "",
+   "language": "",
+   "category": "books",
+   "adult": "show",
+   "expected_ids": [
+    "test:a",
+    "test:z"
+   ]
+  },
+  {
+   "id": "language-exact",
+   "query": "",
+   "language": "de",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:z"
+   ]
+  },
+  {
+   "id": "adult-hide",
+   "query": "",
+   "language": "",
+   "category": "",
+   "adult": "hide",
+   "expected_ids": [
+    "test:r5",
+    "test:c",
+    "test:fork",
+    "test:b",
+    "test:m",
+    "test:r1",
+    "test:r2",
+    "test:r3",
+    "test:a",
+    "test:z",
+    "test:f",
+    "test:r4",
+    "test:d",
+    "test:e",
+    "test:g",
+    "test:h"
+   ]
+  },
+  {
+   "id": "adult-deemphasize",
+   "query": "",
+   "language": "",
+   "category": "",
+   "adult": "de-emphasize",
+   "expected_ids": [
+    "test:r5",
+    "test:c",
+    "test:fork",
+    "test:b",
+    "test:m",
+    "test:r1",
+    "test:r2",
+    "test:r3",
+    "test:a",
+    "test:z",
+    "test:f",
+    "test:r4",
+    "test:d",
+    "test:e",
+    "test:g",
+    "test:h",
+    "test:adult"
+   ]
+  },
+  {
+   "id": "adult-hidden-category",
+   "query": "",
+   "language": "",
+   "category": "adult",
+   "adult": "hide",
+   "expected_ids": []
+  },
+  {
+   "id": "retained-fork",
+   "query": "conflicting",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:fork"
+   ]
+  },
+  {
+   "id": "withdrawn-excluded",
+   "query": "withdrawn",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": []
+  },
+  {
+   "id": "rare",
+   "query": "sensitive-local-search-probe",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": []
+  },
+  {
+   "id": "ecmascript-nbsp",
+   "query": "library alpha",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:a",
+    "test:z"
+   ]
+  },
+  {
+   "id": "nel-is-not-ecmascript-space",
+   "query": "libraryalpha",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": []
+  },
+  {
+   "id": "term-limit",
+   "query": "regex regex regex regex regex regex regex regex regex regex regex regex regex regex regex regex missing",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:f"
+   ]
+  },
+  {
+   "id": "empty-language-unknown",
+   "query": "",
+   "language": "fr",
+   "category": "",
+   "adult": "show",
+   "expected_ids": []
+  },
+  {
+   "id": "tiers-exact-prefix-words-other",
+   "query": "library",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:r1",
+    "test:r3",
+    "test:a",
+    "test:z",
+    "test:r2",
+    "test:r4",
+    "test:r5"
+   ]
+  },
+  {
+   "id": "tier-exact-phrase",
+   "query": "library alpha",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:a",
+    "test:z"
+   ]
+  },
+  {
+   "id": "tier-all-terms-in-name",
+   "query": "project library",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:r4"
+   ]
+  },
+  {
+   "id": "tier-description-only",
+   "query": "mirror library",
+   "language": "",
+   "category": "",
+   "adult": "show",
+   "expected_ids": [
+    "test:r5"
+   ]
+  }
+ ]
+}

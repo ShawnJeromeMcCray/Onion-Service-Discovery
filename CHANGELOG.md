@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Search results are ranked by text relevance (owner decision D-023) in the
+  browser and in the server search alike: an exact normalized name first, then
+  names that start with the query, names containing every term and finally
+  other matches; ties by the normalized name without leading ASCII punctuation,
+  then the identity key. Case variants and a leading "!" no longer move a name
+  ahead, and Node or observation counts never rank. Shared fixtures are now
+  `local-search-v2.json`. **Upgrade note:** a Node with server search enabled
+  reports `SEARCH_INDEX_STALE` until `node:snapshot … --rebuild-derived` builds
+  the new index format.
 - Publisher Node checks evaluate checkpoint freshness (owner decision D-036): a
   Node counts toward discoverability only while its signed checkpoint is at most
   seven days old and not dated more than five minutes ahead. A Node that

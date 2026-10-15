@@ -1292,7 +1292,7 @@
    "components": [
     "server search"
    ],
-   "meaning": "The server search index was built for another snapshot than the one now published, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived."
+   "meaning": "The server search index was built for another snapshot than the one now published, or by an earlier release in an older format, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived."
   },
   "SEARCH_INDEX_UNAVAILABLE": {
    "cli_exit": [
