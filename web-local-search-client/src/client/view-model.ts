@@ -100,10 +100,28 @@ export function localSearch(services:readonly ServiceRow[],query:string,language
   });
 }
 
+/**
+ * Invisible characters that can make two different names look identical: zero-width and other
+ * default-ignorable characters and tag characters. Emoji variation selectors and the zero-width
+ * joiner of emoji sequences are common in honest names and are not listed.
+ */
+const INVISIBLE=/[\u00ad\u034f\u115f\u1160\u17b4\u17b5\u180b-\u180f\u200b\u200c\u2060-\u2064\u3164\ufeff\uffa0\u{1bca0}-\u{1bca3}\u{e0000}-\u{e007f}]/u;
 /** Presentation hints only: signed Unicode remains unchanged and identity never depends on these. */
 export function metadataWarnings(name:string,description:string):string[] {
   const warnings:string[]=[];
   if (/[\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(name+description)) warnings.push('Metadata contains direction-changing characters. Compare the full Onion and identity key.');
+  if (INVISIBLE.test(name+description)) warnings.push('Metadata contains invisible characters, which can make different names look the same. Compare the full Onion and identity key.');
   if (/\p{Script=Latin}/u.test(name) && /[\p{Script=Cyrillic}\p{Script=Greek}]/u.test(name)) warnings.push('The name mixes visually similar writing systems. Names are self-declared; compare the full Onion and identity key.');
   return warnings;
+}
+/** Comparison form of a self-declared name: case, compatibility forms and spacing ignored. */
+const INVISIBLE_ALL=new RegExp(INVISIBLE.source,'gu');
+export function nameKey(name:string):string { return searchTextV1(name.replace(INVISIBLE_ALL,'')).replace(/\s+/gu,' ').trim(); }
+/**
+ * Spec 06 section 22: a self-declared name equal to a pinned label under another identity key is a
+ * warning, never a match. Returns the pinned label a row imitates, if any.
+ */
+export function pinNameMatcher(pins:readonly LocalPin[]):(row:{genesisKey:string;name:string})=>string|undefined {
+  const keys=new Set(pins.map(pin=>pin.genesisKey)); const names=new Map(pins.map(pin=>[nameKey(pin.label),pin.label] as const));
+  return row=>keys.has(row.genesisKey)?undefined:names.get(nameKey(row.name));
 }

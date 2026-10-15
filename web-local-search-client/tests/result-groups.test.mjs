@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { performance } from 'node:perf_hooks';
-import { groupSimilarResults } from '../src/client/result-groups.ts';
+import { groupLead, groupSimilarResults } from '../src/client/result-groups.ts';
 import { localSearch } from '../src/client/view-model.ts';
 
 const row=(key,name='Same',description='Same description')=>({genesisKey:key,name,description,onion:null,revision:1,status:'PUBLISHED',addressConflict:false,languages:['en'],categories:['other'],observationClaims:0,rotationCount:0,migrationCount:0,currentHash:null});
@@ -22,4 +22,12 @@ test('100000 synthetic presentation identities cannot occupy 100000 result group
   assert.equal(groups.find(group=>group.representative.name==='Same').entries.length,100000);
   assert.equal(groups.flatMap(group=>group.entries).length,100001);
   assert.ok(performance.now()-start<10000,'Bounded offline presentation stress exceeded ten seconds');
+});
+test('the pinned identity leads its group however another key sorts',()=>{
+  // An imitator can choose a key or a case variant that sorts first; the reader's pin still leads.
+  const groups=groupSimilarResults(localSearch([row('aaa-imitator','LIBRARY'),row('zzz-pinned','Library')],''));
+  assert.equal(groups.length,1);
+  assert.equal(groups[0].representative.genesisKey,'aaa-imitator');
+  assert.equal(groupLead(groups[0],new Set(['zzz-pinned'])).genesisKey,'zzz-pinned');
+  assert.equal(groupLead(groups[0],new Set()).genesisKey,'aaa-imitator');
 });

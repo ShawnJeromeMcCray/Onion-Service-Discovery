@@ -16,3 +16,7 @@ export function groupSimilarResults(rows: readonly ServiceRow[]): ResultGroup[] 
   }
   return [...groups.values()];
 }
+/** The identity you pinned leads its group, whatever another key's name sorts like. */
+export function groupLead(group:ResultGroup,pinned:ReadonlySet<string>):ServiceRow {
+  return group.entries.find(entry=>pinned.has(entry.genesisKey))??group.representative;
+}

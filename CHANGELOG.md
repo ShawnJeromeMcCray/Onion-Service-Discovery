@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Browser client accessibility and identity safety: without JavaScript only an
+  explanation and the server-search option are shown; load results and search
+  counts are announced once instead of on every update, and high-risk pin
+  changes use an alert; keyboard focus, open details and the result page
+  survive updates; repeated controls name their identity; every notice carries
+  a marker and a written severity, and text fields reach 3:1 contrast. A result
+  with a pinned name under another key is flagged, the pinned identity leads its
+  group, invisible characters are reported (also in pin labels and imports),
+  keys and onion addresses can be copied, and the privacy wording no longer
+  overstates: the page says what a Client Host relay learns. New security copy
+  registry (`docs/ux/security-copy-registry.md`) and accessibility notes.
 - Publisher Nodes live in the validated configuration: the optional
   `publisher_nodes` list (Onion plus independently obtained Node key, at most 16)
   is checked by `config:validate`, written by `init … --node ONION KEY`, and used
