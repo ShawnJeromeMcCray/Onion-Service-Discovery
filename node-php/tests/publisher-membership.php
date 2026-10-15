@@ -101,15 +101,23 @@ try {
     $assert($byOnion[$wrongKey]['category'] === 'rejected' && $byOnion[$wrongKey]['error'] === 'SOURCE_KEY_MISMATCH', 'wrong expected key'); ++$checks;
     $assert(!in_array($wrongKey . '/onion-service-discovery/v1/chunks/', array_map(static fn (string $r): string => preg_replace('~[0-9a-f]{64}\z~', '', $r), $requests), true), 'chunks fetched under wrong key'); ++$checks;
     $included = $byOnion[$nodes['included']['onion']];
-    $assert($included['snapshot_state']['manifest_hash'] === $current->contentHash && $included['checkpoint_age_seconds'] === 100, 'included evidence'); ++$checks;
+    $assert($included['snapshot_state']['manifest_hash'] === $current->contentHash && $included['checkpoint_age_seconds'] === 100 && $included['checkpoint_freshness'] === 'FRESH', 'included evidence'); ++$checks;
     $assert($result['status'] === 'CURRENT_STATE_INCLUDED_AT_SOME_SELECTED' && $result['counts'] === ['included' => 1, 'stale' => 1, 'not_present' => 1, 'contradictory' => 1, 'unavailable' => 1, 'rejected' => 2], 'summary ' . json_encode($result['counts'])); ++$checks;
     $assert($result['expected_state']['manifest_hash'] === $current->contentHash && $result['expected_state']['revision'] === 2, 'expected state'); ++$checks;
-    $assert($result['operator_independence'] === 'NOT_ESTABLISHED' && $result['freshness'] === 'NOT_EVALUATED' && $result['state_mutated'] === false, 'scope boundaries'); ++$checks;
+    $assert($result['operator_independence'] === 'NOT_ESTABLISHED' && $result['freshness'] === 'CHECKPOINT_WITHIN_7_DAYS' && $result['included_with_outdated_checkpoint'] === 0 && $result['state_mutated'] === false, 'scope boundaries'); ++$checks;
     $assert($result['checkpoint_consistency'] === ['consistent' => 0, 'baseline' => 4, 'not_evaluated' => 0], 'first check is a baseline ' . json_encode($result['checkpoint_consistency'])); ++$checks;
     $assert($result['selected_sources'] === 7 && $result['distinct_node_keys'] === 5, 'key count is reported, not trusted'); ++$checks;
 
     $all = $checker->check($own, [[$nodes['included']['onion'], $nodes['included']['key']]], 1700000100);
     $assert($all['status'] === 'CURRENT_STATE_INCLUDED_AT_ALL_SELECTED', 'all selected'); ++$checks;
+    // D-036: a checkpoint older than seven days, or dated ahead of the local clock, includes the revision but is not counted.
+    $boundary = $checker->check($own, [[$nodes['included']['onion'], $nodes['included']['key']]], 1700000000 + PublisherMembership::CHECKPOINT_FRESH_SECONDS);
+    $assert($boundary['status'] === 'CURRENT_STATE_INCLUDED_AT_ALL_SELECTED' && $boundary['sources'][0]['checkpoint_freshness'] === 'FRESH', 'exactly seven days is fresh'); ++$checks;
+    foreach (['OUTDATED' => 1700000001 + PublisherMembership::CHECKPOINT_FRESH_SECONDS, 'CLOCK_AHEAD' => 1700000000 - PublisherMembership::CLOCK_TOLERANCE_SECONDS - 1] as $freshness => $at) {
+        $old = $checker->check($own, [[$nodes['included']['onion'], $nodes['included']['key']]], $at);
+        $assert($old['sources'][0]['category'] === 'included' && $old['sources'][0]['checkpoint_freshness'] === $freshness && $old['status'] === 'CURRENT_STATE_NOT_CONFIRMED'
+            && $old['included_with_outdated_checkpoint'] === 1 && $old['included_with_node_direct_observation'] === 0, 'not counted: ' . $freshness . ' ' . json_encode($old['sources'][0])); ++$checks;
+    }
     $none = $checker->check($own, [[$unreachable, $nodes['included']['key']]], 1700000100);
     $assert($none['status'] === 'CURRENT_STATE_NOT_CONFIRMED', 'none confirmed'); ++$checks;
     try { $checker->check([$genesis, $current, $fork], [[$nodes['included']['onion'], $nodes['included']['key']]], 1700000100); $assert(false, 'forked own history accepted'); }

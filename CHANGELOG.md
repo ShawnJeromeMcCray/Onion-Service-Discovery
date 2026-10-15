@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Publisher Node checks evaluate checkpoint freshness (owner decision D-036): a
+  Node counts toward discoverability only while its signed checkpoint is at most
+  seven days old and not dated more than five minutes ahead. A Node that
+  includes the revision in an older checkpoint is reported as `OUTDATED` or
+  `CLOCK_AHEAD`, saved as `outdated_checkpoints`, warned about on the status
+  page and no longer makes the Service DISCOVERABLE.
 - PHP 8.3 is supported (owner decision D-002: 8.3+, 8.5 preferred), so the
   distribution PHP of Ubuntu 24.04 LTS works. `composer.json` requires `^8.3`,
   `doctor` passes on 8.3 to 8.5 and fails below 8.3, and CI runs every PHP test,

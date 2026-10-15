@@ -90,6 +90,19 @@ try {
     PublisherEvidence::recordMembership($result(['stale' => 2], 0), $cfg, $now);
     $pending = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
     $assert($pending['overall'] === 'EXTERNALLY_OBSERVED' && $pending['external_observation'] === 'OBSERVED_STALE_REVISION'); ++$checks;
+    // D-036: Nodes that include the revision but serve a signed index older than seven days are not counted.
+    $outdated = $result(['included' => 2, 'unavailable' => 1], 0); $outdated['included_with_outdated_checkpoint'] = 2;
+    PublisherEvidence::recordMembership($outdated, $cfg, $now);
+    $old = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($old['overall'] === 'EXTERNALLY_OBSERVED' && $old['index_freshness'] === '2_INCLUDING_NODES_OLDER_THAN_7_DAYS' && str_contains($old['next_action'], 'older than seven days')
+        && count($old['warnings']) === 1 && str_contains(StatusPage::render($old)['body'], 'not counted as discoverable')); ++$checks;
+    $mixed = $result(['included' => 2], 1); $mixed['included_with_outdated_checkpoint'] = 1;
+    PublisherEvidence::recordMembership($mixed, $cfg, $now);
+    $one = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
+    $assert($one['overall'] === 'DISCOVERABLE' && $one['index_freshness'] === '1_INCLUDING_NODES_OLDER_THAN_7_DAYS' && count($one['warnings']) === 1); ++$checks;
+    $tampered = json_decode((string) file_get_contents(PublisherEvidence::path($cfg)), true); $tampered['membership']['outdated_checkpoints'] = 2;
+    file_put_contents(PublisherEvidence::path($cfg), json_encode($tampered));
+    $assert(PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now)['overall'] !== 'DISCOVERABLE', 'inconsistent freshness counts are refused'); ++$checks;
     PublisherEvidence::recordMembership($result(['included' => 3], 3, 'sha256:' . str_repeat('0', 64)), $cfg, $now);
     $other = PublisherStatus::inspect($config, $verifier, $manifest, $cfg, $now);
     // Membership for another revision is ignored; the accepted announcement of this revision still counts.

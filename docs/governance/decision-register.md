@@ -41,7 +41,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-033 | OWASP ASVS Applicability Level/Matrix | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-034 | Logging Defaults | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-035 | Direct Observation Publication | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
-| D-036 | Staleness Thresholds | PARTIALLY OWNER-APPROVED | Project owner / reviewer | CONDITIONAL / REVIEW | Owner approved 7 days for publisher discoverability evidence (2026-10-14); other local staleness thresholds remain open. |
+| D-036 | Staleness Thresholds | PARTIALLY OWNER-APPROVED | Project owner / reviewer | CONDITIONAL / REVIEW | Owner approved 7 days for publisher discoverability evidence (2026-10-14) and 7 days for the signed checkpoint of a Node that counts toward a publisher's discoverability (2026-10-15; 5 minutes of clock tolerance as in the browser); other local staleness thresholds remain open. |
 | D-037 | Default Operator Switches | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | publishing false until configured; mirror/discover conservative; sync only if node role enabled. |
 | D-038 | Manifest Auto-Regeneration | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-039 | Key Backup UX | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |

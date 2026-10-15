@@ -23,6 +23,10 @@ final readonly class PublisherMembership
     public const MAX_SOURCES = 16;
     /** Parent checkpoints fetched per Node and check before ancestry counts as not evaluated. */
     public const MAX_ANCESTRY_FETCHES = 32;
+    /** D-036 (owner-approved): a Node's signed checkpoint counts as fresh for seven days, like the browser's STALE rule. */
+    public const CHECKPOINT_FRESH_SECONDS = 604800;
+    /** A checkpoint dated further ahead of the local clock than this is not counted either. */
+    public const CLOCK_TOLERANCE_SECONDS = 300;
 
     /** @param \Closure(OnionAddress, ProtocolEndpoint): string $fetch */
     public function __construct(private RecordVerifier $verifier, private \Closure $fetch) {}
@@ -58,20 +62,24 @@ final readonly class PublisherMembership
         $expected = ['logical_service_id' => $own['genesis_key'], 'key_epoch' => $epoch, 'current_service_identity_public_key' => $manifest?->service_identity_public_key,
             'onion' => $manifest?->onion, 'revision' => $own['highest_revision'], 'manifest_hash' => $own['current_hash'],
             'active' => $own['discoverability'] === 'PUBLISHED'];
-        $results = []; $observed = 0;
+        $results = []; $observed = 0; $fresh = 0; $outdated = 0;
         $counts = ['included' => 0, 'stale' => 0, 'not_present' => 0, 'contradictory' => 0, 'unavailable' => 0, 'rejected' => 0];
         $consistency = ['consistent' => 0, 'baseline' => 0, 'not_evaluated' => 0];
         foreach ($selected as [$address, $key]) {
             $result = $this->source($address, $key, $ownHistory, $now, $anchors[PublisherEvidence::nodeKey($address)] ?? null);
             ++$counts[$result['category']];
             if (isset($result['checkpoint_consistency'])) { ++$consistency[strtolower($result['checkpoint_consistency'])]; }
-            if ($result['category'] === 'included' && $result['node_claimed_direct_observation_at'] !== null) { ++$observed; }
+            if ($result['category'] === 'included') {
+                // A Node whose signed index is older than seven days (or dated ahead) is no evidence of current discoverability.
+                if ($result['checkpoint_freshness'] !== 'FRESH') { ++$outdated; }
+                else { ++$fresh; if ($result['node_claimed_direct_observation_at'] !== null) { ++$observed; } }
+            }
             $results[] = $result;
         }
         $total = count($results);
         $status = match (true) {
-            $counts['included'] === $total => 'CURRENT_STATE_INCLUDED_AT_ALL_SELECTED',
-            $counts['included'] > 0 => 'CURRENT_STATE_INCLUDED_AT_SOME_SELECTED',
+            $fresh === $total => 'CURRENT_STATE_INCLUDED_AT_ALL_SELECTED',
+            $fresh > 0 => 'CURRENT_STATE_INCLUDED_AT_SOME_SELECTED',
             default => 'CURRENT_STATE_NOT_CONFIRMED',
         };
         return [
@@ -80,14 +88,16 @@ final readonly class PublisherMembership
             'selected_sources' => $total,
             'distinct_node_keys' => count(array_unique(array_column($results, 'node_identity_public_key'))),
             'counts' => $counts,
+            // Only Nodes with a fresh checkpoint count as observing the current revision (D-036).
             'included_with_node_direct_observation' => $observed,
+            'included_with_outdated_checkpoint' => $outdated,
             'sources' => $results,
             'evidence_type' => 'COMPLETE_SIGNED_DRAFT_SNAPSHOT',
             'basis' => 'Each count is a locally verified complete signed snapshot from the selected Onion under the independently supplied Node key; acknowledgements and Node booleans are never counted.',
             'operator_independence' => 'NOT_ESTABLISHED',
             // D-052: rollback, equivocation and broken chains are rejected above; these count the rest.
             'checkpoint_consistency' => $consistency,
-            'freshness' => 'NOT_EVALUATED',
+            'freshness' => 'CHECKPOINT_WITHIN_7_DAYS',
             'state_mutated' => false,
             'network_side_effects' => true,
         ];
@@ -131,6 +141,7 @@ final readonly class PublisherMembership
             default => 'contradictory',
         };
         $created = strtotime($verified['checkpoint_created_at']);
+        $age = $created === false ? null : $now - $created;
         return $base + [
             'category' => $category,
             'status' => $verified['status'],
@@ -138,8 +149,13 @@ final readonly class PublisherMembership
             'checkpoint_hash' => $verified['checkpoint_hash'],
             'checkpoint_generation' => $verified['checkpoint_generation'],
             'checkpoint_created_at' => $verified['checkpoint_created_at'],
-            // Informational local-clock difference; no freshness threshold is frozen in the draft protocol.
-            'checkpoint_age_seconds' => $created === false ? null : $now - $created,
+            // Local-clock age of the Node's signed index; D-036 counts it as current for seven days.
+            'checkpoint_age_seconds' => $age,
+            'checkpoint_freshness' => match (true) {
+                $age === null || $age > self::CHECKPOINT_FRESH_SECONDS => 'OUTDATED',
+                $age < -self::CLOCK_TOLERANCE_SECONDS => 'CLOCK_AHEAD',
+                default => 'FRESH',
+            },
             'node_claimed_direct_observation_at' => $verified['node_claimed_direct_observation_at'],
             'checkpoint_consistency' => $consistency,
             'anchor' => ['node_key' => hash('sha256', $key), 'checkpoint_hash' => $checkpoint->contentHash, 'generation' => $descriptor->generation, 'checked_at' => gmdate('Y-m-d\TH:i:s\Z', $now)],

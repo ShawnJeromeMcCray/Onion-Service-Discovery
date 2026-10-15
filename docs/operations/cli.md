@@ -169,13 +169,16 @@ in the webroot) or a single signed record; several files may be given. Each
 source is reported once as included, stale, not_present, contradictory,
 unavailable or rejected; mere acknowledgements are never counted. It mutates no
 store and loads no signing key. Exit 0 only when every selected Node includes the
-current state, otherwise 6. Checkpoint ancestry (D-052) is compared with the
+current state in a fresh checkpoint, otherwise 6. A checkpoint is fresh for seven
+days by the local clock (D-036); an included Node whose checkpoint is older, or
+dated more than five minutes ahead, is reported with `checkpoint_freshness`
+`OUTDATED` or `CLOCK_AHEAD`, counted in `included_with_outdated_checkpoint` and
+not counted as current. Checkpoint ancestry (D-052) is compared with the
 checkpoints saved at the previous `--save-status` check: rollback, equivocation
 or a broken chain rejects that Node (`SOURCE_CHECKPOINT_*`) before any chunk is
 downloaded; at most 32 predecessors are fetched per Node, and an unreachable
-predecessor or longer gap is `NOT_EVALUATED`, never a rejection. Freshness stays
-`NOT_EVALUATED`; operator independence stays `NOT_ESTABLISHED`. Not usable with
-the client-host role.
+predecessor or longer gap is `NOT_EVALUATED`, never a rejection. Operator
+independence stays `NOT_ESTABLISHED`. Not usable with the client-host role.
 `network:discoverability-check` is the specification's name for the same command.
 With `--save-status` it also writes aggregate counts, each Node's category and
 the checkpoint hash and generation it served, under SHA-256 hashes of the Node
