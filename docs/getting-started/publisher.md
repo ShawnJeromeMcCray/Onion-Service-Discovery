@@ -110,8 +110,10 @@ Open these routes through your actual Onion:
 - `/onion-service-discovery/status/`: read-only status, usable without JavaScript.
 
 Do not replace the rest of your existing website with the OSD front controller.
-Integrate these routes with its existing routing, keeping configuration and keys
-outside the document root. The reference templates assume a dedicated OSD listener.
+Add only the OSD routes to its existing server block or virtual host, with the
+[existing-website snippets](../operations/existing-website.md) for nginx and
+Apache, and keep configuration and keys outside the document root. The full
+reference templates assume a dedicated OSD listener.
 
 ## 5. Verify over Tor and check selected Nodes
 

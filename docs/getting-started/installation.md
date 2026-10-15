@@ -189,6 +189,12 @@ configuration and socket. These files are templates, not enabled services.
 Disable request/query logging and expose only the front controller. Configure
 Tor and startup scheduling using your OS's service manager. See
 [deployment, schedules, backup, upgrade and removal](../operations/deployment-and-recovery.md).
+To add OSD to a website that already runs, use the
+[existing-website snippets](../operations/existing-website.md) instead of the
+dedicated templates. The [hardening matrix](../operations/hardening-matrix.md)
+lists every control, where it is enforced and what remains your duty; the
+[incident runbook](../operations/incident-runbook.md) covers lost or exposed keys
+and damaged stores.
 
 The optional [NoJS search deployment](../operations/server-search.md) has a
 separate request-body/rate-limit/privacy contract. Do not enable it by merely

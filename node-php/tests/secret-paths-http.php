@@ -71,12 +71,8 @@ try {
             foreach ($paths as $path) {
                 foreach (['GET', 'HEAD'] as $method) {
                     [$status, $reply] = $request($method, $path); ++$requests;
-                    // Known: the front controller charges the relay budget before it checks the role, and a
-                    // publisher has no export directory, so its relay paths fail generically (no content).
-                    $knownPublisherRelay = $name === 'publisher' && str_starts_with($path, '/onion-service-discovery/relay/') && $status === 503
-                        && ($method === 'HEAD' || str_ends_with($reply, "\r\n\r\n" . '{"error":"NODE_UNAVAILABLE"}'));
-                    // Otherwise a refusal, never a served file or a server failure that could hide a misconfiguration.
-                    if (!$knownPublisherRelay && !in_array($status, [400, 403, 404, 405], true)) { throw new RuntimeException($name . ' ' . $method . ' ' . $path . ' answered ' . $status); }
+                    // A refusal, never a served file or a server failure that could hide a misconfiguration.
+                    if (!in_array($status, [400, 403, 404, 405], true)) { throw new RuntimeException($name . ' ' . $method . ' ' . $path . ' answered ' . $status); }
                     foreach ($needles as $needle) { if (str_contains($reply, $needle)) { throw new RuntimeException($name . ' ' . $method . ' ' . $path . ' disclosed private or repository content'); } }
                 }
             }

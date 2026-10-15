@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Deployment: the nginx, Apache, PHP-FPM and systemd templates are hardened
+  (no server version, header and body limits, no uploads or remote includes,
+  no core dumps, empty capability sets, kernel and namespace protections, file
+  limits). New snippets add only the OSD routes to an existing website, and
+  static examples serve a self-hosted browser client with the same headers as
+  the PHP host. A test requests 39 likely secret paths for every role and
+  expects refusals without content. Relay paths exist only for the Client Host
+  and combined roles: a publisher answered them with 503 instead of 404. New
+  documents: the hardening matrix (spec 18 section 55), an incident runbook for
+  lost or exposed keys, conflicting peers, damaged stores and leaked passphrase
+  files, and the privacy data inventory and data flow; `PRIVACY.md` describes
+  the current runtime.
 - A Client Host can vouch for the keys of the Nodes it lists: the optional
   `source_node_keys` (written by `init --source ONION KEY`) reaches the browser
   client, which fills in those keys read-only and refuses a source that signs

@@ -157,8 +157,10 @@ checked with the CLI in a scratch directory on a development host.
 CONFIG` shows the peer's state and error; `doctor CONFIG` counts quarantined
 peers. Publishers see `SOURCE_CHECKPOINT_…` codes for a checked Node, with a
 warning on their status page; browser visitors see the source set aside.
-`quarantine:list CONFIG` is a different list: Service candidates whose direct
-check failed, for example with `IDENTITY_FORKED` or `IDENTITY_CHANGED`.
+`quarantine:list CONFIG` lists such peers (`"kind":"peer"`) with the hashes of
+the conflicting checkpoints kept as evidence, next to Service candidates whose
+direct check failed (`"kind":"candidate"`, for example `IDENTITY_FORKED` or
+`IDENTITY_CHANGED`).
 
 **What is kept.** Both signed checkpoints are stored as records. The store keeps
 up to eight checkpoint hashes per Node key and generation, and the last accepted
@@ -190,7 +192,9 @@ an unfinished transaction and completes a committed one whose HEAD update was
 lost. Until then the read-only web routes answer 503, and `doctor` reports
 `STORAGE_RECOVERY_REQUIRED`. SQLite recovers its own journal.
 
-1. Free disk space if it is full.
+1. Free disk space if it is full. `storage:verify BACKEND PATH` looks without
+   changing anything: it reports `STORAGE_RECOVERY_REQUIRED` instead of
+   completing the write.
 2. Stop the timers and run `storage:check BACKEND PATH`: the explicit recovery
    plus a hash check of every record.
 3. Run `doctor CONFIG`, then start the timers again.
