@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-225 codes.
+226 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -45,6 +45,7 @@ for remedies.
 | `CONFIGURATION_PATH_UNSAFE` | configuration and status | 3 | init refused the configuration path: it must be an absolute path of at most 1024 bytes in an existing, non-symlinked, owner-only (0700) directory outside node-php/public. |
 | `CONFIGURATION_UNAVAILABLE` | configuration and status | 3 | The configuration file is missing, unreadable, a symlink or larger than 16 KiB. |
 | `CONFIGURATION_WRITE_FAILED` | configuration and status | 3 | init created the configuration file but could not write or sync it or sync its directory, so the file may be incomplete; check free space, remove the file and run init again. |
+| `CONFUSABLE_DATA_INVALID` | browser client | – | The confusable table built into the browser client does not decode to its recorded entry count, so look-alike names cannot be checked; serve an unmodified client build. |
 | `CONTENT_ENCODING_REJECTED` | Tor transport, browser client | 5 | A Node or Service answered with a Content-Encoding other than identity (a compressed answer), which OSD does not accept, so nothing from it was verified; serve the OSD paths without compression. |
 | `CONTENT_TYPE_REJECTED` | Tor transport, browser client | 5 | A Node or Service answered without application/json; nothing was verified. |
 | `CRYPTO_ALGORITHM_UNSUPPORTED` | browser client | – | An internal browser check failed: without Web Crypto, the client’s built-in hash fallback supports only SHA-256, and another algorithm was requested. |

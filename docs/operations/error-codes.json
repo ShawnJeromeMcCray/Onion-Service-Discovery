@@ -286,6 +286,13 @@
    ],
    "meaning": "init created the configuration file but could not write or sync it or sync its directory, so the file may be incomplete; check free space, remove the file and run init again."
   },
+  "CONFUSABLE_DATA_INVALID": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "The confusable table built into the browser client does not decode to its recorded entry count, so look-alike names cannot be checked; serve an unmodified client build."
+  },
   "CONTENT_ENCODING_REJECTED": {
    "cli_exit": [
     "5"

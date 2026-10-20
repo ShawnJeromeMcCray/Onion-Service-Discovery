@@ -7,10 +7,24 @@ function inRanges(point:number,ranges:readonly (readonly number[])[]):boolean {
   while(lo<=hi){const mid=(lo+hi)>>>1;const range=ranges[mid]!;if(point<range[0]!)hi=mid-1;else if(point>range[1]!)lo=mid+1;else return true;}
   return false;
 }
-function expand(point:number,out:number[]):void {
+/** Which mappings of the table apply to a code point; without it every one does. */
+type Decomposes=(point:number)=>boolean;
+function expand(point:number,out:number[],decomposes?:Decomposes):void {
   if(point>=0xac00&&point<0xd7a4){const syllable=point-0xac00;out.push(0x1100+Math.floor(syllable/588),0x1161+Math.floor((syllable%588)/28));if(syllable%28!==0)out.push(0x11a7+syllable%28);}
-  else {const parts=data.decomposition[point];if(parts===undefined)out.push(point);else for(const part of parts)expand(part,out);}
+  else {const parts=data.decomposition[point];if(parts===undefined||(decomposes!==undefined&&!decomposes(point)))out.push(point);else for(const part of parts)expand(part,out,decomposes);}
   if(out.length>MAX_POINTS)throw new Error('SEARCH_WORK_LIMIT');
+}
+/**
+ * Full decomposition in canonical order (UAX #15) with the frozen Unicode 17 table, as code points.
+ * The table holds canonical and compatibility mappings alike: `decomposes` limits the expansion to
+ * some of them (the canonical ones give NFD); without it every mapping applies, as for NFKC.
+ */
+export function decomposeV1(points:readonly number[],decomposes?:Decomposes):number[] {
+  const decomposed:number[]=[];for(const point of points)expand(point,decomposed,decomposes);
+  const ordered:number[]=[];let segment:number[]=[];
+  const flush=()=>{segment.sort((a,b)=>(data.combining[a]??0)-(data.combining[b]??0));for(const point of segment)ordered.push(point);segment=[];};
+  for(const point of decomposed){if((data.combining[point]??0)===0){flush();ordered.push(point);}else segment.push(point);}flush();
+  return ordered;
 }
 function compose(a:number,b:number):number|undefined {
   if(a>=0x1100&&a<0x1113&&b>=0x1161&&b<0x1176)return 0xac00+(a-0x1100)*588+(b-0x1161)*28;
@@ -21,10 +35,7 @@ function text(points:readonly number[]):string {return points.map(point=>String.
 /** Frozen Unicode 17 NFKC. Does not change signed bytes or depend on host ICU. */
 export function nfkcV1(value:string):string {
   if(value.length>65536)throw new Error('SEARCH_WORK_LIMIT');
-  const decomposed:number[]=[];for(const character of value)expand(character.codePointAt(0)!,decomposed);
-  const ordered:number[]=[];let segment:number[]=[];
-  const flush=()=>{segment.sort((a,b)=>(data.combining[a]??0)-(data.combining[b]??0));for(const point of segment)ordered.push(point);segment=[];};
-  for(const point of decomposed){if((data.combining[point]??0)===0){flush();ordered.push(point);}else segment.push(point);}flush();
+  const ordered=decomposeV1(Array.from(value,character=>character.codePointAt(0)!));
   const result:number[]=[];let starterPosition=-1,lastClass=0;
   for(const point of ordered){const cls=data.combining[point]??0;const merged=starterPosition>=0&&(lastClass===0||lastClass<cls)?compose(result[starterPosition]!,point):undefined;
     if(merged!==undefined)result[starterPosition]=merged;

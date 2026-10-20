@@ -138,6 +138,7 @@ DESCRIPTIONS = {
     'CONFIGURATION_PATH_INVALID': 'storage.path, export_path or node.key_path is not an absolute path of at most 1024 bytes without . or .. segments, control characters or ://, or it cannot be resolved; the detail names the key.',
     'CONFIGURATION_PATH_UNSAFE': 'init refused the configuration path: it must be an absolute path of at most 1024 bytes in an existing, non-symlinked, owner-only (0700) directory outside node-php/public.',
     'CONFIGURATION_WRITE_FAILED': 'init created the configuration file but could not write or sync it or sync its directory, so the file may be incomplete; check free space, remove the file and run init again.',
+    'CONFUSABLE_DATA_INVALID': 'The confusable table built into the browser client does not decode to its recorded entry count, so look-alike names cannot be checked; serve an unmodified client build.',
     'CONTENT_ENCODING_REJECTED': 'A Node or Service answered with a Content-Encoding other than identity (a compressed answer), which OSD does not accept, so nothing from it was verified; serve the OSD paths without compression.',
     'CRYPTO_ALGORITHM_UNSUPPORTED': 'An internal browser check failed: without Web Crypto, the client’s built-in hash fallback supports only SHA-256, and another algorithm was requested.',
     'CURSOR_INVALID': 'A changes cursor is out of range: beyond this Node’s last record sequence number (HTTP 400 on the changes route), or negative or above the largest safe integer; use a cursor the Node returned, or 0.',
