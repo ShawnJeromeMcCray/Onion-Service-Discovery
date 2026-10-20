@@ -106,6 +106,10 @@ jobs:
       - name: Install controlled browser
         working-directory: web-local-search-client
         run: npx playwright install --with-deps chromium
+      - name: Check the confusable table against its pinned Unicode 17 source (D-024)
+        run: |
+          curl --fail --silent --show-error --location --max-time 120 -o "$RUNNER_TEMP/confusables.txt" https://raw.githubusercontent.com/unicode-org/icu/release-78.3/icu4c/source/data/unidata/confusables.txt
+          python3 tools/generate_confusables.py "$RUNNER_TEMP/confusables.txt" --check
       - name: Build and check local client behavior
         working-directory: web-local-search-client
         run: |
