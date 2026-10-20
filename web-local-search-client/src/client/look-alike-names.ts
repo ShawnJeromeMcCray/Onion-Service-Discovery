@@ -19,11 +19,14 @@ export function nameForms(name:string):NameForms {
   return {same,visual:collapse(searchTextV1(skeletonV1(name))),folded:collapse(skeletonV1(same))};
 }
 export function looksAlike(a:NameForms,b:NameForms):boolean { return a.same!==b.same&&(a.visual===b.visual||a.folded===b.folded); }
-// Once per row object of a view: the worker sends new rows with every update.
-const rowForms=new WeakMap<ServiceRow,{name:string;forms:NameForms}>();
+// Keyed by the name, not the row object: the worker sends new row objects with every update, and
+// recomputing 10,000 skeletons each time would cost a quarter second or more on the main thread.
+const NAME_FORMS_LIMIT=20000;
+const formsByName=new Map<string,NameForms>();
 function formsOf(row:ServiceRow):NameForms {
-  const cached=rowForms.get(row); if(cached?.name===row.name) return cached.forms;
-  const forms=nameForms(row.name); rowForms.set(row,{name:row.name,forms}); return forms;
+  const cached=formsByName.get(row.name); if(cached!==undefined) return cached;
+  if(formsByName.size>=NAME_FORMS_LIMIT) formsByName.clear();
+  const forms=nameForms(row.name); formsByName.set(row.name,forms); return forms;
 }
 /** Keys of entries sharing a skeleton form with an entry that is not the same name. Linear: grouped, never paired. */
 function lookAlikeKeys(entries:readonly {key:string;forms:NameForms}[]):Set<string> {
