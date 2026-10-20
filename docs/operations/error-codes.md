@@ -101,6 +101,7 @@ for remedies.
 | `METHOD_NOT_ALLOWED` | front controller, web routes | – | The route does not accept the request method (HTTP 405): the data, relay and client routes take GET or HEAD, and the announcement route takes only POST. |
 | `MIGRATION_INVALID` | browser client, protocol, signing | 3 | An address change without a valid migration proof for exactly this predecessor and revision. |
 | `MIRROR_DISABLED` | CLI | 3 | node:snapshot refused to run because features.mirror_directory and features.server_search are both off in this configuration; enable the feature it needs in a node or combined configuration. |
+| `NODE_DEGRADED_READ_ONLY` | front controller, web routes | – | The Node cannot read its store, so it keeps serving only its last published snapshot (D-045) and answers HTTP 503 on routes that need the store, announcements included; the operator follows the incident runbook, section 4. |
 | `NODE_DESCRIPTOR_HISTORY_INCOMPLETE` | Node worker | 3 | A peer’s new Node descriptor skips a revision or does not name the previously seen descriptor as its predecessor, so the peer was quarantined; after checking, release it with peers:retry. |
 | `NODE_DESCRIPTOR_INVALID` | configuration and status, doctor | 3, 4 | The Node descriptor in the store does not verify or names another Onion than node.onion (doctor also reports a published snapshot that fails verification this way); check that storage.path and node.onion belong to this Node. |
 | `NODE_DESCRIPTOR_ROLLBACK_OR_FORK` | Node worker | 3 | A peer served an older Node descriptor than seen before, or two different descriptors with the same revision, so the peer was quarantined and the descriptors were kept as evidence; quarantine:list shows the evidence. |
@@ -110,7 +111,7 @@ for remedies.
 | `NODE_KEY_MISSING_OR_UNSAFE` | doctor | 6 | doctor: the Node key file is missing or readable by others (needs 0600). |
 | `NODE_KEY_ROTATION_UNSUPPORTED` | CLI | 3 | Protocol v1 cannot rotate a Node key; create a new Node identity and have peers pin it explicitly. |
 | `NODE_NOT_INITIALIZED` | CLI, doctor, web routes | 3, 6 | Run node:init before this command. |
-| `NODE_UNAVAILABLE` | front controller | – | The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable store or export directory, or a relayed Node that could not be fetched; operators run doctor. |
+| `NODE_UNAVAILABLE` | front controller | – | The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable export directory, a store that cannot be read without a last published snapshot to serve in its place, or a relayed Node that could not be fetched; operators run doctor. |
 | `NOT_FOUND` | front controller, web routes | 3 | The route or record does not exist on this installation. |
 | `ONION_BINDING_MISMATCH` | browser client, protocol, signing | 3 | The signed Manifest belongs to a different Onion than the one it was fetched from or installed for. |
 | `ONION_UNREACHABLE` | Tor transport | 5 | Tor answered with a SOCKS error: it could not reach the Onion (still bootstrapping, Service offline or descriptor not published). |

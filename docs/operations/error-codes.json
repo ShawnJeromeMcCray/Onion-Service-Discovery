@@ -803,6 +803,14 @@
    ],
    "meaning": "node:snapshot refused to run because features.mirror_directory and features.server_search are both off in this configuration; enable the feature it needs in a node or combined configuration."
   },
+  "NODE_DEGRADED_READ_ONLY": {
+   "cli_exit": [],
+   "components": [
+    "front controller",
+    "web routes"
+   ],
+   "meaning": "The Node cannot read its store, so it keeps serving only its last published snapshot (D-045) and answers HTTP 503 on routes that need the store, announcements included; the operator follows the incident runbook, section 4."
+  },
   "NODE_DESCRIPTOR_HISTORY_INCOMPLETE": {
    "cli_exit": [
     "3"
@@ -894,7 +902,7 @@
    "components": [
     "front controller"
    ],
-   "meaning": "The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable store or export directory, or a relayed Node that could not be fetched; operators run doctor."
+   "meaning": "The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable export directory, a store that cannot be read without a last published snapshot to serve in its place, or a relayed Node that could not be fetched; operators run doctor."
   },
   "NOT_FOUND": {
    "cli_exit": [

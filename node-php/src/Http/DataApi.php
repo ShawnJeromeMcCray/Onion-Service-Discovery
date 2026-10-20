@@ -3,17 +3,26 @@ declare(strict_types=1);
 namespace OnionServiceDiscovery\Http;
 use OnionServiceDiscovery\Crypto\CanonicalJson;
 use OnionServiceDiscovery\Domain\OnionAddress;
+use OnionServiceDiscovery\Node\PublishedState;
 use OnionServiceDiscovery\Protocol\ProtocolException;
 use OnionServiceDiscovery\Protocol\RecordVerifier;
 use OnionServiceDiscovery\Protocol\SnapshotFormat;
+use OnionServiceDiscovery\Protocol\ValidatedRecord;
 use OnionServiceDiscovery\Storage\StorageBackend;
 use OnionServiceDiscovery\Storage\PublicBlobStore;
 
-/** Read-only public protocol surface; no signing or maintenance dependency. */
+/**
+ * Read-only public protocol surface; no signing or maintenance dependency. Without a store
+ * (degraded mode, D-045) it serves the last published snapshot from $published and the export
+ * blobs, byte for byte as with the store, and refuses the routes that need the store.
+ */
 final readonly class DataApi
 {
     /** @param list<string> $allowedOrigins */
-    public function __construct(private StorageBackend $store, private PublicBlobStore $blobs, private RecordVerifier $verifier, private bool $mirror, private array $allowedOrigins = []) {}
+    public function __construct(private ?StorageBackend $store, private PublicBlobStore $blobs, private RecordVerifier $verifier, private bool $mirror, private array $allowedOrigins = [], private ?PublishedState $published = null)
+    {
+        if ($store === null && $published === null) { throw new \LogicException('The data API needs a store or a last published state.'); }
+    }
     /**
      * @return array<array-key, mixed>
      */
@@ -37,21 +46,21 @@ final readonly class DataApi
         // Canonical stable-identity route (specs 04/14/46/48); the combined route remains for address lookup.
         if (preg_match('~\A/onion-service-discovery/v1/services/by-id/(ed25519:[A-Za-z0-9_-]{43})\z~D', $path, $byId) === 1) { $path = '/onion-service-discovery/v1/services/' . $byId[1]; }
         try {
-            $state = $this->store->snapshot(); $publicHashes = [];
-            foreach ($state['tables']['node'] as $key => $row) { if (str_starts_with($key,'key:public-index-')) { foreach ($row['hashes'] as $hash) { $publicHashes[$hash]=true; } } }
-            $published = $state['tables']['node']['key:published-snapshot'] ?? null;
+            // Null in degraded mode: only what the last published snapshot holds can be answered.
+            $state = $this->store?->snapshot();
             if ($path === '/onion-service-discovery/v1/node' && $query === '') {
-                $node = $state['tables']['node']['key:descriptor'] ?? null;
+                $node = $this->nodeDescriptor($state);
                 if ($node === null) { return $this->response(503, ['error' => 'NODE_NOT_INITIALIZED'], $headers); }
-                return $this->wireResponse($this->record($node['hash'], 'node_descriptor'), 16384, $headers, $method);
+                return $this->wireResponse($node, 16384, $headers, $method);
             }
             if (!$this->mirror) { return $this->response(404, ['error' => 'NOT_FOUND'], $headers); }
             if ($path === '/onion-service-discovery/v1/state' && $query === '') {
-                if ($published === null) { return $this->response(503, ['error' => 'SNAPSHOT_UNAVAILABLE'], $headers); }
-                $checkpoint = $this->verifier->verifyWire($this->record($published['hash'], 'snapshot_descriptor'))->document();
-                return $this->response(200, ['protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'checkpoint_hash' => $published['hash'], 'generation' => $checkpoint->generation, 'cursor' => $checkpoint->cursor, 'node_identity_public_key' => $checkpoint->node_identity_public_key], $headers, $method);
+                $checkpoint = $this->checkpoint($state);
+                if ($checkpoint === null) { return $this->response(503, ['error' => 'SNAPSHOT_UNAVAILABLE'], $headers); }
+                return $this->wireResponse(PublishedState::stateWire($checkpoint), 16384, $headers, $method);
             }
             if ($path === '/onion-service-discovery/v1/peers' && $query === '') {
+                if ($state === null) { return $this->degraded($headers); }
                 $peers = [];
                 foreach ($state['tables']['peers'] as $key => $peer) {
                     if (($peer['state'] ?? null) === 'ACTIVE' && isset($peer['node_identity_public_key'])) { $peers[] = (object) ['onion' => OnionAddress::parse(substr($key, 4))->hostname, 'node_identity_public_key' => $peer['node_identity_public_key']]; }
@@ -60,20 +69,25 @@ final readonly class DataApi
                 return $this->response(200, ['protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'peers' => $peers], $headers, $method);
             }
             if (preg_match('~\A/onion-service-discovery/v1/snapshots/([0-9a-f]{64})\z~D', $path, $match) === 1 && $query === '') {
-                return $this->wireResponse($this->record('sha256:' . $match[1], 'snapshot_descriptor'), 65536, $headers, $method);
+                if ($state !== null) { return $this->wireResponse($this->record('sha256:' . $match[1], 'snapshot_descriptor'), 65536, $headers, $method); }
+                // An older checkpoint may be pruned from the exports but still in the store: unknown, not absent.
+                $wire = $this->exportedCheckpoint('sha256:' . $match[1]);
+                return $wire === null ? $this->degraded($headers) : $this->wireResponse($wire, 65536, $headers, $method);
             }
             if (preg_match('~\A/onion-service-discovery/v1/chunks/([0-9a-f]{64})\z~D', $path, $match) === 1 && $query === '') {
-                if ($published === null) { throw new ProtocolException('NOT_FOUND'); }
-                $checkpoint = $this->verifier->verifyWire($this->record($published['hash'], 'snapshot_descriptor'))->document(); $expected = null;
-                foreach ($checkpoint->chunks as $chunk) { if ($chunk->hash === 'sha256:' . $match[1]) { $expected = $chunk; break; } }
+                $checkpoint = $this->checkpoint($state);
+                if ($checkpoint === null) { throw new ProtocolException('NOT_FOUND'); }
+                $expected = null;
+                foreach ($checkpoint->document()->chunks as $chunk) { if ($chunk->hash === 'sha256:' . $match[1]) { $expected = $chunk; break; } }
                 if ($expected === null) { throw new ProtocolException('NOT_FOUND'); }
                 $wire = $this->blobs->get($expected->hash);
                 if ($wire === null || strlen($wire) !== $expected->bytes || SnapshotFormat::chunkHash($wire) !== $expected->hash) { throw new ProtocolException('EXPORT_CORRUPT'); }
                 return $this->wireResponse($wire, 524288, $headers, $method);
             }
             if ($path === '/onion-service-discovery/v1/changes' && preg_match('/\Aafter=(0|[1-9][0-9]{0,15})\z/D', $query, $match) === 1) {
+                if ($state === null) { return $this->degraded($headers); }
                 $after = (int) $match[1]; if ($after > 9007199254740991 || $after > $state['last_sequence']) { throw new ProtocolException('CURSOR_INVALID'); }
-                $entries = array_intersect_key($state['records'], $publicHashes); uasort($entries, static fn (array $a, array $b): int => $a['sequence'] <=> $b['sequence']);
+                $entries = array_intersect_key($state['records'], $this->publicHashes($state)); uasort($entries, static fn (array $a, array $b): int => $a['sequence'] <=> $b['sequence']);
                 $records = []; $cursor = $after; $bytes = 256;
                 $selected = [];
                 foreach ($entries as $hash => $metadata) {
@@ -94,7 +108,9 @@ final readonly class DataApi
                 $identifier = $match[1];
                 if (str_starts_with($identifier, 'ed25519:')) { \OnionServiceDiscovery\Crypto\Encoding::publicKey($identifier); }
                 else { OnionAddress::parse($identifier); }
-                $records = []; $validated = [];
+                if ($state === null) { return $this->degraded($headers); }
+                $records = []; $validated = []; $publicHashes = $this->publicHashes($state);
+                $published = $state['tables']['node']['key:published-snapshot'] ?? null;
                 if (($published['service_index_version'] ?? 0) !== 2) { return $this->response(503, ['error' => 'SERVICE_INDEX_NOT_READY'], $headers, $method); }
                 $prefix = substr(hash('sha256', $identifier), 0, 2);
                 $index = $state['tables']['node']['key:service-index-' . $prefix] ?? null;
@@ -124,9 +140,57 @@ final readonly class DataApi
             return $this->response($error->getMessage() === 'NOT_FOUND' ? 404 : ($error->getMessage() === 'RESPONSE_TOO_LARGE' ? 413 : 400), ['error' => $error->getMessage()], $headers);
         } catch (\InvalidArgumentException) { return $this->response(400, ['error' => 'REQUEST_INVALID'], $headers); }
     }
+    /**
+     * The current signed Node descriptor, or null before node:init.
+     * @param array<array-key, mixed>|null $state
+     */
+    private function nodeDescriptor(?array $state): ?string
+    {
+        if ($state === null) { return $this->published?->nodeDescriptor?->canonicalWire; }
+        $node = $state['tables']['node']['key:descriptor'] ?? null;
+        return $node === null ? null : $this->record($node['hash'], 'node_descriptor');
+    }
+    /**
+     * The published checkpoint, verified, or null before the first snapshot.
+     * @param array<array-key, mixed>|null $state
+     */
+    private function checkpoint(?array $state): ?ValidatedRecord
+    {
+        if ($state === null) { return $this->published?->checkpoint; }
+        $published = $state['tables']['node']['key:published-snapshot'] ?? null;
+        return $published === null ? null : $this->verifier->verifyWire($this->record($published['hash'], 'snapshot_descriptor'));
+    }
+    /** Without the store: one of this Node's checkpoints still in the exports, exactly as the store holds it, or null. */
+    private function exportedCheckpoint(string $hash): ?string
+    {
+        $current = $this->published?->checkpoint;
+        if ($current === null || $hash === $current->contentHash) { return $current?->canonicalWire; }
+        $wire = $this->blobs->get($hash);
+        if ($wire === null) { return null; }
+        try { $record = $this->verifier->verifyWire($wire); } catch (\InvalidArgumentException) { return null; }
+        return $record->type === 'snapshot_descriptor' && $record->contentHash === $hash && $record->canonicalWire === $wire
+            && $record->document()->node_identity_public_key === $current->document()->node_identity_public_key ? $wire : null;
+    }
+    /**
+     * @param array<array-key, mixed> $state
+     * @return array<string, true>
+     */
+    private function publicHashes(array $state): array
+    {
+        $publicHashes = [];
+        foreach ($state['tables']['node'] as $key => $row) { if (str_starts_with($key,'key:public-index-')) { foreach ($row['hashes'] as $hash) { $publicHashes[$hash]=true; } } }
+        return $publicHashes;
+    }
+    /**
+     * A route that needs the store while it cannot be read (D-045).
+     * @param array<array-key, mixed> $headers
+     * @return array<array-key, mixed>
+     */
+    private function degraded(array $headers): array
+    { return $this->response(503, ['error' => 'NODE_DEGRADED_READ_ONLY'], $headers); }
     private function record(string $hash, string $type): string
     {
-        $wire = $this->store->readRecord($hash); if ($wire === null) { throw new ProtocolException('NOT_FOUND'); }
+        $wire = $this->store?->readRecord($hash); if ($wire === null) { throw new ProtocolException('NOT_FOUND'); }
         $record = $this->verifier->verifyWire($wire); if ($record->type !== $type || $record->contentHash !== $hash) { throw new ProtocolException('STORAGE_CORRUPT'); }
         return $wire;
     }
