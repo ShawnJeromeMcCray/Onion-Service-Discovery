@@ -21,7 +21,9 @@ use OnionServiceDiscovery\Http\StatusPage;
 use OnionServiceDiscovery\Configuration\PublisherStatus;
 use OnionServiceDiscovery\Protocol\RecordVerifier;
 use OnionServiceDiscovery\Domain\OnionAddress;
+use OnionServiceDiscovery\Node\PublishedState;
 use OnionServiceDiscovery\Storage\PublicBlobStore;
+use OnionServiceDiscovery\Storage\StorageException;
 $requestStarted = hrtime(true);
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $target = $_SERVER['REQUEST_URI'] ?? '/';
@@ -64,6 +66,8 @@ try {
         if ($method !== 'POST') { $response = ['status' => 405, 'headers' => ['Allow' => 'POST'], 'body' => '{"error":"METHOD_NOT_ALLOWED"}']; }
         elseif (isset($_SERVER['CONTENT_LENGTH']) && (!is_string($_SERVER['CONTENT_LENGTH']) || preg_match('/\A(?:0|[1-9][0-9]{0,2})\z/D', $_SERVER['CONTENT_LENGTH']) !== 1 || (int)$_SERVER['CONTENT_LENGTH'] > CandidateAnnouncement::MAX_BYTES)) { $response = ['status' => 413, 'headers' => [], 'body' => '{"error":"REQUEST_TOO_LARGE"}']; }
         elseif (!(new PublicRequestBudget($config->exportPath . '/.request-budget'))->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
+        // D-045: intake pauses while the store cannot be read; opening it for writing would recover it unasked.
+        elseif (PublishedState::degraded($config, new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas')) !== null) { $response = ['status' => 503, 'headers' => [], 'body' => '{"error":"NODE_DEGRADED_READ_ONLY"}']; }
         else {
             // Read one byte beyond the cap; never parse or persist a raw unbounded request.
             $input = fopen('php://input', 'rb');
@@ -81,9 +85,13 @@ try {
         $verifier=new RecordVerifier(dirname(__DIR__,2).'/protocol/schemas');$record=$verifier->verifyWire($wire,OnionAddress::parse($config->nodeOnion));
         if($record->type!=='service_manifest')throw new RuntimeException('Public manifest invalid');
         if(!$config->features['publish_service'] && $record->document()->discovery->publish_service)throw new RuntimeException('Publishing disabled');
-        $descriptor = null;
-        if ($config->role !== 'publisher') { $store=$config->store(readOnly: true);$descriptor=$store->snapshot()['tables']['node']['key:descriptor']??null; }
-        if($descriptor!==null){$nodeWire=$store->readRecord($descriptor['hash']);if($nodeWire===null)throw new RuntimeException('Node descriptor unavailable');$node=$verifier->verifyWire($nodeWire)->document();if($node->node_identity_public_key===$record->document()->service_identity_public_key)throw new RuntimeException('Node and Service keys must differ');}
+        $nodeWire = null;
+        if ($config->role !== 'publisher') {
+            try { $store=$config->store(readOnly: true);$descriptor=$store->snapshot()['tables']['node']['key:descriptor']??null;if($descriptor!==null){$nodeWire=$store->readRecord($descriptor['hash'])??throw new RuntimeException('Node descriptor unavailable');} }
+            // D-045: with the store unreadable, the last published Node descriptor serves the same check.
+            catch (StorageException $error) { $nodeWire=(PublishedState::load(new PublicBlobStore($config->exportPath),$verifier,$config->nodeOnion)??throw $error)->nodeDescriptor?->canonicalWire; }
+        }
+        if($nodeWire!==null){$node=$verifier->verifyWire($nodeWire)->document();if($node->node_identity_public_key===$record->document()->service_identity_public_key)throw new RuntimeException('Node and Service keys must differ');}
         $response=['status'=>200,'headers'=>['Content-Length'=>(string)strlen($record->canonicalWire)],'body'=>$method==='HEAD'?'':$record->canonicalWire];
     }
     elseif ($target === '/.well-known/onion-service-discovery-history.json' && $config->nodeOnion !== null && in_array($method,['GET','HEAD'],true)) {
@@ -100,8 +108,15 @@ try {
     elseif (in_array($config->role, ['client-host','publisher'], true)) { $response = ['status' => 404, 'headers' => [], 'body' => '{"error":"NOT_FOUND"}']; }
     elseif (!(new PublicRequestBudget($config->exportPath . '/.request-budget'))->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
     else {
-        $api = new DataApi($config->store(readOnly: true), new PublicBlobStore($config->exportPath), new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas'), $config->features['mirror_directory'], $config->allowedClientOrigins);
-        $response = $api->handle($method, $target, $_SERVER['HTTP_ORIGIN'] ?? null);
+        $blobs = new PublicBlobStore($config->exportPath); $verifier = new RecordVerifier(dirname(__DIR__, 2) . '/protocol/schemas');
+        try { $response = (new DataApi($config->store(readOnly: true), $blobs, $verifier, $config->features['mirror_directory'], $config->allowedClientOrigins))->handle($method, $target, $_SERVER['HTTP_ORIGIN'] ?? null); }
+        catch (StorageException $error) {
+            // D-045: an unreadable store keeps the last published snapshot online; its blobs verify on their own.
+            // Without a published state, or with damaged exports, nothing can be served and the request fails as before.
+            if (str_starts_with($error->errorCode, 'EXPORT_')) { throw $error; }
+            $published = PublishedState::load($blobs, $verifier, $config->nodeOnion) ?? throw $error;
+            $response = (new DataApi(null, $blobs, $verifier, $config->features['mirror_directory'], $config->allowedClientOrigins, $published))->handle($method, $target, $_SERVER['HTTP_ORIGIN'] ?? null);
+        }
     }
 
 } catch (Throwable) {

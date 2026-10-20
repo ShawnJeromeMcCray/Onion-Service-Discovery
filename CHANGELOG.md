@@ -2,6 +2,70 @@
 
 ## Unreleased
 
+- `doctor` and `security:check` reports have a JSON schema
+  (`docs/operations/health-report.schema.json`, spec 32 section 10) that the
+  tests apply to every report they produce; `status` for a publisher adds the
+  Logical Service Identifier, current key, fingerprint and key epoch.
+- A Discovery Node whose store cannot be read stays online read-only (owner
+  decision D-045): `node:snapshot` keeps a copy of the last published state
+  (`.published-state.json`) beside the export blobs, and while the store is
+  damaged or awaits recovery the Node serves `node`, `state`, its checkpoints
+  and chunks byte-identically from there. Peers, changes, service lookups and
+  announcements answer 503 `NODE_DEGRADED_READ_ONLY`, server search pauses,
+  the status page and `status` show DEGRADED (spec 47 section 39 names:
+  HEALTHY, READ_ONLY, DEGRADED, ERROR) and `doctor` reports `node_health` and
+  warns with `PUBLISHED_STATE_STALE` when the copy lags the store. A public
+  announcement no longer opens a damaged store for writing.
+- Search after a view update reuses normalized text and look-alike forms by
+  content: with 10,000 entries the page no longer spends about a second
+  normalizing every update. The NoJS server search shows the browser's
+  invisible-character and mixed-script notes.
+- Look-alike names are flagged (owner decision D-024): the browser compares
+  names by their UTS #39 confusable skeleton, built from the Unicode 17.0.0
+  `confusables.txt` and the client's own frozen NFD, so the result does not
+  depend on the browser's Unicode version. A name that looks like a pinned name
+  under another key gets a warning, names of different identities that look
+  alike get a note, and pin labels and the pin import preview are checked too.
+  Names are never rewritten or hidden. The table adds about 38 KB to
+  `client.js`; `tools/generate_confusables.py` rebuilds and checks it against
+  the pinned source hash.
+- Browser tests fix the verifier's clock through the page: since 2026-10-19
+  the aging fixtures made six tests fail.
+- The decision register records the owner's decisions of 2026-10-15: D-004
+  (origin trust and server fallback as implemented), D-030/D-031 (keyless
+  Sigstore signing and provenance through GitHub attestations), D-034 (no logs
+  by default), D-037 (default switches as implemented) and D-053/D-054
+  (Category Registry v1 frozen, language-tag grammar approved; the registry
+  files, generated constants and PCP-001 say so).
+- Keys have a human-comparable fingerprint (owner decision D-025): SHA-256 over
+  a domain and the raw key, 150 bits as six groups of five Base32 characters.
+  The browser shows it for identity keys, pins, the pin import preview, Node
+  keys of loaded sources and the keys of Client Host vouched or visitor-added
+  Nodes; the status page shows the Service and Node key fingerprints and
+  `node:identity` prints `node_key_fingerprint` and puts it in the visitor line.
+  Vectors are generated independently in Python and checked in PHP and the
+  browser.
+- Search results are ranked by text relevance (owner decision D-023) in the
+  browser and in the server search alike: an exact normalized name first, then
+  names that start with the query, names containing every term and finally
+  other matches; ties by the normalized name without leading ASCII punctuation,
+  then the identity key. Case variants and a leading "!" no longer move a name
+  ahead, and Node or observation counts never rank. Shared fixtures are now
+  `local-search-v2.json`. **Upgrade note:** a Node with server search enabled
+  reports `SEARCH_INDEX_STALE` until `node:snapshot … --rebuild-derived` builds
+  the new index format.
+- Publisher Node checks evaluate checkpoint freshness (owner decision D-036): a
+  Node counts toward discoverability only while its signed checkpoint is at most
+  seven days old and not dated more than five minutes ahead. A Node that
+  includes the revision in an older checkpoint is reported as `OUTDATED` or
+  `CLOCK_AHEAD`, saved as `outdated_checkpoints`, warned about on the status
+  page and no longer makes the Service DISCOVERABLE.
+- PHP 8.3 is supported (owner decision D-002: 8.3+, 8.5 preferred), so the
+  distribution PHP of Ubuntu 24.04 LTS works. `composer.json` requires `^8.3`,
+  Composer's platform check refuses an older PHP, `doctor` passes on 8.3 to 8.5
+  and warns on a newer untested minor version, and CI runs every PHP test,
+  the protocol conformance suite and the fuzzer on a pinned `php:8.3-cli` image
+  (8.3.35) besides 8.4 and 8.5.
 - Browser client on slow devices: a record already verified in this session is
   not verified again when another Node serves the same bytes, so loading three
   Nodes costs little more than loading one. The 90-second limit per source now

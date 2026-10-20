@@ -2,14 +2,14 @@
 
 Source: specification document 24. No approval has been inferred from the request to implement the project; every approval below quotes an explicit owner answer. Protocol v1 is owner-frozen as implemented (D-005 to D-017, D-052); independent review and production approval remain open.
 
-D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrestricted use and relinquish rights. Runtime versions (D-002) are not yet decided.
+D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrestricted use and relinquish rights. Runtime versions (D-002): PHP 8.3, 8.4 and 8.5, 8.5 preferred (owner decision 2026-10-15).
 
 | ID | Decision | State | Owner | Release blocker | Source recommendation |
 | --- | --- | --- | --- | --- | --- |
 | D-001 | Project License | APPROVED | Project owner / reviewer | YES | See source decision |
-| D-002 | Minimum/Preferred PHP Version | UNRESOLVED | Project owner / reviewer | YES | PHP 8.5 preferred as of October 2026; only supported branches. |
+| D-002 | Minimum/Preferred PHP Version | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | YES | PHP 8.3+ supported, 8.5 preferred: 8.3, 8.4 and 8.5 each run the full PHP suite in CI; 8.3 support ends with its upstream security support (end of 2027). Ubuntu 24.04 LTS and Debian 13 work with their distribution PHP. |
 | D-003 | Web Local Search Browser Compatibility Baseline | UNRESOLVED | Project owner / reviewer | YES | See source decision |
-| D-004 | Web Local Search Origin Trust and Server-Fallback Policy | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
+| D-004 | Web Local Search Origin Trust and Server-Fallback Policy | OWNER-APPROVED AS IMPLEMENTED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | Combined host: same-origin generic index download; separated host: query-independent Client Host relay or direct credentialless CORS; no extension; browser storage optional; local search sends no request; the page's serving-origin trust wording; NoJS server search opt-in per Node, POST only, no query logging, no query-triggered remote work. |
 | D-005 | Canonical JSON Implementation | OWNER-APPROVED v1 (2026-10-14) / CRYPTO-REVIEW-OPEN | Project owner / reviewer | YES | As implemented: RFC 8785 serialization over the integer-only JSON subset ([ADR 002](../adr/002-integer-json-and-signed-byte-construction.md)). |
 | D-006 | Signed Envelope Exact Byte Construction | OWNER-APPROVED v1 (2026-10-14) / CRYPTO-REVIEW-OPEN | Project owner / reviewer | YES | As implemented: `Onion Service Discovery/<domain>/v1`, one zero byte, canonical payload without the declared signature slots (ADR 002). |
 | D-007 | Manifest Hash Definition | OWNER-APPROVED v1 (2026-10-14) / CRYPTO-REVIEW-OPEN | Project owner / reviewer | YES | As implemented: SHA-256 over `Onion Service Discovery/<domain>-hash/v1`, zero byte, canonical payload; `sha256:` plus lowercase hex. |
@@ -28,21 +28,21 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-020 | Proof of Work | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | not Protocol v1 core. Only reconsider after measured abuse pressure. |
 | D-021 | Moderation in Initial Release | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | avoid mandatory central moderation. |
 | D-022 | Clearnet Identity Proof | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | optional and separate from core identity. Needs outbound/privacy threat review. |
-| D-023 | Search Ranking Algorithm | UNRESOLVED | Project owner / reviewer | YES | See source decision |
-| D-024 | Unicode Confusable Strategy | UNRESOLVED | Project owner / reviewer | YES | See source decision |
-| D-025 | Human Fingerprint Format | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
+| D-023 | Search Ranking Algorithm | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | YES | Deterministic text relevance, identical in browser and server search: exact normalized name, name prefix, every term in the name, other match; ties by normalized name without leading ASCII punctuation, then identity key; Node, observation or source counts never rank. Fixtures: `protocol/test-vectors/local-search-v2.json`. |
+| D-024 | Unicode Confusable Strategy | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | YES | UTS #39 skeletons from Unicode 17.0.0 confusables.txt (ICU release-78.3, SHA-256 pinned in `protocol/registries/confusables-v1.provenance.json`) over the client's frozen Unicode 17 NFD: a result whose name looks like a pinned name or another entry's name under a different key is flagged; names are never rewritten or hidden. The server search shows the browser's direction-control, invisible-character and mixed-script notes but no skeleton comparison. |
+| D-025 | Human Fingerprint Format | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | Grouped Base32 of SHA-256 (`Onion Service Discovery/key-fingerprint/v1`, zero byte, raw key): 150 bits as six groups of five characters; display aid only, full keys stay authoritative. Vectors: `protocol/test-vectors/key-fingerprint-v1.json`. |
 | D-026 | Client Source Bootstrap Set | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-027 | Node Seed Inclusion Policy | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-028 | Web Client Distribution and Asset Provenance | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-029 | Server Packaging | OWNER-APPROVED (2026-10-14) | Project owner / reviewer | YES | Development runtime package (vendor/ and built client) per merge to main, with CI provenance, marked unsigned development preview; signed stable releases still need D-030/D-031. |
-| D-030 | Release Signing Mechanism | UNRESOLVED | Project owner / reviewer | YES | See source decision |
-| D-031 | Provenance Infrastructure | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
+| D-030 | Release Signing Mechanism | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | YES | Keyless Sigstore signing through GitHub Actions OIDC: GitHub build-provenance and SBOM attestations in the public transparency log, verified with `gh attestation verify ARTIFACT --repo ShawnJeromeMcCray/Onion-Service-Discovery`. No long-lived release key; trust rests on the repository's GitHub identity and workflow. |
+| D-031 | Provenance Infrastructure | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | GitHub artifact attestations (build provenance and CycloneDX SBOM) from the digest-pinned workflow; no SLSA level is claimed beyond what the attestation states. |
 | D-032 | CycloneDX Version/Tool | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-033 | OWASP ASVS Applicability Level/Matrix | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
-| D-034 | Logging Defaults | UNRESOLVED | Project owner / reviewer | YES | See source decision |
+| D-034 | Logging Defaults | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | YES | No logs by default: job output and web errors are discarded (systemd output to null, FPM `log_errors` off, no access logs for OSD routes). Failures surface through `doctor`, `status`, the status page and saved publisher evidence. Operators who enable logging do so locally and keep queries, onion addresses, IP addresses and keys out of it. |
 | D-035 | Direct Observation Publication | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
-| D-036 | Staleness Thresholds | PARTIALLY OWNER-APPROVED | Project owner / reviewer | CONDITIONAL / REVIEW | Owner approved 7 days for publisher discoverability evidence (2026-10-14); other local staleness thresholds remain open. |
-| D-037 | Default Operator Switches | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | publishing false until configured; mirror/discover conservative; sync only if node role enabled. |
+| D-036 | Staleness Thresholds | PARTIALLY OWNER-APPROVED | Project owner / reviewer | CONDITIONAL / REVIEW | Owner approved 7 days for publisher discoverability evidence (2026-10-14) and 7 days for the signed checkpoint of a Node that counts toward a publisher's discoverability (2026-10-15; 5 minutes of clock tolerance as in the browser); other local staleness thresholds remain open. |
+| D-037 | Default Operator Switches | OWNER-APPROVED AS IMPLEMENTED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | Publishing only with `init --publish`; mirroring and discovery only for the node and combined roles; peer sync, server search, announcement intake and visitor-chosen Nodes stay off until explicitly enabled. |
 | D-038 | Manifest Auto-Regeneration | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-039 | Key Backup UX | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-040 | Database Retention Defaults | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
@@ -50,7 +50,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-042 | Tor Stream Isolation Strategy | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-043 | HTTP Compression | UNRESOLVED | Project owner / reviewer | YES | disable or strictly expanded-size enforce for verification path. |
 | D-044 | API CORS Model | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
-| D-045 | Public Health/Metrics | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | minimal health; detailed metrics local/private. Ops/security review. |
+| D-045 | Public Health/Metrics | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | Minimal public health, detailed diagnostics local only. A Node whose store cannot be read keeps serving its last published signed snapshot (node, state, checkpoint and chunks from `.published-state.json` and the export blobs, re-verified on every read); the status page shows DEGRADED; store-backed routes and announcements answer 503 `NODE_DEGRADED_READ_ONLY`; server search pauses. |
 | D-046 | Container Support | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-047 | Project Branding/Logo | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-048 | Real-World Legal/Policy Review | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
@@ -63,8 +63,8 @@ The refreshed source decision register adds four release blockers; D-051 and D-0
 | --- | --- | --- | --- | --- | --- |
 | D-051 | Stable Logical Service Identifier | OWNER-APPROVED / CRYPTO-REVIEW-OPEN | Human Protocol/Crypto reviewer | YES (independent review) | Owner approved canonical genesis public-key encoding on 2026-10-13; claimed identifiers need full continuity evidence. |
 | D-052 | Signed Node Checkpoint Chain | OWNER-APPROVED v1 (2026-10-14) / CRYPTO-REVIEW-OPEN | Human Protocol/Security reviewer | YES | As implemented: generation exactly +1, `previous_checkpoint_hash` chain, `null` for generation 1; equivocation stays sticky. |
-| D-053 | Category Registry v1 Immutability | PROPOSED / NEEDS-HUMAN-REVIEW | Human Protocol/Product reviewer | YES | Frozen IDs cannot change or silently expand; extensions need explicit versioning. |
-| D-054 | Language Tag Wire Grammar | PROPOSED / NEEDS-HUMAN-REVIEW | Human Protocol/I18N reviewer | YES | One tested RFC 5646 grammar, lowercase ASCII wire form and canonical uniqueness are proposed. |
+| D-053 | Category Registry v1 Immutability | OWNER-APPROVED (2026-10-15) / INDEPENDENT REVIEW OPEN | Human Protocol/Product reviewer | YES | The 38 v1 IDs are frozen: they cannot change or silently expand; extensions need explicit versioning. |
+| D-054 | Language Tag Wire Grammar | OWNER-APPROVED (2026-10-15) / INDEPENDENT REVIEW OPEN | Human Protocol/I18N reviewer | YES | One tested RFC 5646 grammar, lowercase ASCII wire form (at most 35 characters, 16 entries) and canonical uniqueness. |
 
 D-052 is owner-approved as implemented (see the second set of 2026-10-14 decisions); D-053 and D-054 remain source recommendations, not approvals. D-001 remains approved by the owner's earlier explicit CC0 instruction.
 

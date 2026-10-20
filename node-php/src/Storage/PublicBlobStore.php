@@ -27,8 +27,38 @@ final readonly class PublicBlobStore
             return $action();
         } finally { flock($lock, LOCK_UN); fclose($lock); }
     }
-    /** Lock and request-budget files the front controller keeps beside the blobs; never pruned. */
-    public const CONTROL_FILES = ['.writer.lock', '.http-budget', '.request-budget', '.relay-budget', '.visitor-relay-budget'];
+    /** The last published state node:snapshot keeps beside the blobs for degraded serving (D-045). */
+    public const PUBLISHED_STATE = '.published-state.json';
+    public const PUBLISHED_STATE_MAX_BYTES = 65536;
+    /** Lock and request-budget files the front controller keeps beside the blobs, and the last published state; never pruned. */
+    public const CONTROL_FILES = ['.writer.lock', '.http-budget', '.request-budget', '.relay-budget', '.visitor-relay-budget', self::PUBLISHED_STATE];
+
+    /**
+     * Replaces the last published state under the writer lock. $build runs inside the lock and
+     * returns the new bytes, or null to leave the file as it is; returns whether the file changed.
+     * @param callable(): ?string $build
+     */
+    public function replacePublishedState(callable $build): bool
+    {
+        return $this->withWriterLock(function () use ($build): bool {
+            $bytes = $build();
+            if ($bytes === null || $bytes === $this->publishedState()) { return false; }
+            if (strlen($bytes) > self::PUBLISHED_STATE_MAX_BYTES) { throw new StorageException('EXPORT_BUDGET_EXHAUSTED'); }
+            $this->atomicWrite($this->directory . '/' . self::PUBLISHED_STATE, $bytes);
+            return true;
+        });
+    }
+    /** The last published state as written, or null before the first one. */
+    public function publishedState(): ?string
+    {
+        $path = $this->directory . '/' . self::PUBLISHED_STATE;
+        if (is_link($path)) { throw new StorageException('EXPORT_CORRUPT'); }
+        if (!is_file($path)) { return null; }
+        $stream = fopen($path, 'rb'); if ($stream === false) { throw new StorageException('EXPORT_UNAVAILABLE'); }
+        try { $bytes = stream_get_contents($stream, self::PUBLISHED_STATE_MAX_BYTES + 1); } finally { fclose($stream); }
+        if ($bytes === false || strlen($bytes) > self::PUBLISHED_STATE_MAX_BYTES) { throw new StorageException('EXPORT_CORRUPT'); }
+        return $bytes;
+    }
 
     /** Cleanup that keeps all given references and deletes at most 256 other blobs. With $olderThan
      * (a Unix time) only files last written before it are deleted, so a snapshot writing new blobs
@@ -79,6 +109,11 @@ final readonly class PublicBlobStore
             $total += $file->getSize();
         }
         if ($count >= 4096 || $total + strlen($bytes) > $this->maxBytes) { throw new StorageException('EXPORT_BUDGET_EXHAUSTED'); }
+        $this->atomicWrite($path, $bytes);
+    }
+    /** Durable replacement: a synced temporary file renamed over $path, then the directory synced. */
+    private function atomicWrite(string $path, string $bytes): void
+    {
         $temporary = $this->directory . '/.tmp-' . bin2hex(random_bytes(12));
         $mask = umask(0077); try { $stream = fopen($temporary, 'x+b'); } finally { umask($mask); }
         if ($stream === false) { throw new StorageException('EXPORT_UNAVAILABLE'); }

@@ -1,0 +1,38 @@
+{
+ "format_version": 1,
+ "definition": "SHA-256 over the ASCII bytes \"Onion Service Discovery/key-fingerprint/v1\", one zero byte and the 32 raw Ed25519 public key bytes; the first 150 bits as RFC 4648 Base32 (uppercase, no padding), written as six groups of five characters joined by \"-\" (decision D-025).",
+ "cases": [
+  {
+   "public_key": "ed25519:1ucgJGkAyu35i45cT0876Zhxk82--g45wD1QJlMrUzs",
+   "fingerprint": "YCUA6-Y3WUQ-EGQTZ-3YKVL-YMM5Q-F2G23"
+  },
+  {
+   "public_key": "ed25519:SEnx65yKeLuO2kHCPHh9sOCyas44RUlCmiLYTHpNewA",
+   "fingerprint": "DXA2S-6VL2M-RLHXS-DXYY7-SZADD-YOU3N"
+  },
+  {
+   "public_key": "ed25519:Wxn_XTwuoDlrDzjFFKRF-f4I2Uc39HTOncUMzBudP18",
+   "fingerprint": "HIQVY-ODYAA-DNAPO-BDWRT-TNQ76-QWAVA"
+  },
+  {
+   "public_key": "ed25519:d5AFdtLPqvtACsEy9cFPo4v4BRZmMp9UMF1ngNpJ6W0",
+   "fingerprint": "2TSUQ-P7FTL-6QNZ5-J5CYQ-M5FU5-PVDUU"
+  },
+  {
+   "public_key": "ed25519:hkGfeslmAhBQPcsZnOxTcOKJ_EM4mb-n2RMAtEYLXhg",
+   "fingerprint": "KJKFA-GVZEL-HWBW2-VQ5ED-BJWI3-JXP5G"
+  },
+  {
+   "public_key": "ed25519:liciJVR3sdWozn8n7nzsleiZJON-eZb_JJ4NieJbDzI",
+   "fingerprint": "75IYZ-VJ5ZT-TSOG4-RBA3A-6OAPL-JZU4O"
+  },
+  {
+   "public_key": "ed25519:shJI9W1UVLR8bRWWMXaz3e-BZ2t-gEExnBF_2f9o-V8",
+   "fingerprint": "G7PCG-6OS4H-ZDEHN-3U5ZE-KZB7F-XSNPS"
+  },
+  {
+   "public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
+   "fingerprint": "WGX6X-HX6MI-M4OSX-7VWAO-ZVWOG-7C526"
+  }
+ ]
+}

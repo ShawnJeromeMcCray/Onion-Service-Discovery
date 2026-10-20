@@ -69,7 +69,7 @@ final class PublisherStatus
             $record = $verifier->verifyWire($wire, OnionAddress::parse($config->nodeOnion));
             if ($record->type !== 'service_manifest') { throw new \InvalidArgumentException('MANIFEST_INVALID'); }
             $doc = $record->document(); $hash = $record->contentHash;
-            $status['manifest'] = ['state' => 'SIGNATURE_VALID', 'revision' => $doc->revision, 'hash' => $record->contentHash, 'current_key' => $doc->service_identity_public_key, 'publish_service' => $doc->discovery->publish_service,
+            $status['manifest'] = ['state' => 'SIGNATURE_VALID', 'revision' => $doc->revision, 'hash' => $record->contentHash, 'current_key' => $doc->service_identity_public_key, 'current_key_fingerprint' => \OnionServiceDiscovery\Crypto\KeyFingerprint::of($doc->service_identity_public_key), 'publish_service' => $doc->discovery->publish_service,
                 'continuity' => $doc->revision === 1 ? 'GENESIS' : 'NOT_CHECKED',
                 'history_bundle' => is_file(dirname($manifestPath) . '/onion-service-discovery-history.json') ? 'INSTALLED' : 'NOT_INSTALLED'];
             // Do not invent a logical identifier or key epoch from a non-genesis record.
@@ -175,6 +175,8 @@ final class PublisherStatus
                 // Spec 47 section 79.
                 $status['warnings'][] = sprintf('Conflicting signed index checkpoints detected at %d checked Discovery Node(s): a rollback, two different checkpoints for one generation, or a broken chain since your previous check. Their answers are not used. Keep the saved evidence file and tell the Node operators.', $conflicts);
             }
+            // D-036: Nodes whose signed index is older than seven days include the revision but are not counted.
+            $outdated = $membership['outdated_checkpoints'] ?? 0;
             if ($membership['manifest_hash'] !== $currentHash) {
                 $actions[50] = 'Checked Nodes were last compared with revision ' . $membership['revision'] . ', not the installed Manifest. Run network:discoverability-check --save-status again.';
             } else {
@@ -185,6 +187,10 @@ final class PublisherStatus
                 $status['manifest']['continuity'] = 'VERIFIED_FROM_OWNER_HISTORY';
                 $status['evidence_checked_at'] = $membership['checked_at'];
                 $status['active_index_membership'] = sprintf('CURRENT_REVISION_IN_%d_OF_%d_CHECKED_NODE_SNAPSHOTS', $membership['included'], $checked);
+                if ($outdated > 0) {
+                    $status['index_freshness'] = sprintf('%d_INCLUDING_NODES_OLDER_THAN_7_DAYS', $outdated);
+                    $status['warnings'][] = sprintf('%d checked Discovery Node(s) include this revision, but their signed index is older than seven days or dated ahead of your clock. They are not counted as discoverable until they publish a fresh snapshot (decision D-036).', $outdated);
+                }
                 $status['external_observation'] = match (true) {
                     $membership['contradictory'] > 0 => 'CONFLICT_REPORTED',
                     $observed > 0 => 'OBSERVED_CURRENT_REVISION',
@@ -204,9 +210,12 @@ final class PublisherStatus
                         $actions[90] = $unreached > 0 ? sprintf('%d checked Node(s) could not be verified. Several Node keys may still belong to one operator.', $unreached)
                             : 'No action needed. Recheck after each new revision. Several Node keys may still belong to one operator.';
                     }
-                } elseif ($membership['included'] > 0) {
+                } elseif ($membership['included'] > $outdated) {
                     $overall = 'EXTERNALLY_OBSERVED';
                     $actions[80] = 'The current revision is included by checked Nodes that exported no direct observation of their own. Ask a cooperating Node to run its direct verification worker.';
+                } elseif ($membership['included'] > 0) {
+                    $overall = 'EXTERNALLY_OBSERVED';
+                    $actions[80] = sprintf('Only Nodes whose signed index is older than seven days include the current revision (%d of %d). Ask their operators whether their snapshot timer runs, or add Nodes that publish fresh snapshots, then recheck.', $outdated, $checked);
                 } elseif ($membership['stale'] > 0) {
                     $overall = 'EXTERNALLY_OBSERVED';
                     $actions[80] = sprintf('Checked Nodes still expose an older revision (%d of %d). This is ordinary propagation delay; recheck after their next snapshot.', $membership['stale'], $checked);

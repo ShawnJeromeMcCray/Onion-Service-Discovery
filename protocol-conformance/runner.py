@@ -68,7 +68,7 @@ def batches(fixtures):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--php-image', choices=['php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3', 'php@sha256:1d2cf2b7d715b5b3aa959f0150ccbcc7b71e0181b637e443abf40a7fb56bf79a'], default=PHP_IMAGE)
+    parser.add_argument('--php-image', choices=['php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3', 'php@sha256:1d2cf2b7d715b5b3aa959f0150ccbcc7b71e0181b637e443abf40a7fb56bf79a', 'php@sha256:aafe21201943a8a6e497ddfb471e2ce68ada76adede38c7d61fede8918b24319'], default=PHP_IMAGE)
     parser.add_argument('--php-container', action='store_true')
     parser.add_argument('--report', type=Path)
     args = parser.parse_args()

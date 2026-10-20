@@ -15,9 +15,22 @@ final readonly class SnapshotProducer
     public function __construct(private StorageBackend $store, private PublicBlobStore $blobs, private RecordVerifier $verifier, private SignerProvider $signer, private bool $serverSearch = false, private bool $forceDerived = false)
     { if ($signer->role() !== 'node') { throw new ProtocolException('SIGNER_ROLE_MISMATCH'); } }
     /**
+     * Publishes a new generation when the public evidence changed, then copies the published state
+     * beside the export blobs for degraded serving (D-045). The copy is written only after the store
+     * committed, so it never names a snapshot the store did not publish; an UNCHANGED run repairs a
+     * missing or older copy, for example after an upgrade.
      * @return array<array-key, mixed>
      */
     public function publish(int $now): array
+    {
+        $result = $this->produce($now);
+        PublishedState::save($this->store, $this->blobs, $this->verifier);
+        return $result;
+    }
+    /**
+     * @return array<array-key, mixed>
+     */
+    private function produce(int $now): array
     {
         if ($now < 0 || $now > 253402300799) { throw new ProtocolException('CLOCK_INVALID'); }
         $state = $this->store->snapshot(); $all = [];
@@ -108,7 +121,7 @@ final readonly class SnapshotProducer
             $publicHashes[] = $descriptor->contentHash;
             foreach (array_chunk(array_values(array_unique($publicHashes)),64) as $index => $part) { $tx->set('node','public-index-' . $index,['hashes'=>$part]); }
             foreach ($serviceIndexes as $prefix => $hash) { $tx->set('node', 'service-index-' . $prefix, ['hash' => $hash]); }
-            if ($searchIndex !== null) { $tx->set('node', 'server-search-index', ['format_version' => 1, 'hash' => $searchIndex]); }
+            if ($searchIndex !== null) { $tx->set('node', 'server-search-index', ['format_version' => \OnionServiceDiscovery\Search\SearchIndex::FORMAT_VERSION, 'hash' => $searchIndex]); }
             else { $tx->deleteOperational('node', 'server-search-index'); }
             $tx->set('node', 'published-snapshot', ['hash' => $descriptor->contentHash, 'root_hash' => SnapshotFormat::rootHash($chunks), 'generation' => $generation, 'cursor' => (string) $publicCursor, 'service_index_version' => 2]);
         });

@@ -189,10 +189,12 @@ next check the new checkpoint must descend from it, otherwise the Node is
 or `SOURCE_CHECKPOINT_CHAIN_BROKEN` and keeps that state until you act. Each
 Node row shows `checkpoint_consistency`: `BASELINE` (first check of this Node
 key), `CONSISTENT`, or `NOT_EVALUATED` when a predecessor was unreachable or the
-gap exceeds 32 checkpoints. The checkpoint age is shown for your judgement only:
-`freshness` remains `NOT_EVALUATED` because no freshness threshold is approved
-yet, and `operator_independence` is always `NOT_ESTABLISHED`: several keys may
-belong to one operator. Membership is evidence about those Nodes' current
+gap exceeds 32 checkpoints. A Node counts only while its signed checkpoint is at
+most seven days old (decision D-036): a Node that includes your revision in an
+older checkpoint, or one dated ahead of your clock, is shown as not counted, with
+a warning on your status page, because its index no longer shows that you are
+findable today. `operator_independence` is always `NOT_ESTABLISHED`: several keys
+may belong to one operator. Membership is evidence about those Nodes' current
 snapshots, not a promise that browsers will load them. See the
 [acceptance scenario and remaining work](project-status.md#end-to-end-acceptance-scenario).
 

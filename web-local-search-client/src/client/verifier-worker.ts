@@ -6,7 +6,7 @@ import { buildView, pinIdentity, type LocalPin } from './view-model.ts';
 import { classifyPinImport, mergePins, parsePinBackup } from './pins.ts';
 import { SourceWitnesses } from './source-witnesses.ts';
 
-type Command = {op:'configure';allowedSources:string[];deliveryProfile:DeliveryProfile;visitorSources?:boolean}|{op:'add-source';onion:string;expectedKey:string}|{op:'remove-source';onion:string}|{op:'export-evidence';onion:string}|{op:'load';sources:SourceSelection[]}|{op:'cancel'}|{op:'import-records';bytes:ArrayBuffer;synthetic?:boolean}|{op:'pin';genesisKey:string}|{op:'unpin';genesisKey:string}|{op:'restore-pins';bytes:ArrayBuffer;origin:'profile'|'backup'}|{op:'preview-pins';bytes:ArrayBuffer}|{op:'clear-index'}|{op:'clear-all'};
+type Command = {op:'configure';allowedSources:string[];deliveryProfile:DeliveryProfile;visitorSources?:boolean}|{op:'add-source';onion:string;expectedKey:string}|{op:'remove-source';onion:string}|{op:'export-evidence';onion:string}|{op:'load';sources:SourceSelection[];now?:number}|{op:'cancel'}|{op:'import-records';bytes:ArrayBuffer;synthetic?:boolean}|{op:'pin';genesisKey:string}|{op:'unpin';genesisKey:string}|{op:'restore-pins';bytes:ArrayBuffer;origin:'profile'|'backup'}|{op:'preview-pins';bytes:ArrayBuffer}|{op:'clear-index'}|{op:'clear-all'};
 const scope=globalThis as unknown as {onmessage:((event:MessageEvent<Command>)=>void)|null;postMessage:(data:unknown)=>void};
 const crypto=browserCryptoProviders(); let loader=new SourceLoader(crypto);
 const records=new Map<string,VerifiedRecord>(); const ledgers=new Map<string,SourceLedger>(); const witnesses=new SourceWitnesses();
@@ -100,7 +100,8 @@ async function command(message:Command):Promise<void> {
             // A small message per verified chunk; the full view is rebuilt only when the source ends.
             (done,total)=>scope.postMessage({type:'progress',onion:selection.onion,records:done,total}));
           admit(result.records,selection.onion); ledgers.set(selection.onion,result.ledger);
-          const age=Date.now()-Date.parse(result.createdAt); status.status=age>604800000||age< -300000?'STALE':'COMPLETE'; status.nodeKey=result.ledger.nodeKey; status.generation=result.ledger.generation; status.createdAt=result.createdAt; status.baselineHistoryProven=result.baselineHistoryProven;
+          const now=typeof message.now==='number'&&Number.isFinite(message.now)?message.now:Date.now();
+          const age=now-Date.parse(result.createdAt); status.status=age>604800000||age< -300000?'STALE':'COMPLETE'; status.nodeKey=result.ledger.nodeKey; status.generation=result.ledger.generation; status.createdAt=result.createdAt; status.baselineHistoryProven=result.baselineHistoryProven;
         } catch(error) {
           status.error=code(error);
           status.status=status.error==='SOURCE_CANCELLED'?'CANCELLED':status.error==='SOURCE_HISTORY_PROGRESS'?'PARTIAL':/EQUIVOCATION|ROLLBACK|FORK|KEY_CHANGED|CHAIN_BROKEN/.test(status.error)?'QUARANTINED':'FAILED';

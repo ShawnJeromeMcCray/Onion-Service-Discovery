@@ -15,7 +15,7 @@ final class NodeInitializer
     public static function initialize(NodeConfig $config, SignerProvider $signer, RecordVerifier $verifier): array
     {
         if ($config->role === 'client-host' || $signer->role() !== 'node') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
-        $store = $config->store(true); new PublicBlobStore($config->exportPath, true);
+        $store = $config->store(true); $blobs = new PublicBlobStore($config->exportPath, true);
         $state = $store->snapshot(); $pointer = $state['tables']['node']['key:descriptor'] ?? null; $previous = null;
         if ($pointer !== null) {
             $wire = $store->readRecord($pointer['hash']); if ($wire === null) { throw new ProtocolException('STORAGE_CORRUPT'); }
@@ -37,6 +37,8 @@ final class NodeInitializer
             if ($tx->state()['generation'] !== $state['generation']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
             $tx->putRecord($descriptor); $tx->set('node', 'descriptor', ['hash' => $descriptor->contentHash]);
         });
+        // A Node that already published keeps the new descriptor for degraded serving too (D-045).
+        PublishedState::save($store, $blobs, $verifier);
         return ['status' => 'INITIALIZED', 'descriptor_hash' => $descriptor->contentHash];
     }
 }

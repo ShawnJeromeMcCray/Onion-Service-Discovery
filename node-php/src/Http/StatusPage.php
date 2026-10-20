@@ -38,7 +38,7 @@ final class StatusPage
             if (is_string($value)) { $body .= '<dt>' . self::escape(str_replace('_', ' ', $field)) . '</dt><dd>' . self::escape($value) . '</dd>'; }
         }
         if (is_array($facts['manifest'] ?? null)) {
-            foreach (['state','revision','hash','logical_service_id','current_key','key_epoch','publish_service','continuity'] as $field) {
+            foreach (['state','revision','hash','logical_service_id','current_key','current_key_fingerprint','key_epoch','publish_service','continuity'] as $field) {
                 $value = $facts['manifest'][$field] ?? null;
                 if (is_string($value) || is_int($value) || is_bool($value)) {
                     $body .= '<dt>' . self::escape('manifest: ' . str_replace('_', ' ', $field)) . '</dt><dd>' . self::escape(is_bool($value) ? ($value ? 'ON' : 'OFF') : (string)$value) . '</dd>';
@@ -54,7 +54,12 @@ final class StatusPage
         $body .= '</section>';
         if (is_array($facts['node'] ?? null)) {
             $node = $facts['node'];
-            $body .= '<section><h2>Discovery Node</h2>';
+            $degraded = ($node['storage_state'] ?? null) === 'DEGRADED';
+            $body .= '<section' . ($degraded ? ' class="warning"' : '') . '><h2>Discovery Node</h2>';
+            // D-045: public health stays minimal; the cause and the repair steps stay in doctor and status.
+            if ($degraded) {
+                $body .= '<p><strong>Degraded.</strong> This Node cannot read its local store right now. It keeps serving its last published signed snapshot, which clients verify themselves; announcements, server search and lookups that need the store are paused until the operator repairs it.</p>';
+            }
             if (is_string($node['node_onion'] ?? null) && is_string($node['node_identity_public_key'] ?? null)) {
                 $body .= '<p>Publishers, peers and visitors need both values below to use this Node. Give them through a channel they trust; they must never take the key from the Node’s own answers.</p>';
             }
@@ -65,6 +70,7 @@ final class StatusPage
             foreach ($labels as $field => $label) {
                 $value = $node[$field] ?? null;
                 if (is_string($value) || is_int($value)) { $body .= '<dt>' . self::escape($label) . '</dt><dd>' . ($field === 'node_onion' || $field === 'node_identity_public_key' ? '<code>' . self::escape((string) $value) . '</code>' : self::escape((string) $value)) . '</dd>'; }
+                if ($field === 'node_identity_public_key' && is_string($value)) { $body .= self::fingerprint('Node key fingerprint', $value); }
             }
             foreach (['candidates' => 'Discovery queue', 'peers' => 'Peers'] as $field => $label) {
                 if (!is_array($node[$field] ?? null)) { continue; }
@@ -86,6 +92,13 @@ final class StatusPage
         $body .= '<p>Signature validity establishes technical key evidence, not content safety or operator identity. Several Node keys may belong to one operator.</p><p>Development implementation. Production approval remains open.</p></main></html>';
         return ['status' => 200, 'headers' => $headers, 'body' => $method === 'HEAD' ? '' : $body];
     }
+    /** D-025: a key's grouped fingerprint, easier to read aloud and compare than the key itself. */
+    private static function fingerprint(string $label, string $key): string
+    {
+        try { return '<dt>' . self::escape($label) . '</dt><dd><code>' . self::escape(\OnionServiceDiscovery\Crypto\KeyFingerprint::of($key)) . '</code></dd>'; }
+        catch (\InvalidArgumentException) { return ''; }
+    }
+
     /** @param array<string,mixed> $facts */
     private static function warnings(array $facts): string
     {

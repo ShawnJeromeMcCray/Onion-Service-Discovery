@@ -51,7 +51,7 @@ try {
 
     $node = NodeStatus::inspect($config, $verifier, 1800000000);
     $assert($node['node_onion'] === $onion && $node['node_identity_public_key'] === $signer->publicKey() && $node['identity'] === 'INITIALIZED', 'identity'); ++$checks;
-    $assert($node['storage_state'] === 'READABLE' && $node['snapshot'] === 'PUBLISHED' && $node['snapshot_generation'] === 1 && $node['snapshot_age_seconds'] === 3600, 'snapshot ' . json_encode($node)); ++$checks;
+    $assert($node['storage_state'] === 'HEALTHY' && $node['snapshot'] === 'PUBLISHED' && $node['snapshot_generation'] === 1 && $node['snapshot_age_seconds'] === 3600, 'snapshot ' . json_encode($node)); ++$checks;
     $assert($node['candidates'] === ['VERIFIED' => 1] && $node['last_direct_verification_at'] === '2027-01-15T05:13:20Z', 'discovery aggregates'); ++$checks;
     $assert($node['peers'] === ['configured' => 1, 'active' => 0, 'quarantined' => 0] && $node['last_successful_sync_at'] === null, 'peer aggregates'); ++$checks;
 
@@ -59,10 +59,13 @@ try {
     $assert($facts['answer'] === 'NOT APPLICABLE' && str_contains($facts['next_action'], 'Discovery Node'), 'node answer'); ++$checks;
     $facts['node'] = $node; $page = StatusPage::render($facts)['body'];
     $assert(str_contains($page, 'Discovery Node') && str_contains($page, $signer->publicKey()) && str_contains($page, $onion), 'node card'); ++$checks;
+    $fingerprint = \OnionServiceDiscovery\Crypto\KeyFingerprint::of($signer->publicKey());
+    $assert(str_contains($page, 'Node key fingerprint') && str_contains($page, $fingerprint), 'node card fingerprint (D-025)'); ++$checks;
     $assert(!str_contains($page, $peer) && !str_contains($page, $root) && !str_contains($page, 'sha256:' . str_repeat('0', 64)), 'node card leaked peer, path or private hash'); ++$checks;
 
     $identity = $cli(['node:identity', $root . '/config.json'], 0);
     $assert($identity['share']['publishers'] === '--node ' . $onion . ' ' . $signer->publicKey() && str_contains($identity['share']['peers'], '--expected-node-key ' . $signer->publicKey()), 'share lines'); ++$checks;
+    $assert($identity['node_key_fingerprint'] === $fingerprint && str_contains($identity['share']['visitors'], $fingerprint), 'identity fingerprint (D-025)'); ++$checks;
     $publisher = json_decode(file_get_contents($project . '/node-php/config/example.json'), true, 32, JSON_THROW_ON_ERROR);
     $publisher['role'] = 'publisher'; $publisher['node']['onion'] = $onion; $publisher['storage']['path'] = $root . '/p-data'; $publisher['export_path'] = $root . '/p-exports';
     file_put_contents($root . '/publisher.json', json_encode($publisher, JSON_THROW_ON_ERROR));

@@ -43,7 +43,10 @@ Both endpoints use local published evidence only: no signing, network requests,
 maintenance, query persistence or trust by peer count. Responses are capped at
 256 records and 32 KiB; oversized histories return 413 and remain available
 through bounded signed snapshot chunks. Unknown/unavailable data never creates
-an identity. Mirror-disabled nodes do not expose these routes.
+an identity. Mirror-disabled nodes do not expose these routes. While the Node's
+store cannot be read, both answer 503 `NODE_DEGRADED_READ_ONLY`: the lookup
+needs the store, while the signed snapshot stays available in
+[degraded mode](deployment-and-recovery.md#degraded-mode).
 
 `node-php/tests/service-id-api.php` exercises the shared identity histories on
 both storage backends, including complete rotation/migration, persistent forks,

@@ -42,7 +42,8 @@ final class PublisherEvidence
             self::write($configPath, 'membership', ['checked_at' => self::time($now), 'manifest_hash' => $expected['manifest_hash'],
                 'logical_service_id' => $expected['logical_service_id'], 'revision' => $expected['revision'], 'key_epoch' => $expected['key_epoch'],
                 'selected_sources' => $result['selected_sources'], 'distinct_node_keys' => $result['distinct_node_keys'],
-                'included_with_node_direct_observation' => $result['included_with_node_direct_observation']] + $result['counts'] + ['nodes' => $nodes, 'checkpoint_conflicts' => $conflicts]);
+                'included_with_node_direct_observation' => $result['included_with_node_direct_observation']] + $result['counts'] + ['nodes' => $nodes, 'checkpoint_conflicts' => $conflicts,
+                'outdated_checkpoints' => $result['included_with_outdated_checkpoint'] ?? 0]);
             // D-052 anchors: the checkpoint each consistent Node served. A rejected or unreachable Node keeps its
             // previous anchor, so a rollback or equivocation stays visible until the operator acts.
             $anchors = self::load($configPath)['checkpoints'] ?? [];
@@ -209,8 +210,9 @@ final class PublisherEvidence
     /** @param array<array-key,mixed> $m */
     private static function validMembership(array $m): bool
     {
-        // Evidence saved before per-Node categories (nodes) and integrity counts (checkpoint_conflicts) existed stays valid.
-        if (count($m) !== 14 + (array_key_exists('nodes', $m) ? 1 : 0) + (array_key_exists('checkpoint_conflicts', $m) ? 1 : 0) || !self::isTime($m['checked_at'] ?? null) || !self::isHash($m['manifest_hash'] ?? null) ||
+        // Evidence saved before per-Node categories (nodes), integrity counts (checkpoint_conflicts) and D-036 freshness
+        // (outdated_checkpoints) existed stays valid.
+        if (count($m) !== 14 + (array_key_exists('nodes', $m) ? 1 : 0) + (array_key_exists('checkpoint_conflicts', $m) ? 1 : 0) + (array_key_exists('outdated_checkpoints', $m) ? 1 : 0) || !self::isTime($m['checked_at'] ?? null) || !self::isHash($m['manifest_hash'] ?? null) ||
             !is_string($m['logical_service_id'] ?? null) || preg_match('/\Aed25519:[A-Za-z0-9_-]{43}\z/D', $m['logical_service_id']) !== 1) { return false; }
         foreach (self::MEMBERSHIP_COUNTS as $field) { if (!is_int($m[$field] ?? null) || $m[$field] < 0 || $m[$field] > 1000000) { return false; } }
         if (array_key_exists('nodes', $m)) {
@@ -220,6 +222,8 @@ final class PublisherEvidence
             foreach (self::CATEGORIES as $category) { if (($categories[$category] ?? 0) !== $m[$category]) { return false; } }
         }
         if (array_key_exists('checkpoint_conflicts', $m) && (!is_int($m['checkpoint_conflicts']) || $m['checkpoint_conflicts'] < 0 || $m['checkpoint_conflicts'] > $m['rejected'])) { return false; }
+        if (array_key_exists('outdated_checkpoints', $m) && (!is_int($m['outdated_checkpoints']) || $m['outdated_checkpoints'] < 0
+            || $m['outdated_checkpoints'] + $m['included_with_node_direct_observation'] > $m['included'])) { return false; }
         return $m['included'] + $m['stale'] + $m['not_present'] + $m['contradictory'] + $m['unavailable'] + $m['rejected'] === $m['selected_sources']
             && $m['selected_sources'] <= PublisherMembership::MAX_SOURCES && $m['included_with_node_direct_observation'] <= $m['included'] && $m['key_epoch'] >= 1;
     }

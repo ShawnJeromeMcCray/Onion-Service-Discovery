@@ -111,23 +111,46 @@ export function pinIdentity(identity:ServiceRow,label=identity.name):LocalPin {
   return {genesisKey:identity.genesisKey,contextOnion:identity.onion,anchorHash:identity.currentHash,latestHash:identity.currentHash,highestRevision:identity.revision,label:[...label].slice(0,128).join(''),conflicted:false}; // code points: never split a surrogate pair
 }
 export type AdultVisibility = 'show' | 'de-emphasize' | 'hide';
-// Derived presentation data only. Weak keys release old views; comparing the
-// complete input also keeps callers that mutate row metadata correct.
-const searchTexts = new WeakMap<ServiceRow, {input:string; normalized:string}>();
-function searchHaystack(row:ServiceRow):string {
+// Derived presentation data only, keyed by the complete search input: the worker sends new row
+// objects with every update, and normalizing 10,000 rows again took about a second of main-thread
+// time here. Keying by content also keeps callers that mutate row metadata correct. At most
+// SEARCH_CACHE_LIMIT inputs are kept (one full index plus changes); then the cache starts over.
+const SEARCH_CACHE_LIMIT = 12000;
+const searchTexts = new Map<string, {normalized:string; name:string}>();
+/** Normalized search text and normalized name (whitespace collapsed), shared with the PHP server search. */
+function searchFields(row:ServiceRow):{normalized:string;name:string} {
   const input=[row.name,row.description,row.onion??'',row.genesisKey,...row.categories,...row.languages].join(' ');
-  const cached=searchTexts.get(row);
-  if(cached?.input===input)return cached.normalized;
-  const normalized=searchTextV1(input);
-  searchTexts.set(row,{input,normalized});
-  return normalized;
+  const cached=searchTexts.get(input);
+  if(cached!==undefined)return cached;
+  if(searchTexts.size>=SEARCH_CACHE_LIMIT)searchTexts.clear();
+  const fields={normalized:searchTextV1(input),name:searchTextV1(row.name).split(/\s+/u).filter(Boolean).join(' ')};
+  searchTexts.set(input,fields);
+  return fields;
 }
+/** Leading ASCII punctuation does not move a name to the front of the list. */
+const LEADING_PUNCTUATION=/^[\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]+/u;
+/**
+ * Ranking version 2 (decision D-023): text relevance only. Tier 0 is a normalized name equal to the
+ * query, 1 a name that starts with it, 2 a name containing every term, 3 any other match. Ties are
+ * ordered by the normalized name without leading ASCII punctuation, then by the identity key. Node
+ * counts, observations and source agreement never affect the order: they are cheap to fake.
+ */
 export function localSearch(services:readonly ServiceRow[],query:string,language='',category='',adult:AdultVisibility='show'):ServiceRow[] {
-  const terms=searchTextV1(query.slice(0,256)).split(/\s+/u).filter(Boolean).slice(0,16);
-  return services.filter(row=>{if(row.status==='WITHDRAWN'||(language!==''&&!row.languages.includes(language))||(category!==''&&!row.categories.includes(category))||(adult==='hide'&&row.categories.includes('adult')))return false;const haystack=terms.length===0?'':searchHaystack(row);return terms.every(term=>haystack.includes(term));}).sort((a,b)=>{
-    if(adult==='de-emphasize') { const difference=Number(a.categories.includes('adult'))-Number(b.categories.includes('adult'));if(difference!==0)return difference; }
-    return a.name<b.name?-1:a.name>b.name?1:a.genesisKey<b.genesisKey?-1:a.genesisKey>b.genesisKey?1:0;
-  });
+  const terms=searchTextV1(query.slice(0,256)).split(/\s+/u).filter(Boolean).slice(0,16); const phrase=terms.join(' ');
+  const ranked:{row:ServiceRow;tier:number;sortName:string}[]=[];
+  for(const row of services) {
+    if(row.status==='WITHDRAWN'||(language!==''&&!row.languages.includes(language))||(category!==''&&!row.categories.includes(category))||(adult==='hide'&&row.categories.includes('adult'))) continue;
+    const fields=searchFields(row);
+    if(!terms.every(term=>fields.normalized.includes(term))) continue;
+    const tier=terms.length===0||fields.name===phrase?0:fields.name.startsWith(phrase)?1:terms.every(term=>fields.name.includes(term))?2:3;
+    ranked.push({row,tier,sortName:fields.name.replace(LEADING_PUNCTUATION,'')});
+  }
+  return ranked.sort((a,b)=>{
+    if(adult==='de-emphasize') { const difference=Number(a.row.categories.includes('adult'))-Number(b.row.categories.includes('adult'));if(difference!==0)return difference; }
+    if(a.tier!==b.tier) return a.tier-b.tier;
+    if(a.sortName!==b.sortName) return a.sortName<b.sortName?-1:1;
+    return a.row.genesisKey<b.row.genesisKey?-1:a.row.genesisKey>b.row.genesisKey?1:0;
+  }).map(item=>item.row);
 }
 
 /**

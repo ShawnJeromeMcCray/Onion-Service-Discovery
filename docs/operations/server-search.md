@@ -19,7 +19,9 @@ GET `/onion-service-discovery/search/` serves the form; POST
 fallback or query transfer from the local-search field. A separate recovery link
 also remains available when browser scripting or verifier startup fails.
 
-Missing, stale or corrupted cache data yields 503 without partial results.
+Missing, stale or corrupted cache data yields 503 without partial results, and
+so does a store that cannot be read: server search pauses while the Node serves
+its last published snapshot in [degraded mode](deployment-and-recovery.md#degraded-mode).
 `doctor CONFIG` checks the prepared cache without repairing or signing it.
 An operator can reconstruct derived exports explicitly using
 `node:snapshot CONFIG --passphrase-file PRIVATE_FILE --rebuild-derived`.
@@ -32,9 +34,17 @@ Stop workers before `exports:prune CONFIG --workers-stopped`.
 Browser and PHP search use the same generated Unicode 17 NFKC/default lowercase
 tables and shared ranking fixtures. They do not use locale-dependent collation.
 Literal whitespace-separated terms must all match; there are at most 16 terms.
-Filters cover category, lowercase language tag and adult visibility. Ordering is
-raw name in UTF-16 code-unit order, then stable genesis ID. Node claim counts
-do not determine trust or ranking. Withdrawal and unresolved fork handling match
+Filters cover category, lowercase language tag and adult visibility. Ranking
+follows decision D-023 (version 2 of the shared fixtures,
+`protocol/test-vectors/local-search-v2.json`): first a normalized name equal to
+the query, then a name that starts with it, then a name containing every term,
+then any other match. Ties are ordered by the normalized name without leading
+ASCII punctuation, in UTF-16 code-unit order, then by genesis ID; with no query
+every match is in the first tier, so the list is alphabetical. Node claim counts,
+observations and source agreement never affect trust or ranking. The prepared
+index stores each normalized name (index format 2); an index built by an earlier
+release is reported as `SEARCH_INDEX_STALE` until
+`node:snapshot CONFIG --passphrase-file PRIVATE_FILE --rebuild-derived` replaces it. Withdrawal and unresolved fork handling match
 the local presentation model. Signed bytes are never normalized for verification.
 
 Requests accept only four form fields: required `query`, optional `language`,

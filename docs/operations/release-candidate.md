@@ -94,7 +94,9 @@ php onion-service-discovery/node-php/bin/onion-service-discovery help
 
 A passing verification proves which workflow built the archive from which
 commit. It does not prove that the code was reviewed or is production-ready;
-signed stable releases still need decisions D-030 and D-031.
+stable releases use the same keyless Sigstore signing through GitHub
+attestations (owner decisions D-030 and D-031); production approval (D-050)
+remains a separate gate.
 
 ## Package smoke check
 

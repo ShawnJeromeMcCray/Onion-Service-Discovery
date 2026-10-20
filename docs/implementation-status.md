@@ -45,9 +45,11 @@ implementation-agent review, not human approval. Later specifications require
 FilesystemStore alongside optional SQLite, separate executable hosting roles,
 offline Service signing and established release trust-root verification.
 D-001 CC0-1.0 is approved under the owner's unrestricted-use instruction. The
-owner also approved D-005 to D-018, D-029, D-051, D-052 and, in part, D-036 (see
-the [decision register](governance/decision-register.md)); independent reviews
-and the other decisions remain open.
+owner also approved D-005 to D-018, D-029, D-051, D-052 and, on 2026-10-15,
+D-002, D-004, D-023, D-024, D-025, D-030, D-031, D-034, D-037, D-045, D-053,
+D-054 and more of D-036 (see the
+[decision register](governance/decision-register.md)); independent reviews and
+the other decisions remain open.
 
 ## Executed development evidence
 
@@ -56,7 +58,8 @@ and the other decisions remain open.
   skips, including exact signed bytes, absent optional metadata, strict Ed25519
   edge cases and identity conflict/rotation/migration sequences.
 - The shared unit/integration harness has 36 passing checks on digest-pinned
-  PHP 8.5.11 and PHP 8.4.26, including PHPStan level 8, both storage backends,
+  PHP 8.5.11 and PHP 8.4.26 (CI now also runs every PHP check on PHP 8.3.35,
+  decision D-002), including PHPStan level 8, both storage backends,
   read-only diagnostics, staged private backup, quotas, journal-first commit recovery and explicit historical-format migration.
   Separate actual ENOSPC checks pass on isolated 2 MiB tmpfs on both PHP minors
   and both backends, preserving record/cursor and resuming after space restoration.

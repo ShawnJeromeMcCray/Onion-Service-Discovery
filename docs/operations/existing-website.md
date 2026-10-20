@@ -91,9 +91,8 @@ Through your Onion:
 
 nginx 1.24.0 (`nginx -t`) and Apache httpd 2.4.58 (`apache2 -t`) accepted both
 snippets inside a test server block or virtual host. A local loopback run then
-served them with PHP-FPM 8.3 (pool user `osd-worker`), with only paths and ports
-changed. PHP 8.3 was the only FPM available there; OSD supports PHP 8.4 and
-newer. In that run:
+served them with PHP-FPM 8.3 (pool user `osd-worker`), the PHP of Ubuntu 24.04,
+with only paths and ports changed. In that run:
 
 - all three routes reached OSD, and the test website's own page kept working;
 - 30 likely secret paths, each with GET and HEAD, never returned 200 or the

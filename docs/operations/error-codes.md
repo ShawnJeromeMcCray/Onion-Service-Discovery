@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-225 codes.
+228 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -45,6 +45,7 @@ for remedies.
 | `CONFIGURATION_PATH_UNSAFE` | configuration and status | 3 | init refused the configuration path: it must be an absolute path of at most 1024 bytes in an existing, non-symlinked, owner-only (0700) directory outside node-php/public. |
 | `CONFIGURATION_UNAVAILABLE` | configuration and status | 3 | The configuration file is missing, unreadable, a symlink or larger than 16 KiB. |
 | `CONFIGURATION_WRITE_FAILED` | configuration and status | 3 | init created the configuration file but could not write or sync it or sync its directory, so the file may be incomplete; check free space, remove the file and run init again. |
+| `CONFUSABLE_DATA_INVALID` | browser client | – | The confusable table built into the browser client does not decode to its recorded entry count, so look-alike names cannot be checked; serve an unmodified client build. |
 | `CONTENT_ENCODING_REJECTED` | Tor transport, browser client | 5 | A Node or Service answered with a Content-Encoding other than identity (a compressed answer), which OSD does not accept, so nothing from it was verified; serve the OSD paths without compression. |
 | `CONTENT_TYPE_REJECTED` | Tor transport, browser client | 5 | A Node or Service answered without application/json; nothing was verified. |
 | `CRYPTO_ALGORITHM_UNSUPPORTED` | browser client | – | An internal browser check failed: without Web Crypto, the client’s built-in hash fallback supports only SHA-256, and another algorithm was requested. |
@@ -63,7 +64,7 @@ for remedies.
 | `EXPORT_BUDGET_EXHAUSTED` | storage | 4 | The public export directory reached its limit of 4096 files or 256 MiB, or a single export file would exceed 512 KiB; remove unreferenced files with exports:prune or node:maintain. |
 | `EXPORT_BUDGET_NEARLY_EXHAUSTED` | doctor | 6 | doctor warning: the export directory uses at least 80 % of its 4,096-file or 256 MiB limit; check that the maintenance timer runs (node:maintain prunes old blobs). |
 | `EXPORT_BUSY` | storage | 4 | Another process held the export directory’s writer lock for more than 2 seconds, so this write or prune did not run; run it again when the other command has finished. |
-| `EXPORT_CORRUPT` | CLI, configuration and status, storage, web routes | 3, 4 | Published snapshot files do not match their signed hashes; rebuild with node:snapshot --rebuild-derived. |
+| `EXPORT_CORRUPT` | CLI, Node worker, configuration and status, storage, web routes | 3, 4 | Published snapshot files, or the copy of the published state kept beside them for degraded serving, do not match their signed records; rebuild with node:snapshot --rebuild-derived. |
 | `EXPORT_DIRECTORY_UNSAFE` | storage | 4 | The export directory (export_path) is a URL, a symlink, missing or open to group or others, or it contains a symlink, a subdirectory or a file that is not an OSD export file; node:init or client:init creates it with mode 0700. |
 | `EXPORT_UNAVAILABLE` | storage | 4 | An export file or the export directory’s lock file could not be created, written, synced, renamed, read or deleted; check the ownership and free space of export_path. |
 | `FILESYSTEM_FORMAT_MIGRATION_REQUIRED` | doctor | 6 | doctor: the filesystem store uses format 1; plan storage:migrate. |
@@ -100,6 +101,7 @@ for remedies.
 | `METHOD_NOT_ALLOWED` | front controller, web routes | – | The route does not accept the request method (HTTP 405): the data, relay and client routes take GET or HEAD, and the announcement route takes only POST. |
 | `MIGRATION_INVALID` | browser client, protocol, signing | 3 | An address change without a valid migration proof for exactly this predecessor and revision. |
 | `MIRROR_DISABLED` | CLI | 3 | node:snapshot refused to run because features.mirror_directory and features.server_search are both off in this configuration; enable the feature it needs in a node or combined configuration. |
+| `NODE_DEGRADED_READ_ONLY` | front controller, web routes | – | The Node cannot read its store, so it keeps serving only its last published snapshot (D-045) and answers HTTP 503 on routes that need the store, announcements included; the operator follows the incident runbook, section 4. |
 | `NODE_DESCRIPTOR_HISTORY_INCOMPLETE` | Node worker | 3 | A peer’s new Node descriptor skips a revision or does not name the previously seen descriptor as its predecessor, so the peer was quarantined; after checking, release it with peers:retry. |
 | `NODE_DESCRIPTOR_INVALID` | configuration and status, doctor | 3, 4 | The Node descriptor in the store does not verify or names another Onion than node.onion (doctor also reports a published snapshot that fails verification this way); check that storage.path and node.onion belong to this Node. |
 | `NODE_DESCRIPTOR_ROLLBACK_OR_FORK` | Node worker | 3 | A peer served an older Node descriptor than seen before, or two different descriptors with the same revision, so the peer was quarantined and the descriptors were kept as evidence; quarantine:list shows the evidence. |
@@ -109,7 +111,7 @@ for remedies.
 | `NODE_KEY_MISSING_OR_UNSAFE` | doctor | 6 | doctor: the Node key file is missing or readable by others (needs 0600). |
 | `NODE_KEY_ROTATION_UNSUPPORTED` | CLI | 3 | Protocol v1 cannot rotate a Node key; create a new Node identity and have peers pin it explicitly. |
 | `NODE_NOT_INITIALIZED` | CLI, doctor, web routes | 3, 6 | Run node:init before this command. |
-| `NODE_UNAVAILABLE` | front controller | – | The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable store or export directory, or a relayed Node that could not be fetched; operators run doctor. |
+| `NODE_UNAVAILABLE` | front controller | – | The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable export directory, a store that cannot be read without a last published snapshot to serve in its place, or a relayed Node that could not be fetched; operators run doctor. |
 | `NOT_FOUND` | front controller, web routes | 3 | The route or record does not exist on this installation. |
 | `ONION_BINDING_MISMATCH` | browser client, protocol, signing | 3 | The signed Manifest belongs to a different Onion than the one it was fetched from or installed for. |
 | `ONION_UNREACHABLE` | Tor transport | 5 | Tor answered with a SOCKS error: it could not reach the Onion (still bootstrapping, Service offline or descriptor not published). |
@@ -132,6 +134,7 @@ for remedies.
 | `PUBLIC_KEY_INVALID` | browser client, encoding | 3 | Not a canonical ed25519: public key (43 base64url characters after the prefix). |
 | `PUBLIC_MANIFEST_PATH_UNSAFE` | signing | 3 | The public Manifest file or the publisher lock file in WEBROOT/.well-known is a symlink, so the publisher command refused to write there; remove the symlink and install again. |
 | `PUBLIC_MANIFEST_WRITE_FAILED` | signing | 3 | The publisher lock, the new Manifest or the history bundle could not be created, written, synced or renamed in WEBROOT/.well-known; check that the installing user can write there. |
+| `PUBLISHED_STATE_STALE` | doctor | 6 | doctor warning: the copy of the published state that the export directory keeps for degraded serving (D-045) is missing or does not match the store’s published snapshot and Node descriptor; node:snapshot rewrites it, unless the copy names a newer generation than the store (a restored older backup): then follow the incident runbook, section 4, first. |
 | `PUBLISHER_BUSY` | configuration and status, signing | 3 | Another publisher command holds the lock on the same files; run it again when that command has finished. |
 | `PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT` | doctor | 6 | doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page. |
 | `PUBLISHER_NODES_NOT_CONFIGURED` | CLI, doctor | 3, 6 | No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key. |
@@ -150,10 +153,10 @@ for remedies.
 | `REVISION_EXHAUSTED` | signing | 3 | The current Manifest already has the highest possible revision (9007199254740991), so no successor revision can be drafted. |
 | `ROLE_CONFIGURATION_INVALID` | CLI, Node worker, configuration and status | 3 | The command or feature is not available for this configuration role. |
 | `RUNTIME_DEPENDENCIES_MISSING` | CLI, front controller | 3 | PHP dependencies are missing: use the development runtime package, which bundles them, or run the locked Composer install. |
-| `RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX` | doctor | 6 | doctor: this PHP minor version is outside the tested 8.4/8.5 matrix. |
+| `RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX` | doctor | 6 | doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it. |
 | `SCHEMA_INVALID` | CLI, Node worker, browser client, encoding, input parsing, protocol, signing, web routes | 3 | The record does not match its draft schema. |
 | `SEARCH_INDEX_CORRUPT` | server search | 3 | The server search index files in the export directory are missing, altered or malformed or do not match the published snapshot, so server search is unavailable; rebuild them with node:snapshot --rebuild-derived. |
-| `SEARCH_INDEX_STALE` | server search | 3 | The server search index was built for another snapshot than the one now published, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived. |
+| `SEARCH_INDEX_STALE` | server search | 3 | The server search index was built for another snapshot than the one now published, or by an earlier release in an older format, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived. |
 | `SEARCH_INDEX_UNAVAILABLE` | server search | 3 | Server search has no index because no snapshot was published or it was published with server search off, so server search is unavailable; run node:snapshot with server_search enabled. |
 | `SEARCH_REQUEST_INVALID` | server search, web routes | 3 | The server search form submission is malformed (wrong media type, unknown or repeated fields, a query over 256 UTF-16 units, or an invalid language, category or adult value), so it was rejected; use the search form. |
 | `SEARCH_TEXT_INVALID` | server search | 3 | Text given to search normalization is not valid UTF-8, exceeds 1 MiB or contains an invalid code point, so it was refused. |

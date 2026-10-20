@@ -1,11 +1,13 @@
 import { localSearch, metadataWarnings, pinNameMatcher, type AdultVisibility, type ClientView, type LocalPin } from './view-model.ts';
 import { CATEGORY_IDS, CATEGORY_LABELS } from '../protocol/category-id.ts';
 import { groupLead, groupSimilarResults } from './result-groups.ts';
+import { importedPinMatcher, lookAlikeEntries, lookAlikePins, pinLookAlikeMatcher } from './look-alike-names.ts';
 import { parseStrictJson } from '../protocol/strict-json.ts';
 import { serializePins, type PinImportStatus } from './pins.ts';
 import { operationMessage, sourceMessage } from './messages.ts';
 import type { SourceSelection } from './source-loader.ts';
 import { CLIENT_VERSION, PROTOCOL_VERSION } from './version.ts';
+import { keyFingerprint } from '../protocol/key-fingerprint.ts';
 interface SourceStatus {onion:string;status:string;nodeKey:string|null;generation:number|null;createdAt:string|null;error:string|null;baselineHistoryProven:boolean;evidenceAvailable:boolean;}
 interface VisitorSource {onion:string;expectedKey:string;}
 interface ViewMessage {type:'view';view:ClientView;sources:SourceStatus[];synthetic:boolean;busy:boolean;witnessCount:number;visitorSources:VisitorSource[];}
@@ -59,6 +61,11 @@ function when(iso:string):string { return iso.replace('T',' ').replace(/(\.\d+)?
 function download(blob:Blob,name:string):void { const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download=name;anchor.rel='noreferrer';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000); }
 /** Sources of the latest load that delivered verified data. */
 let loadedSources:string[]=[];
+/** D-025: a key's grouped fingerprint, to compare with what the operator published. */
+function fingerprintLine(key:string,label='Fingerprint'):HTMLElement {
+  let value:string; try { value=keyFingerprint(key); } catch { value='not available for this key'; }
+  return text('p',label+': '+value,'key-value');
+}
 function copyRow(value:string,className:string,label:string,focusKey:string):HTMLElement {
   const row=text('div','','copy-row'); row.append(text('p',value,className),button(label,()=>copy(value,label.replace(/^Copy /u,'')),focusKey)); return row;
 }
@@ -82,13 +89,18 @@ function renderResults(resetPage=true):void {
   const groups=groupSimilarResults(rows);const pageSize=25;
   resultPage=Math.min(resultPage,Math.max(0,Math.ceil(groups.length/pageSize)-1));
   const pinnedKeys=new Set(view.pins.map(item=>item.pin.genesisKey)); const sameName=pinNameMatcher(view.pins.map(item=>item.pin));
+  // D-024: confusable-skeleton comparison over the whole loaded index (each name reduced once per view); names are never changed.
+  const looksLikePinned=pinLookAlikeMatcher(view.pins.map(item=>item.pin),view.services); const lookAlike=lookAlikeEntries(view.services);
   for(const group of groups.slice(resultPage*pageSize,(resultPage+1)*pageSize)) {
     const row=groupLead(group,pinnedKeys);
     const pinned=pinnedKeys.has(row.genesisKey);
     const card=text('article','', 'result-card'); card.append(text('p','Service-declared metadata','muted')); card.append(text('h3',row.name),text('p',row.description));
     const imitated=sameName(row);
     if(imitated!==undefined) card.append(notice('danger','Same name as your pinned “'+imitated+'”, but a different identity key. This is not the Service you pinned; compare the key and the onion address.'));
+    const resembled=looksLikePinned(row);
+    if(resembled!==undefined) card.append(notice('danger','Name looks like your pinned “'+resembled+'”, but a different identity key. This is not the Service you pinned; compare the key and the onion address.'));
     for(const warning of metadataWarnings(row.name,row.description)) card.append(notice('attention',warning));
+    if(lookAlike.has(row.genesisKey)) card.append(notice('attention','The name looks like the name of another entry with a different identity key. Names are self-declared; compare the full Onion and identity key.'));
     if(row.onion!==null) card.append(text('p',row.onion,'onion-address'));
     const tags=text('div','','tags'); for(const tag of [...row.categories,...row.languages]) tags.append(text('span',tag,'tag')); card.append(tags);
     card.append(text('p',row.status==='FORKED'?'No current manifest selected':'Service-key signature validated · revision '+row.revision,'evidence-label'));
@@ -102,7 +114,7 @@ function renderResults(resetPage=true):void {
     if(row.status==='FORKED') card.append(notice('danger','Fork evidence is retained. Faster responses or more Nodes do not resolve it.'));
     const details=document.createElement('details'); details.dataset.key='details:'+row.genesisKey;
     details.append(text('summary','Identity and continuity details'),text('p','Identity key: the Service’s own signing key. It is neither the Tor key of the onion address nor proof of who runs the Service.'));
-    details.append(copyRow(row.genesisKey,'key-value','Copy identity key','copy-key:'+row.genesisKey));
+    details.append(copyRow(row.genesisKey,'key-value','Copy identity key','copy-key:'+row.genesisKey),fingerprintLine(row.genesisKey,'Identity key fingerprint'));
     if(row.onion!==null) details.append(copyRow(row.onion,'onion-address','Copy onion address','copy-onion:'+row.genesisKey));
     if(row.currentKey!==null&&row.currentKey!==row.genesisKey) details.append(text('p','Current signing key after '+row.rotationCount+' signed key rotation(s):'),copyRow(row.currentKey,'key-value','Copy current signing key','copy-current:'+row.genesisKey));
     if(row.currentHash!==null) details.append(text('p','Signed Manifest of revision '+row.revision+':'),copyRow(row.currentHash,'key-value','Copy Manifest hash','copy-hash:'+row.genesisKey));
@@ -134,6 +146,7 @@ function renderResults(resetPage=true):void {
           const item=text('article','','pin-card');
           if(pinnedKeys.has(entry.genesisKey)) item.append(text('p','Your pinned identity','pinned-mark'));
           const other=sameName(entry); if(other!==undefined) item.append(notice('danger','Same name as your pinned “'+other+'”, but a different identity key.'));
+          const resembles=looksLikePinned(entry); if(resembles!==undefined) item.append(notice('danger','Name looks like your pinned “'+resembles+'”, but a different identity key.'));
           item.append(text('p',entry.genesisKey,'key-value'));
           if(entry.onion!==null)item.append(text('p',entry.onion,'onion-address'));
           const open=button('Inspect this identity',()=>{el<HTMLInputElement>('query').value=entry.genesisKey;renderResults();announce(el('result-summary').textContent??'');},'inspect:'+entry.genesisKey,'Inspect this identity: '+entry.genesisKey.slice(0,20)+'…');item.append(open);list.append(item);
@@ -162,12 +175,14 @@ const pinSeverity:{[status:string]:Severity|'ok'}={CONTINUITY_VALID:'ok',MIGRATE
 const pinAdvice:{[status:string]:string}={MIGRATED:'The Service moved with a signed migration proof; use the current onion address below.',WITHDRAWN:'The operator withdrew this Service from discovery.',FORKED:'Two signed branches exist. Use neither until you know which one the operator published.',HISTORY_INCOMPLETE:'Load again or add sources to connect the history.',REVISION_DOWNGRADE:'A source served an older revision than you saw before. Your pin keeps the newer one; load other sources.',IDENTITY_CHANGED:'Do not trust the other key. Your pin is kept; check the Service’s signed rotation or migration evidence first.',NOT_IN_INDEX:'Load the directory to check this pin.'};
 function renderPins():void {
   const container=el('pins'); container.replaceChildren(); el('pin-count').textContent=String(view.pins.length);
+  const similarLabels=lookAlikePins(view.pins.map(row=>row.pin));
   for(const row of view.pins) {
     const card=text('article','','pin-card'); card.append(text('h3',row.pin.label));
     for(const warning of metadataWarnings(row.pin.label,'')) card.append(notice('attention',warning));
+    if(similarLabels.has(row.pin.genesisKey)) card.append(notice('attention','This label looks like the label of another pin with a different identity key. Compare their identity keys.'));
     const severity=pinSeverity[row.status]??'attention';
     const status=severity==='ok'?text('p',pinLabels[row.status]??row.status):notice(severity,(pinLabels[row.status]??row.status)+'. '+(pinAdvice[row.status]??''));
-    status.classList.add('pin-status'); card.append(status,text('p',row.pin.genesisKey,'key-value'),text('p','Saved onion: '+row.pin.contextOnion,'onion-address'));
+    status.classList.add('pin-status'); card.append(status,text('p',row.pin.genesisKey,'key-value'),fingerprintLine(row.pin.genesisKey),text('p','Saved onion: '+row.pin.contextOnion,'onion-address'));
     if(row.onion!==null&&row.onion!==row.pin.contextOnion) card.append(text('p','Current signed onion: '+row.onion,'onion-address'));
     if(row.onion!==null&&!synthetic) card.append(visit(row.onion,row.pin.label));
     card.append(button('Remove local pin',()=>worker.postMessage({op:'unpin',genesisKey:row.pin.genesisKey}),'unpin:'+row.pin.genesisKey,'Remove local pin: '+row.pin.label)); container.append(card);
@@ -183,7 +198,7 @@ function renderSources(sources:SourceStatus[]):void {
     const card=text('div','','source-status status-'+severity); const head=text('div','');
     const marker=text('span',severity==='danger'?'⚠':severity==='ok'?'✓':'!','status-marker'); marker.setAttribute('aria-hidden','true');
     head.append(marker,text('strong',sourceStatusLabels[source.status]??source.status)); card.append(head,text('div',source.onion));
-    if(source.nodeKey!==null) card.append(text('div',source.nodeKey,'key-value'));
+    if(source.nodeKey!==null) card.append(text('div',source.nodeKey,'key-value'),fingerprintLine(source.nodeKey,'Node key fingerprint'));
     if(source.generation!==null&&source.createdAt!==null) card.append(text('div','Signed checkpoint generation '+source.generation+', created '+when(source.createdAt)+'.','muted'));
     if(source.status==='QUARANTINED'&&source.evidenceAvailable) card.append(button('Save the conflicting signed records',()=>worker.postMessage({op:'export-evidence',onion:source.onion}),'evidence:'+source.onion,'Save the conflicting signed records of '+source.onion));
     if(source.error!==null) card.append(text('div',sourceMessage(source.error),'problem'),text('div','Code: '+source.error,'muted'));
@@ -210,7 +225,7 @@ function renderVisitorSources(sources:readonly VisitorSource[]):void {
     const key=document.createElement('input'); key.type='text'; key.id=check.id+'-key'; key.value=source.expectedKey; key.readOnly=true;
     const keyLabel=document.createElement('label'); keyLabel.htmlFor=key.id; keyLabel.textContent='Expected Node key you entered';
     const remove=button('Remove this Node',()=>worker.postMessage({op:'remove-source',onion:source.onion}),'remove-source:'+source.onion,'Remove the Node '+source.onion);
-    item.append(label,keyLabel,key,remove); container.append(item);
+    item.append(label,keyLabel,key,fingerprintLine(source.expectedKey,'Fingerprint of the key you entered'),remove); container.append(item);
   });
   el('source-empty').hidden=configuredSourceCount+sources.length>0;
   persistVisitorSources(sources);
@@ -244,7 +259,9 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
   }
   if(message.type==='pin-preview') {
     const statusText:{[status:string]:string}={NEW:'New pin',SAME:'Already pinned; nothing changes',UPDATES_REVISION:'Already pinned; remembers a newer revision',CONFLICT_KEEPS_EXISTING:'Conflicts with your existing pin; yours is kept and this one is skipped'};
-    const preview=el('pin-preview'); preview.replaceChildren(); for(const {pin,status} of message.pins) { const item=text('div','','preview-pin'+(status==='CONFLICT_KEEPS_EXISTING'?' conflict':'')); item.append(text('strong',pin.label)); for(const warning of metadataWarnings(pin.label,'')) item.append(notice('attention',warning)); item.append(text('div',statusText[status]??status),text('div',pin.genesisKey,'key-value'),text('div',pin.contextOnion,'onion-address')); preview.append(item); }
+    const preview=el('pin-preview'); preview.replaceChildren(); for(const {pin,status} of message.pins) { const item=text('div','','preview-pin'+(status==='CONFLICT_KEEPS_EXISTING'?' conflict':'')); item.append(text('strong',pin.label)); for(const warning of metadataWarnings(pin.label,'')) item.append(notice('attention',warning)); item.append(text('div',statusText[status]??status),text('div',pin.genesisKey,'key-value'),fingerprintLine(pin.genesisKey),text('div',pin.contextOnion,'onion-address')); preview.append(item); }
+    // D-024: an imported label equal to or looking like a held pin's name under another key, right after the label.
+    const resembles=importedPinMatcher(view.pins.map(row=>row.pin),view.services); message.pins.forEach(({pin},index)=>{ const match=resembles(pin); if(match!==undefined) preview.children[index]?.querySelector('strong')?.after(notice('danger',(match.same?'Same name as':'Name looks like')+' your pinned “'+match.label+'”, but a different identity key. Do not import it unless you chose this key yourself.')); });
     el<HTMLDialogElement>('pin-import-dialog').showModal(); return;
   }
   el('client-startup-notice').hidden=true;
@@ -294,7 +311,8 @@ el('source-form').addEventListener('submit',event=>{
     operation('Select at least three sources, or allow loading with fewer under “Source selection and expected keys”.');
     el<HTMLDetailsElement>('source-details').open=true; el<HTMLInputElement>('limited-coverage').focus(); return;
   }
-  lastOperation='load'; worker.postMessage({op:'load',sources});
+  // The page's clock judges source freshness: the same system clock in a browser, and tests can fix it.
+  lastOperation='load'; worker.postMessage({op:'load',sources,now:Date.now()});
 });
 el('cancel-load').addEventListener('click',()=>worker.postMessage({op:'cancel'}));
 el('clear-index').addEventListener('click',()=>worker.postMessage({op:'clear-index'}));
@@ -363,7 +381,7 @@ async function configure():Promise<void>{
     el('relay-note').hidden=value.delivery_profile!=='client-host-proxy';
     sources.forEach((onion,index)=>{const item=text('div','','source-option');const check=document.createElement('input');check.type='checkbox';check.checked=true;check.dataset.source=onion;check.id='source-'+index;const label=document.createElement('label');label.className='check-label';label.append(check,text('span',onion));const key=document.createElement('input');key.type='text';key.id=check.id+'-key';key.maxLength=51;key.placeholder='Optional expected Node public key';key.autocomplete='off';const keyLabel=document.createElement('label');keyLabel.htmlFor=key.id;keyLabel.textContent='Expected Node key for source '+(index+1)+' (optional)';
       const vouched=(hostKeys as {[onion:string]:unknown})[onion];if(typeof vouched==='string'){key.value=vouched;key.readOnly=true;keyLabel.textContent='Expected Node key for source '+(index+1)+', provided by this Client Host';}
-      item.append(label,keyLabel,key);container.append(item);});
+      item.append(label,keyLabel,key);if(typeof vouched==='string')item.append(fingerprintLine(vouched,'Node key fingerprint'));container.append(item);});
     if('mode'in value&&value.mode==='combined')el('host-boundary').textContent='Combined deployment: this serving Node controls the page’s code and its data. A separate self-hosted Client Host gives stronger separation.';
     worker.postMessage({op:'configure',allowedSources:sources,deliveryProfile:value.delivery_profile,visitorSources});
     if(visitorSources) restoreVisitorSources();

@@ -22,6 +22,8 @@ final class SearchIndex
     public const MAX_BYTES = 16777216;
     public const MAX_ROWS = 10000;
     public const MAX_CHUNKS = 128;
+    /** 2 adds the precomputed searchName of the D-023 ranking; an index of format 1 is stale and is rebuilt. */
+    public const FORMAT_VERSION = 2;
     /** @param list<ServiceRow> $rows */
     public static function build(PublicBlobStore $blobs, array $rows, ValidatedRecord $checkpoint): string
     {
@@ -33,7 +35,7 @@ final class SearchIndex
             $current[] = $row; $bytes += $size;
         }
         self::flush($blobs, $current, $chunks, $total);
-        $wire = StorageJson::encode(['format_version' => 1, 'checkpoint_hash' => $checkpoint->contentHash, 'created_at' => $checkpoint->document()->created_at, 'row_count' => count($rows), 'chunks' => $chunks]);
+        $wire = StorageJson::encode(['format_version' => self::FORMAT_VERSION, 'checkpoint_hash' => $checkpoint->contentHash, 'created_at' => $checkpoint->document()->created_at, 'row_count' => count($rows), 'chunks' => $chunks]);
         $hash = self::digest('index', $wire); $blobs->put($hash, $wire); return $hash;
     }
     /** @param list<ServiceRow> $current
@@ -59,7 +61,7 @@ final class SearchIndex
     private static function manifest(PublicBlobStore $blobs, string $hash): array
     {
         $wire = self::blob($blobs, $hash, 'index'); $value = StorageJson::decode($wire, 16384);
-        if (count($value) !== 5 || ($value['format_version'] ?? null) !== 1 || !is_string($value['checkpoint_hash'] ?? null) || !is_string($value['created_at'] ?? null) || !is_int($value['row_count'] ?? null) || $value['row_count'] < 0 || $value['row_count'] > self::MAX_ROWS || !is_array($value['chunks'] ?? null) || !array_is_list($value['chunks']) || count($value['chunks']) > self::MAX_CHUNKS) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); }
+        if (count($value) !== 5 || ($value['format_version'] ?? null) !== self::FORMAT_VERSION || !is_string($value['checkpoint_hash'] ?? null) || !is_string($value['created_at'] ?? null) || !is_int($value['row_count'] ?? null) || $value['row_count'] < 0 || $value['row_count'] > self::MAX_ROWS || !is_array($value['chunks'] ?? null) || !array_is_list($value['chunks']) || count($value['chunks']) > self::MAX_CHUNKS) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); }
         $rows = 0; $bytes = 0; $seen = [];
         foreach ($value['chunks'] as $chunk) {
             if (!is_array($chunk) || count($chunk) !== 3 || !is_string($chunk['hash'] ?? null) || !is_int($chunk['bytes'] ?? null) || $chunk['bytes'] < 2 || $chunk['bytes'] > 524288 || !is_int($chunk['row_count'] ?? null) || $chunk['row_count'] < 1 || $chunk['row_count'] > self::MAX_ROWS || isset($seen[$chunk['hash']])) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); }
@@ -74,9 +76,9 @@ final class SearchIndex
      */
     private static function row(array $row): array
     {
-        $keys = ['genesisKey','name','description','onion','revision','status','addressConflict','languages','categories','observationClaims','rotationCount','migrationCount','currentHash','searchText'];
+        $keys = ['genesisKey','name','description','onion','revision','status','addressConflict','languages','categories','observationClaims','rotationCount','migrationCount','currentHash','searchText','searchName'];
         if (count($row) !== count($keys) || array_diff(array_keys($row), $keys) !== []) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); }
-        foreach (['genesisKey','name','description','status','searchText'] as $key) { if (!is_string($row[$key])) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); } }
+        foreach (['genesisKey','name','description','status','searchText','searchName'] as $key) { if (!is_string($row[$key])) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); } }
         if (strlen($row['name']) > 4096 || strlen($row['description']) > 4096 || !in_array($row['status'], ['PUBLISHED','WITHDRAWN','FORKED'], true) || !is_bool($row['addressConflict']) || (!is_string($row['onion']) && $row['onion'] !== null) || (!is_string($row['currentHash']) && $row['currentHash'] !== null)) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); }
         Encoding::publicKey($row['genesisKey']);
         if ($row['onion'] !== null) { OnionAddress::parse($row['onion']); }
@@ -93,7 +95,9 @@ final class SearchIndex
     public static function load(StorageBackend $store, PublicBlobStore $blobs, RecordVerifier $verifier, \Closure $budget): array
     {
         $budget(); $state = $store->snapshot(); $pointer = $state['tables']['node']['key:server-search-index'] ?? null; $published = $state['tables']['node']['key:published-snapshot'] ?? null;
-        if ($pointer === null || $published === null || ($pointer['format_version'] ?? null) !== 1) { throw new ProtocolException('SEARCH_INDEX_UNAVAILABLE'); }
+        if ($pointer === null || $published === null) { throw new ProtocolException('SEARCH_INDEX_UNAVAILABLE'); }
+        // An index an earlier release built cannot rank by D-023; node:snapshot --rebuild-derived replaces it.
+        if (($pointer['format_version'] ?? null) !== self::FORMAT_VERSION) { throw new ProtocolException('SEARCH_INDEX_STALE'); }
         $manifest = self::manifest($blobs, $pointer['hash']);
         if ($manifest['checkpoint_hash'] !== $published['hash']) { throw new ProtocolException('SEARCH_INDEX_STALE'); }
         $wire = $store->readRecord($published['hash']); if ($wire === null) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); }

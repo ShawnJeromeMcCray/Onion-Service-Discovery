@@ -21,25 +21,41 @@ publication for a publishing installation, `export_usage` (blob files and bytes
 against the 4,096-file and 256 MiB export limits; WARN from 80 %) and
 `scheduler_state` derived from stored times: a published checkpoint older than
 two days (`SNAPSHOT_TIMER_STALE`) or publisher checks older than 36 hours
-(`PUBLISHER_TIMER_STALE`) mean the timer stopped. Unsupported/unobserved checks
+(`PUBLISHER_TIMER_STALE`) mean the timer stopped. For a Node it reports
+`node_health`, the storage state its status page shows (`HEALTHY`, `READ_ONLY`,
+`DEGRADED`, `ERROR` or `NOT_INITIALIZED`), with a `next_action` when the store
+needs attention, and warns `PUBLISHED_STATE_STALE` when the export directory's
+copy of the published state, which [degraded mode](deployment-and-recovery.md#degraded-mode)
+serves, does not match the store. Unsupported/unobserved checks
 are explicitly marked: Tor connectivity, backup freshness, deployed headers and
 independent security/release review are not inferred from local configuration.
 `security:check` adds focused findings, each with a remediation: configuration
 file and directory modes, Tor secret keys next to OSD files, unexpected files in
 `node-php/public`, packaged files changed since packaging (against
 `release/FILE-MANIFEST.json` when present) and the absence of remote
-administration.
+administration. Both reports follow the
+[health report schema](health-report.schema.json) (spec 32 section 10); every
+field is listed there, so monitoring can validate them and no private value can
+appear unreviewed.
 
 `status CONFIG` (alias of `node:status`) reports the role, the own Onion and the
-roles in use: for a publisher the publication state and next action, for a Node
+roles in use: for a publisher the publication state, the Logical Service
+Identifier, current key, its fingerprint and key epoch, and the next action; for a Node
 its store counts plus identity, snapshot generation and last direct check and
-sync. `status CONFIG --check` prints the full status page facts and exits 0 when
-nothing needs attention, 6 while waiting or degraded, 4 on an error or conflict. Use separate
+sync. While the store cannot be read it fails with the store's error code (exit
+4) and adds the Node card and a `next_action` from the
+[incident runbook](incident-runbook.md#4-store-corruption-or-an-interrupted-write).
+`status CONFIG --check` prints the full status page facts and exits 0 when
+nothing needs attention, 6 while waiting or degraded, 4 on an error or conflict
+and while the Node's store cannot be read. Use separate
 transport/browser tests and operator acceptance to establish those properties.
 The ordinary data/status web routes open a read-only store and do not repair
-journals. The default-off experimental announcement route alone opens the
-selected writable store for bounded queue admission; it has no signer or
-outbound transport capability. Filesystem format 2 uses the journal COMMIT as durable authority before HEAD.
+journals; while it cannot be read they serve the last published snapshot
+([degraded mode](deployment-and-recovery.md#degraded-mode), D-045). The
+default-off experimental announcement route alone opens the selected writable
+store for bounded queue admission, and only after a read-only opening
+succeeded, so a damaged store is never recovered by a web request; it has no
+signer or outbound transport capability. Filesystem format 2 uses the journal COMMIT as durable authority before HEAD.
 Read-only opening refuses unresolved recovery rather than repairing it.
 
 `storage:check` is a separate explicit integrity/recovery command; it completes
@@ -169,13 +185,16 @@ in the webroot) or a single signed record; several files may be given. Each
 source is reported once as included, stale, not_present, contradictory,
 unavailable or rejected; mere acknowledgements are never counted. It mutates no
 store and loads no signing key. Exit 0 only when every selected Node includes the
-current state, otherwise 6. Checkpoint ancestry (D-052) is compared with the
+current state in a fresh checkpoint, otherwise 6. A checkpoint is fresh for seven
+days by the local clock (D-036); an included Node whose checkpoint is older, or
+dated more than five minutes ahead, is reported with `checkpoint_freshness`
+`OUTDATED` or `CLOCK_AHEAD`, counted in `included_with_outdated_checkpoint` and
+not counted as current. Checkpoint ancestry (D-052) is compared with the
 checkpoints saved at the previous `--save-status` check: rollback, equivocation
 or a broken chain rejects that Node (`SOURCE_CHECKPOINT_*`) before any chunk is
 downloaded; at most 32 predecessors are fetched per Node, and an unreachable
-predecessor or longer gap is `NOT_EVALUATED`, never a rejection. Freshness stays
-`NOT_EVALUATED`; operator independence stays `NOT_ESTABLISHED`. Not usable with
-the client-host role.
+predecessor or longer gap is `NOT_EVALUATED`, never a rejection. Operator
+independence stays `NOT_ESTABLISHED`. Not usable with the client-host role.
 `network:discoverability-check` is the specification's name for the same command.
 With `--save-status` it also writes aggregate counts, each Node's category and
 the checkpoint hash and generation it served, under SHA-256 hashes of the Node
@@ -219,7 +238,9 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
   (answer, ten-step pipeline, Node card) for monitoring: exit 0 when nothing
   needs attention, 6 while waiting for external evidence, when it is older than
   seven days or before `node:init`, 4 for an invalid Manifest, an identity
-  conflict or an unreadable store. `status CONFIG` without `--check` keeps the Node counts.
+  conflict or an unreadable store (also while the Node serves its last published
+  snapshot in degraded mode; the card's `next_action` names the next step).
+  `status CONFIG` without `--check` keeps the Node counts.
 - `history:verify WEBROOT` checks offline whether the served history bundle
   connects to the installed Manifest (`CONNECTED`; `MISSING`/`INCOMPLETE` exit 6).
   `history:install WEBROOT SIGNED_RECORD...` rebuilds it from the owner's signed
@@ -227,8 +248,8 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
   `HISTORY_INCOMPLETE` unless the result connects. `manifest:install` maintains
   the bundle automatically and reports `history` ([PCP-004](../protocol/proposals/PCP-004-continuity-bundle-draft.md)).
 - `node:identity CONFIG` prints the verified Node Onion and Node public key from
-  the signed descriptor, with ready-to-use lines for `--node`, `peers:add` and
-  visitors. Node and combined roles only; it fails with `NODE_NOT_INITIALIZED`
+  the signed descriptor, its `node_key_fingerprint` (D-025), and ready-to-use
+  lines for `--node`, `peers:add` and visitors. Node and combined roles only; it fails with `NODE_NOT_INITIALIZED`
   before `node:init`.
 - `manifest:rotate … --output-dir DIR` and `manifest:migrate … --output-dir DIR`
   write `rotation-draft.json`/`migration-draft.json` and `successor-draft.json`

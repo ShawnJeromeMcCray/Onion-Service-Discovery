@@ -286,6 +286,13 @@
    ],
    "meaning": "init created the configuration file but could not write or sync it or sync its directory, so the file may be incomplete; check free space, remove the file and run init again."
   },
+  "CONFUSABLE_DATA_INVALID": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "The confusable table built into the browser client does not decode to its recorded entry count, so look-alike names cannot be checked; serve an unmodified client build."
+  },
   "CONTENT_ENCODING_REJECTED": {
    "cli_exit": [
     "5"
@@ -458,11 +465,12 @@
    ],
    "components": [
     "CLI",
+    "Node worker",
     "configuration and status",
     "storage",
     "web routes"
    ],
-   "meaning": "Published snapshot files do not match their signed hashes; rebuild with node:snapshot --rebuild-derived."
+   "meaning": "Published snapshot files, or the copy of the published state kept beside them for degraded serving, do not match their signed records; rebuild with node:snapshot --rebuild-derived."
   },
   "EXPORT_DIRECTORY_UNSAFE": {
    "cli_exit": [
@@ -795,6 +803,14 @@
    ],
    "meaning": "node:snapshot refused to run because features.mirror_directory and features.server_search are both off in this configuration; enable the feature it needs in a node or combined configuration."
   },
+  "NODE_DEGRADED_READ_ONLY": {
+   "cli_exit": [],
+   "components": [
+    "front controller",
+    "web routes"
+   ],
+   "meaning": "The Node cannot read its store, so it keeps serving only its last published snapshot (D-045) and answers HTTP 503 on routes that need the store, announcements included; the operator follows the incident runbook, section 4."
+  },
   "NODE_DESCRIPTOR_HISTORY_INCOMPLETE": {
    "cli_exit": [
     "3"
@@ -886,7 +902,7 @@
    "components": [
     "front controller"
    ],
-   "meaning": "The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable store or export directory, or a relayed Node that could not be fetched; operators run doctor."
+   "meaning": "The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable export directory, a store that cannot be read without a last published snapshot to serve in its place, or a relayed Node that could not be fetched; operators run doctor."
   },
   "NOT_FOUND": {
    "cli_exit": [
@@ -1088,6 +1104,15 @@
    ],
    "meaning": "The publisher lock, the new Manifest or the history bundle could not be created, written, synced or renamed in WEBROOT/.well-known; check that the installing user can write there."
   },
+  "PUBLISHED_STATE_STALE": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: the copy of the published state that the export directory keeps for degraded serving (D-045) is missing or does not match the store\u2019s published snapshot and Node descriptor; node:snapshot rewrites it, unless the copy names a newer generation than the store (a restored older backup): then follow the incident runbook, section 4, first."
+  },
   "PUBLISHER_BUSY": {
    "cli_exit": [
     "3"
@@ -1258,7 +1283,7 @@
    "components": [
     "doctor"
    ],
-   "meaning": "doctor: this PHP minor version is outside the tested 8.4/8.5 matrix."
+   "meaning": "doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it."
   },
   "SCHEMA_INVALID": {
    "cli_exit": [
@@ -1292,7 +1317,7 @@
    "components": [
     "server search"
    ],
-   "meaning": "The server search index was built for another snapshot than the one now published, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived."
+   "meaning": "The server search index was built for another snapshot than the one now published, or by an earlier release in an older format, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived."
   },
   "SEARCH_INDEX_UNAVAILABLE": {
    "cli_exit": [

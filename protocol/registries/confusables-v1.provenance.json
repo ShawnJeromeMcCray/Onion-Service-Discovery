@@ -1,0 +1,30 @@
+{
+  "format_version": 1,
+  "scope": "browser look-alike name warnings only; signed names are never rewritten, hidden or ranked by it",
+  "algorithm": "UTS #39 section 4 skeleton: NFD, remove Default_Ignorable_Code_Point, replace by MA prototypes, NFD",
+  "unicode_version": "17.0.0",
+  "source": {
+    "file": "confusables.txt",
+    "standard": "UTS #39 Unicode Security Mechanisms",
+    "header_version": "17.0.0",
+    "repository": "https://github.com/unicode-org/icu",
+    "tag": "release-78.3",
+    "path": "icu4c/source/data/unidata/confusables.txt",
+    "source_url": "https://raw.githubusercontent.com/unicode-org/icu/release-78.3/icu4c/source/data/unidata/confusables.txt",
+    "sha256": "091c7f82fc39ef208faf8f94d29c244de99254675e09de163160c810d13ef22a"
+  },
+  "source_entry_count": 6565,
+  "table_entry_count": 5499,
+  "omitted_entries": {
+    "source_changed_by_nfd": 1065,
+    "source_default_ignorable": 1
+  },
+  "decomposition_table": {
+    "path": "protocol/registries/search-unicode-v1.json",
+    "sha256": "ed503692c5a3759ddd87daf30707f69b5d56f4c4665b660fb81a24f345a591ea"
+  },
+  "table_path": "web-local-search-client/src/client/confusables-data.ts",
+  "table_sha256": "7c0ec92c20eb8724d22439a43aabb589fcc9f0b8ef2d27a8161f1ae43b455bac",
+  "license": "Unicode-3.0",
+  "license_file": "third-party/Unicode-3.0.txt"
+}

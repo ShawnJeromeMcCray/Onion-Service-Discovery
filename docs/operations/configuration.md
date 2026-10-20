@@ -24,7 +24,7 @@ is missing from this page.
 | `role` | `publisher`, `node`, `client-host` or `combined` | What this installation does; see role rules below. |
 | `storage.backend` | `filesystem` or `sqlite` | Store for a Node's signed records and operational state. |
 | `storage.path` | absolute path, at most 1024 bytes, no `.`/`..` segments | Store location. Required by the format for every role; publishers and Client Hosts never create it. |
-| `export_path` | absolute path | Directory for public snapshot files and the request-budget files. |
+| `export_path` | absolute path | Directory for public snapshot files, the copy of the last published state that [degraded mode](deployment-and-recovery.md#degraded-mode) serves, and the request-budget files. |
 | `node.onion` | canonical v3 Onion or `null` | This installation's own Onion: the published Service (publisher) or the Node address (node, combined). |
 | `node.key_path` | absolute path or `null` | Encrypted Node key file (node, combined). Never a Service key or a Tor key. |
 | `features.publish_service` | boolean | Serve this installation's signed Manifest as an opted-in Service. |

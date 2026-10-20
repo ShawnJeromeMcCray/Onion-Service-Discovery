@@ -1,9 +1,11 @@
 <?php
 declare(strict_types=1);
+require __DIR__.'/health-report.inc.php';
 $project=dirname(__DIR__,2);$cli=$project.'/node-php/bin/onion-service-discovery';$root=sys_get_temp_dir().'/osd-cli-'.bin2hex(random_bytes(12));mkdir($root,0700);
 function command(array $arguments,int $expected=0):array{
  global $cli;$process=proc_open([PHP_BINARY,$cli,...$arguments,'--json','--no-interaction'],[['pipe','r'],['pipe','w'],['pipe','w']],$pipes);fclose($pipes[0]);$out=stream_get_contents($pipes[1]);$err=stream_get_contents($pipes[2]);fclose($pipes[1]);fclose($pipes[2]);$exit=proc_close($process);
- if($exit!==$expected||$err!=='')throw new RuntimeException('CLI failed '.$arguments[0].' exit '.$exit.' '.$out.' '.$err);return json_decode($out,true,32,JSON_THROW_ON_ERROR);
+ if($exit!==$expected||$err!=='')throw new RuntimeException('CLI failed '.$arguments[0].' exit '.$exit.' '.$out.' '.$err);$decoded=json_decode($out,true,32,JSON_THROW_ON_ERROR);
+ if(in_array($arguments[0],['doctor','security:check'],true)&&isset($decoded['software_version']))assertHealthReport($decoded);return $decoded;
 }
 file_put_contents($root.'/passphrase','TEST ONLY private operator passphrase');chmod($root.'/passphrase',0600);
 // Synthetic filenames only: no Tor identity is created or read in this test.

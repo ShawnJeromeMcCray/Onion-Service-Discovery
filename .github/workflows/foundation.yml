@@ -17,8 +17,10 @@ jobs:
       fail-fast: false
       matrix:
         php_image:
+          # php:8.5-cli, php:8.4-cli and php:8.3-cli (8.3.35, resolved 2026-10-15); every supported minor (D-002).
           - php@sha256:01a109229f4465bc9ef042d9198f09a4d9da7775a825dbd8572dcdbd8756c4d3
           - php@sha256:1d2cf2b7d715b5b3aa959f0150ccbcc7b71e0181b637e443abf40a7fb56bf79a
+          - php@sha256:aafe21201943a8a6e497ddfb471e2ce68ada76adede38c7d61fede8918b24319
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -104,6 +106,10 @@ jobs:
       - name: Install controlled browser
         working-directory: web-local-search-client
         run: npx playwright install --with-deps chromium
+      - name: Check the confusable table against its pinned Unicode 17 source (D-024)
+        run: |
+          curl --fail --silent --show-error --location --max-time 120 -o "$RUNNER_TEMP/confusables.txt" https://raw.githubusercontent.com/unicode-org/icu/release-78.3/icu4c/source/data/unidata/confusables.txt
+          python3 tools/generate_confusables.py "$RUNNER_TEMP/confusables.txt" --check
       - name: Build and check local client behavior
         working-directory: web-local-search-client
         run: |

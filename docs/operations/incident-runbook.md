@@ -186,10 +186,27 @@ If peers or publishers report this about your own Node, stop
 
 ## 4. Store corruption or an interrupted write
 
+**While the store cannot be read, the Node stays online in degraded mode**
+(decision D-045). The web routes keep serving the last published snapshot from
+the export directory: the Node descriptor, the state, the checkpoint and its
+chunks, byte for byte as before, and visitors' browsers and peers verify them as
+always. Everything that needs the store answers 503 `NODE_DEGRADED_READ_ONLY`:
+peers, changes, service lookups and announcements. Server search answers its
+503 page. No web request opens the damaged store for writing, so nothing
+repairs or changes it behind your back. The status page shows the Node's storage
+as `DEGRADED`, with one sentence and no details. `status CONFIG` and `doctor
+CONFIG` name the store's error code, report `DEGRADED` and point to this
+section; `status CONFIG --check` exits 4. Degraded serving needs the copy of
+the last published state that `node:snapshot` keeps in the export directory
+(`.published-state.json`). Without it, or with a damaged copy or export
+directory, every data route answers 503 `NODE_UNAVAILABLE` and the card shows
+`ERROR`. The Node serves from its store again by itself once the store can be
+read.
+
 **Interrupted write** (power loss, killed job, full disk). The filesystem store
 recovers the next time a writer opens it: it cuts a partial journal line, aborts
 an unfinished transaction and completes a committed one whose HEAD update was
-lost. Until then the read-only web routes answer 503, and `doctor` reports
+lost. Until then the Node serves in degraded mode, and `doctor` reports
 `STORAGE_RECOVERY_REQUIRED`. SQLite recovers its own journal.
 
 1. Free disk space if it is full. `storage:verify BACKEND PATH` looks without
@@ -201,15 +218,18 @@ lost. Until then the read-only web routes answer 503, and `doctor` reports
 
 **Corruption** (`storage:check` fails with `STORAGE_CORRUPT`, exit 4).
 
-1. Stop the timers and the web pool. Do not edit, move or delete files inside
-   the store; keep it as evidence.
+1. Stop the timers. Do not edit, move or delete files inside the store; keep it
+   as evidence. The web pool may keep running until the switch in step 5: in
+   degraded mode it never writes to the store.
 2. Check the newest private backup: `backup:verify PRIVATE_FILE`.
 3. Restore it into a new, empty path (an existing path is refused):
    `storage:restore BACKEND NEW_STAGING_PATH PRIVATE_FILE
    --trusted-private-backup`, then `storage:check BACKEND NEW_STAGING_PATH`.
 4. Compare generations. Point a copy of the configuration at the staging path
    and run `status COPY --check`: the Node card shows `snapshot_generation`.
-   Compare it with the newest generation this Node published: a peer's
+   Compare it with the newest generation this Node published: the status page
+   shows it while the Node is degraded, the export directory keeps it in
+   `.published-state.json` (the `generation` inside `state`), and a peer's
    `sync:status` shows the generation it accepted from you.
 5. Same generation: switch the configuration to the restored path while all
    processes are stopped, run `doctor`, start the timers. If export files are

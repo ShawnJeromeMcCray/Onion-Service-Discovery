@@ -18,7 +18,7 @@ Keep private keys, passphrases, search history and raw private backups out of re
 | `CONFIGURATION_PATH_UNSAFE` / permission error | Use real absolute directories outside the webroot, owned by the service user, mode 0700; private files 0600. Avoid symlink/private-key filename aliases. Do not fix by making data world-readable. |
 | Synthetic Onion or key rejected | Replace the example with a checksum-valid v3 Onion / canonical `ed25519:` public key; placeholders are not real values. |
 | `MIRROR_DISABLED` / `DISCOVERY_DISABLED` | Enable only the feature needed in the matching Node/combined configuration. Publisher and Client Host roles cannot perform Node jobs. |
-| `PHP 8.4+ required` / Ubuntu 24.04 | Ubuntu 24.04 LTS ships PHP 8.3, which is not supported. Use a release that ships PHP 8.4+ or a PHP build you trust. |
+| `PHP 8.3+ required` | The PHP found is older than 8.3 or 32-bit. Ubuntu 24.04 LTS (8.3) and Debian 13 (8.4) ship a supported PHP; older releases need a newer PHP from a source you trust. |
 | Status page answers **NOT YET** | Run `service:verify CONFIG YOUR.onion --save-status`, then `network:discoverability-check … --save-status` against independently selected Nodes; the *Steps* list shows the first step that is still pending. |
 | Status page state `CONNECTING` | Your Manifest passed the self-check through your Onion, but no Node has accepted an announcement or included it yet. Announce it and check the Nodes, or enable the publisher timer. |
 | Status page state `ANNOUNCED_PENDING_VERIFICATION` | At least one Node accepted the announcement of the installed revision. Nodes fetch and verify the Manifest themselves, usually within a day; the next check shows the result. |
@@ -41,6 +41,7 @@ Keep private keys, passphrases, search history and raw private backups out of re
 | `SIGNATURE_INVALID` / `ONION_BINDING_MISMATCH` | The record was changed after signing or belongs to another Onion. Re-sign the unchanged draft offline; never edit signed JSON. |
 | Revision conflict / fork while signing | Two different revisions with the same number exist. Continue from the one already published; see the update workflow in the publisher guide. |
 | `STORAGE_BUSY` / store locked | Another worker holds the writer lock. Let scheduled jobs finish; do not delete lock files while workers run. |
+| Node card shows storage `DEGRADED` / `NODE_DEGRADED_READ_ONLY` | The Node cannot read its store and keeps serving its last published snapshot ([degraded mode](../operations/deployment-and-recovery.md#degraded-mode)). Run `doctor CONFIG` for the cause and follow the [incident runbook](../operations/incident-runbook.md#4-store-corruption-or-an-interrupted-write), section 4. |
 | `ENOSPC` / disk full | Free space; the stores resume from the last durable commit. Run `storage:check` afterwards. See [recovery](../operations/deployment-and-recovery.md). |
 | Browser client shows old results | Reload sources explicitly. A failed refresh keeps the last verified view on purpose. |
 | Pin mismatch warning | A loaded identity conflicts with your pin. Treat it as a possible impersonation; keep the pin until you verified the change through the Service's signed rotation/migration evidence. |

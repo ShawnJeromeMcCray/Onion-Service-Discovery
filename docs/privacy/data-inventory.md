@@ -47,8 +47,9 @@ without any report to a Node.
 | Peers: Onion, expected key, state, failures, error, local group; sync anchors | B | `peers:add`, sync | Synchronization | Store | `/onion-service-discovery/v1/peers` publishes active peers' Onions and keys | Kept; `peers:disable` keeps the row | No command | `peer-sync.php`, `peer-source-groups.php` |
 | Checkpoint evidence: at most 8 hashes per Node key and generation | E | Peer sync | Equivocation evidence | Store | Local; the signed checkpoints are public | Kept | No command | `peer-sync.php` |
 | Request budget `.request-budget` | B | Data API, announcement and search requests | Rate limit without identifiers | Export directory: a token count and a time | Nobody | Overwritten on every request | — | `request-budget.php` |
+| Copy of the last published state `.published-state.json`: the state document and the signed Node descriptor | A | `node:snapshot`, `node:init` | Serving the last published snapshot while the store cannot be read (D-045) | Export directory | Public: the same bytes the state and Node routes serve | Replaced by every publication; never pruned | — | `degraded-mode-http.php` |
 | Node key and passphrase file | D | The operator | Signing | Owner-only files | Never sent | Until the operator removes them | The operator | `protected-signer.php` |
-| Status page facts | A, B | Configuration and store | Operator and visitor information | Not stored; rendered per request | Public: Node Onion and key, counts by state, record count, snapshot generation and time, last check and sync times | — | — | `node-status.php` |
+| Status page facts | A, B | Configuration and store | Operator and visitor information | Not stored; rendered per request | Public: Node Onion and key, storage state, counts by state, record count, snapshot generation and time, last check and sync times; while the store cannot be read only the state `DEGRADED`, the identity and the snapshot generation and time | — | — | `node-status.php`, `degraded-mode-http.php` |
 
 ## Publisher
 
