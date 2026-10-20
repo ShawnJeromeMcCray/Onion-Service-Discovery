@@ -41,6 +41,7 @@ Keep private keys, passphrases, search history and raw private backups out of re
 | `SIGNATURE_INVALID` / `ONION_BINDING_MISMATCH` | The record was changed after signing or belongs to another Onion. Re-sign the unchanged draft offline; never edit signed JSON. |
 | Revision conflict / fork while signing | Two different revisions with the same number exist. Continue from the one already published; see the update workflow in the publisher guide. |
 | `STORAGE_BUSY` / store locked | Another worker holds the writer lock. Let scheduled jobs finish; do not delete lock files while workers run. |
+| Node card shows storage `DEGRADED` / `NODE_DEGRADED_READ_ONLY` | The Node cannot read its store and keeps serving its last published snapshot ([degraded mode](../operations/deployment-and-recovery.md#degraded-mode)). Run `doctor CONFIG` for the cause and follow the [incident runbook](../operations/incident-runbook.md#4-store-corruption-or-an-interrupted-write), section 4. |
 | `ENOSPC` / disk full | Free space; the stores resume from the last durable commit. Run `storage:check` afterwards. See [recovery](../operations/deployment-and-recovery.md). |
 | Browser client shows old results | Reload sources explicitly. A failed refresh keeps the last verified view on purpose. |
 | Pin mismatch warning | A loaded identity conflicts with your pin. Treat it as a possible impersonation; keep the pin until you verified the change through the Service's signed rotation/migration evidence. |

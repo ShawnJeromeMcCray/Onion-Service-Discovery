@@ -21,7 +21,12 @@ publication for a publishing installation, `export_usage` (blob files and bytes
 against the 4,096-file and 256 MiB export limits; WARN from 80 %) and
 `scheduler_state` derived from stored times: a published checkpoint older than
 two days (`SNAPSHOT_TIMER_STALE`) or publisher checks older than 36 hours
-(`PUBLISHER_TIMER_STALE`) mean the timer stopped. Unsupported/unobserved checks
+(`PUBLISHER_TIMER_STALE`) mean the timer stopped. For a Node it reports
+`node_health`, the storage state its status page shows (`HEALTHY`, `READ_ONLY`,
+`DEGRADED`, `ERROR` or `NOT_INITIALIZED`), with a `next_action` when the store
+needs attention, and warns `PUBLISHED_STATE_STALE` when the export directory's
+copy of the published state, which [degraded mode](deployment-and-recovery.md#degraded-mode)
+serves, does not match the store. Unsupported/unobserved checks
 are explicitly marked: Tor connectivity, backup freshness, deployed headers and
 independent security/release review are not inferred from local configuration.
 `security:check` adds focused findings, each with a remediation: configuration
@@ -33,13 +38,20 @@ administration.
 `status CONFIG` (alias of `node:status`) reports the role, the own Onion and the
 roles in use: for a publisher the publication state and next action, for a Node
 its store counts plus identity, snapshot generation and last direct check and
-sync. `status CONFIG --check` prints the full status page facts and exits 0 when
-nothing needs attention, 6 while waiting or degraded, 4 on an error or conflict. Use separate
+sync. While the store cannot be read it fails with the store's error code (exit
+4) and adds the Node card and a `next_action` from the
+[incident runbook](incident-runbook.md#4-store-corruption-or-an-interrupted-write).
+`status CONFIG --check` prints the full status page facts and exits 0 when
+nothing needs attention, 6 while waiting or degraded, 4 on an error or conflict
+and while the Node's store cannot be read. Use separate
 transport/browser tests and operator acceptance to establish those properties.
 The ordinary data/status web routes open a read-only store and do not repair
-journals. The default-off experimental announcement route alone opens the
-selected writable store for bounded queue admission; it has no signer or
-outbound transport capability. Filesystem format 2 uses the journal COMMIT as durable authority before HEAD.
+journals; while it cannot be read they serve the last published snapshot
+([degraded mode](deployment-and-recovery.md#degraded-mode), D-045). The
+default-off experimental announcement route alone opens the selected writable
+store for bounded queue admission, and only after a read-only opening
+succeeded, so a damaged store is never recovered by a web request; it has no
+signer or outbound transport capability. Filesystem format 2 uses the journal COMMIT as durable authority before HEAD.
 Read-only opening refuses unresolved recovery rather than repairing it.
 
 `storage:check` is a separate explicit integrity/recovery command; it completes
@@ -222,7 +234,9 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
   (answer, ten-step pipeline, Node card) for monitoring: exit 0 when nothing
   needs attention, 6 while waiting for external evidence, when it is older than
   seven days or before `node:init`, 4 for an invalid Manifest, an identity
-  conflict or an unreadable store. `status CONFIG` without `--check` keeps the Node counts.
+  conflict or an unreadable store (also while the Node serves its last published
+  snapshot in degraded mode; the card's `next_action` names the next step).
+  `status CONFIG` without `--check` keeps the Node counts.
 - `history:verify WEBROOT` checks offline whether the served history bundle
   connects to the installed Manifest (`CONNECTED`; `MISSING`/`INCOMPLETE` exit 6).
   `history:install WEBROOT SIGNED_RECORD...` rebuilds it from the owner's signed

@@ -19,7 +19,9 @@ GET `/onion-service-discovery/search/` serves the form; POST
 fallback or query transfer from the local-search field. A separate recovery link
 also remains available when browser scripting or verifier startup fails.
 
-Missing, stale or corrupted cache data yields 503 without partial results.
+Missing, stale or corrupted cache data yields 503 without partial results, and
+so does a store that cannot be read: server search pauses while the Node serves
+its last published snapshot in [degraded mode](deployment-and-recovery.md#degraded-mode).
 `doctor CONFIG` checks the prepared cache without repairing or signing it.
 An operator can reconstruct derived exports explicitly using
 `node:snapshot CONFIG --passphrase-file PRIVATE_FILE --rebuild-derived`.

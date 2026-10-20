@@ -131,6 +131,39 @@ processes are stopped. Re-run doctor, integrity, bounded peer sync and end-to-en
 checks before re-enabling schedules. Test this drill regularly; physical
 power-loss/disk-full and live deployment restore drills remain open gates.
 
+## Degraded mode
+
+A Node whose store cannot be read, for example after an interrupted write that
+needs recovery or because the store is corrupted, keeps serving its last
+published signed snapshot (decision D-045). The snapshot descriptor and its
+chunks are content-addressed files in the export directory and verify on their
+own. After every publication `node:snapshot` also writes a copy of the published
+state there, `.published-state.json`: the state document and the signed Node
+descriptor, replaced atomically and never pruned. While the store cannot be read:
+
+- `/onion-service-discovery/v1/node`, `state`, `snapshots/HASH` for the current
+  checkpoint (and for older checkpoints still in the export directory) and
+  `chunks/HASH` answer exactly as before, with the same headers and limits;
+- `peers`, `changes`, service lookups, a checkpoint the export directory no
+  longer holds and announcements answer 503 `NODE_DEGRADED_READ_ONLY`; no web
+  request opens the store for writing, so nothing recovers it unasked;
+- server search answers its 503 page;
+- the status page shows the Node's storage as `DEGRADED` with one sentence and no
+  details. `status`, `status --check` and `doctor` report the cause and the next
+  step, which the [incident runbook](incident-runbook.md#4-store-corruption-or-an-interrupted-write)
+  describes.
+
+Every request checks the copy against the signed records again. Without a copy
+(before the first `node:snapshot` of this release), with a damaged copy or
+export directory, or with a missing or invalid configuration nothing is served:
+the routes answer 503 `NODE_UNAVAILABLE` as before and the card shows `ERROR`.
+The copy is written only after the store committed the publication, so it never
+names a snapshot the store did not publish. If writing it fails, `node:snapshot`
+fails and its next run writes it; until then `doctor` warns
+`PUBLISHED_STATE_STALE`. Back up the export directory with the store, as
+described above. Detailed health stays local: the public page shows only the
+state.
+
 ## Maintenance, rollback and removal
 
 `node:maintain CONFIG` scans at most 256 remote-provenance assertions, expires
