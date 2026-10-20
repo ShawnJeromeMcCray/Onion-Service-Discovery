@@ -21,10 +21,13 @@ try{
  $service=ProtectedFileSigner::create($root.'/service.key','service','TEST ONLY server search Service passphrase',$verifier);
  $signed=json_decode(file_get_contents($project.'/protocol/test-vectors/signed-records.json'));
  $private=json_decode(json_encode($signed->stories->genesis));$private->service_identity_public_key=$service->publicKey();$private->discovery->publish_service=false;$private->service->name='PRIVATE_SEARCH_METADATA_MARKER';$private=$verifier->verify($service->signRecord($private));
- foreach(['filesystem','sqlite'] as $backend){foreach(['browser','fork','orphan'] as $scenario){
+ // A published name with a Cyrillic а and a zero-width space: the same notes as the browser client.
+ $lookalikeKey=ProtectedFileSigner::create($root.'/lookalike.key','service','TEST ONLY server search look-alike passphrase',$verifier);
+ $lookalike=json_decode(json_encode($signed->stories->genesis));$lookalike->service_identity_public_key=$lookalikeKey->publicKey();$lookalike->discovery->publish_service=true;$lookalike->service->name="Synthetic Libr\u{0430}ry\u{200b}";$lookalike=$verifier->verify($lookalikeKey->signRecord($lookalike));
+ foreach(['filesystem','sqlite'] as $backend){foreach(['browser','fork','orphan','lookalike'] as $scenario){
   $dir=$root.'/'.$backend.'-'.$scenario;mkdir($dir,0700);
   $store=$backend==='filesystem'?new FilesystemStore($dir.'/data',create:true):new SQLiteStore($dir.'/data.sqlite',create:true);
-  $selected=$scenario==='browser'?[...$records,$private]:($scenario==='fork'?$fork:$orphan);
+  $selected=$scenario==='browser'?[...$records,$private]:($scenario==='fork'?$fork:($scenario==='lookalike'?[$lookalike]:$orphan));
   $store->transaction(static function(StorageTransaction $tx)use($selected):void{foreach($selected as $record)$tx->putRecord($record);});
   $blobs=new PublicBlobStore($dir.'/exports',true);$producer=new SnapshotProducer($store,$blobs,$verifier,$signer,true);$published=$producer->publish(1700000000);
   if($producer->publish(1700000001)['status']!=='UNCHANGED')throw new RuntimeException('search publication not idempotent');
@@ -37,6 +40,8 @@ try{
    if($reply['status']!==200||!str_contains($reply['body'],'1 matching identities')||!str_contains($reply['body'],'Synthetic Library')||str_contains($reply['body'],'Synthetic Climate Archive'))throw new RuntimeException('semantic search filter');
   }elseif($scenario==='fork'){
    if(!str_contains($empty['body'],'Signed fork evidence is retained')||str_contains($empty['body'],'Visit Onion Service'))throw new RuntimeException('fork gained visit/current state');
+  }elseif($scenario==='lookalike'){
+   if(!str_contains($empty['body'],'1 matching identities')||!str_contains($empty['body'],'Metadata contains invisible characters')||!str_contains($empty['body'],'The name mixes visually similar writing systems'))throw new RuntimeException('look-alike notes missing from server search');
   }elseif(!str_contains($empty['body'],'0 matching identities'))throw new RuntimeException('orphan minted identity');
   $rare=$query('query=sensitive-local-search-probe-9341');if($rare['status']!==200||str_contains($rare['body'],'sensitive-local-search-probe-9341')||!str_contains($rare['body'],'0 matching identities'))throw new RuntimeException('query echoed or persisted in result');
   foreach(['query=a&query=b','query=a&que%72y=b','query%5B%5D=a','query=%ZZ','query=%C0%AF','query=%00','query=a&extra=1','language=en','query=a&category=unknown','query=a&language=EN','query=a&adult=rank','query='.str_repeat('a',257),'query='.urlencode(str_repeat('😀',129))] as $input){if($query($input)['status']!==400)throw new RuntimeException('unsafe form accepted');}

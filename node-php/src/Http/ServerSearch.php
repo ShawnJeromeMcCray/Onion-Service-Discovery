@@ -61,12 +61,18 @@ final readonly class ServerSearch
             $html .= '</ol>'; $budget(); return self::page(200, $html);
         } catch (\Throwable) { return self::page(503, '<p>Server search is unavailable for this published index or its work budget. No partial result is presented. Use a local-search client or retry later.</p>'); }
     }
+    /** Default-ignorable and tag characters that can make two names look identical, as in the browser client. */
+    private const INVISIBLE = '/[\x{00ad}\x{034f}\x{115f}\x{1160}\x{17b4}\x{17b5}\x{180b}-\x{180f}\x{200b}\x{200c}\x{2060}-\x{2064}\x{3164}\x{feff}\x{ffa0}\x{1bca0}-\x{1bca3}\x{e0000}-\x{e007f}]/u';
+
     /** @param ServiceRow $row */
     private static function result(array $row): string
     {
         $excerpt = UnicodeSearch::text(array_slice(UnicodeSearch::points($row['description']), 0, 240));
         $html = '<li><article><h3><bdi>' . self::escape($row['name'] === '' ? 'Unnamed service' : $row['name']) . '</bdi></h3><p><bdi>' . self::escape($excerpt) . '</bdi></p>';
         if (preg_match('/[\x{061c}\x{200e}\x{200f}\x{202a}-\x{202e}\x{2066}-\x{2069}]/u', $row['name'] . $row['description']) === 1) { $html .= '<p>Metadata contains direction-changing characters. Compare the full Onion address and identity key.</p>'; }
+        // The same presentation notes as the browser client (view-model.ts metadataWarnings).
+        if (preg_match(self::INVISIBLE, $row['name'] . $row['description']) === 1) { $html .= '<p>Metadata contains invisible characters, which can make different names look the same. Compare the full Onion address and identity key.</p>'; }
+        if (preg_match('/\p{Latin}/u', $row['name']) === 1 && preg_match('/[\p{Cyrillic}\p{Greek}]/u', $row['name']) === 1) { $html .= '<p>The name mixes visually similar writing systems. Names are self-declared; compare the full Onion address and identity key.</p>'; }
         if ($row['onion'] !== null) { $html .= '<p class="onion">' . self::escape($row['onion']) . '</p>'; }
         $html .= '<p>Categories: ' . self::escape(implode(', ', $row['categories'])) . ' · Languages: ' . self::escape(implode(', ', $row['languages'])) . '</p><p>Identity: <code>' . self::escape($row['genesisKey']) . '</code></p><p>' . $row['rotationCount'] . ' key-rotation proofs · ' . $row['migrationCount'] . ' migration proofs.</p>';
         if ($row['addressConflict']) { $html .= '<p>Different Service identities claim this address. Source agreement cannot replace a pinned key.</p>'; }
