@@ -18,3 +18,11 @@ test('prototype-looking keys remain inert data', () => {
   assert.equal(parsed.__proto__.polluted, true);
   assert.equal({}.polluted, undefined);
 });
+
+test('strict JSON: a record bundle list may exceed 256 items only where the caller allows it', () => {
+  const bytes = new TextEncoder().encode(JSON.stringify({ bundle_version: 1, records: Array.from({ length: 300 }, (_, index) => ({ n: index })) }));
+  assert.throws(() => parseStrictJson(bytes, 1048576), { message: 'SCHEMA_INVALID' });
+  assert.equal(parseStrictJson(bytes, 1048576, 10000).records.length, 300);
+  const nested = new TextEncoder().encode(JSON.stringify({ records: [{ list: Array.from({ length: 300 }, () => 0) }] }));
+  assert.throws(() => parseStrictJson(nested, 1048576, 10000), { message: 'SCHEMA_INVALID' }, 'deeper arrays keep the protocol limit');
+});

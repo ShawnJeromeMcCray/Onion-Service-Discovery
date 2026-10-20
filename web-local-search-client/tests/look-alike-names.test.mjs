@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {pinNameMatcher} from '../src/client/view-model.ts';
-import {importedPinMatcher,lookAlikeEntries,lookAlikePins,pinLookAlikeMatcher} from '../src/client/look-alike-names.ts';
+import {importedPinMatcher,lookAlikeEntries,lookAlikePins,pinLookAlikeMatcher,sameNameEntries} from '../src/client/look-alike-names.ts';
 const pin=(genesisKey,label)=>({genesisKey,contextOnion:'x.onion',anchorHash:'sha256:a',latestHash:'sha256:a',highestRevision:1,label,conflicted:false});
 const row=(genesisKey,name,status='PUBLISHED')=>({genesisKey,name,status});
 test('a look-alike of a pinned label under another key is flagged; the same name stays with the existing warning',()=>{
@@ -45,4 +45,9 @@ test('pin labels and imported pins are compared with the pins already held',()=>
   assert.deepEqual(resembles(pin('ed25519:new','SYNTHETIC LIBRARY')),{label:'Synthetic Library',same:true});
   assert.equal(resembles(pin('ed25519:held','Synthetic Librаry')),undefined,'the same key is an update, not an impostor');
   assert.equal(resembles(pin('ed25519:new','Synthetic Climate Archive')),undefined);
+});
+
+test('the same name under two identity keys is flagged on both entries; withdrawn entries are not',()=>{
+  assert.deepEqual([...sameNameEntries([row('a','Riseup Mail'),row('b','riseup  MAIL'),row('c','Example'),row('d','Riseup Mail','WITHDRAWN')])].sort(),['a','b']);
+  assert.deepEqual([...sameNameEntries([row('a','Example'),row('b','Exarnple')])],[],'a look-alike is not the same name');
 });

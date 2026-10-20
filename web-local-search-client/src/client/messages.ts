@@ -1,5 +1,6 @@
 /** Plain-language explanations for typed codes: what happened, what still works, what to do. */
 const sourceMessages:{[code:string]:string}={
+  CLIENT_RECORD_BUDGET_EXHAUSTED:'The local index is full (10,000 signed records across all sources). Choose Clear index, then load fewer Nodes.',
   SOURCE_FETCH_FAILED:'The Node did not answer. It may be offline or unreachable over Tor right now; try again later. The last verified local index stays available.',
   SOURCE_HTTP_STATUS_REJECTED:'The Node answered with an error page instead of signed data. Nothing from it was used; try again later.',
   SOURCE_TIMEOUT:'The Node answered too slowly. Nothing from this attempt was used; try again later.',

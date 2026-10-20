@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- Full blocker review (operators, Node core, browser client):
+  - `manifest:install` makes `.well-known` world-readable whatever the umask; a
+    missing or unreadable Manifest answers 404 `MANIFEST_NOT_INSTALLED`, and a Node
+    with announcements off answers 404 instead of 405.
+  - Templates and guides use one configuration path per role
+    (`/etc/onion-service-discovery/node.json`, `publisher.json`), the Node units may
+    write where `init` puts the store, and every command runs as `osd-worker`.
+  - `sync:status` lists every peer; `status` works for a Client Host; `doctor` warns
+    when the saved self-check failed.
+  - Candidate checks resume one hour after a clock rollback instead of stalling; an
+    idle queue no longer writes the store, so snapshots and direct checks stop
+    aborting with `EVIDENCE_CHANGED_RETRY`; reused export blobs survive pruning; the
+    server search index accepts long multi-byte descriptions.
+  - Browser client: results are re-rendered only when the data changes (seconds per
+    update saved at Tor Browser's Safer level), the network budget grows with the
+    declared snapshot size, bundles may hold more than 256 records, reloading a Node
+    replaces its old records, the same name under two keys is flagged, and demo and
+    real data no longer mix.
 - `doctor` and `security:check` reports have a JSON schema
   (`docs/operations/health-report.schema.json`, spec 32 section 10) that the
   tests apply to every report they produce; `status` for a publisher adds the

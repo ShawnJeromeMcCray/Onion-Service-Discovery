@@ -38,7 +38,8 @@ async function fetchBytes(onion: string, endpoint: Endpoint, limit: number, pare
   const controller = new AbortController();
   const abort = () => controller.abort(); parent.addEventListener('abort', abort, { once: true });
   if (parent.aborted) controller.abort();
-  const timeout = setTimeout(abort, Math.min(15000, Math.max(1, budget.remainingMs)));
+  // 15 s to answer plus time for the body at a slow Tor circuit's 20 KB/s: a full 512 KiB chunk gets about 41 s.
+  const timeout = setTimeout(abort, Math.min(15000 + Math.ceil(limit / 20), Math.max(1, budget.remainingMs)));
   try {
     const destination=delivery==='client-host-proxy'?new URL('relay/'+onion+'/'+path(endpoint).slice(prefix.length),new URL('./',import.meta.url)).href:'http://'+onion+path(endpoint);
     const response = await fetch(destination, { method: 'GET', credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer', cache: 'no-store', mode: 'cors', headers: { Accept: 'application/json' }, signal: controller.signal });
@@ -111,6 +112,9 @@ export class SourceLoader {
     if (!Array.isArray(document.chunks) || document.chunks.length > 64 || typeof document.record_count !== 'number' || document.record_count > 10000) throw new Error('SOURCE_WORK_BUDGET_EXHAUSTED');
     let sum = 0; for (const item of document.chunks) sum += Number(requiredObject(item).bytes);
     if (sum > 33554432) throw new Error('SOURCE_WORK_BUDGET_EXHAUSTED');
+    // The fixed budget covers the small requests; the declared chunk bytes add time at 20 KB/s, so a large
+    // Node stays loadable over a slow Tor circuit. At most 15 minutes in total per source.
+    budget.remainingMs = Math.min(budget.remainingMs + Math.ceil(sum / 20), 900000);
     let ancestor = document; let walks = 0;
     if (ledger.generation > 0 && Number(document.generation) > ledger.generation) {
       const pending=this.#ancestry.get(selection.onion);

@@ -3,7 +3,8 @@ export type JsonValue = null | boolean | number | string | JsonValue[] | { [key:
 const MAX_SAFE_INTEGER = 9007199254740991;
 
 /** Bounded parser that rejects duplicates before constructing protocol objects. */
-export function parseStrictValue(bytes: Uint8Array, maxBytes = 16384): JsonValue {
+/** outerArrayItems raises the item limit for arrays directly inside the top-level object only (a record bundle's list). */
+export function parseStrictValue(bytes: Uint8Array, maxBytes = 16384, outerArrayItems = 256): JsonValue {
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 1048576) throw new Error('DOCUMENT_TOO_LARGE');
   if (bytes.byteLength > maxBytes) throw new Error('DOCUMENT_TOO_LARGE');
   if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) throw new Error('ENCODING_INVALID');
@@ -68,7 +69,7 @@ export function parseStrictValue(bytes: Uint8Array, maxBytes = 16384): JsonValue
       const array: JsonValue[] = [];
       if (source[cursor] === ']') { cursor++; return array; }
       while (true) {
-        if (array.length >= 256) return fail('SCHEMA_INVALID');
+        if (array.length >= (depth === 2 ? outerArrayItems : 256)) return fail('SCHEMA_INVALID');
         array.push(value(depth + 1));
         whitespace();
         const separator = source[cursor++];
@@ -94,8 +95,8 @@ export function parseStrictValue(bytes: Uint8Array, maxBytes = 16384): JsonValue
   return parsed;
 }
 
-export function parseStrictJson(bytes: Uint8Array, maxBytes = 16384): { [key: string]: JsonValue } {
-  const result = parseStrictValue(bytes, maxBytes);
+export function parseStrictJson(bytes: Uint8Array, maxBytes = 16384, outerArrayItems = 256): { [key: string]: JsonValue } {
+  const result = parseStrictValue(bytes, maxBytes, outerArrayItems);
   if (result === null || typeof result !== 'object' || Array.isArray(result)) throw new Error('SCHEMA_INVALID');
   return result;
 }

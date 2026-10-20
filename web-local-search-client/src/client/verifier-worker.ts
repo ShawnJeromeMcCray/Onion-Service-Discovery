@@ -17,16 +17,28 @@ const MAX_VISITOR_SOURCES=8; const visitor=new Map<string,string>(); let visitor
 let pins:LocalPin[]=[]; let allowed=new Set<string>(); let controller:AbortController|null=null; let busy=false; let synthetic=false;
 interface SourceStatus {onion:string;status:'LOADING'|'PARTIAL'|'COMPLETE'|'STALE'|'FAILED'|'QUARANTINED'|'CANCELLED'|'NOT_STARTED';nodeKey:string|null;generation:number|null;createdAt:string|null;error:string|null;baselineHistoryProven:boolean;evidenceAvailable:boolean;}
 let statuses:SourceStatus[]=[];
+// The view is rebuilt only when its inputs change; status-only updates reuse it, and viewVersion lets the page skip re-rendering results.
+let recordsVersion=0; let pinsVersion=0; let viewVersion=0; let cached:{key:string;view:ReturnType<typeof buildView>}|null=null;
+function currentView(quarantined:ReadonlySet<string>):ReturnType<typeof buildView> {
+  const key=recordsVersion+'/'+pinsVersion+'/'+[...quarantined].sort().join(',');
+  if(cached===null||cached.key!==key) { cached={key,view:buildView([...records.values()],pins,{provenance,quarantined})}; ++viewVersion; }
+  return cached.view;
+}
 function code(error:unknown):string { return error instanceof Error&&/^[A-Z_]{1,80}$/.test(error.message)?error.message:'CLIENT_OPERATION_FAILED'; }
 function publish():void {
   const quarantined=new Set(statuses.filter(status=>status.status==='QUARANTINED').map(status=>status.onion));
   for(const status of statuses){const key=ledgers.get(status.onion)?.nodeKey??null;status.evidenceAvailable=key!==null&&witnesses.forkEvidence(key).length===2;}
-  const view=buildView([...records.values()],pins,{provenance,quarantined}); pins=view.pins.map(row=>row.pin);
-  scope.postMessage({type:'view',view,sources:statuses,synthetic,busy,witnessCount:witnesses.size,visitorSources:[...visitor].map(([onion,expectedKey])=>({onion,expectedKey}))});
+  const view=currentView(quarantined); pins=view.pins.map(row=>row.pin);
+  scope.postMessage({type:'view',view,viewVersion,sources:statuses,synthetic,busy,witnessCount:witnesses.size,visitorSources:[...visitor].map(([onion,expectedKey])=>({onion,expectedKey}))});
 }
-function admit(incoming:readonly VerifiedRecord[],origin:string):void {
+function admit(incoming:readonly VerifiedRecord[],origin:string,replace=false):void {
   const added=new Set(incoming.filter(record=>!records.has(record.contentHash)).map(record=>record.contentHash));
-  if(records.size+added.size>10000) throw new Error('CLIENT_RECORD_BUDGET_EXHAUSTED');
+  // A reloaded Node replaces what only it supplied before: superseded records do not pile up toward the limit.
+  const incomingHashes=new Set(incoming.map(record=>record.contentHash));
+  const superseded=replace?[...provenance].filter(([hash,origins])=>origins.size===1&&origins.has(origin)&&!incomingHashes.has(hash)).map(([hash])=>hash):[];
+  if(records.size-superseded.length+added.size>10000) throw new Error('CLIENT_RECORD_BUDGET_EXHAUSTED');
+  for(const hash of superseded) { records.delete(hash); provenance.delete(hash); }
+  ++recordsVersion;
   for(const record of incoming) { records.set(record.contentHash,record); const origins=provenance.get(record.contentHash)??new Set<string>(); origins.add(origin); provenance.set(record.contentHash,origins); }
 }
 async function command(message:Command):Promise<void> {
@@ -59,38 +71,41 @@ async function command(message:Command):Promise<void> {
     scope.postMessage({type:'evidence',onion:message.onion,wires:pair.map(record=>record.canonicalWire)}); return;
   }
   if(message.op==='pin') {
-    const row=buildView([...records.values()],pins).services.find(item=>item.genesisKey===message.genesisKey);
+    // The last published view already holds every row; rebuilding it here would verify nothing new.
+    const row=cached?.view.services.find(item=>item.genesisKey===message.genesisKey);
     if(row===undefined||pins.length>=256) throw new Error('PIN_CONTEXT_UNAVAILABLE');
-    if(!pins.some(pin=>pin.genesisKey===row.genesisKey)) pins.push(pinIdentity(row)); publish(); return;
+    if(!pins.some(pin=>pin.genesisKey===row.genesisKey)) { pins.push(pinIdentity(row)); ++pinsVersion; } publish(); return;
   }
-  if(message.op==='unpin') { pins=pins.filter(pin=>pin.genesisKey!==message.genesisKey); publish(); return; }
+  if(message.op==='unpin') { pins=pins.filter(pin=>pin.genesisKey!==message.genesisKey); ++pinsVersion; publish(); return; }
   if(message.op==='restore-pins'||message.op==='preview-pins') {
     const imported=parsePinBackup(new Uint8Array(message.bytes),crypto);
     if(message.op==='preview-pins') {
       const held=new Map(pins.map(pin=>[pin.genesisKey,pin]));
       scope.postMessage({type:'pin-preview',pins:imported.map(pin=>({pin,status:classifyPinImport(held.get(pin.genesisKey),pin)}))}); return;
     }
-    const result=mergePins(pins,imported); pins=result.pins; publish();
+    const result=mergePins(pins,imported); pins=result.pins; ++pinsVersion; publish();
     scope.postMessage({type:'pins-restored',origin:message.origin,added:result.added,updated:result.updated,skipped:result.skipped}); return;
   }
   if(busy) throw new Error('CLIENT_BUSY');
-  if(message.op==='clear-all') { records.clear(); provenance.clear(); ledgers.clear(); witnesses.clear(); loader.clear(); pins=[]; statuses=[]; synthetic=false; visitor.clear(); publish(); return; }
-  if(message.op==='clear-index') { records.clear(); provenance.clear(); loader.forgetVerified(); statuses=[]; synthetic=false; publish(); return; }
+  if(message.op==='clear-all') { records.clear(); provenance.clear(); ledgers.clear(); witnesses.clear(); loader.clear(); pins=[]; statuses=[]; synthetic=false; visitor.clear(); ++recordsVersion; ++pinsVersion; publish(); return; }
+  if(message.op==='clear-index') { records.clear(); provenance.clear(); loader.forgetVerified(); statuses=[]; synthetic=false; ++recordsVersion; publish(); return; }
   busy=true; publish();
   try {
     if(message.op==='import-records') {
-      const bundle=parseStrictJson(new Uint8Array(message.bytes),1048576);
+      // A bundle's record list may be as long as the 1 MiB file allows; every record inside keeps the protocol limits.
+      const bundle=parseStrictJson(new Uint8Array(message.bytes),1048576,10000);
       const incoming=bundle.protocol==='Onion Service Discovery'?[bundle]:bundle.bundle_version===1&&Object.keys(bundle).length===2&&Array.isArray(bundle.records)?bundle.records:null;
       if(incoming===null)throw new Error('IMPORT_FORMAT_INVALID');
       const verified:VerifiedRecord[]=[];
       for(const item of incoming) { verified.push(await verifyRecord(requiredObject(item),crypto)); if(verified.length%32===0) await new Promise(resolve=>setTimeout(resolve,0)); }
-      if(message.synthetic===true) { records.clear(); provenance.clear(); statuses=[]; synthetic=true; }
+      // Demo data and real records never mix: either kind replaces the other.
+      if(message.synthetic===true||synthetic) { records.clear(); provenance.clear(); statuses=[]; synthetic=message.synthetic===true; ++recordsVersion; }
       admit(verified,message.synthetic===true?'demonstration':'local file');
     } else if(message.op==='load') {
       if(message.sources.length<1||message.sources.length>16||new Set(message.sources.map(source=>source.onion)).size!==message.sources.length) throw new Error('CLIENT_CONFIGURATION_INVALID');
       // A visitor-chosen Node loads only with exactly the key the visitor entered for it.
       for(const selection of message.sources) { loader.validate(selection); if(!allowed.has(selection.onion)&&!(visitorEnabled&&visitor.get(selection.onion)!==undefined&&visitor.get(selection.onion)===selection.expectedKey)) throw new Error('SOURCE_NOT_IN_HOST_ALLOWLIST'); }
-      if(synthetic) { records.clear(); provenance.clear(); synthetic=false; }
+      if(synthetic) { records.clear(); provenance.clear(); synthetic=false; ++recordsVersion; }
       controller=new AbortController();
       statuses=message.sources.map(selection=>({onion:selection.onion,status:'NOT_STARTED',nodeKey:null,generation:null,createdAt:null,error:null,baselineHistoryProven:false,evidenceAvailable:false}));
       for(let index=0;index<message.sources.length;++index) {
@@ -99,7 +114,7 @@ async function command(message:Command):Promise<void> {
           const result=await loader.load(selection,ledgers.get(selection.onion),controller.signal,(ledger,evidence)=>{const fork=witnesses.observe(evidence);ledger.equivocated ||= fork;ledgers.set(selection.onion,structuredClone(ledger));if(ledger.equivocated)throw new Error(evidence.type==='node_descriptor'?'SOURCE_DESCRIPTOR_EQUIVOCATION':'SOURCE_CHECKPOINT_EQUIVOCATION');},
             // A small message per verified chunk; the full view is rebuilt only when the source ends.
             (done,total)=>scope.postMessage({type:'progress',onion:selection.onion,records:done,total}));
-          admit(result.records,selection.onion); ledgers.set(selection.onion,result.ledger);
+          admit(result.records,selection.onion,true); ledgers.set(selection.onion,result.ledger);
           const now=typeof message.now==='number'&&Number.isFinite(message.now)?message.now:Date.now();
           const age=now-Date.parse(result.createdAt); status.status=age>604800000||age< -300000?'STALE':'COMPLETE'; status.nodeKey=result.ledger.nodeKey; status.generation=result.ledger.generation; status.createdAt=result.createdAt; status.baselineHistoryProven=result.baselineHistoryProven;
         } catch(error) {
