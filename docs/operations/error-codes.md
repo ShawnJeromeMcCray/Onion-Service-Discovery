@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-228 codes.
+231 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -85,7 +85,8 @@ for remedies.
 | `IMPORT_REQUIRES_EMPTY_STAGING_STORE` | storage | 4 | storage:import writes only into a new, empty store, and the given staging store already holds records or changes; give a new staging path. |
 | `INPUT_FILE_UNAVAILABLE` | CLI, signing | 3 | An input file is missing, not a regular file, unreadable or given as a URL; check the path and read permission. |
 | `INTERNAL_ERROR` | CLI | 8 | An unexpected internal failure; details are withheld on purpose. Run storage:check if a store was involved and attach the reviewed diagnostics:export output when reporting it. |
-| `JSON_DEPTH_EXCEEDED` | browser client, encoding | 3 | The JSON nests objects or arrays more than 16 levels deep, beyond what the protocol allows. |
+| `JSON_DEPTH_EXCEEDED` | JSON parsing, browser client, encoding | 3 | The JSON nests objects or arrays more than 16 levels deep, beyond what the protocol allows. |
+| `JSON_DUPLICATE_KEY` | JSON parsing, browser client | 3 | The JSON repeats a member name inside one object; signed protocol JSON must have unique keys so every reader sees the same value. |
 | `KEY_DIRECTORY_UNSAFE` | signing | 4 | key:create refused the key path because it is a URL or its directory is a symlink, missing or open to group or others; create the directory with mode 0700 first. |
 | `KEY_ENVELOPE_INVALID` | signing | 4 | The key file is not a valid key envelope for this role (for example a service key used as a Node key) or is damaged, so the key was not unlocked; use the key file key:create made for this role. |
 | `KEY_FILE_UNAVAILABLE` | signing | 4 | The key file is missing, a symlink, not a regular file, open to group or others, larger than 4 KiB or unreadable, or key:create found an existing file or could not write it; keys must be owner-only (0600) regular files. |
@@ -97,6 +98,7 @@ for remedies.
 | `LOCAL_RESOURCE_TOO_LARGE` | browser client | – | The Client Host’s config.json exceeds 16 KiB or its demo.json exceeds 1 MiB, so the browser client stopped reading it. |
 | `LOCAL_RESOURCE_UNAVAILABLE` | browser client | – | The browser client could not load config.json or demo.json from its Client Host as a successful JSON response; without config.json no configured Nodes are offered. |
 | `MANIFEST_INVALID` | configuration and status | 3 | The installed public Manifest file holds a validly signed record that is not a Service Manifest, so the status page and publisher:status report the Manifest as invalid; install a signed Service Manifest with manifest:install. |
+| `MANIFEST_NOT_INSTALLED` | front controller | – | The front controller found no readable Manifest in node-php/public/.well-known: run manifest:install into this checkout, and keep .well-known readable (0755) for the web server user. |
 | `METADATA_INVALID` | signing | 3 | The metadata file for manifest:init or manifest:revise is not a JSON object with a service member and no members other than service, links and discovery. |
 | `METHOD_NOT_ALLOWED` | front controller, web routes | – | The route does not accept the request method (HTTP 405): the data, relay and client routes take GET or HEAD, and the announcement route takes only POST. |
 | `MIGRATION_INVALID` | browser client, protocol, signing | 3 | An address change without a valid migration proof for exactly this predecessor and revision. |
@@ -138,6 +140,7 @@ for remedies.
 | `PUBLISHER_BUSY` | configuration and status, signing | 3 | Another publisher command holds the lock on the same files; run it again when that command has finished. |
 | `PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT` | doctor | 6 | doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page. |
 | `PUBLISHER_NODES_NOT_CONFIGURED` | CLI, doctor | 3, 6 | No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key. |
+| `PUBLISHER_SELF_VERIFICATION_FAILED` | doctor | 6 | doctor warning: the last saved self-check through your own Onion failed or fetched a different Manifest; publisher:status names the cause and the fix. |
 | `PUBLISHER_TIMER_STALE` | doctor | 6 | doctor warning: the last saved publisher check is older than 36 hours although the timer runs every six hours; check osd-publisher-check.timer. |
 | `PUBLISHING_DISABLED` | CLI | 3 | Publishing is off in the configuration or the Manifest withdraws publication. |
 | `RATE_LIMIT_CONFIGURATION_INVALID` | web routes | 4 | A request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is a symlink or its limits are invalid, so requests fail with HTTP 503; remove the symlink. |
@@ -154,7 +157,7 @@ for remedies.
 | `ROLE_CONFIGURATION_INVALID` | CLI, Node worker, configuration and status | 3 | The command or feature is not available for this configuration role. |
 | `RUNTIME_DEPENDENCIES_MISSING` | CLI, front controller | 3 | PHP dependencies are missing: use the development runtime package, which bundles them, or run the locked Composer install. |
 | `RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX` | doctor | 6 | doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it. |
-| `SCHEMA_INVALID` | CLI, Node worker, browser client, encoding, input parsing, protocol, signing, web routes | 3 | The record does not match its draft schema. |
+| `SCHEMA_INVALID` | CLI, JSON parsing, Node worker, browser client, encoding, input parsing, protocol, signing, web routes | 3 | The record does not match its draft schema. |
 | `SEARCH_INDEX_CORRUPT` | server search | 3 | The server search index files in the export directory are missing, altered or malformed or do not match the published snapshot, so server search is unavailable; rebuild them with node:snapshot --rebuild-derived. |
 | `SEARCH_INDEX_STALE` | server search | 3 | The server search index was built for another snapshot than the one now published, or by an earlier release in an older format, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived. |
 | `SEARCH_INDEX_UNAVAILABLE` | server search | 3 | Server search has no index because no snapshot was published or it was published with server search off, so server search is unavailable; run node:snapshot with server_search enabled. |

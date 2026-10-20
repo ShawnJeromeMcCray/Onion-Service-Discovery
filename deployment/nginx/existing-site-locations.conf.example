@@ -13,6 +13,9 @@
 # browsers enforce every policy they receive.
 # Header limits are server-wide (client_header_timeout, large_client_header_buffers);
 # onion-service-discovery.conf has the reference values.
+# The configuration path must be the file the publisher timer
+# (deployment/systemd/osd-publisher-check.service) checks: the status page reads the
+# evidence saved beside it. A Node or combined deployment points to its node.json.
 # Optional NoJS server search needs its own reviewed limits and pool: add the exact
 # location from server-search-location.conf.example next to these blocks.
 
@@ -23,7 +26,7 @@ location = /.well-known/onion-service-discovery.json {
     client_body_timeout 5s;
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME /opt/onion-service-discovery/node-php/public/index.php;
-    fastcgi_param ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/node.json;
+    fastcgi_param ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/publisher.json;
     fastcgi_pass unix:/run/php/onion-service-discovery.sock;
     fastcgi_read_timeout 65s;
 }
@@ -35,7 +38,7 @@ location = /.well-known/onion-service-discovery-history.json {
     client_body_timeout 5s;
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME /opt/onion-service-discovery/node-php/public/index.php;
-    fastcgi_param ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/node.json;
+    fastcgi_param ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/publisher.json;
     fastcgi_pass unix:/run/php/onion-service-discovery.sock;
     fastcgi_read_timeout 65s;
 }
@@ -50,7 +53,7 @@ location ^~ /onion-service-discovery/ {
     client_body_timeout 5s;
     include fastcgi_params;
     fastcgi_param SCRIPT_FILENAME /opt/onion-service-discovery/node-php/public/index.php;
-    fastcgi_param ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/node.json;
+    fastcgi_param ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/publisher.json;
     fastcgi_pass unix:/run/php/onion-service-discovery.sock;
     fastcgi_read_timeout 65s;
 }

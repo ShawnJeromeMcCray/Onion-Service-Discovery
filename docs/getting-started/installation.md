@@ -52,7 +52,9 @@ package** with the PHP dependencies and the built browser client already
 included, so Composer and npm are not needed; PHP 8.3+ still is. Download it,
 verify its GitHub build provenance and extract it as described in
 [development runtime package](../operations/release-candidate.md#development-runtime-package-d-029),
-then continue below from the extracted `onion-service-discovery` directory.
+then move the extracted `onion-service-discovery` directory to
+`/opt/onion-service-discovery` (the path every deployment template uses; otherwise
+adjust the templates) and continue below from there.
 The runtime Composer dependencies are locked; development dependencies are
 excluded here. Source builds require dependency downloads. The browser's default
 configuration contains zero approved sources.
@@ -80,7 +82,7 @@ One service user owns everything OSD writes on a host. The templates call it
 | Private configuration directory and file | `osd-worker` | 0700 / 0600 | PHP-FPM pool, all timers, your commands |
 | Saved publisher evidence (`CONFIG_NAME.discoverability.json`) | `osd-worker` | 0600 | written by checks, read by the status page |
 | Node store, export blobs, Node key, passphrase file | `osd-worker` | 0700 / 0600 | Node timers and PHP-FPM (read-only) |
-| Installed Manifest and history bundle in `node-php/public/.well-known/` | the user running `manifest:install` | 0644 | served publicly |
+| Installed Manifest and history bundle in `node-php/public/.well-known/` | the user running `manifest:install` | 0755 directory / 0644 files | served publicly |
 
 Run `init` and every later command on the web host as that user, for example
 `sudo -u osd-worker php node-php/bin/onion-service-discovery …`. A command run as
@@ -117,13 +119,16 @@ Host the browser client and a query-independent Tor relay to selected Nodes.
 This role needs no Service or Node signing key. From the repository root:
 
 ```sh
-umask 077
-mkdir -p /absolute/private/osd-client
-php node-php/bin/onion-service-discovery init /absolute/private/osd-client/config.json --role client-host --source FIRST_NODE.onion ed25519:FIRST_NODE_KEY --source SECOND_NODE.onion ed25519:SECOND_NODE_KEY
+sudo install -d -m 0700 -o osd-worker -g osd /etc/onion-service-discovery
+sudo -u osd-worker php node-php/bin/onion-service-discovery init /etc/onion-service-discovery/node.json --role client-host --source FIRST_NODE.onion ed25519:FIRST_NODE_KEY --source SECOND_NODE.onion ed25519:SECOND_NODE_KEY
 ```
 
-Replace `/absolute/private/osd-client` with a real absolute owner-private path
-and the sources with independently chosen Node addresses (up to 16, or none).
+`/etc/onion-service-discovery/node.json` is the path the
+[web templates](../../deployment/nginx/onion-service-discovery.conf) pass to the
+front controller; if you choose another one, change it there too. Run this and
+every later command as `osd-worker`, the PHP-FPM pool user: a file created by
+another user is unreadable to the pool, and every route then answers 503.
+Replace the sources with independently chosen Node addresses (up to 16, or none).
 The key after each source is optional but recommended: it is the Node's public
 key, obtained independently of the Node. `init` writes it to
 `source_node_keys`, and the browser client then refuses a source that signs
@@ -134,7 +139,7 @@ refuses to overwrite a file. The generated file follows these rules, explained
 in the [configuration reference](../operations/configuration.md):
 
 - Keep `role` as `client-host`, `node.onion` and `node.key_path` null, and all features false except, optionally, `visitor_sources` (see below).
-- Set `export_path` to `/absolute/private/osd-client/exports` and the unused storage path to `/absolute/private/osd-client/data`.
+- Keep `export_path` and the unused storage path inside the private configuration directory, as `init` wrote them.
 - Put independently chosen canonical v3 Node addresses in `sources` (maximum 16) and, optionally, their expected keys in `source_node_keys`.
 - Set the actual loopback Tor SOCKS port, normally 9050. Tor Browser's separate SOCKS listener is not automatically a persistent server runtime.
 - Leave `allowed_client_origins` empty for the same-origin relay deployment.
@@ -142,15 +147,15 @@ in the [configuration reference](../operations/configuration.md):
 Then run:
 
 ```sh
-php node-php/bin/onion-service-discovery config:validate /absolute/private/osd-client/config.json
-php node-php/bin/onion-service-discovery client:init /absolute/private/osd-client/config.json
+sudo -u osd-worker php node-php/bin/onion-service-discovery config:validate /etc/onion-service-discovery/node.json
+sudo -u osd-worker php node-php/bin/onion-service-discovery client:init /etc/onion-service-discovery/node.json
 ```
 
 Expect `PASS`, then `INITIALIZED` with `signing_keys_required: false`.
 For a loopback staging check:
 
 ```sh
-ONION_SERVICE_DISCOVERY_CONFIG=/absolute/private/osd-client/config.json php -S 127.0.0.1:8080 node-php/public/index.php
+sudo -u osd-worker env ONION_SERVICE_DISCOVERY_CONFIG=/etc/onion-service-discovery/node.json php -S 127.0.0.1:8080 node-php/public/index.php
 ```
 
 Open `http://127.0.0.1:8080/onion-service-discovery/`. The PHP development server

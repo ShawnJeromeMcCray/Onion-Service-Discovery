@@ -122,7 +122,8 @@ final class PeerSync
                 // Local quota/disk failures are not authenticated peer misconduct.
                 if (!$localFailure) { ++$row['failures']; }
                 $row['state'] = !$localFailure && (!$transient || $row['failures'] >= 8) ? 'QUARANTINED' : 'BACKOFF';
-                $delay = $localFailure ? 3600 : min(86400,3600 * (2 ** min(5,$row['failures'] - 1)));
+                // Lock contention with another worker is momentary: retry at the next timer run, not in an hour.
+                $delay = $localFailure ? ($error->getMessage() === 'STORAGE_BUSY' ? 60 : 3600) : min(86400,3600 * (2 ** min(5,$row['failures'] - 1)));
                 $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $now + $delay + random_int(0,300); $row['error'] = $error->getMessage(); $tx->set('peers',$onion->hostname,$row); return $row['state'];
             });
             return ['status' => $failureState,'error' => $error->getMessage()];

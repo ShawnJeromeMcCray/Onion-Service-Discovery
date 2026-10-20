@@ -97,7 +97,8 @@ final readonly class PublicBlobStore
             $existing = null;
             try { $existing = $this->get($hash); }
             catch (StorageException $error) { if (!$this->repairDerived || $error->errorCode !== 'EXPORT_CORRUPT') { throw $error; } }
-            if ($existing === $bytes) { return; }
+            // Reused by a new snapshot: renew the mtime so exports:prune keeps its grace period for this blob.
+            if ($existing === $bytes) { if (!touch($path)) { throw new StorageException('EXPORT_UNAVAILABLE'); } return; }
             if (!$this->repairDerived) { throw new StorageException('EXPORT_CORRUPT'); }
             // Explicit operator rebuild only: canonical bytes were reconstructed
             // from independently verified immutable records by SnapshotProducer.

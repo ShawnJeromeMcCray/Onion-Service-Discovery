@@ -113,7 +113,10 @@ final readonly class SnapshotProducer
         }
         $searchIndex = $this->serverSearch ? \OnionServiceDiscovery\Search\SearchIndex::build($this->blobs, \OnionServiceDiscovery\Search\LocalSearch::build($publicRecords), $descriptor) : null;
         $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor, $hashes, $serviceIndexes, $searchIndex): void {
-            if ($tx->state()['generation'] !== $state['generation']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
+            // The snapshot derives only from the signed records (append-only, so last_sequence covers them) and the
+            // Node rows; queue leases, peer state and maintenance counters written meanwhile do not invalidate it.
+            $current = $tx->state();
+            if ($current['last_sequence'] !== $state['last_sequence'] || $current['tables']['node'] !== $state['tables']['node']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
             $tx->putRecord($descriptor);
             foreach ($tx->state()['tables']['node'] as $key => $_) { if ((str_starts_with($key, 'key:public-index-') || str_starts_with($key, 'key:service-index-'))) { $tx->deleteOperational('node', substr($key,4)); } }
             $publicHashes = $hashes;

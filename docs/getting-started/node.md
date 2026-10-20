@@ -8,13 +8,22 @@ network is supplied. These steps are a staging workflow, not production approval
 
 ## 1. Prepare one configuration
 
-From the repository root, as the dedicated service user:
+From the repository root (the templates assume `/opt/onion-service-discovery`),
+as the dedicated service user `osd-worker` that the PHP-FPM pool and the Node
+timers also run as:
 
 ```sh
-umask 077
-mkdir -p /absolute/private/osd-node
-php node-php/bin/onion-service-discovery init /absolute/private/osd-node/config.json YOUR_NODE_V3_ADDRESS.onion --role node
+sudo install -d -m 0700 -o osd-worker -g osd /etc/onion-service-discovery
+sudo -u osd-worker php node-php/bin/onion-service-discovery init /etc/onion-service-discovery/node.json YOUR_NODE_V3_ADDRESS.onion --role node
 ```
+
+These are the paths the [systemd units](../../deployment/systemd/) and web
+templates use: configuration `/etc/onion-service-discovery/node.json`, passphrase
+file `/etc/onion-service-discovery/node-passphrase`, and the units may write only
+inside `/etc/onion-service-discovery`. If you choose other paths, change them in
+the templates too (`ExecStart`, `LoadCredential`, `ReadWritePaths`,
+`ONION_SERVICE_DISCOVERY_CONFIG`). Run every later command as `osd-worker` too:
+files another user creates are unreadable to the pool and the timers.
 
 `init` writes a validated configuration with every private path inside that
 directory (`data`, `exports`, `node.key`), mirroring and direct checks on, peer
@@ -27,10 +36,10 @@ Adjust the result if needed; all fields are explained in the
 | --- | --- |
 | `role` | `node` |
 | `storage.backend` | `filesystem`, or deliberately choose `sqlite` |
-| `storage.path` | `/absolute/private/osd-node/data` (filesystem) or `/absolute/private/osd-node/data.sqlite` |
-| `export_path` | `/absolute/private/osd-node/exports` |
+| `storage.path` | `/etc/onion-service-discovery/data` (filesystem) or `/etc/onion-service-discovery/data.sqlite` |
+| `export_path` | `/etc/onion-service-discovery/exports` |
 | `node.onion` | Your real canonical v3 Node Onion; replace the synthetic example |
-| `node.key_path` | `/absolute/private/osd-node/node.key` |
+| `node.key_path` | `/etc/onion-service-discovery/node.key` |
 | `features.mirror_directory` | `true` to serve directory snapshots |
 | `features.discover_services` | `true` to explicitly admit and directly check Service candidates |
 | `features.sync_with_peers` | `false` until you choose pinned peers; then `true` |
@@ -50,18 +59,18 @@ Create an owner-private 0600 passphrase file using a private input method, as
 explained in [key custody](../signing/offline.md). Then run:
 
 ```sh
-php node-php/bin/onion-service-discovery config:validate /absolute/private/osd-node/config.json
-php node-php/bin/onion-service-discovery key:create node /absolute/private/osd-node/node.key --passphrase-file /absolute/private/osd-node/passphrase
-php node-php/bin/onion-service-discovery node:init /absolute/private/osd-node/config.json --passphrase-file /absolute/private/osd-node/passphrase
-php node-php/bin/onion-service-discovery node:snapshot /absolute/private/osd-node/config.json --passphrase-file /absolute/private/osd-node/passphrase
-php node-php/bin/onion-service-discovery node:status /absolute/private/osd-node/config.json
+sudo -u osd-worker php node-php/bin/onion-service-discovery config:validate /etc/onion-service-discovery/node.json
+sudo -u osd-worker php node-php/bin/onion-service-discovery key:create node /etc/onion-service-discovery/node.key --passphrase-file /etc/onion-service-discovery/node-passphrase
+sudo -u osd-worker php node-php/bin/onion-service-discovery node:init /etc/onion-service-discovery/node.json --passphrase-file /etc/onion-service-discovery/node-passphrase
+sudo -u osd-worker php node-php/bin/onion-service-discovery node:snapshot /etc/onion-service-discovery/node.json --passphrase-file /etc/onion-service-discovery/node-passphrase
+sudo -u osd-worker php node-php/bin/onion-service-discovery node:status /etc/onion-service-discovery/node.json
 ```
 
 Others need two public values to use your Node: its Onion and its Node public
 key. Print both, with ready-to-use lines for publishers, peers and visitors:
 
 ```sh
-php node-php/bin/onion-service-discovery node:identity /absolute/private/osd-node/config.json
+sudo -u osd-worker php node-php/bin/onion-service-discovery node:identity /etc/onion-service-discovery/node.json
 ```
 
 Give them through a channel others trust; they must not take the key from your
@@ -88,9 +97,9 @@ example with a reviewed multi-worker relay deployment.
 Use a real opted-in Publisher with a signed Manifest at its Well-Known endpoint:
 
 ```sh
-php node-php/bin/onion-service-discovery candidate:add /absolute/private/osd-node/config.json PUBLISHER_V3_ADDRESS.onion
-php node-php/bin/onion-service-discovery node:work-one /absolute/private/osd-node/config.json --passphrase-file /absolute/private/osd-node/passphrase
-php node-php/bin/onion-service-discovery node:snapshot /absolute/private/osd-node/config.json --passphrase-file /absolute/private/osd-node/passphrase
+sudo -u osd-worker php node-php/bin/onion-service-discovery candidate:add /etc/onion-service-discovery/node.json PUBLISHER_V3_ADDRESS.onion
+sudo -u osd-worker php node-php/bin/onion-service-discovery node:work-one /etc/onion-service-discovery/node.json --passphrase-file /etc/onion-service-discovery/node-passphrase
+sudo -u osd-worker php node-php/bin/onion-service-discovery node:snapshot /etc/onion-service-discovery/node.json --passphrase-file /etc/onion-service-discovery/node-passphrase
 ```
 
 Replace the address placeholder. On a successful direct check expect `VERIFIED`.
@@ -113,7 +122,7 @@ automatically after about seven days. When its publisher tells you the problem i
 fixed, check it at the next worker run instead:
 
 ```sh
-php node-php/bin/onion-service-discovery candidate:retry /absolute/private/osd-node/config.json PUBLISHER_V3_ADDRESS.onion --acknowledge-quarantine
+sudo -u osd-worker php node-php/bin/onion-service-discovery candidate:retry /etc/onion-service-discovery/node.json PUBLISHER_V3_ADDRESS.onion --acknowledge-quarantine
 ```
 
 ## 4. Select and synchronize peers explicitly
@@ -122,12 +131,16 @@ Obtain a peer Onion and expected Node key independently; never infer its key fro
 an untrusted directory response. Enable `features.sync_with_peers`, then run:
 
 ```sh
-php node-php/bin/onion-service-discovery peers:add /absolute/private/osd-node/config.json PEER_V3_ADDRESS.onion --expected-node-key ed25519:PEER_PUBLIC_KEY
-php node-php/bin/onion-service-discovery sync:peer-step /absolute/private/osd-node/config.json PEER_V3_ADDRESS.onion
-php node-php/bin/onion-service-discovery sync:status /absolute/private/osd-node/config.json
+sudo -u osd-worker php node-php/bin/onion-service-discovery peers:add /etc/onion-service-discovery/node.json PEER_V3_ADDRESS.onion --expected-node-key ed25519:PEER_PUBLIC_KEY
+sudo -u osd-worker php node-php/bin/onion-service-discovery sync:peer-step /etc/onion-service-discovery/node.json PEER_V3_ADDRESS.onion
+sudo -u osd-worker php node-php/bin/onion-service-discovery sync:status /etc/onion-service-discovery/node.json
 ```
 
-Expect `CURRENT` only after complete bounded verification. `PROGRESS` requires
+Expect the step to report `CURRENT` only after complete bounded verification.
+`sync:status` lists every configured peer with its state (`ACTIVE` after a
+complete step, `BACKOFF` or `QUARANTINED` with the `error`), `next_attempt`,
+`last_sync` and the synchronized `generation`. A peer that is not due yet answers
+`NOTHING_DUE` with `next_due_at`. `PROGRESS` requires
 another scheduled step after the reported peer retry time; it does not activate a
 partial snapshot. Each step limits network requests and ancestor work. A long
 absence resumes ancestry across steps. A late first contact does not prove all

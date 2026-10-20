@@ -76,10 +76,11 @@ final class SearchIndex
      */
     private static function row(array $row): array
     {
+        // Byte limits are four times the schema's code-point limits (name 128, description 2048): one UTF-8 code point takes up to four bytes.
         $keys = ['genesisKey','name','description','onion','revision','status','addressConflict','languages','categories','observationClaims','rotationCount','migrationCount','currentHash','searchText','searchName'];
         if (count($row) !== count($keys) || array_diff(array_keys($row), $keys) !== []) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); }
         foreach (['genesisKey','name','description','status','searchText','searchName'] as $key) { if (!is_string($row[$key])) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); } }
-        if (strlen($row['name']) > 4096 || strlen($row['description']) > 4096 || !in_array($row['status'], ['PUBLISHED','WITHDRAWN','FORKED'], true) || !is_bool($row['addressConflict']) || (!is_string($row['onion']) && $row['onion'] !== null) || (!is_string($row['currentHash']) && $row['currentHash'] !== null)) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); }
+        if (strlen($row['name']) > 512 || strlen($row['description']) > 8192 || !in_array($row['status'], ['PUBLISHED','WITHDRAWN','FORKED'], true) || !is_bool($row['addressConflict']) || (!is_string($row['onion']) && $row['onion'] !== null) || (!is_string($row['currentHash']) && $row['currentHash'] !== null)) { throw new ProtocolException('SEARCH_INDEX_CORRUPT'); }
         Encoding::publicKey($row['genesisKey']);
         if ($row['onion'] !== null) { OnionAddress::parse($row['onion']); }
         if ($row['currentHash'] !== null) { Encoding::hash($row['currentHash']); }

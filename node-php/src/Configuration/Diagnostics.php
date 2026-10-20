@@ -53,6 +53,8 @@ final class Diagnostics
             // Without chosen Nodes neither the timer nor a plain command can check or announce anything.
             $checks['publisher_nodes'] = $config->publisherNodes === [] ? 'WARN' : 'PASS';
             if ($config->publisherNodes === []) { $warnings[] = 'PUBLISHER_NODES_NOT_CONFIGURED'; }
+            // The last saved self-check through the own Onion failed or saw another Manifest: the page answers NOT YET, so doctor must not say PASS.
+            if (str_starts_with($facts['self_verification'], 'FAIL_') || $facts['self_verification'] === 'SERVED_MANIFEST_DIFFERS') { $warnings[] = 'PUBLISHER_SELF_VERIFICATION_FAILED'; }
             // Scheduler freshness from saved timestamps (spec 32 section 8): the publisher timer runs every six hours.
             $checkedAt = is_string($facts['self_verification_checked_at'] ?? null) ? (int) strtotime($facts['self_verification_checked_at']) : null;
             $scheduler['publisher_checks'] = $checkedAt === null ? 'NOT_OBSERVED' : (time() - $checkedAt > self::PUBLISHER_EVIDENCE_STALE_AFTER_SECONDS ? 'STALE' : 'RECENT');

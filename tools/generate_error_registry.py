@@ -16,6 +16,8 @@ THROW = re.compile(r"new \\?(ProtocolException|StorageException|TransportExcepti
 LITERAL = re.compile(r"'([A-Z][A-Z0-9_]{2,})'")
 RESPONSE = re.compile(r"""(?:'error'\s*=>\s*'|"error":\s*")([A-Z][A-Z0-9_]{2,})""")
 DOCTOR = re.compile(r"\$(failures|warnings)\[\]\s*=\s*'([A-Z][A-Z0-9_]{2,})'")
+# The strict JSON parsers raise through a local fail('CODE') helper, so a THROW pattern alone misses them.
+FAIL = re.compile(r"(?:self::|\b)fail\(\s*'([A-Z][A-Z0-9_]{2,})'")
 CLI_LITERAL_EXITS = {'RUNTIME_DEPENDENCIES_MISSING': '3', 'INTERNAL_ERROR': '8'}
 EXITS = {'StorageException': '4', 'SignerException': '4', 'TransportException': '5', 'ProtocolException': '3', 'InvalidArgumentException': '3'}
 COMPONENTS = {
@@ -41,6 +43,8 @@ DESCRIPTIONS = {
     'PUBLISHER_NODES_NOT_CONFIGURED': 'No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key.',
     'EXPORT_BUDGET_NEARLY_EXHAUSTED': 'doctor warning: the export directory uses at least 80 % of its 4,096-file or 256 MiB limit; check that the maintenance timer runs (node:maintain prunes old blobs).',
     'SNAPSHOT_TIMER_STALE': 'doctor warning: the published checkpoint is older than two days although snapshots refresh daily; check the snapshot timer and run node:snapshot.',
+    'PUBLISHER_SELF_VERIFICATION_FAILED': 'doctor warning: the last saved self-check through your own Onion failed or fetched a different Manifest; publisher:status names the cause and the fix.',
+    'MANIFEST_NOT_INSTALLED': 'The front controller found no readable Manifest in node-php/public/.well-known: run manifest:install into this checkout, and keep .well-known readable (0755) for the web server user.',
     'PUBLISHER_TIMER_STALE': 'doctor warning: the last saved publisher check is older than 36 hours although the timer runs every six hours; check osd-publisher-check.timer.',
     'EVIDENCE_UNAVAILABLE': 'The browser keeps no pair of conflicting signed records for this Node, so there is nothing to save.',
     'PUBLISHER_BUSY': 'Another publisher command holds the lock on the same files; run it again when that command has finished.',
@@ -161,6 +165,7 @@ DESCRIPTIONS = {
     'IMPORT_FORMAT_INVALID': 'The imported file is neither a single signed record nor a record bundle (bundle_version 1 with a records list), so nothing was imported.',
     'IMPORT_REQUIRES_EMPTY_STAGING_STORE': 'storage:import writes only into a new, empty store, and the given staging store already holds records or changes; give a new staging path.',
     'INPUT_FILE_UNAVAILABLE': 'An input file is missing, not a regular file, unreadable or given as a URL; check the path and read permission.',
+    'JSON_DUPLICATE_KEY': 'The JSON repeats a member name inside one object; signed protocol JSON must have unique keys so every reader sees the same value.',
     'JSON_DEPTH_EXCEEDED': 'The JSON nests objects or arrays more than 16 levels deep, beyond what the protocol allows.',
     'KEY_DIRECTORY_UNSAFE': 'key:create refused the key path because it is a URL or its directory is a symlink, missing or open to group or others; create the directory with mode 0700 first.',
     'KEY_ENVELOPE_INVALID': 'The key file is not a valid key envelope for this role (for example a service key used as a Node key) or is damaged, so the key was not unlocked; use the key file key:create made for this role.',
@@ -267,6 +272,7 @@ def collect() -> dict:
             component = next(name for prefix, name in COMPONENTS.items() if relative.startswith(prefix))
             text = path.read_text(encoding='utf-8')
             found = [(exception, code) for exception, arguments in THROW.findall(text) for code in LITERAL.findall(arguments)]
+            found += [('InvalidArgumentException' if path.suffix == '.php' else 'Error', code) for code in FAIL.findall(text)]
             found += [('HTTP', code) for code in RESPONSE.findall(text)]
             found += [('doctor-' + kind, code) for kind, code in DOCTOR.findall(text)]
             for exception, code in found:

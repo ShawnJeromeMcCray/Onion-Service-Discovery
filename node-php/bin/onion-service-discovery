@@ -248,7 +248,7 @@ try {
                 'node:init ' . $path . ' --passphrase-file PRIVATE_FILE', 'node:snapshot ' . $path . ' --passphrase-file PRIVATE_FILE', 'node:identity ' . $path],
         };
         $output = ['status' => 'CONFIGURED', 'role' => $config->role, 'publishing_opt_in' => $config->features['publish_service'], 'features' => $config->features, 'source_count' => count($config->sources), 'publisher_node_count' => count($config->publisherNodes),
-            'keys_created' => false, 'manifest_installed' => false, 'storage_created' => false, 'network_side_effects' => false, 'next_action' => $role === 'publisher' ? $next[0] . ' Configure selected public sources explicitly; no production seed set is fabricated.' : $next];
+            'keys_created' => false, 'manifest_installed' => false, 'storage_created' => false, 'network_side_effects' => false, 'next_action' => $role === 'publisher' ? $next[0] . ($config->publisherNodes === [] ? ' Then add the Discovery Nodes you chose to publisher_nodes; no production seed set is fabricated.' : '') : $next];
     } elseif ($command === 'publisher:status') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
@@ -466,8 +466,18 @@ try {
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         $state = $config->store(readOnly: true)->snapshot();
-        $table = $command === 'sync:status' ? 'sync' : 'candidates'; $rows = []; $eligible = 0;
+        $iso = static fn (mixed $at): ?string => is_int($at) && $at > 0 ? gmdate('Y-m-d\TH:i:s\Z', $at) : null;
+        $table = $command === 'sync:status' ? 'peers' : 'candidates'; $rows = []; $eligible = 0;
         foreach ($state['tables'][$table] as $key => $row) {
+            if ($command === 'sync:status') {
+                // Every configured peer, including failing ones, with its state and the last complete synchronization.
+                ++$eligible;
+                if (count($rows) >= 256) { continue; }
+                $sync = $state['tables']['sync'][$key] ?? [];
+                $rows[] = ['onion' => substr($key, 4), 'state' => $row['state'] ?? null, 'error' => $row['error'] ?? null, 'next_attempt' => $iso($row['next_attempt'] ?? null),
+                    'generation' => $sync['generation'] ?? null, 'cursor' => $sync['cursor'] ?? null, 'last_sync' => $iso($sync['last_sync'] ?? null), 'resuming' => isset($sync['chunk_index']) && !isset($sync['last_sync'])];
+                continue;
+            }
             if ($command === 'quarantine:list' && ($row['state'] ?? null) !== 'QUARANTINED') { continue; }
             ++$eligible;
             if (count($rows) >= 256) { continue; }
@@ -494,7 +504,7 @@ try {
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         if (!in_array($config->role, ['client-host', 'combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         new \OnionServiceDiscovery\Storage\PublicBlobStore($config->exportPath, true);
-        $output = ['status' => 'INITIALIZED', 'role' => $config->role, 'source_count' => count($config->sources), 'signing_keys_required' => false];
+        $output = ['status' => 'INITIALIZED', 'role' => $config->role, 'source_count' => count($config->sources), 'signing_keys_required' => $config->role === 'combined'];
     } elseif ($command === 'config:validate' || $command === 'doctor' || $command === 'security:check') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
@@ -542,6 +552,13 @@ try {
             elseif ($command === 'sync:peer-step') {
                 if (!$config->features['sync_with_peers']) { throw new ProtocolException('SYNC_DISABLED'); }
                 $output = (new \OnionServiceDiscovery\Node\PeerSync($store,$verifier,$config->transport(),$config->features['discover_services']))->step($onion,time());
+                if ($output['status'] === 'IDLE') {
+                    // Not due, quarantined or disabled: say when it is due instead of a bare IDLE.
+                    $peer = $store->snapshot()['tables']['peers']['key:' . $onion->hostname] ?? [];
+                    $at = max((int) ($peer['next_attempt'] ?? 0), (int) ($peer['lease_until'] ?? 0));
+                    $output = ['status' => 'NOTHING_DUE', 'peer_state' => $peer['state'] ?? null, 'error' => $peer['error'] ?? null,
+                        'next_due_at' => in_array($peer['state'] ?? null, ['QUARANTINED', 'DISABLED'], true) || $at === 0 ? null : gmdate('Y-m-d\TH:i:s\Z', $at), 'network_side_effects' => false];
+                }
             } else {
                 $store->transaction(static function (\OnionServiceDiscovery\Storage\StorageTransaction $tx) use ($onion,$command): void {
                     $row=$tx->get('peers',$onion->hostname); if($row===null) { throw new ProtocolException('PEER_NOT_CONFIGURED'); }
@@ -610,8 +627,13 @@ try {
     } elseif ($command === 'node:status' || $command === 'node:maintain') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
-        if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
-        if ($command === 'node:status' && $config->role === 'publisher') {
+        if ($config->role === 'client-host' && $command === 'node:status') {
+            // A client host has no store or key: report what it serves instead of failing.
+            $output = ['status' => 'PASS', 'role' => 'client-host', 'source_count' => count($config->sources), 'pinned_source_keys' => count($config->sourceNodeKeys),
+                'visitor_sources' => (bool) ($config->features['visitor_sources'] ?? false), 'client_built' => is_file(dirname(__DIR__, 2) . '/web-local-search-client/dist/client.js'),
+                'next_action' => count($config->sources) === 0 && !($config->features['visitor_sources'] ?? false) ? 'Add Node sources with --source in init, or enable visitor_sources, so visitors have something to load.' : null, 'network_side_effects' => false];
+        } elseif ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        elseif ($command === 'node:status' && $config->role === 'publisher') {
             // A publisher has no store: status reports its publication instead of failing (spec 32 section 11).
             $facts = \OnionServiceDiscovery\Configuration\PublisherStatus::inspect($config, $verifier, dirname(__DIR__) . '/public/.well-known/onion-service-discovery.json', $arguments[0]);
             $output = ['status' => 'PASS', 'role' => 'publisher', 'onion' => $config->nodeOnion, 'roles' => $config->features, 'overall' => $facts['overall'], 'answer' => $facts['answer'],

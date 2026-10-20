@@ -26,9 +26,11 @@ final readonly class CandidateQueue
         return $this->store->transaction(static function (StorageTransaction $tx) use ($now): ?array {
             // A bounded rotating scan avoids starvation without an unbounded per-job walk.
             $state = $tx->state(); /** @var list<string> $keys */ $keys = array_keys($state['tables']['candidates']); sort($keys, SORT_STRING);
-            $scan = $tx->get('maintenance', 'candidate-scan')['offset'] ?? 0;
             $count = count($keys);
             if ($count === 0) { return null; }
+            // The saved offset only moves on a claim; an idle scan rotates by time instead, so polling an idle
+            // queue writes nothing (each write is a new storage generation that aborts a running snapshot).
+            $scan = (($tx->get('maintenance', 'candidate-scan')['offset'] ?? 0) + 256 * intdiv($now, 60)) % $count;
             $inFlight = 0;
             foreach ($state['tables']['candidates'] as $candidate) {
                 if ($candidate['state'] === 'DIRECT_CHECK_PENDING' && $candidate['lease_until'] > $now) { ++$inFlight; }
@@ -46,10 +48,9 @@ final readonly class CandidateQueue
                 OnionAddress::parse($key);
                 if (!CandidateAdmission::claimBudget($tx, $now)) { return null; }
                 $row['state'] = 'DIRECT_CHECK_PENDING'; $row['attempts'] = min(8, $row['attempts'] + 1); $row['claim'] = bin2hex(random_bytes(16)); $row['lease_until'] = $now + 120;
-                $tx->set('candidates', $key, $row); $tx->set('maintenance', 'candidate-scan', ['offset' => ($offset + 1) % $count]);
+                $tx->set('candidates', $key, $row); $tx->set('maintenance', 'candidate-scan', ['offset' => ((($offset + 1 - 256 * intdiv($now, 60)) % $count) + $count) % $count]);
                 return ['onion' => $key, 'claim' => $row['claim'], 'attempt' => $row['attempts']];
             }
-            $tx->set('maintenance', 'candidate-scan', ['offset' => ($scan + min(256, $count)) % $count]);
             return null;
         });
     }

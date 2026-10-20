@@ -32,7 +32,11 @@ try {
     if ($configPath === false || $configPath === '') { throw new RuntimeException('Configuration unavailable'); }
     $config = NodeConfig::load($configPath);
     $asset = (new ClientAssets($config, dirname(__DIR__, 2) . '/web-local-search-client/dist'))->handle($method, $target);
-    if (str_starts_with($target, '/onion-service-discovery/search/')) {
+    if (($target === '/onion-service-discovery' || $target === '/onion-service-discovery/status') && in_array($method, ['GET', 'HEAD'], true)) {
+        // Typed without the trailing slash: a relative redirect keeps the Onion host and port.
+        $response = ['status' => 301, 'headers' => ['Location' => basename($target) . '/'], 'body' => ''];
+    }
+    elseif (str_starts_with($target, '/onion-service-discovery/search/')) {
         if (!$config->features['server_search']) { $response = ServerSearch::page(404, '<p>Server search is not enabled on this serving host. Use a local-search client.</p>', [], false); }
         elseif (!in_array($target, [ServerSearch::FORM, ServerSearch::POST, ServerSearch::STYLE], true)) { $response = ServerSearch::page(400, '<p>Use the exact form routes. Queries are never accepted in URLs.</p>'); }
         elseif ($target === ServerSearch::FORM || $target === ServerSearch::STYLE) {
@@ -78,9 +82,16 @@ try {
             $response = (new CandidateAnnouncement($config->store()))->handle($method, $_SERVER['CONTENT_TYPE'] ?? '', $body, time());
         }
     }
+    elseif ($target === CandidateAnnouncement::PATH) {
+        // Announcements are off: a plain 404 tells the publisher that this Node does not take hints.
+        $response = ['status' => 404, 'headers' => [], 'body' => '{"error":"NOT_FOUND"}'];
+    }
     elseif ($target === '/.well-known/onion-service-discovery.json' && $config->nodeOnion !== null && in_array($method,['GET','HEAD'],true)) {
         $path=__DIR__.'/.well-known/onion-service-discovery.json';
-        if(is_link($path)||!is_file($path)||filesize($path)>16384)throw new RuntimeException('Public manifest unavailable');
+        // Not installed here, or unreadable for this user: a 404 points at installation, not at the configuration.
+        if(is_link($path)||!is_file($path)||!is_readable($path)){ $response=['status'=>404,'headers'=>[],'body'=>'{"error":"MANIFEST_NOT_INSTALLED"}']; }
+        else {
+        if(filesize($path)>16384)throw new RuntimeException('Public manifest unavailable');
         $wire=file_get_contents($path,false,null,0,16385);if($wire===false||strlen($wire)>16384)throw new RuntimeException('Public manifest unavailable');
         $verifier=new RecordVerifier(dirname(__DIR__,2).'/protocol/schemas');$record=$verifier->verifyWire($wire,OnionAddress::parse($config->nodeOnion));
         if($record->type!=='service_manifest')throw new RuntimeException('Public manifest invalid');
@@ -93,6 +104,7 @@ try {
         }
         if($nodeWire!==null){$node=$verifier->verifyWire($nodeWire)->document();if($node->node_identity_public_key===$record->document()->service_identity_public_key)throw new RuntimeException('Node and Service keys must differ');}
         $response=['status'=>200,'headers'=>['Content-Length'=>(string)strlen($record->canonicalWire)],'body'=>$method==='HEAD'?'':$record->canonicalWire];
+        }
     }
     elseif ($target === '/.well-known/onion-service-discovery-history.json' && $config->nodeOnion !== null && in_array($method,['GET','HEAD'],true)) {
         // PCP-004: public history bundle maintained by manifest:install; Nodes verify every record themselves.
