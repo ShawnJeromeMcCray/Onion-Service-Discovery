@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-226 codes.
+227 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -134,6 +134,7 @@ for remedies.
 | `PUBLIC_KEY_INVALID` | browser client, encoding | 3 | Not a canonical ed25519: public key (43 base64url characters after the prefix). |
 | `PUBLIC_MANIFEST_PATH_UNSAFE` | signing | 3 | The public Manifest file or the publisher lock file in WEBROOT/.well-known is a symlink, so the publisher command refused to write there; remove the symlink and install again. |
 | `PUBLIC_MANIFEST_WRITE_FAILED` | signing | 3 | The publisher lock, the new Manifest or the history bundle could not be created, written, synced or renamed in WEBROOT/.well-known; check that the installing user can write there. |
+| `PUBLISHED_STATE_STALE` | doctor | 6 | doctor warning: the copy of the published state that the export directory keeps for degraded serving (D-045) is missing or does not match the store’s published snapshot and Node descriptor; node:snapshot rewrites it, unless the copy names a newer generation than the store (a restored older backup): then follow the incident runbook, section 4, first. |
 | `PUBLISHER_BUSY` | configuration and status, signing | 3 | Another publisher command holds the lock on the same files; run it again when that command has finished. |
 | `PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT` | doctor | 6 | doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page. |
 | `PUBLISHER_NODES_NOT_CONFIGURED` | CLI, doctor | 3, 6 | No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key. |

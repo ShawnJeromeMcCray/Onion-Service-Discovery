@@ -1104,6 +1104,15 @@
    ],
    "meaning": "The publisher lock, the new Manifest or the history bundle could not be created, written, synced or renamed in WEBROOT/.well-known; check that the installing user can write there."
   },
+  "PUBLISHED_STATE_STALE": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: the copy of the published state that the export directory keeps for degraded serving (D-045) is missing or does not match the store\u2019s published snapshot and Node descriptor; node:snapshot rewrites it, unless the copy names a newer generation than the store (a restored older backup): then follow the incident runbook, section 4, first."
+  },
   "PUBLISHER_BUSY": {
    "cli_exit": [
     "3"

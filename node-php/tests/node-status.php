@@ -51,7 +51,7 @@ try {
 
     $node = NodeStatus::inspect($config, $verifier, 1800000000);
     $assert($node['node_onion'] === $onion && $node['node_identity_public_key'] === $signer->publicKey() && $node['identity'] === 'INITIALIZED', 'identity'); ++$checks;
-    $assert($node['storage_state'] === 'READABLE' && $node['snapshot'] === 'PUBLISHED' && $node['snapshot_generation'] === 1 && $node['snapshot_age_seconds'] === 3600, 'snapshot ' . json_encode($node)); ++$checks;
+    $assert($node['storage_state'] === 'HEALTHY' && $node['snapshot'] === 'PUBLISHED' && $node['snapshot_generation'] === 1 && $node['snapshot_age_seconds'] === 3600, 'snapshot ' . json_encode($node)); ++$checks;
     $assert($node['candidates'] === ['VERIFIED' => 1] && $node['last_direct_verification_at'] === '2027-01-15T05:13:20Z', 'discovery aggregates'); ++$checks;
     $assert($node['peers'] === ['configured' => 1, 'active' => 0, 'quarantined' => 0] && $node['last_successful_sync_at'] === null, 'peer aggregates'); ++$checks;
 

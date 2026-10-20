@@ -54,7 +54,12 @@ final class StatusPage
         $body .= '</section>';
         if (is_array($facts['node'] ?? null)) {
             $node = $facts['node'];
-            $body .= '<section><h2>Discovery Node</h2>';
+            $degraded = ($node['storage_state'] ?? null) === 'DEGRADED';
+            $body .= '<section' . ($degraded ? ' class="warning"' : '') . '><h2>Discovery Node</h2>';
+            // D-045: public health stays minimal; the cause and the repair steps stay in doctor and status.
+            if ($degraded) {
+                $body .= '<p><strong>Degraded.</strong> This Node cannot read its local store right now. It keeps serving its last published signed snapshot, which clients verify themselves; announcements, server search and lookups that need the store are paused until the operator repairs it.</p>';
+            }
             if (is_string($node['node_onion'] ?? null) && is_string($node['node_identity_public_key'] ?? null)) {
                 $body .= '<p>Publishers, peers and visitors need both values below to use this Node. Give them through a channel they trust; they must never take the key from the Node’s own answers.</p>';
             }

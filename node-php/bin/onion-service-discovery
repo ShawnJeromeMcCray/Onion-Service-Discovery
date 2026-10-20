@@ -601,10 +601,12 @@ try {
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         $output = \OnionServiceDiscovery\Configuration\PublisherStatus::inspect($config, $verifier, dirname(__DIR__) . '/public/.well-known/onion-service-discovery.json', $arguments[0]);
         $output['node'] = \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $verifier, time());
+        $nodeAction = \OnionServiceDiscovery\Configuration\NodeStatus::nextAction($output['node']['storage_state'] ?? '');
+        if ($nodeAction !== null) { $output['node']['next_action'] = $nodeAction; }
         $output['network_side_effects'] = false;
-        // 0: nothing needs attention; 6: waiting or degraded; 4: error or identity conflict.
-        $exitCode = in_array($output['overall'], ['ERROR', 'IDENTITY_CONFLICT'], true) || ($output['node']['storage_state'] ?? null) === 'ERROR' ? 4
-            : (in_array($output['answer'], ['NOT YET', 'DEGRADED'], true) || ($output['node']['identity'] ?? null) === 'NOT_INITIALIZED' ? 6 : 0);
+        // 0: nothing needs attention; 6: waiting or degraded; 4: error, identity conflict or a store that cannot be read (also while degraded serving continues, D-045).
+        $exitCode = in_array($output['overall'], ['ERROR', 'IDENTITY_CONFLICT'], true) || in_array($output['node']['storage_state'] ?? null, ['ERROR', 'DEGRADED'], true) ? 4
+            : (in_array($output['answer'], ['NOT YET', 'DEGRADED'], true) || ($output['node']['identity'] ?? null) === 'NOT_INITIALIZED' || ($output['node']['storage_state'] ?? null) === 'READ_ONLY' ? 6 : 0);
     } elseif ($command === 'node:status' || $command === 'node:maintain') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
@@ -616,13 +618,20 @@ try {
                 'manifest' => array_intersect_key($facts['manifest'], array_flip(['state', 'revision', 'hash'])), 'self_verification' => $facts['self_verification'], 'publisher_node_count' => count($config->publisherNodes),
                 'next_action' => $facts['next_action'], 'network_side_effects' => false];
         } else {
-        $store = $config->store(readOnly: $command === 'node:status');
-        if ($command === 'node:maintain') {
+        $unreadable = null; $state = null;
+        try { $store = $config->store(readOnly: $command === 'node:status'); if ($command === 'node:status') { $state = $store->snapshot(); } }
+        catch (\OnionServiceDiscovery\Storage\StorageException $error) { if ($command !== 'node:status') { throw $error; } $unreadable = $error; }
+        if ($unreadable !== null) {
+            // The store's own error, what the public sees meanwhile (DEGRADED or ERROR, D-045) and the next step.
+            $output = failure($unreadable, $root); $output['node'] = \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $verifier, time()); $exitCode = 4;
+            $nodeAction = \OnionServiceDiscovery\Configuration\NodeStatus::nextAction($output['node']['storage_state'] ?? '');
+            if ($nodeAction !== null) { $output['next_action'] = $nodeAction; $output['help'] = 'docs/operations/incident-runbook.md'; }
+        } elseif ($command === 'node:maintain') {
             $checkpoint = $store instanceof \OnionServiceDiscovery\Storage\SQLiteStore ? $store->checkpoint() : null;
             $output = ['status' => 'PASS', 'sqlite_checkpoint' => $checkpoint, 'maintenance' => (new \OnionServiceDiscovery\Node\LocalMaintenance($store))->run(time()),
                 'exports' => $config->features['mirror_directory'] ? pruneExports($config, $store, $verifier, time() - EXPORT_PRUNE_GRACE_SECONDS) : 'NOT_APPLICABLE', 'network_side_effects' => false];
         } else {
-            $state = $store->snapshot(); $counts = array_map('count', $state['tables']);
+            $counts = array_map('count', $state['tables']);
             $output = ['status' => 'PASS', 'role' => $config->role, 'onion' => $config->nodeOnion, 'roles' => $config->features, 'backend' => $store->backendName(), 'storage_generation' => $state['generation'], 'signed_records' => count($state['records']), 'operational_counts' => $counts,
                 'node' => \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $verifier, time()), 'network_side_effects' => false, 'aggregate_only' => true];
         }
