@@ -111,16 +111,20 @@ export function pinIdentity(identity:ServiceRow,label=identity.name):LocalPin {
   return {genesisKey:identity.genesisKey,contextOnion:identity.onion,anchorHash:identity.currentHash,latestHash:identity.currentHash,highestRevision:identity.revision,label:[...label].slice(0,128).join(''),conflicted:false}; // code points: never split a surrogate pair
 }
 export type AdultVisibility = 'show' | 'de-emphasize' | 'hide';
-// Derived presentation data only. Weak keys release old views; comparing the
-// complete input also keeps callers that mutate row metadata correct.
-const searchTexts = new WeakMap<ServiceRow, {input:string; normalized:string; name:string}>();
+// Derived presentation data only, keyed by the complete search input: the worker sends new row
+// objects with every update, and normalizing 10,000 rows again took about a second of main-thread
+// time here. Keying by content also keeps callers that mutate row metadata correct. At most
+// SEARCH_CACHE_LIMIT inputs are kept (one full index plus changes); then the cache starts over.
+const SEARCH_CACHE_LIMIT = 12000;
+const searchTexts = new Map<string, {normalized:string; name:string}>();
 /** Normalized search text and normalized name (whitespace collapsed), shared with the PHP server search. */
 function searchFields(row:ServiceRow):{normalized:string;name:string} {
   const input=[row.name,row.description,row.onion??'',row.genesisKey,...row.categories,...row.languages].join(' ');
-  const cached=searchTexts.get(row);
-  if(cached?.input===input)return cached;
-  const fields={input,normalized:searchTextV1(input),name:searchTextV1(row.name).split(/\s+/u).filter(Boolean).join(' ')};
-  searchTexts.set(row,fields);
+  const cached=searchTexts.get(input);
+  if(cached!==undefined)return cached;
+  if(searchTexts.size>=SEARCH_CACHE_LIMIT)searchTexts.clear();
+  const fields={normalized:searchTextV1(input),name:searchTextV1(row.name).split(/\s+/u).filter(Boolean).join(' ')};
+  searchTexts.set(input,fields);
   return fields;
 }
 /** Leading ASCII punctuation does not move a name to the front of the list. */
