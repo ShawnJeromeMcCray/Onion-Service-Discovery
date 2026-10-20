@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-227 codes.
+228 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |

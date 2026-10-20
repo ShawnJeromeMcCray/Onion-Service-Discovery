@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- A Discovery Node whose store cannot be read stays online read-only (owner
+  decision D-045): `node:snapshot` keeps a copy of the last published state
+  (`.published-state.json`) beside the export blobs, and while the store is
+  damaged or awaits recovery the Node serves `node`, `state`, its checkpoints
+  and chunks byte-identically from there. Peers, changes, service lookups and
+  announcements answer 503 `NODE_DEGRADED_READ_ONLY`, server search pauses,
+  the status page and `status` show DEGRADED (spec 47 section 39 names:
+  HEALTHY, READ_ONLY, DEGRADED, ERROR) and `doctor` reports `node_health` and
+  warns with `PUBLISHED_STATE_STALE` when the copy lags the store. A public
+  announcement no longer opens a damaged store for writing.
+- Search after a view update reuses normalized text and look-alike forms by
+  content: with 10,000 entries the page no longer spends about a second
+  normalizing every update. The NoJS server search shows the browser's
+  invisible-character and mixed-script notes.
 - Look-alike names are flagged (owner decision D-024): the browser compares
   names by their UTS #39 confusable skeleton, built from the Unicode 17.0.0
   `confusables.txt` and the client's own frozen NFD, so the result does not

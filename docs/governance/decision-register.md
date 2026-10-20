@@ -50,7 +50,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-042 | Tor Stream Isolation Strategy | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-043 | HTTP Compression | UNRESOLVED | Project owner / reviewer | YES | disable or strictly expanded-size enforce for verification path. |
 | D-044 | API CORS Model | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
-| D-045 | Public Health/Metrics | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | minimal health; detailed metrics local/private. Ops/security review. |
+| D-045 | Public Health/Metrics | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | Minimal public health, detailed diagnostics local only. A Node whose store cannot be read keeps serving its last published signed snapshot (node, state, checkpoint and chunks from `.published-state.json` and the export blobs, re-verified on every read); the status page shows DEGRADED; store-backed routes and announcements answer 503 `NODE_DEGRADED_READ_ONLY`; server search pauses. |
 | D-046 | Container Support | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-047 | Project Branding/Logo | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-048 | Real-World Legal/Policy Review | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
