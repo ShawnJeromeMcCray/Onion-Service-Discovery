@@ -16,7 +16,7 @@ never the only signal (spec 31 sections 5 and 6).
 | --- | --- | --- | --- |
 | `sev-info` | `i` | INFORMATION | Ordinary absence, withdrawal |
 | `sev-attention` | `!` and "Note:" | ATTENTION | Incomplete history, older data, look-alike metadata, limited coverage, migration |
-| `sev-danger` | `⚠` and "Warning:" | HIGH-RISK IDENTITY CHANGE, PROTOCOL/INTEGRITY ERROR | Another key for a pinned name or address, forks, conflicting signed Node data |
+| `sev-danger` | `⚠` and "Warning:" | HIGH-RISK IDENTITY CHANGE, PROTOCOL/INTEGRITY ERROR | Another key for a pinned or look-alike name or address, forks, conflicting signed Node data |
 
 Ordinary Tor or Node outages are ATTENTION, never danger (spec 31 section 44).
 
@@ -33,12 +33,20 @@ Ordinary Tor or Node outages are ATTENTION, never danger (spec 31 section 44).
 | PIN.IDENTITY_CHANGED | `IDENTITY_CHANGED` | Warning: Another key claims the saved onion; pin preserved. Do not trust the other key. Your pin is kept; check the Service's signed rotation or migration evidence first. | Another identity key answers for the pinned Onion | That the new key is legitimate | client-model "pin states for withdrawal…"; announced through the alert region |
 | PIN.NOT_IN_INDEX | `NOT_IN_INDEX` | Pinned identity absent from this loaded view. Load the directory to check this pin. | Nothing about the pin is loaded yet | Any problem with the Service | client.spec "local search…" (after reload); client-model "pin states…" |
 | PIN.STORAGE | storage note | Pins saved in this browser profile for this page only. They are not sent to Nodes or shared with other Client Hosts. Tor Browser deletes them when it closes or on New Identity; use Export pins to keep a copy. | Where pins live | That pins survive Tor Browser restarts or exist on other hosts | client.spec "local search…", "saved pins that cannot be read…" |
+| PIN.LOOKALIKE_LABEL | two pins whose labels look alike (D-024), different keys | Note: This label looks like the label of another pin with a different identity key. Compare their identity keys. | Shown on each such pin; same skeleton form, not the same name | That either pin is wrong or which one is | look-alike-names "pin labels and imported pins…"; client.spec "look-alike names are flagged…" |
+| PIN.IMPORT_LOOKALIKE | pin import preview: a label equal to or looking like a held pin's label or current name, other key | Warning: Same name as your pinned "LABEL" (or: Name looks like your pinned "LABEL"), but a different identity key. Do not import it unless you chose this key yourself. | The backup offers another key under a name you already trust | That the backup is malicious | look-alike-names "pin labels and imported pins…"; client.spec "look-alike names are flagged…" |
 
 ## Results
+
+"Looks like" (decision D-024) means equal Unicode 17 confusable skeletons
+(UTS #39, compared without regard to case) without being the same name in the
+sense of RESULT.SAME_NAME_OTHER_KEY; see the
+[client contract](../browser/client-contract.md). Names are always shown as signed.
 
 | Copy ID | State | English reference | Meaning | Must not imply | Tests |
 | --- | --- | --- | --- | --- | --- |
 | RESULT.SAME_NAME_OTHER_KEY | name equals a pinned label, other key | Warning: Same name as your pinned "LABEL", but a different identity key. This is not the Service you pinned; compare the key and the onion address. | Self-declared names can be copied; keys cannot | That the other identity is malicious | client-model "a pinned name under another identity key…" |
+| RESULT.LOOKS_LIKE_PINNED | name looks like (D-024) a pinned label or the pinned identity's current name, other key, not the same name | Warning: Name looks like your pinned "LABEL", but a different identity key. This is not the Service you pinned; compare the key and the onion address. (Similar entries: first sentence only.) | Look-alike characters (a Cyrillic а, "rn" for "m", a capital I for l, invisible characters) cost nothing under a new key; keys cannot be imitated | That the other identity is malicious, or that its name was changed (it is shown as signed) | look-alike-names "a look-alike of a pinned label…", "the current name of a pinned identity…"; client.spec "look-alike names are flagged…" |
 | RESULT.PINNED_LEADS_GROUP | group contains your pin | Pinned locally / Your pinned identity | Your pinned key leads its group of similar metadata | That the other entries are fake | result-groups "the pinned identity leads its group…" |
 | RESULT.ADDRESS_CONFLICT | several identities claim one Onion | Warning: Different Service identities claim this onion address. A pinned key is never replaced by source agreement. | Conflicting signed claims exist | Which claim is right | client-model "pin states for withdrawal…" |
 | RESULT.FORKED | fork | Warning: Fork evidence is retained. Faster responses or more Nodes do not resolve it. | Two signed branches exist | That a majority decides | client-model "pins follow… fork" |
@@ -47,6 +55,7 @@ Ordinary Tor or Node outages are ATTENTION, never danger (spec 31 section 44).
 | RESULT.DIRECTION | direction controls in metadata | Note: Metadata contains direction-changing characters. Compare the full Onion and identity key. | Displayed order may differ from the signed text | Fraud | client-model "direction controls and mixed writing systems…" |
 | RESULT.INVISIBLE | default-ignorable or tag characters | Note: Metadata contains invisible characters, which can make different names look the same. Compare the full Onion and identity key. | Two names may look identical but differ | Fraud | client-model "invisible characters are reported…" |
 | RESULT.MIXED_SCRIPT | Latin with Cyrillic or Greek in a name | Note: The name mixes visually similar writing systems. Names are self-declared; compare the full Onion and identity key. | Possible look-alike name | Fraud | client-model "direction controls and mixed writing systems…" |
+| RESULT.LOOKALIKE_NAME | name looks like (D-024) another published entry's name under another key, not the same name | Note: The name looks like the name of another entry with a different identity key. Names are self-declared; compare the full Onion and identity key. | Shown on every such entry of the loaded index, which may lie outside the current search | Which entry is genuine, or fraud | look-alike-names "entries whose names look alike…", "ten thousand entries…"; client.spec "look-alike names are flagged…" |
 | RESULT.COVERAGE | after a load | Current revision included by A of B loaded sources. Details: supplied by …, X still serves revision N, not listed by … | Which loaded Node snapshots contain this revision | That the agreeing Nodes are independent or that a majority is right | client.spec "results and sources show where the data came from…"; client-model "the view says which source…" |
 | RESULT.ONLY_QUARANTINED | every origin of the current Manifest set aside later | Note: Only Nodes that were set aside for conflicting signed data supplied this entry. Treat it with care until another source confirms it. | The Manifest signature is valid, but no trusted source delivered it | That the Service itself is bad | client-model "the view says which source…" |
 | RESULT.OBSERVERS | details | Signed direct observations of this revision by N Node key(s), latest TIME: KEYS. Several keys can belong to one operator. | Nodes that fetched the Manifest themselves | Independent confirmation | client-model "the view says which source…" |

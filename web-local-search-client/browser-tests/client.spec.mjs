@@ -2,6 +2,10 @@ import {test,expect} from '@playwright/test';
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import {ed25519} from '@noble/curves/ed25519.js';
+import {sha3_256} from '@noble/hashes/sha3.js';
+import {signedMessage} from '../src/protocol/record-format.ts';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const fixtures=JSON.parse(await readFile(new URL('../../protocol/test-vectors/browser-dataset.json',import.meta.url),'utf8'));
 let server;let origin;const requests=[];let clientConfig=null;
@@ -182,6 +186,45 @@ test('pin import keeps existing pins, adds new ones and reports skipped conflict
   // The same file can be chosen again after the input was cleared.
   await page.locator('#import-pins').setInputFiles({name:'pins.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
   await expect(page.locator('#pin-import-dialog')).toBeVisible();await page.getByRole('button',{name:'Cancel',exact:true}).last().click();
+});
+
+/** A validly signed TEST ONLY Service named "Synthetic Library" with a Cyrillic а, under its own key and onion. */
+function lookAlikeRecord() {
+  const seed=label=>createHash('sha256').update('Onion Service Discovery TEST ONLY '+label).digest();
+  const base32=bytes=>{const alphabet='abcdefghijklmnopqrstuvwxyz234567';let text='',value=0,bits=0;for(const byte of bytes){value=(value<<8|byte)&0xffff;bits+=8;while(bits>=5){bits-=5;text+=alphabet[(value>>bits)&31];}}return text;};
+  const address=ed25519.getPublicKey(seed('tor-address-look-alike'));const version=Uint8Array.of(3);
+  const checksum=sha3_256(Buffer.concat([Buffer.from('.onion checksum'),address,version])).subarray(0,2);
+  const record=structuredClone(fixtures.bundle.records.find(item=>item.service?.name==='Synthetic Climate Archive'));
+  Object.assign(record,{onion:base32(Buffer.concat([address,checksum,version]))+'.onion',service_identity_public_key:'ed25519:'+Buffer.from(ed25519.getPublicKey(seed('browser-service-look-alike'))).toString('base64url')});
+  Object.assign(record.service,{name:'Synthetic Librаry',description:'Fictional look-alike of the library entry.'});
+  delete record.signature;record.signature='ed25519sig:'+Buffer.from(ed25519.sign(signedMessage(record),seed('browser-service-look-alike'))).toString('base64url');
+  return record;
+}
+test('look-alike names are flagged under other keys and shown exactly as signed',async({page})=>{
+  await page.goto(origin+'/onion-service-discovery/');
+  await page.getByRole('button',{name:'Load directory',exact:true}).click();await expect(page.locator('.result-card')).toHaveCount(3);
+  await expect(page.locator('.result-card').filter({hasText:'looks like'})).toHaveCount(0);
+  // An import waits for the load to finish; the look-alike arrives as a validly signed local file.
+  await expect(page.getByRole('button',{name:'Load directory',exact:true})).toBeEnabled();
+  await page.locator('#import-records').setInputFiles({name:'records.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({bundle_version:1,records:[lookAlikeRecord()]}))});
+  await expect(page.locator('.result-card')).toHaveCount(4);
+  const genuine=page.locator('.result-card').filter({has:page.getByRole('heading',{name:'Synthetic Library',exact:true})});
+  const lookAlike=page.locator('.result-card').filter({has:page.getByRole('heading',{name:'Synthetic Librаry',exact:true})});
+  for(const card of [genuine,lookAlike]) await expect(card.locator('.sev-attention')).toContainText(['Note: The name looks like the name of another entry with a different identity key.']);
+  await expect(page.locator('.result-card').filter({hasText:'Synthetic Climate Archive'})).not.toContainText('looks like');
+  // Pinning one of them turns the note on the other key into a warning; nothing is hidden or renamed.
+  await genuine.getByRole('button',{name:/^Pin this identity/}).click();await expect(page.locator('#pins .pin-card')).toHaveCount(1);
+  await expect(lookAlike.locator('.sev-danger')).toHaveText('⚠Warning: Name looks like your pinned “Synthetic Library”, but a different identity key. This is not the Service you pinned; compare the key and the onion address.');
+  await expect(genuine.locator('.sev-danger')).toHaveCount(0);await expect(page.locator('.result-card')).toHaveCount(4);
+  await expect(lookAlike.getByRole('heading')).toHaveText('Synthetic Librаry');
+  // An imported pin whose label imitates the held one is flagged before import, and both labels after it.
+  const climate=page.locator('.result-card').filter({hasText:'Synthetic Climate Archive'});
+  const climateKey=await climate.locator('.key-value').first().textContent();const climateOnion=await climate.locator('.onion-address').first().textContent();
+  const backup={pin_backup_version:1,pins:[{genesisKey:climateKey,contextOnion:climateOnion,anchorHash:'sha256:'+'3'.repeat(64),latestHash:'sha256:'+'3'.repeat(64),highestRevision:1,label:'SYNTHETIC LIBRАRY',conflicted:false}]};
+  await page.locator('#import-pins').setInputFiles({name:'pins.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+  await expect(page.locator('.preview-pin .sev-danger')).toContainText('Name looks like your pinned “Synthetic Library”, but a different identity key. Do not import it unless you chose this key yourself.');
+  await page.getByRole('button',{name:'Import reviewed pins',exact:true}).click();await expect(page.locator('#pins .pin-card')).toHaveCount(2);
+  await expect(page.locator('#pins .sev-attention').filter({hasText:'This label looks like the label of another pin with a different identity key.'})).toHaveCount(2);
 });
 
 test('without JavaScript only the explanation and the server-search option are shown',async({browser})=>{

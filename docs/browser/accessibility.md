@@ -34,14 +34,25 @@ security texts themselves are listed in the
   similar entries, and invisible or direction-changing characters in names,
   descriptions, pin labels and imported pins are reported. The identity key and
   the onion address can be copied with buttons.
+- **Look-alike names** (decision D-024): names are compared by Unicode 17
+  confusable skeletons, so a Cyrillic "а", "rn" for "m" or a capital I for "l"
+  cannot pass as a pinned name: such a result gets the same kind of warning as
+  an identical name under another key. Entries whose names look like each other
+  get a written note on each, so do pins with look-alike labels, and the pin
+  import preview warns before a label imitates a pin you hold. The notes are
+  text with the usual marker and label, read in order after the name; names are
+  never rewritten, hidden or reordered, so what a screen reader announces is
+  exactly the signed name.
 
 ## Tested automatically
 
 `npm run test:browser` (Chromium, controlled server) checks the JavaScript-off
 view, focus return after pinning and unpinning, open details across updates,
 the load summary and result-count announcements, accessible names of all
-visible controls and the text-field contrast ratio. `npm test` covers the
-look-alike checks, pin states and group ordering.
+visible controls and the text-field contrast ratio, and the look-alike notes
+and warnings with a validly signed look-alike Service imported as a local file.
+`npm test` covers the look-alike checks (including real pairs from Unicode's
+confusables.txt), pin states and group ordering.
 
 ## Not yet checked
 

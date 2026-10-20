@@ -42,6 +42,16 @@ Synthetic demonstration addresses cannot be opened through the result links.
 The page explicitly states the Client Host code-origin trust boundary and the
 weaker combined-host mode. Signatures do not prove a person's identity or safety.
 
+Look-alike names (decision D-024) are compared by UTS #39 confusable skeletons
+from frozen Unicode 17 data (`confusables.txt` prototypes, the client's own NFD,
+Default_Ignorable_Code_Point removed), never by the browser's Unicode version. A
+result whose name looks like the label or current name of a pinned identity
+under another key gets a warning; published entries whose names look like each
+other under different keys each get a note, as do pins with look-alike labels
+and imported pins imitating a held one. The comparison only adds notices: names
+are shown exactly as signed and are never rewritten, hidden, merged or
+reordered by it. The optional server search does not run it.
+
 Pins remember a genesis key, onion context, anchor/latest hashes, high-water
 revision and sticky conflict state. Authorized rotations/migrations preserve the
 logical root; a bare key replacement never does. Profile persistence is opt-in
