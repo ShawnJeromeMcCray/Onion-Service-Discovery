@@ -1,7 +1,7 @@
 # PCP-001: current category and language draft alignment
 
-Status: IMPLEMENTATION_EXPERIMENT / NEEDS-HUMAN-REVIEW. Not accepted, frozen or
-Production-supported. D-053 and D-054 remain open.
+Status: OWNER-APPROVED for protocol v1 (D-053 and D-054, 2026-10-15) / NEEDS
+INDEPENDENT REVIEW. Not Production-supported; no Protocol v1 Stable release exists.
 
 Problem: the former draft allowed arbitrary category spellings and a loose
 language grammar. The refreshed normative sources require registry membership
@@ -10,7 +10,8 @@ and one tested language policy. No Protocol v1 Stable release exists.
 Proposed behavior: generate all category constants/schema enums from the 38
 entries specified in source document 50, including adult. Unknown IDs, wrong case,
 duplicates, non-ASCII lookalikes, unsorted arrays and 33 entries reject. Registry
-status remains provisional until D-053 approval; it is immutable after freeze.
+is frozen for v1 by D-053: IDs never change or silently expand, and an extension
+needs a new registry version.
 Tags remain absent from the signed v1 schema, not overloaded into categories.
 
 Language experiment: RFC 5646 well-formed grammar, serialized lowercase ASCII,
@@ -39,5 +40,6 @@ Evidence: protocol/registries/categories-v1.json, language-tags-v1.json,
 107 signed-record cases, three-language black-box core report, category/count
 neutrality tests, malformed-input tests and compiler-token sink policies.
 
-Human approvals: D-053 Protocol/Product and D-054 Protocol/I18N OPEN. No approval
-is inferred from implementation, test success or the request to build the product.
+Human approvals: the project owner approved D-053 (Category Registry v1
+immutability) and D-054 (this language-tag grammar) on 2026-10-15. An independent
+Protocol/I18N review remains open; approval is not inferred from test success.

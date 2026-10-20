@@ -19,7 +19,7 @@
         "docs/conformance/core-unit-report.json",
         "docs/conformance/php84-unit-report.json"
       ],
-      "remaining": "Complete individual requirement traceability, active-index checkpoint alignment, historical category/language transition (D-053/D-054) and independent Protocol/Crypto review. Protocol v1 itself is owner-frozen (D-005..D-017, D-052)."
+      "remaining": "Complete individual requirement traceability, active-index checkpoint alignment, historical category/language transition (D-053/D-054 owner-approved 2026-10-15) and independent Protocol/Crypto review. Protocol v1 itself is owner-frozen (D-005..D-017, D-052)."
     },
     {
       "id": "FINITE_FORMAL_MODEL",
@@ -101,7 +101,7 @@
         "tools/verify_candidate.py",
         "tools/run_candidate_smoke.py"
       ],
-      "remaining": "Owner-approved D-029 development runtime package (vendor/ and built client) is built twice, smoke-tested and attested for each merge to main; production hardened-builder/provenance acceptance, independent release review and approved TUF authority (D-030/D-031) remain open; a development branch is not release authorization."
+      "remaining": "Owner-approved D-029 development runtime package (vendor/ and built client) is built twice, smoke-tested and attested for each merge to main; release signing is keyless Sigstore through GitHub attestations (owner decisions D-030/D-031); production hardened-builder acceptance, independent release review and an approved TUF authority remain open; a development branch is not release authorization."
     },
     {
       "id": "RELEASE_VERIFIER",
@@ -118,7 +118,7 @@
       "evidence": [
         "docs/governance/decision-register.md"
       ],
-      "remaining": "Owner-approved: D-001, D-005..D-018, D-029, D-051, D-052 and D-036 (7-day publisher evidence). Independent Crypto/security review and the remaining decisions in the register (for example D-002, D-026, D-030, D-031, D-053, D-054) are open."
+      "remaining": "Owner-approved: D-001, D-002, D-004, D-005..D-018, D-023, D-025, D-029, D-030, D-031, D-034, D-036 (7-day evidence and Node checkpoint freshness), D-037, D-051..D-054 (implementation of D-024 and D-045 in progress). Independent Crypto/security review and the remaining decisions in the register (for example D-003, D-026, D-028, D-041, D-042) are open."
     },
     {
       "id": "INDEPENDENT_SECURITY_AUDIT",

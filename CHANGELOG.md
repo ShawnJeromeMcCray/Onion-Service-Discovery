@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- The decision register records the owner's decisions of 2026-10-15: D-004
+  (origin trust and server fallback as implemented), D-030/D-031 (keyless
+  Sigstore signing and provenance through GitHub attestations), D-034 (no logs
+  by default), D-037 (default switches as implemented) and D-053/D-054
+  (Category Registry v1 frozen, language-tag grammar approved; the registry
+  files, generated constants and PCP-001 say so).
 - Keys have a human-comparable fingerprint (owner decision D-025): SHA-256 over
   a domain and the raw key, 150 bits as six groups of five Base32 characters.
   The browser shows it for identity keys, pins, the pin import preview, Node

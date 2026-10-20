@@ -213,4 +213,5 @@ bytes. Tags are absent and cannot be substituted into category identifiers.
 The current language experiment uses lowercase RFC 5646 well-formed tags with
 no duplicate variants/extension singletons. Limits remain 35 ASCII characters
 and 16 entries. This is syntax validation, not registered-language validation.
-See PCP-001 for compatibility and the unresolved D-053/D-054 freeze approvals.
+See PCP-001 for compatibility; the owner approved both rules for v1 (D-053 and
+D-054, 2026-10-15).
