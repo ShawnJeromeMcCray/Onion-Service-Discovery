@@ -300,7 +300,8 @@ el('source-form').addEventListener('submit',event=>{
     operation('Select at least three sources, or allow loading with fewer under “Source selection and expected keys”.');
     el<HTMLDetailsElement>('source-details').open=true; el<HTMLInputElement>('limited-coverage').focus(); return;
   }
-  lastOperation='load'; worker.postMessage({op:'load',sources});
+  // The page's clock judges source freshness: the same system clock in a browser, and tests can fix it.
+  lastOperation='load'; worker.postMessage({op:'load',sources,now:Date.now()});
 });
 el('cancel-load').addEventListener('click',()=>worker.postMessage({op:'cancel'}));
 el('clear-index').addEventListener('click',()=>worker.postMessage({op:'clear-index'}));
