@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Look-alike names are flagged (owner decision D-024): the browser compares
+  names by their UTS #39 confusable skeleton, built from the Unicode 17.0.0
+  `confusables.txt` and the client's own frozen NFD, so the result does not
+  depend on the browser's Unicode version. A name that looks like a pinned name
+  under another key gets a warning, names of different identities that look
+  alike get a note, and pin labels and the pin import preview are checked too.
+  Names are never rewritten or hidden. The table adds about 38 KB to
+  `client.js`; `tools/generate_confusables.py` rebuilds and checks it against
+  the pinned source hash.
+- Browser tests fix the verifier's clock through the page: since 2026-10-19
+  the aging fixtures made six tests fail.
 - The decision register records the owner's decisions of 2026-10-15: D-004
   (origin trust and server fallback as implemented), D-030/D-031 (keyless
   Sigstore signing and provenance through GitHub attestations), D-034 (no logs
