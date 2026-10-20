@@ -615,7 +615,7 @@ try {
             // A publisher has no store: status reports its publication instead of failing (spec 32 section 11).
             $facts = \OnionServiceDiscovery\Configuration\PublisherStatus::inspect($config, $verifier, dirname(__DIR__) . '/public/.well-known/onion-service-discovery.json', $arguments[0]);
             $output = ['status' => 'PASS', 'role' => 'publisher', 'onion' => $config->nodeOnion, 'roles' => $config->features, 'overall' => $facts['overall'], 'answer' => $facts['answer'],
-                'manifest' => array_intersect_key($facts['manifest'], array_flip(['state', 'revision', 'hash'])), 'self_verification' => $facts['self_verification'], 'publisher_node_count' => count($config->publisherNodes),
+                'manifest' => array_intersect_key($facts['manifest'], array_flip(['state', 'revision', 'hash', 'logical_service_id', 'current_key', 'current_key_fingerprint', 'key_epoch'])), 'self_verification' => $facts['self_verification'], 'publisher_node_count' => count($config->publisherNodes),
                 'next_action' => $facts['next_action'], 'network_side_effects' => false];
         } else {
         $unreadable = null; $state = null;

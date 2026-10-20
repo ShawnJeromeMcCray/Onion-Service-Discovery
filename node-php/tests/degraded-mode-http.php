@@ -8,6 +8,7 @@ declare(strict_types=1);
 // storage:check or a restore makes the Node healthy again. Without a usable published state, with
 // a missing export directory or a broken configuration, nothing is served, as before.
 require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/health-report.inc.php';
 use OnionServiceDiscovery\Configuration\NodeConfig;
 use OnionServiceDiscovery\Node\NodeInitializer;
 use OnionServiceDiscovery\Node\PublishedState;
@@ -28,7 +29,9 @@ $cli = static function (array $arguments, int $expected) use ($project): array {
     fclose($pipes[0]); $out = (string) stream_get_contents($pipes[1]); $err = (string) stream_get_contents($pipes[2]); fclose($pipes[1]); fclose($pipes[2]);
     $exit = proc_close($process);
     if ($exit !== $expected || $err !== '') { throw new RuntimeException('CLI ' . $arguments[0] . ' exit ' . $exit . ' ' . $out . $err); }
-    return json_decode($out, true, 32, JSON_THROW_ON_ERROR);
+    $decoded = json_decode($out, true, 32, JSON_THROW_ON_ERROR);
+    if (in_array($arguments[0], ['doctor', 'security:check'], true) && isset($decoded['software_version'])) { assertHealthReport($decoded); }
+    return $decoded;
 };
 // Content of every file below a path: a store that nobody touched hashes the same.
 $fingerprint = static function (string $path): string {

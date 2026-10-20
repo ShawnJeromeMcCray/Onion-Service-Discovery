@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `doctor` and `security:check` reports have a JSON schema
+  (`docs/operations/health-report.schema.json`, spec 32 section 10) that the
+  tests apply to every report they produce; `status` for a publisher adds the
+  Logical Service Identifier, current key, fingerprint and key epoch.
 - A Discovery Node whose store cannot be read stays online read-only (owner
   decision D-045): `node:snapshot` keeps a copy of the last published state
   (`.published-state.json`) beside the export blobs, and while the store is

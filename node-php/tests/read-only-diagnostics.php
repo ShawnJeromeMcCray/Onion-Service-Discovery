@@ -16,7 +16,7 @@ foreach(['filesystem','sqlite'] as $backend){
  try{$reader->transaction(static function(StorageTransaction $tx):void{$tx->set('sync','test',['cursor'=>4]);});throw new RuntimeException('readonly mutation accepted');}catch(StorageException $error){if($error->getMessage()!=='STORAGE_READ_ONLY')throw $error;}
  if($source->snapshot()!==$before)throw new RuntimeException('readonly logical state changed');
  $config=json_decode(file_get_contents($project.'/node-php/config/node.example.json'),true,32,JSON_THROW_ON_ERROR);$config['storage']=['backend'=>$backend,'path'=>$path];$config['export_path']=$root.'/exports';$config['node']['key_path']=$root.'/missing-node.key';file_put_contents($root.'/config.json',json_encode($config));
- $health=Diagnostics::inspect(NodeConfig::load($root.'/config.json'),new RecordVerifier($project.'/protocol/schemas'));
+ $health=Diagnostics::inspect(NodeConfig::load($root.'/config.json'),new RecordVerifier($project.'/protocol/schemas'));require_once __DIR__.'/health-report.inc.php';assertHealthReport($health);
  if($health['status']!=='WARN'||$health['security_check_summary']['storage_integrity']!=='PASS'||$health['network_side_effects']!==false||$source->snapshot()!==$before)throw new RuntimeException('diagnostic status/readonly mismatch');
  unset($source,$reader);
 }

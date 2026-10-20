@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/health-report.inc.php';
 use OnionServiceDiscovery\Configuration\NodeConfig;
 use OnionServiceDiscovery\Configuration\PublisherStatus;
 use OnionServiceDiscovery\Configuration\PublisherEvidence;
@@ -158,7 +159,7 @@ try {
         && str_contains($warnedPage, 'role="alert"') && str_contains($warnedPage, 'Conflicting signed index checkpoints')); ++$checks;
     $assert(str_contains($warnedPage, 'href="/.well-known/onion-service-discovery.json"')); ++$checks;
     // doctor and the support bundle report the publication too (spec 32 sections 8 and 10).
-    $doctor = Diagnostics::inspect($config, $verifier, $manifest, $cfg);
+    $doctor = Diagnostics::inspect($config, $verifier, $manifest, $cfg); assertHealthReport($doctor);
     $assert($doctor['manifest_state'] === 'SIGNATURE_VALID' && $doctor['security_check_summary']['publisher_manifest'] === 'PASS' && $doctor['publication']['overall'] === 'DISCOVERABLE'
         && in_array('PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT', $doctor['warnings'], true)); ++$checks;
     $bundle = json_encode(\OnionServiceDiscovery\Configuration\SupportBundle::create($config, $verifier, $cfg, $manifest), JSON_THROW_ON_ERROR);
@@ -188,7 +189,7 @@ try {
     $broken = $fixture['stories']['genesis']; $broken['service']['name'] = 'tampered';
     file_put_contents($manifest, json_encode($broken, JSON_THROW_ON_ERROR));
     $assert(PublisherStatus::inspect($config, $verifier, $manifest)['overall'] === 'ERROR'); ++$checks;
-    $health = Diagnostics::inspect($config, $verifier);
+    $health = Diagnostics::inspect($config, $verifier); assertHealthReport($health);
     $assert($health['status'] === 'PASS' && !isset($health['security_check_summary']['storage_integrity'])); ++$checks;
     $assert(!file_exists($v['storage']['path']) && !file_exists($v['export_path'])); ++$checks;
     $created = PublisherInitializer::create($temp . '/initialized.json', \OnionServiceDiscovery\Domain\OnionAddress::parse($v['node']['onion']));

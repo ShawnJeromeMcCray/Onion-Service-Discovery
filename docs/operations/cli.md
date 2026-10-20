@@ -33,10 +33,14 @@ independent security/release review are not inferred from local configuration.
 file and directory modes, Tor secret keys next to OSD files, unexpected files in
 `node-php/public`, packaged files changed since packaging (against
 `release/FILE-MANIFEST.json` when present) and the absence of remote
-administration.
+administration. Both reports follow the
+[health report schema](health-report.schema.json) (spec 32 section 10); every
+field is listed there, so monitoring can validate them and no private value can
+appear unreviewed.
 
 `status CONFIG` (alias of `node:status`) reports the role, the own Onion and the
-roles in use: for a publisher the publication state and next action, for a Node
+roles in use: for a publisher the publication state, the Logical Service
+Identifier, current key, its fingerprint and key epoch, and the next action; for a Node
 its store counts plus identity, snapshot generation and last direct check and
 sync. While the store cannot be read it fails with the store's error code (exit
 4) and adds the Node card and a `next_action` from the
