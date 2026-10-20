@@ -64,7 +64,7 @@ for remedies.
 | `EXPORT_BUDGET_EXHAUSTED` | storage | 4 | The public export directory reached its limit of 4096 files or 256 MiB, or a single export file would exceed 512 KiB; remove unreferenced files with exports:prune or node:maintain. |
 | `EXPORT_BUDGET_NEARLY_EXHAUSTED` | doctor | 6 | doctor warning: the export directory uses at least 80 % of its 4,096-file or 256 MiB limit; check that the maintenance timer runs (node:maintain prunes old blobs). |
 | `EXPORT_BUSY` | storage | 4 | Another process held the export directory’s writer lock for more than 2 seconds, so this write or prune did not run; run it again when the other command has finished. |
-| `EXPORT_CORRUPT` | CLI, configuration and status, storage, web routes | 3, 4 | Published snapshot files do not match their signed hashes; rebuild with node:snapshot --rebuild-derived. |
+| `EXPORT_CORRUPT` | CLI, Node worker, configuration and status, storage, web routes | 3, 4 | Published snapshot files, or the copy of the published state kept beside them for degraded serving, do not match their signed records; rebuild with node:snapshot --rebuild-derived. |
 | `EXPORT_DIRECTORY_UNSAFE` | storage | 4 | The export directory (export_path) is a URL, a symlink, missing or open to group or others, or it contains a symlink, a subdirectory or a file that is not an OSD export file; node:init or client:init creates it with mode 0700. |
 | `EXPORT_UNAVAILABLE` | storage | 4 | An export file or the export directory’s lock file could not be created, written, synced, renamed, read or deleted; check the ownership and free space of export_path. |
 | `FILESYSTEM_FORMAT_MIGRATION_REQUIRED` | doctor | 6 | doctor: the filesystem store uses format 1; plan storage:migrate. |

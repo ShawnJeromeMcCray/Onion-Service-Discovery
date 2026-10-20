@@ -465,11 +465,12 @@
    ],
    "components": [
     "CLI",
+    "Node worker",
     "configuration and status",
     "storage",
     "web routes"
    ],
-   "meaning": "Published snapshot files do not match their signed hashes; rebuild with node:snapshot --rebuild-derived."
+   "meaning": "Published snapshot files, or the copy of the published state kept beside them for degraded serving, do not match their signed records; rebuild with node:snapshot --rebuild-derived."
   },
   "EXPORT_DIRECTORY_UNSAFE": {
    "cli_exit": [

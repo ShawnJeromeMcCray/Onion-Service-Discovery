@@ -15,9 +15,22 @@ final readonly class SnapshotProducer
     public function __construct(private StorageBackend $store, private PublicBlobStore $blobs, private RecordVerifier $verifier, private SignerProvider $signer, private bool $serverSearch = false, private bool $forceDerived = false)
     { if ($signer->role() !== 'node') { throw new ProtocolException('SIGNER_ROLE_MISMATCH'); } }
     /**
+     * Publishes a new generation when the public evidence changed, then copies the published state
+     * beside the export blobs for degraded serving (D-045). The copy is written only after the store
+     * committed, so it never names a snapshot the store did not publish; an UNCHANGED run repairs a
+     * missing or older copy, for example after an upgrade.
      * @return array<array-key, mixed>
      */
     public function publish(int $now): array
+    {
+        $result = $this->produce($now);
+        PublishedState::save($this->store, $this->blobs, $this->verifier);
+        return $result;
+    }
+    /**
+     * @return array<array-key, mixed>
+     */
+    private function produce(int $now): array
     {
         if ($now < 0 || $now > 253402300799) { throw new ProtocolException('CLOCK_INVALID'); }
         $state = $this->store->snapshot(); $all = [];

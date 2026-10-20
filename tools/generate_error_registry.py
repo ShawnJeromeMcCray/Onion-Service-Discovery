@@ -45,7 +45,7 @@ DESCRIPTIONS = {
     'EVIDENCE_UNAVAILABLE': 'The browser keeps no pair of conflicting signed records for this Node, so there is nothing to save.',
     'PUBLISHER_BUSY': 'Another publisher command holds the lock on the same files; run it again when that command has finished.',
     'EXPECTED_NODE_KEY_REQUIRED': 'A visitor-chosen Node needs its expected public key.',
-    'EXPORT_CORRUPT': 'Published snapshot files do not match their signed hashes; rebuild with node:snapshot --rebuild-derived.',
+    'EXPORT_CORRUPT': 'Published snapshot files, or the copy of the published state kept beside them for degraded serving, do not match their signed records; rebuild with node:snapshot --rebuild-derived.',
     'HISTORY_INCOMPLETE': 'The current Manifest does not connect to its history: the Service serves no or an incomplete history bundle (history:install), or a proof is missing.',
     'HISTORY_BUNDLE_INVALID': 'The PCP-004 history bundle is malformed, too large or contains a record type it must not contain.',
     'HTTP_STATUS_REJECTED': 'The remote answered with an unexpected HTTP status other than 404, a redirect or 5xx; nothing was verified.',
