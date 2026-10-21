@@ -41,7 +41,8 @@ final readonly class SnapshotProducer
                 $all[] = $record;
             }
         }
-        if (count($all) !== count($state['records'])) { throw new ProtocolException('STORAGE_CORRUPT'); }
+        // Maintenance may have removed a superseded checkpoint since the snapshot was read.
+        if (count($all) !== count($state['records'])) { throw new ProtocolException($this->store->snapshot()['generation'] !== $state['generation'] ? 'EVIDENCE_CHANGED_RETRY' : 'STORAGE_CORRUPT'); }
         $selected = PublicEvidencePolicy::select($all); $hashes = array_keys($selected); sort($hashes, SORT_STRING);
         $byHash = []; foreach ($all as $record) { $byHash[$record->contentHash] = $record; }
         $publicCursor = 0; foreach ($hashes as $hash) { $publicCursor = max($publicCursor, $state['records'][$hash]['sequence']); }
@@ -112,16 +113,18 @@ final readonly class SnapshotProducer
             $this->blobs->put($hash, $wire); $serviceIndexes[(string)$prefix] = $hash;
         }
         $searchIndex = $this->serverSearch ? \OnionServiceDiscovery\Search\SearchIndex::build($this->blobs, \OnionServiceDiscovery\Search\LocalSearch::build($publicRecords), $descriptor) : null;
-        $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor, $hashes, $serviceIndexes, $searchIndex): void {
-            // The snapshot derives only from the signed records (append-only, so last_sequence covers them) and the
-            // Node rows; queue leases, peer state and maintenance counters written meanwhile do not invalidate it.
+        // The public index names this Node's own retained checkpoints, never a peer's.
+        $ownCheckpoints = [];
+        foreach ($all as $record) { if ($record->type === 'snapshot_descriptor' && $record->document()->node_identity_public_key === $this->signer->publicKey()) { $ownCheckpoints[] = $record->contentHash; } }
+        $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor, $hashes, $serviceIndexes, $searchIndex, $ownCheckpoints): void {
+            // The snapshot derives only from the signed records (new ones raise last_sequence, pruned ones raise
+            // pruned_records) and the Node rows; queue leases, peer state and maintenance counters written meanwhile
+            // do not invalidate it.
             $current = $tx->state();
-            if ($current['last_sequence'] !== $state['last_sequence'] || $current['tables']['node'] !== $state['tables']['node']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
+            if ($current['last_sequence'] !== $state['last_sequence'] || ($current['pruned_records'] ?? 0) !== ($state['pruned_records'] ?? 0) || $current['tables']['node'] !== $state['tables']['node']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
             $tx->putRecord($descriptor);
             foreach ($tx->state()['tables']['node'] as $key => $_) { if ((str_starts_with($key, 'key:public-index-') || str_starts_with($key, 'key:service-index-'))) { $tx->deleteOperational('node', substr($key,4)); } }
-            $publicHashes = $hashes;
-            foreach ($state['records'] as $hash => $metadata) { if ($metadata['record_type'] === 'snapshot_descriptor') { $publicHashes[] = $hash; } }
-            $publicHashes[] = $descriptor->contentHash;
+            $publicHashes = array_merge($hashes, $ownCheckpoints, [$descriptor->contentHash]);
             foreach (array_chunk(array_values(array_unique($publicHashes)),64) as $index => $part) { $tx->set('node','public-index-' . $index,['hashes'=>$part]); }
             foreach ($serviceIndexes as $prefix => $hash) { $tx->set('node', 'service-index-' . $prefix, ['hash' => $hash]); }
             if ($searchIndex !== null) { $tx->set('node', 'server-search-index', ['format_version' => \OnionServiceDiscovery\Search\SearchIndex::FORMAT_VERSION, 'hash' => $searchIndex]); }

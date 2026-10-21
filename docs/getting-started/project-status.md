@@ -71,7 +71,7 @@ renamed to the pending active-index checkpoint protocol.
 
 - Final active-index checkpoint semantics, exact wire bytes and continuity design, then implementation/adversarial vectors after the required protocol decisions are reviewed.
 - Learned-source admission and independent-source bootstrap policy; current peers are explicitly pinned and bounded.
-- Long-lived record growth/retention, larger applicable tiers, operational-state-heavy sync, concurrency and degraded-network/low-end-browser measurements.
+- Measured long-lived service-evidence growth (checkpoint retention is bounded and tested; service history is kept by design), larger applicable tiers, operational-state-heavy sync, concurrency and degraded-network/low-end-browser measurements.
 - Strong deployed Node-key isolation from web compromise, with an executable storage/signer separation rather than shared-UID templates alone.
 - Complete revised-spec traceability and the remaining applicable conformance/chaos/release evidence.
 

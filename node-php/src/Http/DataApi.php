@@ -79,7 +79,14 @@ final readonly class DataApi
                 if ($checkpoint === null) { throw new ProtocolException('NOT_FOUND'); }
                 $expected = null;
                 foreach ($checkpoint->document()->chunks as $chunk) { if ($chunk->hash === 'sha256:' . $match[1]) { $expected = $chunk; break; } }
-                if ($expected === null) { throw new ProtocolException('NOT_FOUND'); }
+                if ($expected === null) {
+                    // A chunk of an earlier checkpoint, while its export blob is kept (node:maintain keeps those of
+                    // checkpoints current within the last hour), so a peer can finish verifying it. The domain-separated
+                    // chunk hash proves the blob is a published chunk and nothing else.
+                    $wire = $this->blobs->get('sha256:' . $match[1]);
+                    if ($wire === null || SnapshotFormat::chunkHash($wire) !== 'sha256:' . $match[1]) { throw new ProtocolException('NOT_FOUND'); }
+                    return $this->wireResponse($wire, 524288, $headers, $method);
+                }
                 $wire = $this->blobs->get($expected->hash);
                 if ($wire === null || strlen($wire) !== $expected->bytes || SnapshotFormat::chunkHash($wire) !== $expected->hash) { throw new ProtocolException('EXPORT_CORRUPT'); }
                 return $this->wireResponse($wire, 524288, $headers, $method);
@@ -96,7 +103,8 @@ final readonly class DataApi
                 }
                 $wires = $this->store->readRecords(array_keys($selected));
                 foreach ($selected as $hash => $metadata) {
-                    $wire = $wires[$hash] ?? null; if ($wire === null) { throw new ProtocolException('STORAGE_CORRUPT'); }
+                    // Both backends report a missing object of a held record as corrupt; absent means maintenance removed a superseded checkpoint meanwhile.
+                    $wire = $wires[$hash] ?? null; if ($wire === null) { continue; }
                     $record = $this->verifier->verifyWire($wire);
                     $entry = (object) ['sequence' => $metadata['sequence'], 'record' => $record->document()]; $size = strlen(CanonicalJson::encode($entry)) + 1;
                     if ($bytes + $size > 1048576) { break; }

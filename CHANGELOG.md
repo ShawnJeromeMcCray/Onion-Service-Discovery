@@ -20,6 +20,32 @@
     declared snapshot size, bundles may hold more than 256 records, reloading a Node
     replaces its old records, the same name under two keys is flagged, and demo and
     real data no longer mix.
+- A Discovery Node no longer fills its store until `STORAGE_BUDGET_EXHAUSTED`
+  stops it for good. `node:maintain` removes signed checkpoints nothing needs
+  any more, at most 256 per run: the Node's own beyond the newest 256 on its
+  chain (D-052 walks go at most 32 back) and peer checkpoints that are neither a
+  peer's verified anchor, its pending checkpoint, one of the four newest it
+  showed as current nor conflict evidence. Peer sync keeps only those, and only
+  witness rows above each anchor; the public index names only the Node's own
+  checkpoints. Service records, Node descriptors and conflicting checkpoints
+  are never removed. Removal needs storage schema 2, which counts removed
+  records so the sequence check stays exact: run `storage:migrate BACKEND PATH`
+  once (filesystem format 3, SQLite schema version 2; nothing is rewritten, and
+  older releases refuse a migrated store). New stores start in it; private
+  backups and `storage:migrate-backend` keep every record's sequence.
+  `node:status` and `doctor` report `storage_usage` against the record, state
+  and row limits; `doctor` warns `STORAGE_BUDGET_NEARLY_EXHAUSTED` from 80 % and
+  `STORAGE_PRUNING_MIGRATION_REQUIRED` for a store not yet migrated.
+- A peer whose snapshot has more chunks than a sync step fetches and changes
+  every few minutes is verified to the end: its pending checkpoint stays
+  pending while the peer serves its chunks (the data API now serves the chunks
+  of earlier checkpoints while their export blobs exist, and `node:maintain`
+  keeps those of checkpoints current within the last hour), a step fetches up
+  to four chunks, and sync restarts at the current checkpoint only when the
+  older one is no longer served. A peer's checkpoints older than its newest 64
+  that it no longer serves leave a chain gap (`chain_gap`, history no longer
+  claimed as proven) instead of a quarantine.
+
 - `doctor` and `security:check` reports have a JSON schema
   (`docs/operations/health-report.schema.json`, spec 32 section 10) that the
   tests apply to every report they produce; `status` for a publisher adds the

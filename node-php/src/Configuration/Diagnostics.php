@@ -41,7 +41,7 @@ final class Diagnostics
         $checks['runtime'] = PHP_INT_SIZE === 8 ? 'PASS' : 'FAIL';
         foreach (self::EXTENSIONS as $extension) { $checks['extension_' . $extension] = extension_loaded($extension) ? 'PASS' : 'FAIL'; }
         if (!in_array(PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION, self::TESTED_MINORS, true)) { $warnings[] = 'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX'; }
-        $publication = null; $scheduler = []; $exportUsage = null;
+        $publication = null; $scheduler = []; $exportUsage = null; $storageUsage = null;
         if ($manifestPath !== null && $config->nodeOnion !== null && $config->features['publish_service']) {
             $facts = PublisherStatus::inspect($config, $verifier, $manifestPath, $configPath);
             $publication = ['overall' => $facts['overall'], 'manifest_state' => $facts['manifest']['state'], 'revision' => $facts['manifest']['revision'] ?? null,
@@ -95,6 +95,11 @@ final class Diagnostics
             try {
                 $store = $config->store(readOnly: true); $state = $store->snapshot(); $store->integrityCheck(); $checks['storage_integrity'] = 'PASS';
                 if ($store instanceof \OnionServiceDiscovery\Storage\FilesystemStore && $store->formatVersion() === 1) { $warnings[] = 'FILESYSTEM_FORMAT_MIGRATION_REQUIRED'; }
+                // Record and state budgets: at the limit admission stops with STORAGE_BUDGET_EXHAUSTED.
+                $storageUsage = \OnionServiceDiscovery\Storage\StorageTransaction::usage($state, new \OnionServiceDiscovery\Storage\StorageLimits()) + ['record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED'];
+                $checks['storage_budget'] = $storageUsage['state'];
+                if ($storageUsage['state'] === 'WARN') { $warnings[] = 'STORAGE_BUDGET_NEARLY_EXHAUSTED'; }
+                if (!$store->supportsPruning()) { $warnings[] = 'STORAGE_PRUNING_MIGRATION_REQUIRED'; }
                 $descriptor = $state['tables']['node']['key:descriptor'] ?? null;
                 if ($descriptor === null) { $checks['node_descriptor'] = 'WARN'; $warnings[] = 'NODE_NOT_INITIALIZED'; }
                 else {
@@ -151,7 +156,7 @@ final class Diagnostics
         // What the public sees of this Node (the status page's storage state) and, if needed, the next step.
         $nodeHealth = NodeStatus::inspect($config, $verifier, time())['storage_state'] ?? null;
         $health = ['node_health' => $nodeHealth ?? 'NOT_APPLICABLE', 'next_action' => $nodeHealth === null ? null : NodeStatus::nextAction($nodeHealth)];
-        return ['status' => $failures !== [] ? 'FAIL' : ($warnings !== [] ? 'WARN' : 'PASS'), 'software_version' => '0.1.0-dev', 'php_version' => PHP_VERSION, 'protocol_versions' => [1], 'db_schema' => $state['storage_schema'] ?? null, 'role' => $config->role, 'config_state' => 'PASS', 'crypto_state' => 'RUNTIME_EXTENSIONS_ONLY', 'key_authentication_state' => 'NOT_UNLOCKED_UNAUTHENTICATED_HEADER', 'tor_transport_state' => 'CONFIGURED_NOT_PROBED', 'manifest_state' => $publication['manifest_state'] ?? 'NOT_APPLICABLE', 'publication' => $publication, 'sync_state' => ['latest_sync_epoch' => $latestSync, 'quarantined_peers' => $quarantined], 'source_concentration' => $concentration, 'scheduler_state' => $scheduler === [] ? 'NOT_OBSERVED' : $scheduler, 'export_usage' => $exportUsage, 'backup_state' => 'NOT_OBSERVED', 'disk_state' => ['free_bytes' => is_dir($config->exportPath) ? disk_free_space($config->exportPath) : null], 'security_check_summary' => $checks, 'warnings' => $warnings, 'failures' => array_values(array_unique($failures)), 'generated_at' => gmdate('Y-m-d\TH:i:s\Z'), 'network_side_effects' => false, 'production_approval' => 'OPEN'] + $health;
+        return ['status' => $failures !== [] ? 'FAIL' : ($warnings !== [] ? 'WARN' : 'PASS'), 'software_version' => '0.1.0-dev', 'php_version' => PHP_VERSION, 'protocol_versions' => [1], 'db_schema' => $state['storage_schema'] ?? null, 'role' => $config->role, 'config_state' => 'PASS', 'crypto_state' => 'RUNTIME_EXTENSIONS_ONLY', 'key_authentication_state' => 'NOT_UNLOCKED_UNAUTHENTICATED_HEADER', 'tor_transport_state' => 'CONFIGURED_NOT_PROBED', 'manifest_state' => $publication['manifest_state'] ?? 'NOT_APPLICABLE', 'publication' => $publication, 'sync_state' => ['latest_sync_epoch' => $latestSync, 'quarantined_peers' => $quarantined], 'source_concentration' => $concentration, 'scheduler_state' => $scheduler === [] ? 'NOT_OBSERVED' : $scheduler, 'export_usage' => $exportUsage, 'storage_usage' => $storageUsage, 'backup_state' => 'NOT_OBSERVED', 'disk_state' => ['free_bytes' => is_dir($config->exportPath) ? disk_free_space($config->exportPath) : null], 'security_check_summary' => $checks, 'warnings' => $warnings, 'failures' => array_values(array_unique($failures)), 'generated_at' => gmdate('Y-m-d\TH:i:s\Z'), 'network_side_effects' => false, 'production_approval' => 'OPEN'] + $health;
     }
 
     /**

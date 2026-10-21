@@ -167,22 +167,33 @@ state.
 ## Maintenance, rollback and removal
 
 `node:maintain CONFIG` scans at most 256 remote-provenance assertions, expires
-seven-day hints and performs a bounded SQLite WAL checkpoint. It never deletes
-signed identity/history/fork evidence or source high-water marks. Busy SQLite
+seven-day hints and performs a bounded SQLite WAL checkpoint. It removes at most
+256 signed checkpoints per run that nothing needs any more: the Node's own beyond
+the newest 256 on its chain, and peer checkpoints that are not a peer's anchor,
+pending checkpoint, one of its four newest current ones or conflict evidence
+(see cli.md). It never deletes service records, Node descriptors, conflicting
+checkpoints or source high-water marks. Pruning needs a store migrated with
+`storage:migrate` (filesystem format 3, SQLite schema version 2); before that it
+reports `record_pruning: MIGRATION_REQUIRED` and the store keeps growing until
+`STORAGE_BUDGET_EXHAUSTED`. Busy SQLite
 readers may keep WAL frames; retry later, do not remove WAL files manually.
 Archive exports and stop publishers/web workers before running
 `exports:prune CONFIG --workers-stopped`. This removes at most 256 unreferenced
-export blobs per call and retains all current chunks and derived indexes. Old
-signed checkpoints/identity/fork records remain in the database. The current API
-serves only current-checkpoint chunks; older checkpoint bytes for chain proof
-remain in record storage. Besides this immediate operator action, `node:maintain`
-(the maintenance timer) prunes unreferenced blobs once they are older than one
-hour, at most 256 per run; `doctor` reports the export usage. No automatic destruction
+export blobs per call and retains all current chunks and derived indexes. The
+newest 256 own signed checkpoints remain in the database for chain proof. The
+API serves the current checkpoint's chunks and, while their blobs exist, those
+of earlier checkpoints, so a peer can finish one that changed meanwhile.
+Besides this immediate operator action, `node:maintain` (the maintenance timer)
+prunes unreferenced blobs once they are older than one hour and the blobs of
+checkpoints that were current within that hour stay, at most 256 per run;
+`doctor` reports the export usage and the store's `storage_usage`. No automatic destruction
 of conflict evidence or private keys is provided.
 
 Before upgrading, keep an authenticated full backup and verify the package.
-Storage schema 1 rejects unknown versions; no implicit migration or downgrade is
-performed. Run new software in staging first. A code rollback may be incompatible
+Unknown storage versions are refused; no implicit migration or downgrade is
+performed. After upgrading to a release with bounded checkpoint retention, stop
+the workers, back up, run `storage:migrate BACKEND PATH` once and restart; an
+older release then refuses the store, so roll back by restoring that backup. Run new software in staging first. A code rollback may be incompatible
 with newer protocol/storage state; never restore an older identity state just to
 make old code run. TUF software high-water marks intentionally reject older
 releases. Any emergency software recovery needs an authenticated new authorized

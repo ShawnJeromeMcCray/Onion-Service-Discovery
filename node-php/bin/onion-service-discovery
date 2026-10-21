@@ -85,13 +85,15 @@ function failure(\Throwable $error, string $root): array
     return $output;
 }
 
-/** Unreferenced export blobs younger than this survive automatic pruning: a snapshot may be writing them. */
+/** Unreferenced export blobs younger than this survive automatic pruning: a snapshot may be writing them,
+ * or a peer may still be verifying a checkpoint that was current until less than this ago. */
 const EXPORT_PRUNE_GRACE_SECONDS = 3600;
 
 /**
  * Removes at most 256 export blobs the current published snapshot and the derived indexes do not
- * reference. With $olderThan only blobs written before it go, so a snapshot that is writing new
- * blobs at the same time is never cut short; without it the operator has stopped the workers.
+ * reference. With $olderThan only blobs written before it go, and the blobs of checkpoints that were
+ * current after it stay, so neither a snapshot writing new blobs nor a peer verifying the previous
+ * checkpoint is cut short; without it the operator has stopped the workers.
  * @return array<string,int>
  */
 function pruneExports(\OnionServiceDiscovery\Configuration\NodeConfig $config, \OnionServiceDiscovery\Storage\StorageBackend $store, RecordVerifier $verifier, ?int $olderThan): array
@@ -107,6 +109,13 @@ function pruneExports(\OnionServiceDiscovery\Configuration\NodeConfig $config, \
         $body = $blobs->get($chunk->hash);
         if ($body === null || strlen($body) !== $chunk->bytes || \OnionServiceDiscovery\Protocol\SnapshotFormat::chunkHash($body) !== $chunk->hash) { throw new ProtocolException('EXPORT_CORRUPT'); }
         $keep[] = $chunk->hash;
+    }
+    // Checkpoints that were current within the grace keep their blobs too, so a peer can finish verifying
+    // one that changed meanwhile (at most 16 generations; blobs already gone are not restored).
+    for ($document = $checkpoint->document(), $generations = 0; $olderThan !== null && $generations < 16 && is_string($document->previous_checkpoint_hash) && (int) strtotime($document->created_at) >= $olderThan && count($keep) < 2048; ++$generations) {
+        $wire = $store->readRecord($document->previous_checkpoint_hash); if ($wire === null) { break; }
+        $previous = $verifier->verifyWire($wire); $document = $previous->document();
+        foreach (array_merge([$previous->contentHash], array_column($document->chunks, 'hash')) as $hash) { if ($blobs->get($hash) !== null) { $keep[] = $hash; } }
     }
     foreach ($state['tables']['node'] as $key => $row) { if (str_starts_with($key, 'key:service-index-')) { $keep[] = $row['hash']; } }
     $search = $state['tables']['node']['key:server-search-index'] ?? null;
@@ -447,7 +456,7 @@ try {
         if (count($arguments) !== 2) { throw new ProtocolException('USAGE_ERROR'); }
         $output = match ($arguments[0]) {
             'filesystem' => \OnionServiceDiscovery\Storage\FilesystemStore::migrateFormat($arguments[1]),
-            'sqlite' => ['status' => 'UNCHANGED', 'storage_schema' => (new \OnionServiceDiscovery\Storage\SQLiteStore($arguments[1], readOnly: true))->snapshot()['storage_schema']],
+            'sqlite' => \OnionServiceDiscovery\Storage\SQLiteStore::migrateSchema($arguments[1]),
             default => throw new ProtocolException('STORAGE_BACKEND_INVALID'),
         };
     } elseif ($command === 'db:migrate') {
@@ -457,10 +466,11 @@ try {
             'sqlite' => new \OnionServiceDiscovery\Storage\SQLiteStore($arguments[1], readOnly: true),
             default => throw new ProtocolException('STORAGE_BACKEND_INVALID'),
         };
-        $output = ['status' => 'PASS', 'storage_schema' => $store->snapshot()['storage_schema'], 'migration_performed' => false, 'message' => 'Schema 1 is current; unknown schemas are refused.'];
+        $output = ['status' => 'PASS', 'storage_schema' => $store->snapshot()['storage_schema'], 'record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED', 'migration_performed' => false,
+            'message' => 'Schemas 1 and 2 are read; storage:migrate enables bounded checkpoint retention (schema 2) without rewriting evidence; unknown schemas are refused.'];
     } elseif ($command === 'release:info') {
         if ($arguments !== []) { throw new ProtocolException('USAGE_ERROR'); }
-        $output = ['status' => 'DEVELOPMENT', 'software_version' => '0.1.0-dev', 'protocol_versions' => [1], 'storage_schema' => 1, 'production_approved' => false, 'build' => buildIdentity($root), 'gates' => json_decode(boundedFile($root . '/docs/release-gates.json', 65536), true, 16, JSON_THROW_ON_ERROR)];
+        $output = ['status' => 'DEVELOPMENT', 'software_version' => '0.1.0-dev', 'protocol_versions' => [1], 'storage_schema' => 2, 'production_approved' => false, 'build' => buildIdentity($root), 'gates' => json_decode(boundedFile($root . '/docs/release-gates.json', 65536), true, 16, JSON_THROW_ON_ERROR)];
     } elseif (in_array($command, ['candidate:list', 'quarantine:list', 'sync:status'], true)) {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
@@ -654,7 +664,9 @@ try {
                 'exports' => $config->features['mirror_directory'] ? pruneExports($config, $store, $verifier, time() - EXPORT_PRUNE_GRACE_SECONDS) : 'NOT_APPLICABLE', 'network_side_effects' => false];
         } else {
             $counts = array_map('count', $state['tables']);
+            // Budget use (WARN from 80 %): node:maintain keeps it bounded once storage:migrate enabled record pruning.
             $output = ['status' => 'PASS', 'role' => $config->role, 'onion' => $config->nodeOnion, 'roles' => $config->features, 'backend' => $store->backendName(), 'storage_generation' => $state['generation'], 'signed_records' => count($state['records']), 'operational_counts' => $counts,
+                'storage_usage' => \OnionServiceDiscovery\Storage\StorageTransaction::usage($state, new \OnionServiceDiscovery\Storage\StorageLimits()) + ['record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED'],
                 'node' => \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $verifier, time()), 'network_side_effects' => false, 'aggregate_only' => true];
         }
         }

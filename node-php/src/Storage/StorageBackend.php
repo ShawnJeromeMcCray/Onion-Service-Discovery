@@ -6,6 +6,8 @@ namespace OnionServiceDiscovery\Storage;
 interface StorageBackend
 {
     public function backendName(): string;
+    /** Whether the store's format lets bounded retention remove signed records (storage schema 2). */
+    public function supportsPruning(): bool;
     /** Mutation callback is trusted application code, never network supplied. */
     public function transaction(callable $mutation): mixed;
     /**
