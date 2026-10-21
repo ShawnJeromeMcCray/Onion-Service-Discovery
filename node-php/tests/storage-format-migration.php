@@ -31,7 +31,7 @@ foreach (['stable' => 2, 'pending-head' => 2, 'pending-prepare' => 1] as $fixtur
         $before = (new FilesystemStore($path, readOnly: true))->snapshot();
         $result = FilesystemStore::migrateFormat($path);
         $store = new FilesystemStore($path);
-        if ($result['status'] !== 'MIGRATED' || $store->formatVersion() !== 2 || $store->snapshot() !== $before || count($before['records']) !== $expectedCount || $before['tables']['sync']['key:migration-peer']['cursor'] !== $expectedCount) { throw new RuntimeException('Legacy state was reinterpreted'); }
+        if ($result['status'] !== 'MIGRATED' || $store->formatVersion() !== 3 || $store->snapshot() !== $before || count($before['records']) !== $expectedCount || $before['tables']['sync']['key:migration-peer']['cursor'] !== $expectedCount) { throw new RuntimeException('Legacy state was reinterpreted'); }
         ++$checks;
         $store->integrityCheck();
         if (FilesystemStore::migrateFormat($path)['status'] !== 'UNCHANGED') { throw new RuntimeException('Migration not idempotent'); } ++$checks;

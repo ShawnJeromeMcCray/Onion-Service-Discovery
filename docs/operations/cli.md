@@ -66,9 +66,9 @@ changes the SQLite journal mode: a pending recovery is reported as
 `storage:backup`/`backup:create` captures trusted private records and operational
 state; `backup:verify FILE` validates it without restoring. `storage:restore`
 requires a fresh staging path and `--trusted-private-backup`.
-`db:migrate BACKEND PATH` checks current schema 1 without mutation; there is no
-invented migration from an unknown schema. Future migrations need explicit code,
-fixtures and review.
+`db:migrate BACKEND PATH` reports the storage schema and whether record pruning
+is enabled, without mutation; there is no invented migration from an unknown
+schema. Future migrations need explicit code, fixtures and review.
 
 Aliases: status=node:status, peer:list=peers:list, peer:add=peers:add,
 peer:disable=peers:disable, manifest:show=protocol:inspect,
@@ -117,10 +117,26 @@ Protocol tools for implementers, all offline: `protocol:inspect FILE
 document as hex; `protocol:apply-sequence FILE` derives the identity state of a
 `{"records": [...]}` sequence (at most 256 records) exactly as a Node would.
 `node:maintain` expires bounded remote hints and checkpoints SQLite WAL.
+It also removes signed checkpoints nothing needs any more, at most 256 per run
+(`signed_records_removed`): the Node's own checkpoints beyond the newest 256 on
+its chain (publishers and peers walk at most 32 back, D-052), and peer
+checkpoints that are neither a peer's verified anchor, its pending checkpoint,
+one of the four newest it showed as current nor named by conflict evidence.
+Service records, Node descriptors and conflicting checkpoints are never removed,
+and witness rows below a peer's anchor go too (`checkpoint_witnesses_removed`).
+Run it from the maintenance timer, at least daily; with snapshots every 15
+minutes, hourly keeps the store smallest.
 `node:maintain` also prunes export blobs that the current published snapshot and
 the derived indexes do not reference, once they are older than one hour (a
 running snapshot may be writing newer ones), at most 256 per run, so the export
 directory no longer fills up until snapshots fail with `EXPORT_BUDGET_EXHAUSTED`.
+The blobs of checkpoints that were current within that hour stay as well: a peer
+that started on one of them can finish it, as the data API serves the chunks of
+an earlier checkpoint while their blobs exist.
+`node:status CONFIG` and `doctor` report `storage_usage`: signed records,
+removed records, state bytes and operational rows against their limits (10,000
+records, 32 MiB state, 30,000 rows); `doctor` warns
+`STORAGE_BUDGET_NEARLY_EXHAUSTED` from 80 %.
 `exports:prune --workers-stopped` is the immediate operator-only action; it removes
 at most 256 unreferenced derived blobs, not signed identity/fork records.
 No command executes a downloaded software artifact.
@@ -162,11 +178,20 @@ existing private directory, refuses overwrite, creates no keys/storage/Manifest,
 and makes no network request. `publisher:status CONFIG` is read-only and uses
 the public status page's fact derivation. See publish-only.md for consequences.
 
-`storage:migrate filesystem PATH` explicitly migrates native format 1 to 2.
+`storage:migrate filesystem PATH` explicitly migrates native format 1 or 2 to 3.
 Stop workers and make a tested backup with the historical release before migrating.
-Legacy HEAD-published transactions retain their old interpretation; new writes
-are refused until migration. Logical storage schema remains 1 and signed records
-are not rewritten. `storage:migrate sqlite PATH` checks the unchanged schema.
+Legacy HEAD-published transactions retain their old interpretation; format-1
+stores refuse new writes until migration. Format 3 is format 2 that may also hold
+storage schema 2: the count of signed records that bounded retention removed
+(`pruned_records`, so the number of records plus removed ones is always the
+highest sequence). `storage:migrate sqlite PATH` migrates SQLite schema
+version 1 to 2 in one transaction by adding that counter. Neither rewrites a
+signed record or an operational row. A store that is not migrated keeps working
+but keeps every checkpoint: `node:maintain` reports `record_pruning:
+MIGRATION_REQUIRED` and `doctor` warns `STORAGE_PRUNING_MIGRATION_REQUIRED`. New
+stores are created in the current format. Releases before this change refuse a
+migrated store with `STORAGE_VERSION_UNSUPPORTED`; keep the pre-migration backup
+for a rollback.
 
 `index:verify-inclusion CHECKPOINT CHUNKS_DIRECTORY OWN_HISTORY EXPECTED_NODE_KEY`
 verifies exact current owner-state membership offline in a complete signed draft

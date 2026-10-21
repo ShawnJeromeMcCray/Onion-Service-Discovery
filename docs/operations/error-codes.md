@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-228 codes.
+230 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -40,7 +40,7 @@ for remedies.
 | `CLOCK_ROLLBACK` | Node worker | 3 | The system clock is earlier than the creation time of the last published snapshot, so node:snapshot refused to publish; correct the clock, then run node:snapshot again. |
 | `COMMAND_UNKNOWN` | CLI | 3 | help knows no command of that name; run help without arguments for the list. |
 | `CONFIGURATION_CREATE_REFUSED` | configuration and status | 3 | init could not create the configuration file because it already exists or the directory does not allow it; init never overwrites a configuration; choose a new path. |
-| `CONFIGURATION_INVALID` | browser client, configuration and status, storage | 3, 4 | The configuration file has a missing, unknown or wrongly typed key; see the configuration reference. |
+| `CONFIGURATION_INVALID` | Node worker, browser client, configuration and status, storage | 3, 4 | The configuration file has a missing, unknown or wrongly typed key; see the configuration reference. |
 | `CONFIGURATION_PATH_INVALID` | configuration and status | 3 | storage.path, export_path or node.key_path is not an absolute path of at most 1024 bytes without . or .. segments, control characters or ://, or it cannot be resolved; the detail names the key. |
 | `CONFIGURATION_PATH_UNSAFE` | configuration and status | 3 | init refused the configuration path: it must be an absolute path of at most 1024 bytes in an existing, non-symlinked, owner-only (0700) directory outside node-php/public. |
 | `CONFIGURATION_UNAVAILABLE` | configuration and status | 3 | The configuration file is missing, unreadable, a symlink or larger than 16 KiB. |
@@ -208,20 +208,22 @@ for remedies.
 | `SQLITE_DRIVER_UNAVAILABLE` | storage | 4 | The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend. |
 | `STORAGE_ADDRESS_INVALID` | storage | 4 | A record or export address is not sha256: followed by 64 lowercase hex digits, or an operational table or key name is invalid, so the store refused the request. |
 | `STORAGE_BACKEND_INVALID` | CLI, configuration and status | 3 | The storage backend, given as a command argument or as storage.backend in the configuration, is neither filesystem nor sqlite. |
-| `STORAGE_BUDGET_EXHAUSTED` | storage | 4 | The local store reached its record or byte quota; existing evidence is preserved. |
+| `STORAGE_BUDGET_EXHAUSTED` | storage | 4 | The local store reached its record or byte quota; existing evidence is preserved. Check storage_usage in doctor and that node:maintain runs on a store migrated with storage:migrate. |
+| `STORAGE_BUDGET_NEARLY_EXHAUSTED` | doctor | 6 | doctor warning: the store uses at least 80 % of its record, state-size or operational-row budget (storage_usage); check that the maintenance timer runs and that storage:migrate enabled record pruning. |
 | `STORAGE_BUSY` | storage | 4 | Another worker holds the store lock; let it finish. |
 | `STORAGE_CORRUPT` | CLI, Node worker, configuration and status, storage, web routes | 3, 4 | Stored data failed verification; run storage:check and restore from backup if needed. |
 | `STORAGE_ENCODING_INVALID` | storage | 4 | A value could not be put into the store’s strict internal JSON form (nesting over 32 levels, invalid UTF-8, a string over 64 KiB, an unsafe key or an unsupported type), so it was not written. |
 | `STORAGE_ERROR` | storage | 4 | A store operation failed at the operating-system or SQLite level (for example a write or sync on a full disk); data committed before is kept; free space or fix permissions and run the command again. |
-| `STORAGE_MIGRATION_REQUIRED` | storage | 4 | This store uses an older format; stop workers, back up, run storage:migrate. |
+| `STORAGE_MIGRATION_REQUIRED` | storage | 4 | This store uses an older format (a format-1 filesystem store, or one that cannot yet record pruned checkpoints); stop workers, back up, run storage:migrate. |
 | `STORAGE_MODE_INVALID` | storage | 4 | An internal check failed: a store cannot be opened for creation and read-only at the same time, so it was not opened. |
 | `STORAGE_NOT_REQUIRED_FOR_PUBLISHER` | configuration and status | 3 | The command needs a Node store, but this is a publisher configuration, which keeps none; use a node or combined configuration. |
 | `STORAGE_PATH_UNSAFE` | storage | 4 | The filesystem store path is a URL or a symlink; point it at the real directory. |
 | `STORAGE_PERMISSIONS_UNSAFE` | storage | 4 | The store directory, one of its subdirectories or the SQLite database file is open to group or others; chmod 700 the directories and 600 the SQLite file. |
+| `STORAGE_PRUNING_MIGRATION_REQUIRED` | doctor | 6 | doctor warning: the store predates bounded checkpoint retention, so superseded checkpoints are never removed and it eventually fills; stop workers, back up, run storage:migrate. |
 | `STORAGE_READ_ONLY` | storage | 4 | An internal check failed: a write was attempted on a store opened read-only, so nothing was changed. |
 | `STORAGE_RECOVERY_REQUIRED` | storage | 4 | An interrupted write must be recovered with storage:check before read-only use. |
 | `STORAGE_UNAVAILABLE` | storage | 4 | The store path does not exist (and this command does not create it), is a symlink or URL, or the store or one of its files or directories cannot be created or opened; check storage.path; node:init or storage:init creates a store. |
-| `STORAGE_VERSION_UNSUPPORTED` | storage | 4 | The store has a format this release cannot open: a filesystem storage-version other than 1 or 2, or a SQLite schema version other than 1 or SQLite without foreign-key support. |
+| `STORAGE_VERSION_UNSUPPORTED` | storage | 4 | The store has a format this release cannot open: a filesystem storage-version other than 1, 2 or 3, or a SQLite schema version other than 1 or 2 or SQLite without foreign-key support. |
 | `STREAMING_UNAVAILABLE` | browser client | – | The browser returned the Node’s answer without a readable body stream, which the bounded download requires, so nothing from it was used. |
 | `SYNC_DISABLED` | CLI | 3 | Peer sync is off in this configuration (features.sync_with_peers is false), so sync:run and sync:peer-step refused to run; enable it to sync with peers. |
 | `TOO_LARGE` | signing | 3 | Not an error: manifest:install reports the history state TOO_LARGE when the connected history exceeds 256 records or 1 MiB, so the history bundle was not updated. |

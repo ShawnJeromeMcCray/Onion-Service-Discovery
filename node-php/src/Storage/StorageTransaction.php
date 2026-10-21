@@ -15,6 +15,8 @@ final class StorageTransaction
      * @var array<array-key, mixed>
      */
     private array $newObjects = [];
+    /** @var array<string, true> Objects of records removed in this transaction. */
+    private array $removedObjects = [];
 
     /**
      * @param array<array-key, mixed> $state
@@ -33,11 +35,15 @@ final class StorageTransaction
     }
 
     /**
+     * Schema 2 adds `pruned_records`: sequences of signed records removed by bounded retention
+     * (LocalMaintenance). Sequences are never reused, so count(records) + pruned_records is
+     * always last_sequence and a lost or invented record still fails validation.
      * @param array<array-key, mixed> $state
      */
     public static function validateState(array $state, StorageLimits $limits): void
     {
-        if (array_keys(array_diff_key($state, self::emptyState())) !== [] || ($state['storage_schema'] ?? null) !== 1 ||
+        $schema = $state['storage_schema'] ?? null; $pruned = $schema === 2 ? ($state['pruned_records'] ?? null) : 0;
+        if (array_keys(array_diff_key($state, self::emptyState() + ($schema === 2 ? ['pruned_records' => 0] : []))) !== [] || !in_array($schema, [1, 2], true) || !is_int($pruned) || $pruned < 0 ||
             !is_int($state['generation'] ?? null) || $state['generation'] < 0 || $state['generation'] > 9007199254740991 ||
             !is_int($state['last_sequence'] ?? null) || $state['last_sequence'] < 0 || $state['last_sequence'] > 9007199254740991 ||
             !is_array($state['records'] ?? null) || !is_array($state['tables'] ?? null) || count($state['records']) > $limits->maxRecords) {
@@ -56,7 +62,7 @@ final class StorageTransaction
             }
             $sequences[$metadata['sequence']] = true;
         }
-        if (count($sequences) !== $state['last_sequence']) {
+        if (count($sequences) + $pruned !== $state['last_sequence']) {
             throw new StorageException('STORAGE_CORRUPT');
         }
         $rowCount = 0;
@@ -86,10 +92,47 @@ final class StorageTransaction
             throw new StorageException('STORAGE_BUDGET_EXHAUSTED');
         }
         $objectHash = hash('sha256', $record->canonicalWire);
-        $this->newObjects[$objectHash] = $record->canonicalWire;
+        $this->newObjects[$objectHash] = $record->canonicalWire; unset($this->removedObjects[$objectHash]);
         $this->state['records'][$record->contentHash] = ['object_hash' => $objectHash, 'record_type' => $record->type, 'sequence' => ++$this->state['last_sequence']];
         $this->changed = true;
         return true;
+    }
+
+    /**
+     * Bounded retention only (LocalMaintenance): removes a superseded signed record. Its sequence
+     * is retired, not reused; the backend refuses the commit until storage:migrate (schema 2).
+     */
+    public function removeRecord(string $contentHash): bool
+    {
+        $metadata = $this->state['records'][$contentHash] ?? null;
+        if ($metadata === null) { return false; }
+        if (++$this->admissions > $this->limits->maxAdmissionsPerTransaction) { throw new StorageException('WORK_BUDGET_EXHAUSTED'); }
+        unset($this->state['records'][$contentHash], $this->newObjects[$metadata['object_hash']]);
+        $this->removedObjects[$metadata['object_hash']] = true;
+        $this->state['storage_schema'] = 2; $this->state['pruned_records'] = ($this->state['pruned_records'] ?? 0) + 1; $this->changed = true;
+        return true;
+    }
+
+    /** Private backup restore only: retires the sequences a pruned source store no longer holds, so restored records keep theirs. */
+    public function retireSequences(int $count): void
+    {
+        if ($count < 0 || $this->state['last_sequence'] + $count > 9007199254740991) { throw new StorageException('STORAGE_BUDGET_EXHAUSTED'); }
+        if ($count === 0) { return; }
+        $this->state['last_sequence'] += $count; $this->state['storage_schema'] = 2; $this->state['pruned_records'] = ($this->state['pruned_records'] ?? 0) + $count; $this->changed = true;
+    }
+
+    /**
+     * Use of the record, state and operational-row budgets for node:status and doctor; WARN from 80 %.
+     * @param array<array-key, mixed> $state
+     * @return array<string, int|string>
+     */
+    public static function usage(array $state, StorageLimits $limits): array
+    {
+        $bytes = strlen(StorageJson::encode($state)); $rows = array_sum(array_map('count', $state['tables']));
+        $ratio = max(count($state['records']) / $limits->maxRecords, $bytes / $limits->maxCheckpointBytes, $rows / $limits->maxOperationalRows);
+        return ['signed_records' => count($state['records']), 'max_records' => $limits->maxRecords, 'pruned_records' => $state['pruned_records'] ?? 0,
+            'state_bytes' => $bytes, 'max_state_bytes' => $limits->maxCheckpointBytes, 'operational_rows' => $rows, 'max_operational_rows' => $limits->maxOperationalRows,
+            'usage_percent' => (int) floor($ratio * 100), 'state' => $ratio >= 1 ? 'FAIL' : ($ratio >= 0.8 ? 'WARN' : 'PASS')];
     }
 
     /**
@@ -157,6 +200,8 @@ final class StorageTransaction
      * @return array<array-key, mixed>
      */
     public function newObjects(): array { return $this->newObjects; }
+    /** @return array<string, true> */
+    public function removedObjects(): array { return $this->removedObjects; }
     /**
      * @return array<array-key, mixed>
      */

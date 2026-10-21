@@ -3,13 +3,18 @@ declare(strict_types=1);
 
 namespace OnionServiceDiscovery\Storage;
 
-/** Local-filesystem MVCC checkpoint plus a checksummed prepare/commit journal. */
+/**
+ * Local-filesystem MVCC checkpoint plus a checksummed prepare/commit journal. Format 3 is format 2
+ * that may also hold storage schema 2 (records removed by bounded retention); format 2 stays
+ * writable but refuses such a commit until storage:migrate, and older releases refuse format 3.
+ */
 final class FilesystemStore implements StorageBackend
 {
     private readonly string $root;
     private readonly StorageLimits $limits;
     private readonly ?\Closure $faultHook;
-    private int $formatVersion = 2;
+    public const FORMAT = 3;
+    private int $formatVersion = self::FORMAT;
 
     public function __construct(string $directory, ?StorageLimits $limits = null, bool $create = false, ?\Closure $faultHook = null, private readonly bool $readOnly = false)
     {
@@ -43,12 +48,12 @@ final class FilesystemStore implements StorageBackend
                 $bytes = StorageJson::encode(StorageTransaction::emptyState());
                 $hash = hash('sha256', $bytes);
                 $this->writeImmutable($this->checkpointPath($hash), $bytes);
-                $this->atomicWrite($this->root . '/storage-version', '2');
+                $this->atomicWrite($this->root . '/storage-version', (string) self::FORMAT);
                 $this->atomicWrite($this->root . '/HEAD', StorageJson::encode(['generation' => 0, 'checkpoint' => $hash]));
                 $this->atomicWrite($this->root . '/journal.log', '');
             }
             $version = $this->readBounded($this->root . '/storage-version', 16);
-            if (!in_array($version, ['1','2'], true)) {
+            if (!in_array($version, ['1','2','3'], true)) {
                 throw new StorageException('STORAGE_VERSION_UNSUPPORTED');
             }
             $this->formatVersion = (int)$version;
@@ -61,6 +66,8 @@ final class FilesystemStore implements StorageBackend
 
     public function backendName(): string { return 'filesystem'; }
     public function formatVersion(): int { return $this->formatVersion; }
+    /** Whether bounded retention may remove signed records (format 3). */
+    public function supportsPruning(): bool { return $this->formatVersion >= 3; }
 
     /** Explicit local migration preserves format-1 recovery semantics before switching formats.
      * @return array<string,mixed>
@@ -70,7 +77,13 @@ final class FilesystemStore implements StorageBackend
         $store = new self($directory, faultHook: $faultHook, readOnly: true);
         return $store->withLock(function () use ($store): array {
             $version = $store->readBounded($store->root . '/storage-version', 16);
-            if ($version === '2') { $store->recover(false); return ['status' => 'UNCHANGED', 'backend_format' => 2]; }
+            if ($version === '3') { $store->recover(false); return ['status' => 'UNCHANGED', 'backend_format' => 3]; }
+            if ($version === '2') {
+                // Format 3 changes no written byte: it only allows storage schema 2 from now on.
+                $store->recover(false); $state = $store->loadCheckpoint($store->head());
+                $store->atomicWrite($store->root . '/storage-version', '3'); $store->formatVersion = 3;
+                return ['status' => 'MIGRATED', 'from_format' => 2, 'backend_format' => 3, 'generation' => $state['generation'], 'records' => count($state['records']), 'evidence_rewritten' => false];
+            }
             if ($version !== '1') { throw new StorageException('STORAGE_VERSION_UNSUPPORTED'); }
             $store->formatVersion = 1;
             $head = $store->head();
@@ -81,10 +94,10 @@ final class FilesystemStore implements StorageBackend
             }
             $store->recover(true);
             $store->fault('after_legacy_recovery');
-            $store->atomicWrite($store->root . '/storage-version', '2');
-            $store->formatVersion = 2;
+            $store->atomicWrite($store->root . '/storage-version', '3');
+            $store->formatVersion = 3;
             $store->fault('after_format_switch');
-            return ['status' => 'MIGRATED', 'from_format' => 1, 'backend_format' => 2, 'generation' => $state['generation'], 'records' => count($state['records']), 'evidence_rewritten' => false];
+            return ['status' => 'MIGRATED', 'from_format' => 1, 'backend_format' => 3, 'generation' => $state['generation'], 'records' => count($state['records']), 'evidence_rewritten' => false];
         }, forceWriter: true);
     }
 
@@ -103,6 +116,7 @@ final class FilesystemStore implements StorageBackend
                 throw new StorageException('STORAGE_BUDGET_EXHAUSTED');
             }
             $state = $transaction->state();
+            if ($state['storage_schema'] !== 1 && $this->formatVersion < 3) { throw new StorageException('STORAGE_MIGRATION_REQUIRED'); }
             $state['generation'] = $previousHead['generation'] + 1;
             $checkpointBytes = StorageJson::encode($state);
             if (strlen($checkpointBytes) > $this->limits->maxCheckpointBytes) {
@@ -129,6 +143,11 @@ final class FilesystemStore implements StorageBackend
             $this->atomicWrite($this->root . '/HEAD', StorageJson::encode($nextHead));
             $this->fault('after_head');
             $this->cleanCheckpoints($previousHead['checkpoint'], $checkpointHash);
+            // Only after HEAD names the new checkpoint; a crash before this leaves unreferenced objects, never a missing one.
+            foreach ($transaction->removedObjects() as $hash => $_) {
+                $path = $this->objectPath($hash);
+                if (is_file($path) && !is_link($path) && !unlink($path)) { throw new StorageException('STORAGE_ERROR'); }
+            }
             return $result;
         });
     }
@@ -168,6 +187,8 @@ final class FilesystemStore implements StorageBackend
             if (!is_string($contentHash) || preg_match('/\Asha256:[0-9a-f]{64}\z/D', $contentHash) !== 1) { throw new StorageException('STORAGE_ADDRESS_INVALID'); }
             $metadata = $state['records'][$contentHash] ?? null;
             if ($metadata === null) { continue; }
+            // A record that retention removed after this snapshot was read is absent, not corrupt.
+            if (!is_file($this->objectPath($metadata['object_hash'])) && !isset($this->snapshot()['records'][$contentHash])) { continue; }
             $wire = $this->readBounded($this->objectPath($metadata['object_hash']), 65536);
             if (!hash_equals($metadata['object_hash'], hash('sha256', $wire))) { throw new StorageException('STORAGE_CORRUPT'); }
             $result[$contentHash] = $wire;
@@ -189,7 +210,7 @@ final class FilesystemStore implements StorageBackend
                     throw new StorageException('STORAGE_CORRUPT');
                 }
             }
-            return ['backend' => 'filesystem', 'storage_schema' => 1, 'generation' => $state['generation'], 'records' => count($state['records']), 'integrity' => 'PASS'];
+            return ['backend' => 'filesystem', 'backend_format' => $this->formatVersion, 'storage_schema' => $state['storage_schema'], 'generation' => $state['generation'], 'records' => count($state['records']), 'pruned_records' => $state['pruned_records'] ?? 0, 'integrity' => 'PASS'];
         });
     }
 
@@ -299,11 +320,11 @@ final class FilesystemStore implements StorageBackend
             fclose($stream);
         }
         if ($pending !== null) {
-            if (($this->formatVersion === 2 && $head !== $pending['previous']) || ($head !== $pending['next'] && $head !== $pending['previous'])) {
+            if (($this->formatVersion >= 2 && $head !== $pending['previous']) || ($head !== $pending['next'] && $head !== $pending['previous'])) {
                 throw new StorageException('STORAGE_CORRUPT');
             }
         } elseif ($expected !== null && $head !== $expected) {
-            if ($this->formatVersion !== 2 || $head['generation'] + 1 !== $expected['generation']) { throw new StorageException('STORAGE_CORRUPT'); }
+            if ($this->formatVersion < 2 || $head['generation'] + 1 !== $expected['generation']) { throw new StorageException('STORAGE_CORRUPT'); }
             // Only a valid committed successor can repair a lagging HEAD.
             if (($lastCommittedPrevious ?? null) !== $head['checkpoint']) { throw new StorageException('STORAGE_CORRUPT'); }
             $this->loadCheckpoint($expected);

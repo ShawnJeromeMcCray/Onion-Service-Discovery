@@ -3,7 +3,12 @@ declare(strict_types=1);
 
 namespace OnionServiceDiscovery\Storage;
 
-/** Selected-backend-only PDO adapter with immutable rows and atomic cursor/state commits. */
+/**
+ * Selected-backend-only PDO adapter with immutable rows and atomic cursor/state commits. Schema
+ * version 2 adds the `pruned_records` counter, so bounded retention may remove signed records;
+ * version 1 stays writable but refuses such a commit until storage:migrate, and older releases
+ * refuse version 2.
+ */
 final class SQLiteStore implements StorageBackend
 {
     private readonly \PDO $database;
@@ -47,7 +52,7 @@ final class SQLiteStore implements StorageBackend
                 chmod($path, 0600);
                 $this->initialize();
             }
-            if ((int) $this->query('PRAGMA user_version')->fetchColumn() !== 1 || (int) $this->query('PRAGMA foreign_keys')->fetchColumn() !== 1) {
+            if (!in_array((int) $this->query('PRAGMA user_version')->fetchColumn(), [1, 2], true) || (int) $this->query('PRAGMA foreign_keys')->fetchColumn() !== 1) {
                 throw new StorageException('STORAGE_VERSION_UNSUPPORTED');
             }
             $this->snapshot();
@@ -70,6 +75,31 @@ final class SQLiteStore implements StorageBackend
     }
 
     public function backendName(): string { return 'sqlite'; }
+    /** Whether bounded retention may remove signed records (schema version 2). */
+    public function supportsPruning(): bool { return $this->schemaVersion() === 2; }
+    private function schemaVersion(): int { return (int) $this->query('PRAGMA user_version')->fetchColumn(); }
+
+    /** Explicit local migration 1 -> 2: adds the pruned-record counter; no record or row changes.
+     * @return array<string,mixed>
+     */
+    public static function migrateSchema(string $path): array
+    {
+        $store = new self($path);
+        try {
+            $store->database->exec('BEGIN IMMEDIATE');
+        } catch (\PDOException) { throw new StorageException('STORAGE_BUSY'); }
+        try {
+            $state = $store->readState();
+            if ($store->schemaVersion() === 2) { $store->database->exec('ROLLBACK'); return ['status' => 'UNCHANGED', 'backend_format' => 2]; }
+            $store->database->exec("INSERT INTO metadata(name,value) VALUES ('pruned_records',0)");
+            $store->database->exec('PRAGMA user_version=2');
+            $store->database->exec('COMMIT');
+        } catch (\Throwable $error) {
+            $store->rollbackQuietly();
+            throw $error instanceof StorageException ? $error : new StorageException('STORAGE_ERROR');
+        }
+        return ['status' => 'MIGRATED', 'from_format' => 1, 'backend_format' => 2, 'generation' => $state['generation'], 'records' => count($state['records']), 'evidence_rewritten' => false];
+    }
 
     /** Bound WAL cleanup without rewriting immutable history. Busy readers preserve the WAL.
      * @return array<string,int>
@@ -94,8 +124,8 @@ final class SQLiteStore implements StorageBackend
             $this->database->exec('CREATE TABLE operational_state (table_name TEXT NOT NULL, entry_key TEXT NOT NULL, value TEXT NOT NULL, PRIMARY KEY(table_name,entry_key)) WITHOUT ROWID');
             $this->database->exec('CREATE INDEX records_onion_revision ON records(onion, revision)');
             $this->database->exec('CREATE INDEX records_service_key_revision ON records(service_key, revision)');
-            $this->database->exec("INSERT INTO metadata(name,value) VALUES ('generation',0),('last_sequence',0)");
-            $this->database->exec('PRAGMA user_version=1');
+            $this->database->exec("INSERT INTO metadata(name,value) VALUES ('generation',0),('last_sequence',0),('pruned_records',0)");
+            $this->database->exec('PRAGMA user_version=2');
             $this->database->exec('COMMIT');
         } catch (\Throwable $error) {
             $this->rollbackQuietly();
@@ -133,6 +163,8 @@ final class SQLiteStore implements StorageBackend
                 return $result;
             }
             $state = $transaction->state();
+            $schemaVersion = $this->schemaVersion();
+            if ($state['storage_schema'] !== 1 && $schemaVersion !== 2) { throw new StorageException('STORAGE_MIGRATION_REQUIRED'); }
             if ($state['generation'] >= 9007199254740991 || strlen(StorageJson::encode($state)) > $this->limits->maxCheckpointBytes) {
                 throw new StorageException('STORAGE_BUDGET_EXHAUSTED');
             }
@@ -160,6 +192,12 @@ final class SQLiteStore implements StorageBackend
                 $insertRecord->execute(['hash' => $hash, 'object' => $metadata['object_hash'], 'type' => $metadata['record_type'], 'sequence' => $metadata['sequence'],
                     'service_key' => $document['service_identity_public_key'] ?? null, 'onion' => $document['onion'] ?? null, 'revision' => $document['revision'] ?? null]);
             }
+            // Bounded retention: a removed record's immutable object goes with it (one object per record).
+            $deleteRecord = $this->prepare('DELETE FROM records WHERE content_hash=:hash');
+            $deleteObject = $this->prepare('DELETE FROM immutable_objects WHERE object_hash=:object AND NOT EXISTS (SELECT 1 FROM records WHERE object_hash=:object)');
+            foreach (array_diff_key($previous['records'], $state['records']) as $hash => $metadata) {
+                $deleteRecord->execute(['hash' => $hash]); $deleteObject->execute(['object' => $metadata['object_hash']]);
+            }
             $this->fault('after_records');
             $set = $this->prepare('INSERT INTO operational_state(table_name,entry_key,value) VALUES (:table_name,:entry_key,:value) ON CONFLICT(table_name,entry_key) DO UPDATE SET value=excluded.value');
             $delete = $this->prepare('DELETE FROM operational_state WHERE table_name=:table_name AND entry_key=:entry_key');
@@ -177,6 +215,7 @@ final class SQLiteStore implements StorageBackend
             $metadata = $this->prepare('UPDATE metadata SET value=:value WHERE name=:name');
             $metadata->execute(['name' => 'generation', 'value' => $state['generation']]);
             $metadata->execute(['name' => 'last_sequence', 'value' => $state['last_sequence']]);
+            if ($schemaVersion === 2) { $metadata->execute(['name' => 'pruned_records', 'value' => $state['pruned_records'] ?? 0]); }
             $this->database->exec('COMMIT');
             $committed = true;
             $this->fault('after_commit');
@@ -219,11 +258,15 @@ final class SQLiteStore implements StorageBackend
     {
         $state = StorageTransaction::emptyState();
         $metadata = $this->query('SELECT name,value FROM metadata')->fetchAll(\PDO::FETCH_KEY_PAIR);
-        if (count($metadata) !== 2 || !isset($metadata['generation'], $metadata['last_sequence'])) {
+        // Schema version 2 has exactly one more metadata row, the pruned-record counter.
+        $schema = $this->schemaVersion();
+        if (!in_array($schema, [1, 2], true) || count($metadata) !== $schema + 1 || !isset($metadata['generation'], $metadata['last_sequence']) || ($schema === 2 && !isset($metadata['pruned_records']))) {
             throw new StorageException('STORAGE_CORRUPT');
         }
         $state['generation'] = (int) $metadata['generation'];
         $state['last_sequence'] = (int) $metadata['last_sequence'];
+        // The same backend-neutral state as the filesystem store: schema 2 once a record was pruned.
+        if ($schema === 2 && (int) $metadata['pruned_records'] > 0) { $state['storage_schema'] = 2; $state['pruned_records'] = (int) $metadata['pruned_records']; }
         $rows = $this->query('SELECT content_hash,object_hash,record_type,sequence FROM records ORDER BY content_hash LIMIT ' . ($this->limits->maxRecords + 1));
         foreach ($rows as $row) {
             $state['records'][$row['content_hash']] = ['object_hash' => $row['object_hash'], 'record_type' => $row['record_type'], 'sequence' => (int) $row['sequence']];
@@ -298,7 +341,7 @@ final class SQLiteStore implements StorageBackend
                     throw new StorageException('STORAGE_CORRUPT');
                 }
             }
-            return ['backend' => 'sqlite', 'storage_schema' => 1, 'generation' => $state['generation'], 'records' => count($state['records']), 'integrity' => 'PASS'];
+            return ['backend' => 'sqlite', 'backend_format' => $this->schemaVersion(), 'storage_schema' => $state['storage_schema'], 'generation' => $state['generation'], 'records' => count($state['records']), 'pruned_records' => $state['pruned_records'] ?? 0, 'integrity' => 'PASS'];
         } catch (\PDOException) {
             throw new StorageException('STORAGE_CORRUPT');
         }
