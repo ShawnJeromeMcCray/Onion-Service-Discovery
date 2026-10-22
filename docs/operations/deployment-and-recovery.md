@@ -154,9 +154,13 @@ the key's directory, outside the store and its backups, and is replaced atomical
   file, a crash between the store commit and the ledger write) is raised to the
   store's pointers first; no action is needed (`doctor` shows `BEHIND_STORE` or
   `NOT_PRESENT` meanwhile).
+- The guard only works while the ledger is newer than the restored store. When you
+  restore a store, keep the Node's current ledger: never copy an older ledger back
+  over it together with the store. Restore a ledger from backup only when the
+  current one is lost or damaged, and then from the newest copy you have.
 - A damaged ledger, a symlink, one open to group or others or one of another key stops
   signing with `SIGNING_LEDGER_INVALID`; it is never replaced silently. Restore it
-  from the backup kept with the key, or see the
+  from the newest backup kept with the key, or see the
   [incident runbook](incident-runbook.md#6-signing-ledger-ahead-of-the-store-or-damaged).
 
 After restoring an older store, keep the web server and the timers stopped and let
