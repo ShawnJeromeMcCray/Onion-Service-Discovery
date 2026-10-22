@@ -75,6 +75,7 @@ def main() -> int:
         ('php-direct-verification-controlled', php + ['node-php/tests/direct-verifier.php'], ROOT),
         ('php-storage-contract', php + ['node-php/tests/storage-conformance.php'], ROOT),
         ('php-storage-backup', php + ['node-php/tests/storage-backup.php'], ROOT),
+        ('php-signing-ledger', php + ['node-php/tests/signing-ledger.php'], ROOT),
         ('php-storage-archive', php + ['node-php/tests/storage-archive.php'], ROOT),
         ('php-storage-crash-recovery', php + ['node-php/tests/storage-crash.php'], ROOT),
         ('php-storage-format-migration', php + ['node-php/tests/storage-format-migration.php'], ROOT),

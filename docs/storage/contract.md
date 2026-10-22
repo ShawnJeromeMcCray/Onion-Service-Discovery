@@ -87,6 +87,13 @@ local observations, quarantine, source cursors/high-water marks and operational
 rows. Public interchange excludes never-published Service identities, can rebuild
 local admission sequences and restores no operational authority. Empty staging,
 whole-archive signature/hash/shape checks and explicit trust are mandatory.
+A restored store can be older than what the Node key already signed. The key's
+signing ledger (`KEY_PATH.signed`, beside the key and outside every store and
+backup) then stops `node:init` and `node:snapshot` before they sign a checkpoint
+generation or descriptor revision a second time, until `node:snapshot
+--adopt-signed-chain` re-admits the signed records it names; see
+[deployment and recovery](../operations/deployment-and-recovery.md#restoring-an-older-store-the-signing-ledger).
+The ledger is written only after the store committed the publication it records.
 Read-only backend mode rejects transactions, creates no database and performs no
 filesystem journal repair. HTTP and doctor use it; explicit storage:check can
 recover a pending journal. Filesystem format 2 commits in the journal before HEAD publication. A lagging

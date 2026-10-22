@@ -10,13 +10,23 @@ use OnionServiceDiscovery\Storage\PublicBlobStore;
 final class NodeInitializer
 {
     /**
+     * Signs the next Node descriptor revision when the capabilities changed. The signing ledger beside the
+     * Node key refuses a store older than what the key signed (SIGNED_DESCRIPTOR_AHEAD_OF_STORE).
      * @return array<array-key, mixed>
      */
     public static function initialize(NodeConfig $config, SignerProvider $signer, RecordVerifier $verifier): array
     {
-        if ($config->role === 'client-host' || $signer->role() !== 'node') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        if ($config->role === 'client-host' || $signer->role() !== 'node' || $config->nodeKeyPath === null) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        $ledger = SigningLedger::forKey($config->nodeKeyPath);
+        return $ledger->exclusive(static fn (): array => self::sign($config, $signer, $verifier, $ledger));
+    }
+    /**
+     * @return array<array-key, mixed>
+     */
+    private static function sign(NodeConfig $config, SignerProvider $signer, RecordVerifier $verifier, SigningLedger $ledger): array
+    {
         $store = $config->store(true); $blobs = new PublicBlobStore($config->exportPath, true);
-        $state = $store->snapshot(); $pointer = $state['tables']['node']['key:descriptor'] ?? null; $previous = null;
+        $state = $store->snapshot(); $ledger->reconcile($signer->publicKey(), $store, $verifier, $state); $pointer = $state['tables']['node']['key:descriptor'] ?? null; $previous = null;
         if ($pointer !== null) {
             $wire = $store->readRecord($pointer['hash']); if ($wire === null) { throw new ProtocolException('STORAGE_CORRUPT'); }
             $previous = $verifier->verifyWire($wire)->document();
@@ -26,10 +36,11 @@ final class NodeInitializer
         if ($config->features['mirror_directory']) { $capabilities = ['index.core.v1', 'sync.changes.v1', 'sync.snapshots.v1']; }
         sort($capabilities, SORT_STRING);
         if ($previous !== null && $previous->capabilities === $capabilities) { return ['status' => 'UNCHANGED', 'descriptor_hash' => $pointer['hash']]; }
+        $revision = (int) ($previous->descriptor_revision ?? 0) + 1;
         $descriptor = $verifier->verify($signer->signRecord((object) [
             'protocol' => 'Onion Service Discovery', 'protocol_version' => 1, 'record_type' => 'node_descriptor',
             'node_identity_public_key' => $signer->publicKey(), 'node_onion' => $config->nodeOnion,
-            'descriptor_revision' => ($previous->descriptor_revision ?? 0) + 1, 'previous_descriptor_hash' => $pointer['hash'] ?? null,
+            'descriptor_revision' => $revision, 'previous_descriptor_hash' => $pointer['hash'] ?? null,
             'supported_protocol_versions' => [1], 'capabilities' => $capabilities,
             'software' => (object) ['name' => 'Onion Service Discovery', 'version' => '0.1.0-dev'],
         ]));
@@ -37,6 +48,7 @@ final class NodeInitializer
             if ($tx->state()['generation'] !== $state['generation']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
             $tx->putRecord($descriptor); $tx->set('node', 'descriptor', ['hash' => $descriptor->contentHash]);
         });
+        $ledger->record($signer->publicKey(), 'descriptor', $revision, $descriptor->contentHash);
         // A Node that already published keeps the new descriptor for degraded serving too (D-045).
         PublishedState::save($store, $blobs, $verifier);
         return ['status' => 'INITIALIZED', 'descriptor_hash' => $descriptor->contentHash];

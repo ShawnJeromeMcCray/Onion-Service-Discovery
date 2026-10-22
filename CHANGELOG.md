@@ -13,6 +13,24 @@
   attests its build provenance for every merge to `main`; `doctor` on a Client Host
   checks the served client files against `build-manifest.json`
   (`CLIENT_ASSETS_MODIFIED`, `CLIENT_NOT_BUILT`).
+- A Discovery Node never signs a checkpoint generation or Node descriptor revision
+  it already signed, so restoring an older store backup no longer gets it
+  quarantined for equivocation. A signing ledger beside the Node key
+  (`KEY_PATH.signed`, owner-only, replaced atomically after each committed
+  publication) names the newest checkpoint and descriptor the key signed.
+  `node:init` and `node:snapshot` refuse a store behind it with
+  `SIGNED_CHAIN_AHEAD_OF_STORE` or `SIGNED_DESCRIPTOR_AHEAD_OF_STORE` and sign
+  nothing; a missing or older ledger (first run after upgrading, a crash after the
+  commit) is raised to the store by itself; a damaged or foreign one fails with
+  `SIGNING_LEDGER_INVALID`. `node:snapshot --adopt-signed-chain` continues from the
+  signed checkpoint and descriptor the ledger names (from the export directory and
+  the published-state copy), so the chain goes on at the ledger's generation plus
+  one; `SIGNED_CHAIN_UNRECOVERABLE` when they are gone. `doctor` and `node:status`
+  report `signing_ledger` (health-report schema updated; `doctor` fails with
+  `SIGNING_LEDGER_AHEAD_OF_STORE`), and export pruning keeps the ledger's checkpoint.
+  Concurrent `node:init` and `node:snapshot` runs now sign one at a time (a lock on
+  the key file). Tests that reused one Node key for several independent stores
+  now create one key per store.
 - Full blocker review (operators, Node core, browser client):
   - `manifest:install` makes `.well-known` world-readable whatever the umask; a
     missing or unreadable Manifest answers 404 `MANIFEST_NOT_INSTALLED`, and a Node
