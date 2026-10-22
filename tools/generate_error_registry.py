@@ -47,6 +47,8 @@ DESCRIPTIONS = {
     'SNAPSHOT_TIMER_STALE': 'doctor warning: the published checkpoint is older than two days although snapshots refresh daily; check the snapshot timer and run node:snapshot.',
     'PUBLISHER_SELF_VERIFICATION_FAILED': 'doctor warning: the last saved self-check through your own Onion failed or fetched a different Manifest; publisher:status names the cause and the fix.',
     'MANIFEST_NOT_INSTALLED': 'The front controller found no readable Manifest in node-php/public/.well-known: run manifest:install into this checkout, and keep .well-known readable (0755) for the web server user.',
+    'CLIENT_NOT_BUILT': 'doctor warning: this Client Host has no built browser client (web-local-search-client/dist/build-manifest.json); build it or install the development runtime package.',
+    'CLIENT_ASSETS_MODIFIED': 'doctor failure (D-028): a served browser client file is missing or differs from its build manifest; reinstall the verified package or rebuild from the reviewed source.',
     'PUBLISHER_TIMER_STALE': 'doctor warning: the last saved publisher check is older than 36 hours although the timer runs every six hours; check osd-publisher-check.timer.',
     'EVIDENCE_UNAVAILABLE': 'The browser keeps no pair of conflicting signed records for this Node, so there is nothing to save.',
     'PUBLISHER_BUSY': 'Another publisher command holds the lock on the same files; run it again when that command has finished.',

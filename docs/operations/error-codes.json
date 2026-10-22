@@ -155,6 +155,15 @@
    ],
    "meaning": "The snapshot checkpoint used for a membership check is not a snapshot descriptor signed with the expected Node key given for that Node; check the expected Node key."
   },
+  "CLIENT_ASSETS_MODIFIED": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor failure (D-028): a served browser client file is missing or differs from its build manifest; reinstall the verified package or rebuild from the reviewed source."
+  },
   "CLIENT_BUILD_UNAVAILABLE": {
    "cli_exit": [],
    "components": [
@@ -182,6 +191,15 @@
     "browser client"
    ],
    "meaning": "The client page lacks an element its script expects, so the served index.html does not match client.js; serve both from the same client build."
+  },
+  "CLIENT_NOT_BUILT": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: this Client Host has no built browser client (web-local-search-client/dist/build-manifest.json); build it or install the development runtime package."
   },
   "CLIENT_ORIGIN_INVALID": {
    "cli_exit": [

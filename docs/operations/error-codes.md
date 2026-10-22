@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-233 codes.
+235 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -30,10 +30,12 @@ for remedies.
 | `CANDIDATE_CLAIM_LOST` | Node worker | 3 | This worker’s 2-minute claim on the candidate expired and another worker run released it before the result was saved, so the result was dropped and the candidate is checked again later. |
 | `CANDIDATE_NOT_FOUND` | Node worker | 3 | The candidate is not queued on this Node; candidate:add queues it first. |
 | `CHECKPOINT_NODE_MISMATCH` | browser client, protocol | 3 | The snapshot checkpoint used for a membership check is not a snapshot descriptor signed with the expected Node key given for that Node; check the expected Node key. |
+| `CLIENT_ASSETS_MODIFIED` | doctor | 4 | doctor failure (D-028): a served browser client file is missing or differs from its build manifest; reinstall the verified package or rebuild from the reviewed source. |
 | `CLIENT_BUILD_UNAVAILABLE` | web routes | – | The Client Host answered 503 because a browser client file is missing from web-local-search-client/dist, is a symlink or exceeds 2 MiB; build it with npm --prefix web-local-search-client run build. |
 | `CLIENT_BUSY` | browser client | – | Another load, import or clear operation is still running in this page, so the new one was not started; wait for it or cancel it first. |
 | `CLIENT_CONFIGURATION_INVALID` | browser client | – | The browser client got an unusable source setup (over 16 Nodes, an unknown delivery profile or a change during a load) or a load request with no Node, over 16 Nodes or one Node twice. |
 | `CLIENT_MARKUP_INVALID` | browser client | – | The client page lacks an element its script expects, so the served index.html does not match client.js; serve both from the same client build. |
+| `CLIENT_NOT_BUILT` | doctor | 6 | doctor warning: this Client Host has no built browser client (web-local-search-client/dist/build-manifest.json); build it or install the development runtime package. |
 | `CLIENT_ORIGIN_INVALID` | configuration and status | 3 | An allowed_client_origins entry is not exactly http:// followed by a v3 Onion address (no https, port, path or trailing slash); the detail names the entry. |
 | `CLIENT_RECORD_BUDGET_EXHAUSTED` | browser client | – | Admitting these records would grow the browser’s local index beyond 10000 signed records, so none of them were added; clear the index before loading more. |
 | `CLOCK_INVALID` | Node worker, signing, web routes | 3, 4 | The system clock reports a time before 1970 or beyond the supported range (the year 9999 for signed timestamps), so the operation was refused; correct the system clock. |

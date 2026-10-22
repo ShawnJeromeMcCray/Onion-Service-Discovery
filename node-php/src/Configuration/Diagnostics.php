@@ -66,6 +66,11 @@ final class Diagnostics
         $checks['tor_transport_configuration'] = 'PASS'; // NodeConfig already restricts loopback SOCKS and finite timeout.
         $checks['server_search_disabled'] = $config->features['server_search'] ? 'WARN' : 'PASS';
         if ($config->features['server_search']) { $warnings[] = 'SERVER_SEARCH_ENABLED_QUERIES_SENT_TO_NODE'; }
+        if (in_array($config->role, ['client-host', 'combined'], true)) {
+            // D-028: the browser files this host serves must be exactly those its build manifest names.
+            $checks['client_assets'] = self::clientAssets(dirname(__DIR__, 3) . '/web-local-search-client/dist');
+            if ($checks['client_assets'] === 'WARN') { $warnings[] = 'CLIENT_NOT_BUILT'; } elseif ($checks['client_assets'] === 'FAIL') { $failures[] = 'CLIENT_ASSETS_MODIFIED'; }
+        }
         if ($config->features['visitor_sources'] ?? false) { $checks['visitor_source_relay'] = 'WARN'; $warnings[] = 'VISITOR_SOURCE_RELAY_ENABLED_OUTBOUND_TO_VISITOR_CHOSEN_NODES'; }
         if ($config->role !== 'publisher') { $checks['export_directory'] = !is_link($config->exportPath) && is_dir($config->exportPath) && (fileperms($config->exportPath) & 0077) === 0 ? 'PASS' : 'FAIL'; }
         if ($config->role !== 'publisher' && ($checks['export_directory'] ?? null) === 'PASS') {
@@ -208,5 +213,23 @@ final class Diagnostics
         }
         $add('remote_administration', 'PASS', 'OSD has no remote administration interface; every change is a local command.');
         return $findings;
+    }
+    /** WARN when the client is not built, FAIL when a served file is missing or differs from build-manifest.json. */
+    private static function clientAssets(string $dist): string
+    {
+        $manifestPath = $dist . '/build-manifest.json';
+        if (is_link($dist) || !is_file($manifestPath)) { return 'WARN'; }
+        try {
+            $raw = file_get_contents($manifestPath, false, null, 0, 65537);
+            if ($raw === false || strlen($raw) > 65536) { return 'FAIL'; }
+            $manifest = json_decode($raw, true, 8, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) { return 'FAIL'; }
+        if (!is_array($manifest) || !is_array($manifest['files'] ?? null) || $manifest['files'] === [] || count($manifest['files']) > 64) { return 'FAIL'; }
+        foreach ($manifest['files'] as $file) {
+            if (!is_array($file) || !is_string($file['file'] ?? null) || preg_match('/\A[a-zA-Z0-9][a-zA-Z0-9.-]{0,63}\z/D', $file['file']) !== 1 || !is_string($file['sha256'] ?? null) || !is_int($file['bytes'] ?? null)) { return 'FAIL'; }
+            $path = $dist . '/' . $file['file'];
+            if (is_link($path) || !is_file($path) || filesize($path) !== $file['bytes'] || hash_file('sha256', $path) !== $file['sha256']) { return 'FAIL'; }
+        }
+        return 'PASS';
     }
 }

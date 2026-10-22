@@ -5,11 +5,15 @@ spec=importlib.util.spec_from_file_location('candidate_checker',Path(__file__).p
 class CandidateStructureTests(unittest.TestCase):
  def setUp(self):self.temp=tempfile.TemporaryDirectory();self.path=Path(self.temp.name)/'candidate.tar.gz'
  def tearDown(self):self.temp.cleanup()
- def archive(self,tamper=False,traversal=False,bad_sbom=False,symlink=False,profile='source-browser-v1',vendor=(),preview=True):
+ def archive(self,tamper=False,traversal=False,bad_sbom=False,symlink=False,profile='source-browser-v1',vendor=(),preview=True,extra=()):
   metadata={'source_commit':'0'*40,'production_approved':False,'artifact_profile':profile}
-  if profile=='runtime-v1':metadata['unsigned_development_preview']=preview
-  files={'app.txt':b'SYNTHETIC ONLY, never execute','release/BUILD-METADATA.json':json.dumps(metadata).encode(),'release/SBOM.cdx.json':json.dumps({'bomFormat':'CycloneDX','specVersion':'1.6','version':1,'components':[]}if not bad_sbom else {'bad':'schema'}).encode()}
+  if profile in {'runtime-v1','static-client-v1'}:metadata['unsigned_development_preview']=preview
+  files={} if profile=='static-client-v1' else {'app.txt':b'SYNTHETIC ONLY, never execute'}
+  files|={'release/BUILD-METADATA.json':json.dumps(metadata).encode(),'release/SBOM.cdx.json':json.dumps({'bomFormat':'CycloneDX','specVersion':'1.6','version':1,'components':[]}if not bad_sbom else {'bad':'schema'}).encode()}
   for name in vendor:files['node-php/vendor/'+name]=b'<?php // SYNTHETIC ONLY'
+  if profile=='static-client-v1':
+   for name in ('index.html','client.js','verifier-worker.js','build-manifest.json'):files['web-local-search-client/dist/'+name]=b'SYNTHETIC ONLY'
+  for name in extra:files[name]=b'SYNTHETIC ONLY'
   if profile=='runtime-v1':files['release/DEVELOPMENT-PREVIEW.txt']=b'UNSIGNED DEVELOPMENT PREVIEW'
   files['release/FILE-MANIFEST.json']=json.dumps({name:hashlib.sha256(body).hexdigest()for name,body in files.items()}).encode()
   if tamper:files['app.txt']=b'Replaced after manifest construction'
@@ -49,5 +53,13 @@ class CandidateStructureTests(unittest.TestCase):
   with self.assertRaisesRegex(ValueError,'profile rejected'):module.verify(self.path)
  def test_source_profile_with_dependencies_rejected(self):
   self.archive(vendor=self.RUNTIME)
+  with self.assertRaisesRegex(ValueError,'profile rejected'):module.verify(self.path)
+ def test_static_client_profile_holds_only_the_browser_bundle(self):
+  self.archive(profile='static-client-v1');self.assertEqual('static-client-v1',module.verify(self.path)['artifact_profile'])
+ def test_static_client_profile_with_server_code_rejected(self):
+  self.archive(profile='static-client-v1',extra=('node-php/public/index.php',))
+  with self.assertRaisesRegex(ValueError,'profile rejected'):module.verify(self.path)
+ def test_static_client_profile_must_be_marked_as_preview(self):
+  self.archive(profile='static-client-v1',preview=False)
   with self.assertRaisesRegex(ValueError,'profile rejected'):module.verify(self.path)
 if __name__=='__main__':unittest.main(verbosity=2)

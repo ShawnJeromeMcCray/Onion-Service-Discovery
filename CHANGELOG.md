@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Owner decisions of 2026-10-22: D-003 (current Tor Browser desktop and Android at
+  Standard and Safer), D-026 (default source list stays empty until Nodes pass the
+  drafted admission process in `docs/governance/source-node-admission.md`), D-028,
+  D-040 (retention as implemented), D-041 (current budgets as development
+  defaults), D-042 (per-request Tor isolation as implemented), D-043 (no HTTP
+  compression) and a hard guard against re-signing a generation (D-052).
+- D-028: CI builds a reproducible static client bundle
+  (`onion-service-discovery-static-client.tar.gz`, profile `static-client-v1`) and
+  attests its build provenance for every merge to `main`; `doctor` on a Client Host
+  checks the served client files against `build-manifest.json`
+  (`CLIENT_ASSETS_MODIFIED`, `CLIENT_NOT_BUILT`).
 - Full blocker review (operators, Node core, browser client):
   - `manifest:install` makes `.well-known` world-readable whatever the umask; a
     missing or unreadable Manifest answers 404 `MANIFEST_NOT_INSTALLED`, and a Node
