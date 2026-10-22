@@ -13,11 +13,11 @@ $dataset=json_decode(file_get_contents($project.'/protocol/test-vectors/browser-
 $records=array_map($verifier->verify(...),json_decode(base64_decode($dataset->sources[0]->chunk_base64)));
 $root=sys_get_temp_dir().'/osd-search-http-'.bin2hex(random_bytes(12));mkdir($root,0700);
 try{
- $signer=ProtectedFileSigner::create($root.'/node.key','node','TEST ONLY No-JS HTTP Node passphrase',$verifier);
  foreach(['filesystem','sqlite'] as $backend){foreach([false,true] as $enabled){
-  $dir=$root.'/'.$backend.'-'.(int)$enabled;mkdir($dir,0700);
+  // One Node key per store: a key's signing ledger refuses a second, independent chain.
+  $dir=$root.'/'.$backend.'-'.(int)$enabled;mkdir($dir,0700);$signer=ProtectedFileSigner::create($dir.'/node.key','node','TEST ONLY No-JS HTTP Node passphrase',$verifier);
   $config=json_decode(file_get_contents(__DIR__.'/../config/combined.example.json'),true);
-  $config['storage']=['backend'=>$backend,'path'=>$dir.'/data'];$config['export_path']=$dir.'/exports';$config['node']['key_path']=$root.'/node.key';
+  $config['storage']=['backend'=>$backend,'path'=>$dir.'/data'];$config['export_path']=$dir.'/exports';$config['node']['key_path']=$dir.'/node.key';
   $config['features']['server_search']=$enabled;$config['features']['mirror_directory']=true;
   file_put_contents($dir.'/config.json',json_encode($config));chmod($dir.'/config.json',0600);
   $node=NodeConfig::load($dir.'/config.json');NodeInitializer::initialize($node,$signer,$verifier);$store=$node->store();

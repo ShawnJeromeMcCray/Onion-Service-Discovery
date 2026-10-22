@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-233 codes.
+239 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -170,10 +170,16 @@ for remedies.
 | `SERVER_SEARCH_INDEX_UNAVAILABLE_OR_CORRUPT` | doctor | 4 | doctor: server search is on, but its index cannot be loaded because it is missing, stale or corrupt, so the search page answers 503; rebuild it with node:snapshot --rebuild-derived. |
 | `SERVICE_INDEX_NOT_READY` | web routes | – | This Node has not yet published a snapshot with the current (version 2) service lookup index, so service lookups answer 503; the operator runs node:snapshot. |
 | `SIGNATURE_INVALID` | browser client, protocol | 3 | The signature does not verify; the record was changed after signing or signed by another key. |
+| `SIGNED_CHAIN_AHEAD_OF_STORE` | Node worker | 4 | This Node key already signed a newer snapshot checkpoint than the store holds (typically a restored older backup), so signing stops instead of publishing a conflicting generation that peers would quarantine; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain. |
+| `SIGNED_CHAIN_UNRECOVERABLE` | Node worker | 4 | node:snapshot --adopt-signed-chain cannot find the checkpoint or Node descriptor the signing ledger names in the export directory, or it is not exactly what this key signed; restore a newer backup of the store instead. |
+| `SIGNED_DESCRIPTOR_AHEAD_OF_STORE` | Node worker | 4 | This Node key already signed a newer Node descriptor revision than the store holds (typically a restored older backup), so signing stops; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain. |
 | `SIGNER_BINDING_MISMATCH` | Node worker | 3 | The last published snapshot was signed by another Node key than the one unlocked, so node:snapshot refused to publish; use the Node key that signed this store’s snapshots. |
 | `SIGNER_KEY_MISMATCH` | signing | 4 | The record names another public key for its signer (new_public_key with --rotation-confirmation) than the key in this key file, so record:sign signed nothing; sign with the key the record names. |
 | `SIGNER_ROLE_INVALID` | signing | 4 | The key role is neither service nor node, so key:create or record:sign did nothing. |
 | `SIGNER_ROLE_MISMATCH` | Node worker, signing | 3, 4 | The key role cannot sign this record type (service keys sign Manifests, rotations and migrations; Node keys sign Node descriptors, observations and snapshots), or --rotation-confirmation was used on another record. |
+| `SIGNING_LEDGER_AHEAD_OF_STORE` | doctor | 4 | doctor failure: the store is older than what this Node key already signed (a restored backup?), so node:init and node:snapshot refuse to sign; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain. |
+| `SIGNING_LEDGER_INVALID` | Node worker, doctor | 4 | The signing ledger beside the Node key (KEY_PATH.signed) is damaged, a symlink, open to group or others or belongs to another key, so signing stops; it is never replaced silently. See the incident runbook. |
+| `SIGNING_LEDGER_UNAVAILABLE` | Node worker | 4 | The signing ledger beside the Node key could not be locked, read or written; the Node key directory must be a real directory the worker may write and not writable by others. |
 | `SNAPSHOT_CHUNK_HASH_INVALID` | browser client, protocol | 3 | A snapshot chunk’s size or hash does not match the signed checkpoint, so the chunk was rejected. |
 | `SNAPSHOT_INCOMPLETE` | CLI, browser client, protocol | 3 | A snapshot chunk is missing; the snapshot was not used. |
 | `SNAPSHOT_NOT_PUBLISHED` | doctor | 6 | doctor: directory mirroring is on but no snapshot was published yet (node:snapshot). |

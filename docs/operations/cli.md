@@ -45,6 +45,13 @@ its store counts plus identity, snapshot generation and last direct check and
 sync. While the store cannot be read it fails with the store's error code (exit
 4) and adds the Node card and a `next_action` from the
 [incident runbook](incident-runbook.md#4-store-corruption-or-an-interrupted-write).
+With a readable store, `status CONFIG` and `doctor CONFIG` also report
+`signing_ledger`, the Node key's signing ledger compared with the store:
+`CONSISTENT`, `BEHIND_STORE` or `NOT_PRESENT` (the next signing run raises or
+writes it), `AHEAD_OF_STORE` (the store is older than what the key signed: `doctor`
+fails with `SIGNING_LEDGER_AHEAD_OF_STORE`, `status` exits 6, and `next_action`
+names `--adopt-signed-chain`), `INVALID` (signing stops), `NOT_CHECKED` or
+`NOT_APPLICABLE`; see [signed chain](#signed-chain-after-a-restore).
 `status CONFIG --check` prints the full status page facts and exits 0 when
 nothing needs attention, 6 while waiting or degraded, 4 on an error or conflict
 and while the Node's store cannot be read. Use separate
@@ -65,7 +72,9 @@ changes the SQLite journal mode: a pending recovery is reported as
 `STORAGE_RECOVERY_REQUIRED` with exit 6.
 `storage:backup`/`backup:create` captures trusted private records and operational
 state; `backup:verify FILE` validates it without restoring. `storage:restore`
-requires a fresh staging path and `--trusted-private-backup`.
+requires a fresh staging path and `--trusted-private-backup`. A Node whose
+restored store is older than its last publication continues with
+`node:snapshot --adopt-signed-chain` ([signed chain](#signed-chain-after-a-restore)).
 `db:migrate BACKEND PATH` reports the storage schema and whether record pruning
 is enabled, without mutation; there is no invented migration from an unknown
 schema. Future migrations need explicit code, fixtures and review.
@@ -340,6 +349,28 @@ discovery and the optional announcement switch; see
 reconstructs derived exports from verified records and signs a new generation.
 Ordinary publication fails on corrupted exports. See [server search](server-search.md)
 for cache preparation, limits and query privacy.
+
+## Signed chain after a restore
+
+`node:init` and `node:snapshot` never sign a checkpoint generation or Node
+descriptor revision the Node key already signed. The key's signing ledger,
+`KEY_PATH.signed` (owner-only, beside the key, written atomically after each
+committed publication), names the newest of each. When the store is behind it,
+for example after `storage:restore` of an older backup, both commands fail with
+`SIGNED_CHAIN_AHEAD_OF_STORE` or `SIGNED_DESCRIPTOR_AHEAD_OF_STORE` (exit 4) and
+sign nothing. A missing or older ledger is raised to the store automatically; a
+damaged one or one of another key fails with `SIGNING_LEDGER_INVALID` and is
+never replaced.
+
+`node:snapshot CONFIG --passphrase-file PRIVATE_FILE --adopt-signed-chain` takes
+the checkpoint the ledger names from the export directory and, if the ledger's
+descriptor revision is ahead, the Node descriptor from the published-state copy,
+verifies that this key signed exactly those, points the store at them and
+publishes: the new checkpoint is the ledger's generation plus one. The output adds
+`adopted_signed_chain` (`ADOPTED` or `CURRENT` for `checkpoint` and
+`descriptor`). A record that is gone fails with `SIGNED_CHAIN_UNRECOVERABLE`;
+restore a newer backup then. It combines with `--rebuild-derived`. See
+[deployment and recovery](deployment-and-recovery.md#restoring-an-older-store-the-signing-ledger).
 
 `sync:peer-step` may return `PROGRESS` with phase `CHECKPOINT_CHAIN` after a long
 absence. Run another scheduled bounded step after the peer retry time. This
