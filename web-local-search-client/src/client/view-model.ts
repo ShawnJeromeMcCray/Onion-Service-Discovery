@@ -123,9 +123,16 @@ function searchFields(row:ServiceRow):{normalized:string;name:string} {
   const cached=searchTexts.get(input);
   if(cached!==undefined)return cached;
   if(searchTexts.size>=SEARCH_CACHE_LIMIT)searchTexts.clear();
-  const fields={normalized:searchTextV1(input),name:searchTextV1(row.name).split(/\s+/u).filter(Boolean).join(' ')};
+  const fields={normalized:searchTextV1(input),name:normalizedName(row.name)};
   searchTexts.set(input,fields);
   return fields;
+}
+const names=new Map<string,string>();
+function normalizedName(name:string):string {
+  const cached=names.get(name); if(cached!==undefined)return cached;
+  if(names.size>=SEARCH_CACHE_LIMIT)names.clear();
+  const value=searchTextV1(name).split(/\s+/u).filter(Boolean).join(' '); names.set(name,value);
+  return value;
 }
 /** Leading ASCII punctuation does not move a name to the front of the list. */
 const LEADING_PUNCTUATION=/^[\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]+/u;
@@ -140,7 +147,8 @@ export function localSearch(services:readonly ServiceRow[],query:string,language
   const ranked:{row:ServiceRow;tier:number;sortName:string}[]=[];
   for(const row of services) {
     if(row.status==='WITHDRAWN'||(language!==''&&!row.languages.includes(language))||(category!==''&&!row.categories.includes(category))||(adult==='hide'&&row.categories.includes('adult'))) continue;
-    const fields=searchFields(row);
+    // An empty query needs only the normalized name for ordering, not the full search text.
+    const fields=terms.length===0?{normalized:'',name:normalizedName(row.name)}:searchFields(row);
     if(!terms.every(term=>fields.normalized.includes(term))) continue;
     const tier=terms.length===0||fields.name===phrase?0:fields.name.startsWith(phrase)?1:terms.every(term=>fields.name.includes(term))?2:3;
     ranked.push({row,tier,sortName:fields.name.replace(LEADING_PUNCTUATION,'')});

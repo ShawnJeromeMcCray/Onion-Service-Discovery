@@ -1,7 +1,7 @@
 import { localSearch, metadataWarnings, pinNameMatcher, type AdultVisibility, type ClientView, type LocalPin } from './view-model.ts';
 import { CATEGORY_IDS, CATEGORY_LABELS } from '../protocol/category-id.ts';
 import { groupLead, groupSimilarResults } from './result-groups.ts';
-import { importedPinMatcher, lookAlikeEntries, lookAlikePins, pinLookAlikeMatcher } from './look-alike-names.ts';
+import { importedPinMatcher, lookAlikeEntries, lookAlikePins, pinLookAlikeMatcher, sameNameEntries } from './look-alike-names.ts';
 import { parseStrictJson } from '../protocol/strict-json.ts';
 import { serializePins, type PinImportStatus } from './pins.ts';
 import { operationMessage, sourceMessage } from './messages.ts';
@@ -10,7 +10,7 @@ import { CLIENT_VERSION, PROTOCOL_VERSION } from './version.ts';
 import { keyFingerprint } from '../protocol/key-fingerprint.ts';
 interface SourceStatus {onion:string;status:string;nodeKey:string|null;generation:number|null;createdAt:string|null;error:string|null;baselineHistoryProven:boolean;evidenceAvailable:boolean;}
 interface VisitorSource {onion:string;expectedKey:string;}
-interface ViewMessage {type:'view';view:ClientView;sources:SourceStatus[];synthetic:boolean;busy:boolean;witnessCount:number;visitorSources:VisitorSource[];}
+interface ViewMessage {type:'view';view:ClientView;viewVersion:number;sources:SourceStatus[];synthetic:boolean;busy:boolean;witnessCount:number;visitorSources:VisitorSource[];}
 type WorkerMessage=ViewMessage|{type:'evidence';onion:string;wires:string[]}|{type:'error';code:string;op:string;origin:'profile'|'backup'|null}|{type:'visitor-error';code:string}|{type:'pin-preview';pins:{pin:LocalPin;status:PinImportStatus}[]}|{type:'pins-restored';origin:'profile'|'backup';added:number;updated:number;skipped:number}|{type:'progress';onion:string;records:number;total:number};
 const storageKey='onion-service-discovery-pins-v1';
 const sourceStorageKey='onion-service-discovery-sources-v1';
@@ -18,7 +18,7 @@ const visitorErrors:{[code:string]:string}={ADDRESS_INVALID:'Check the onion add
 let configuredSourceCount=0; let renderedVisitorSources='';
 let lastOperation:'load'|'import'|null=null; let wasBusy=false; let pinStates=new Map<string,string>();
 const worker=new Worker(new URL('verifier-worker.js',document.baseURI),{type:'module'});
-let view:ClientView={services:[],pins:[],recordCount:0,pendingCount:0}; let synthetic=false; let busy=false; let pendingPinImport:ArrayBuffer|null=null;
+let view:ClientView={services:[],pins:[],recordCount:0,pendingCount:0}; let shownViewVersion=-1; let synthetic=false; let busy=false; let pendingPinImport:ArrayBuffer|null=null;
 // Saved pins are overwritten only after they were restored: an empty first view or a failed
 // restore must never replace them.
 let profilePins:'none'|'pending'|'restored'|'failed'='none';
@@ -90,7 +90,7 @@ function renderResults(resetPage=true):void {
   resultPage=Math.min(resultPage,Math.max(0,Math.ceil(groups.length/pageSize)-1));
   const pinnedKeys=new Set(view.pins.map(item=>item.pin.genesisKey)); const sameName=pinNameMatcher(view.pins.map(item=>item.pin));
   // D-024: confusable-skeleton comparison over the whole loaded index (each name reduced once per view); names are never changed.
-  const looksLikePinned=pinLookAlikeMatcher(view.pins.map(item=>item.pin),view.services); const lookAlike=lookAlikeEntries(view.services);
+  const looksLikePinned=pinLookAlikeMatcher(view.pins.map(item=>item.pin),view.services); const lookAlike=lookAlikeEntries(view.services); const sharedName=sameNameEntries(view.services);
   for(const group of groups.slice(resultPage*pageSize,(resultPage+1)*pageSize)) {
     const row=groupLead(group,pinnedKeys);
     const pinned=pinnedKeys.has(row.genesisKey);
@@ -100,6 +100,8 @@ function renderResults(resetPage=true):void {
     const resembled=looksLikePinned(row);
     if(resembled!==undefined) card.append(notice('danger','Name looks like your pinned “'+resembled+'”, but a different identity key. This is not the Service you pinned; compare the key and the onion address.'));
     for(const warning of metadataWarnings(row.name,row.description)) card.append(notice('attention',warning));
+    // An exact copy of a name is at least as misleading as a look-alike: whoever sorts first leads the card.
+    if(sharedName.has(row.genesisKey)) card.append(notice('attention','Another entry uses the same name under a different identity key. Names are self-declared; compare the full Onion and identity key before you visit or pin.'));
     if(lookAlike.has(row.genesisKey)) card.append(notice('attention','The name looks like the name of another entry with a different identity key. Names are self-declared; compare the full Onion and identity key.'));
     if(row.onion!==null) card.append(text('p',row.onion,'onion-address'));
     const tags=text('div','','tags'); for(const tag of [...row.categories,...row.languages]) tags.append(text('span',tag,'tag')); card.append(tags);
@@ -266,14 +268,19 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
   }
   el('client-startup-notice').hidden=true;
   const focus=focusKeyNow();
+  // Status-only updates carry the same view: the language list, pins and results then stay as they are.
+  const loaded=message.sources.filter(source=>['COMPLETE','STALE','PARTIAL'].includes(source.status)).map(source=>source.onion);
+  const viewChanged=message.viewVersion!==shownViewVersion||message.synthetic!==synthetic||loaded.join(' ')!==loadedSources.join(' '); shownViewVersion=message.viewVersion;
   view=message.view; synthetic=message.synthetic; busy=message.busy; el('synthetic-notice').hidden=!synthetic;
-  loadedSources=message.sources.filter(source=>['COMPLETE','STALE','PARTIAL'].includes(source.status)).map(source=>source.onion);
+  loadedSources=loaded;
   for(const id of ['load-sources','load-demo','clear-index','forget-all']) el<HTMLButtonElement>(id).disabled=busy;
   el<HTMLButtonElement>('cancel-load').disabled=!busy; el('record-count').textContent=view.recordCount+' signed records';
-  const language=el<HTMLSelectElement>('language'); const selected=language.value; const options=[...new Set(view.services.flatMap(row=>row.languages))].sort(); language.replaceChildren();
-  const all=document.createElement('option'); all.value=''; all.textContent='All languages'; language.append(all);
-  for(const value of options) { const option=document.createElement('option'); option.value=value; option.textContent=value; language.append(option); } language.value=options.includes(selected)?selected:'';
-  renderVisitorSources(message.visitorSources); renderSources(message.sources); renderPins(); renderResults(false); persistPins();
+  if(viewChanged) {
+    const language=el<HTMLSelectElement>('language'); const selected=language.value; const options=[...new Set(view.services.flatMap(row=>row.languages))].sort(); language.replaceChildren();
+    const all=document.createElement('option'); all.value=''; all.textContent='All languages'; language.append(all);
+    for(const value of options) { const option=document.createElement('option'); option.value=value; option.textContent=value; language.append(option); } language.value=options.includes(selected)?selected:'';
+  }
+  renderVisitorSources(message.visitorSources); renderSources(message.sources); if(viewChanged) { renderPins(); renderResults(false); persistPins(); }
   // The status line changes when work starts or ends, not on every update, and says what actually happened.
   if(busy&&!wasBusy) operation(lastOperation==='load'?'Loading generic signed data. You can keep searching the existing local index.':'Checking the signatures of the imported records.');
   if(!busy&&wasBusy) { const summary=finishedSummary(message.sources,message.witnessCount); operation(summary); announce(summary); }
@@ -398,5 +405,5 @@ function verifierStopped():void {
 worker.addEventListener('error',event=>{event.preventDefault();verifierStopped();});
 worker.addEventListener('messageerror',verifierStopped);
 // Scripting runs: show the application. Without it, only the explanation and the server-search option remain.
-el('app').hidden=false; el('client-version').textContent='Client '+CLIENT_VERSION+' · protocol version '+PROTOCOL_VERSION;
+el('app').hidden=false; el('client-startup-notice').hidden=true; el('client-version').textContent='Client '+CLIENT_VERSION+' · protocol version '+PROTOCOL_VERSION;
 void configure();

@@ -116,7 +116,11 @@ fault tests. Role-restricted encrypted signing, zero-renewal revision preparatio
 withdrawal, countersigned rotation, migration and atomic manifest installation
 are executable. Tor-only transport, periodic candidates, local direct checks,
 resumable peer snapshots, remote provenance retention and signed public exports
-preserve local-vs-remote authority. Never-published identities are excluded from
+preserve local-vs-remote authority. Bounded checkpoint retention keeps the store
+from filling up: `node:maintain` removes own checkpoints beyond the newest 256 and
+peer checkpoints no anchor, pending sync, recent witness or conflict needs (storage
+schema 2 after `storage:migrate`); a peer whose large snapshot changes faster than
+it can be fetched is still verified to the end. Never-published identities are excluded from
 public exports; trusted private backups retain their owner-controlled state.
 
 The browser bundles all code/dependencies locally, supports a generic Client Host

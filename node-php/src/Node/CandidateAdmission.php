@@ -33,11 +33,15 @@ final class CandidateAdmission
             return false;
         }
         if (count($tx->state()['tables']['candidates']) >= self::MAX_QUEUE) { return false; }
-        $budget = self::window($tx->get('maintenance', 'candidate-admissions'), $now);
-        if ($budget === null) { return false; }
+        $previous = $tx->get('maintenance', 'candidate-admissions');
+        $budget = self::window($previous, $now);
         $bucket = 'bucket-' . (hexdec(substr(hash('sha256', $source), 0, 2)) % self::SOURCE_BUCKETS);
         $used = $budget['sources'][$bucket] ?? 0;
-        if ($budget['count'] >= self::MAX_ADMISSIONS || $used >= self::MAX_SOURCE_BUCKET_ADMISSIONS) { return false; }
+        if ($budget['count'] >= self::MAX_ADMISSIONS || $used >= self::MAX_SOURCE_BUCKET_ADMISSIONS) {
+            // Keep a window restarted after a clock rollback; otherwise a refusal writes nothing.
+            if ($budget['start'] !== ($previous['start'] ?? null)) { $tx->set('maintenance', 'candidate-admissions', $budget); }
+            return false;
+        }
         ++$budget['count']; $budget['sources'][$bucket] = $used + 1;
         $tx->set('maintenance', 'candidate-admissions', $budget);
         $tx->set('candidates', $onion->hostname, ['state' => 'QUEUED', 'attempts' => 0, 'next_attempt' => 0, 'lease_until' => 0, 'claim' => null, 'sources' => [$source], 'error' => null]);
@@ -47,17 +51,21 @@ final class CandidateAdmission
     public static function claimBudget(StorageTransaction $tx, int $now): bool
     {
         self::time($now);
-        $budget = self::window($tx->get('maintenance', 'candidate-work'), $now);
-        if ($budget === null || $budget['count'] >= self::MAX_WORK) { return false; }
+        $previous = $tx->get('maintenance', 'candidate-work');
+        $budget = self::window($previous, $now);
+        if ($budget['count'] >= self::MAX_WORK) {
+            if ($budget['start'] !== ($previous['start'] ?? null)) { $tx->set('maintenance', 'candidate-work', $budget); }
+            return false;
+        }
         ++$budget['count']; $tx->set('maintenance', 'candidate-work', $budget);
         return true;
     }
 
     /**
      * @param array<array-key,mixed>|null $previous
-     * @return array<array-key,mixed>|null
+     * @return array<array-key,mixed>
      */
-    private static function window(?array $previous, int $now): ?array
+    private static function window(?array $previous, int $now): array
     {
         if ($previous !== null) {
             if (count($previous) !== 4 || !is_int($previous['start'] ?? null) || !is_int($previous['last_seen'] ?? null) ||
@@ -71,7 +79,9 @@ final class CandidateAdmission
                     !is_int($count) || $count < 1 || $count > self::MAX_SOURCE_BUCKET_ADMISSIONS) { throw new StorageException('STORAGE_CORRUPT'); }
             }
         }
-        if ($previous !== null && $now < $previous['last_seen']) { return null; }
+        // The clock went back (it ran ahead before): restart the window now and count it as full, so a rollback
+        // never grants extra admissions, yet work resumes one window later instead of after the clock catches up.
+        if ($previous !== null && $now < $previous['last_seen']) { return ['start' => $now, 'last_seen' => $now, 'count' => self::MAX_ADMISSIONS, 'sources' => []]; }
         if ($previous === null || $now - $previous['start'] >= self::WINDOW_SECONDS) {
             return ['start' => $now, 'last_seen' => $now, 'count' => 0, 'sources' => []];
         }

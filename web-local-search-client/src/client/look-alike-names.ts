@@ -46,6 +46,12 @@ function lookAlikeKeys(entries:readonly {key:string;forms:NameForms}[]):Set<stri
 export function lookAlikeEntries(rows:readonly ServiceRow[]):ReadonlySet<string> {
   return lookAlikeKeys(rows.filter(row=>row.status==='PUBLISHED').map(row=>({key:row.genesisKey,forms:formsOf(row)})));
 }
+/** Identity keys of published entries whose name is the same name as another published entry's (another key by construction). */
+export function sameNameEntries(rows:readonly ServiceRow[]):ReadonlySet<string> {
+  const keys=new Map<string,string[]>();
+  for(const row of rows) if(row.status==='PUBLISHED') { const same=formsOf(row).same; const list=keys.get(same); if(list===undefined) keys.set(same,[row.genesisKey]); else list.push(row.genesisKey); }
+  return new Set([...keys.values()].filter(list=>list.length>1).flat());
+}
 /** Identity keys of pins whose label looks like the label of another pin. */
 export function lookAlikePins(pins:readonly LocalPin[]):ReadonlySet<string> {
   return lookAlikeKeys(pins.map(pin=>({key:pin.genesisKey,forms:nameForms(pin.label)})));

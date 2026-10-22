@@ -46,6 +46,8 @@ npm run demo
 ```
 
 Open **http://127.0.0.1:8080/onion-service-discovery/** in a current browser.
+Use an ordinary browser for this local demo: Tor Browser sends even `127.0.0.1`
+through Tor and cannot open it.
 Click **Try offline demo**, search for `library`, then click **Pin this identity**.
 You should see one matching synthetic library and one local pin. Synthetic results
 have no visit links. Stop the server with **Ctrl+C**. If port 8080 is busy:

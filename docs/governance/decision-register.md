@@ -45,7 +45,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-037 | Default Operator Switches | OWNER-APPROVED AS IMPLEMENTED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | Publishing only with `init --publish`; mirroring and discovery only for the node and combined roles; peer sync, server search, announcement intake and visitor-chosen Nodes stay off until explicitly enabled. |
 | D-038 | Manifest Auto-Regeneration | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-039 | Key Backup UX | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
-| D-040 | Database Retention Defaults | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
+| D-040 | Database Retention Defaults | UNRESOLVED (development default implemented) | Project owner / reviewer | CONDITIONAL / REVIEW | Development default, not yet an owner decision: `node:maintain` keeps the Node's newest 256 own checkpoints, each peer's anchor, pending checkpoint and newest four witnesses, and every conflicting checkpoint; superseded checkpoints are removed. Service history (Manifests, proofs, observations) is never removed. See [storage contract](../storage/contract.md). |
 | D-041 | Rate Limit and Work Budget Defaults | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-042 | Tor Stream Isolation Strategy | UNRESOLVED | Project owner / reviewer | YES | See source decision |
 | D-043 | HTTP Compression | UNRESOLVED | Project owner / reviewer | YES | disable or strictly expanded-size enforce for verification path. |

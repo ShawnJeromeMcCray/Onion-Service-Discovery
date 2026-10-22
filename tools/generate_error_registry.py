@@ -16,6 +16,8 @@ THROW = re.compile(r"new \\?(ProtocolException|StorageException|TransportExcepti
 LITERAL = re.compile(r"'([A-Z][A-Z0-9_]{2,})'")
 RESPONSE = re.compile(r"""(?:'error'\s*=>\s*'|"error":\s*")([A-Z][A-Z0-9_]{2,})""")
 DOCTOR = re.compile(r"\$(failures|warnings)\[\]\s*=\s*'([A-Z][A-Z0-9_]{2,})'")
+# The strict JSON parsers raise through a local fail('CODE') helper, so a THROW pattern alone misses them.
+FAIL = re.compile(r"(?:self::|\b)fail\(\s*'([A-Z][A-Z0-9_]{2,})'")
 CLI_LITERAL_EXITS = {'RUNTIME_DEPENDENCIES_MISSING': '3', 'INTERNAL_ERROR': '8'}
 EXITS = {'StorageException': '4', 'SignerException': '4', 'TransportException': '5', 'ProtocolException': '3', 'InvalidArgumentException': '3'}
 COMPONENTS = {
@@ -40,7 +42,11 @@ DESCRIPTIONS = {
     'PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT': 'doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page.',
     'PUBLISHER_NODES_NOT_CONFIGURED': 'No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key.',
     'EXPORT_BUDGET_NEARLY_EXHAUSTED': 'doctor warning: the export directory uses at least 80 % of its 4,096-file or 256 MiB limit; check that the maintenance timer runs (node:maintain prunes old blobs).',
+    'STORAGE_BUDGET_NEARLY_EXHAUSTED': 'doctor warning: the store uses at least 80 % of its record, state-size or operational-row budget (storage_usage); check that the maintenance timer runs and that storage:migrate enabled record pruning.',
+    'STORAGE_PRUNING_MIGRATION_REQUIRED': 'doctor warning: the store predates bounded checkpoint retention, so superseded checkpoints are never removed and it eventually fills; stop workers, back up, run storage:migrate.',
     'SNAPSHOT_TIMER_STALE': 'doctor warning: the published checkpoint is older than two days although snapshots refresh daily; check the snapshot timer and run node:snapshot.',
+    'PUBLISHER_SELF_VERIFICATION_FAILED': 'doctor warning: the last saved self-check through your own Onion failed or fetched a different Manifest; publisher:status names the cause and the fix.',
+    'MANIFEST_NOT_INSTALLED': 'The front controller found no readable Manifest in node-php/public/.well-known: run manifest:install into this checkout, and keep .well-known readable (0755) for the web server user.',
     'PUBLISHER_TIMER_STALE': 'doctor warning: the last saved publisher check is older than 36 hours although the timer runs every six hours; check osd-publisher-check.timer.',
     'EVIDENCE_UNAVAILABLE': 'The browser keeps no pair of conflicting signed records for this Node, so there is nothing to save.',
     'PUBLISHER_BUSY': 'Another publisher command holds the lock on the same files; run it again when that command has finished.',
@@ -96,10 +102,10 @@ DESCRIPTIONS = {
     'SOURCE_NODE_KEY_CHANGED': 'The Node signed with a different key than expected; check the key or treat it as another Node.',
     'SOURCE_NOT_IN_HOST_ALLOWLIST': 'The Client Host does not relay this Node.',
     'SOURCE_TIMEOUT': 'The Node did not answer in time; the existing local index is unchanged.',
-    'STORAGE_BUDGET_EXHAUSTED': 'The local store reached its record or byte quota; existing evidence is preserved.',
+    'STORAGE_BUDGET_EXHAUSTED': 'The local store reached its record or byte quota; existing evidence is preserved. Check storage_usage in doctor and that node:maintain runs on a store migrated with storage:migrate.',
     'STORAGE_BUSY': 'Another worker holds the store lock; let it finish.',
     'STORAGE_CORRUPT': 'Stored data failed verification; run storage:check and restore from backup if needed.',
-    'STORAGE_MIGRATION_REQUIRED': 'This store uses an older format; stop workers, back up, run storage:migrate.',
+    'STORAGE_MIGRATION_REQUIRED': 'This store uses an older format (a format-1 filesystem store, or one that cannot yet record pruned checkpoints); stop workers, back up, run storage:migrate.',
     'STORAGE_RECOVERY_REQUIRED': 'An interrupted write must be recovered with storage:check before read-only use.',
     'TOR_KEY_ACCESS_FORBIDDEN': 'Commands never read Tor private key files.',
     'TOR_REQUEST_FAILED': 'Tor connected, but the HTTP exchange with the Onion failed (connection reset, empty or malformed reply).',
@@ -161,6 +167,7 @@ DESCRIPTIONS = {
     'IMPORT_FORMAT_INVALID': 'The imported file is neither a single signed record nor a record bundle (bundle_version 1 with a records list), so nothing was imported.',
     'IMPORT_REQUIRES_EMPTY_STAGING_STORE': 'storage:import writes only into a new, empty store, and the given staging store already holds records or changes; give a new staging path.',
     'INPUT_FILE_UNAVAILABLE': 'An input file is missing, not a regular file, unreadable or given as a URL; check the path and read permission.',
+    'JSON_DUPLICATE_KEY': 'The JSON repeats a member name inside one object; signed protocol JSON must have unique keys so every reader sees the same value.',
     'JSON_DEPTH_EXCEEDED': 'The JSON nests objects or arrays more than 16 levels deep, beyond what the protocol allows.',
     'KEY_DIRECTORY_UNSAFE': 'key:create refused the key path because it is a URL or its directory is a symlink, missing or open to group or others; create the directory with mode 0700 first.',
     'KEY_ENVELOPE_INVALID': 'The key file is not a valid key envelope for this role (for example a service key used as a Node key) or is damaged, so the key was not unlocked; use the key file key:create made for this role.',
@@ -243,7 +250,7 @@ DESCRIPTIONS = {
     'STORAGE_PERMISSIONS_UNSAFE': 'The store directory, one of its subdirectories or the SQLite database file is open to group or others; chmod 700 the directories and 600 the SQLite file.',
     'STORAGE_READ_ONLY': 'An internal check failed: a write was attempted on a store opened read-only, so nothing was changed.',
     'STORAGE_UNAVAILABLE': 'The store path does not exist (and this command does not create it), is a symlink or URL, or the store or one of its files or directories cannot be created or opened; check storage.path; node:init or storage:init creates a store.',
-    'STORAGE_VERSION_UNSUPPORTED': 'The store has a format this release cannot open: a filesystem storage-version other than 1 or 2, or a SQLite schema version other than 1 or SQLite without foreign-key support.',
+    'STORAGE_VERSION_UNSUPPORTED': 'The store has a format this release cannot open: a filesystem storage-version other than 1, 2 or 3, or a SQLite schema version other than 1 or 2 or SQLite without foreign-key support.',
     'STREAMING_UNAVAILABLE': 'The browser returned the Node’s answer without a readable body stream, which the bounded download requires, so nothing from it was used.',
     'SYNC_DISABLED': 'Peer sync is off in this configuration (features.sync_with_peers is false), so sync:run and sync:peer-step refused to run; enable it to sync with peers.',
     'TOO_LARGE': 'Not an error: manifest:install reports the history state TOO_LARGE when the connected history exceeds 256 records or 1 MiB, so the history bundle was not updated.',
@@ -267,6 +274,7 @@ def collect() -> dict:
             component = next(name for prefix, name in COMPONENTS.items() if relative.startswith(prefix))
             text = path.read_text(encoding='utf-8')
             found = [(exception, code) for exception, arguments in THROW.findall(text) for code in LITERAL.findall(arguments)]
+            found += [('InvalidArgumentException' if path.suffix == '.php' else 'Error', code) for code in FAIL.findall(text)]
             found += [('HTTP', code) for code in RESPONSE.findall(text)]
             found += [('doctor-' + kind, code) for kind, code in DOCTOR.findall(text)]
             for exception, code in found:

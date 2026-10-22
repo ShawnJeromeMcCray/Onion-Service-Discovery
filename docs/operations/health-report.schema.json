@@ -8,7 +8,7 @@
   "required": [
     "status", "software_version", "php_version", "protocol_versions", "db_schema", "role", "config_state",
     "crypto_state", "key_authentication_state", "tor_transport_state", "manifest_state", "publication",
-    "sync_state", "source_concentration", "scheduler_state", "export_usage", "backup_state", "disk_state",
+    "sync_state", "source_concentration", "scheduler_state", "export_usage", "storage_usage", "backup_state", "disk_state",
     "node_health", "next_action", "security_check_summary", "warnings", "failures", "generated_at",
     "network_side_effects", "production_approval"
   ],
@@ -78,6 +78,29 @@
             "blob_bytes": { "type": "integer", "minimum": 0 },
             "max_files": { "type": "integer", "minimum": 1 },
             "max_bytes": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "storage_usage": {
+      "description": "Use of the store's record, state and operational-row budgets (WARN from 80 %) and whether node:maintain may prune superseded checkpoints; null without a readable store.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["signed_records", "max_records", "pruned_records", "state_bytes", "max_state_bytes", "operational_rows", "max_operational_rows", "usage_percent", "state", "record_pruning"],
+          "properties": {
+            "signed_records": { "type": "integer", "minimum": 0 },
+            "max_records": { "type": "integer", "minimum": 1 },
+            "pruned_records": { "type": "integer", "minimum": 0 },
+            "state_bytes": { "type": "integer", "minimum": 0 },
+            "max_state_bytes": { "type": "integer", "minimum": 1 },
+            "operational_rows": { "type": "integer", "minimum": 0 },
+            "max_operational_rows": { "type": "integer", "minimum": 1 },
+            "usage_percent": { "type": "integer", "minimum": 0 },
+            "state": { "enum": ["PASS", "WARN", "FAIL"] },
+            "record_pruning": { "enum": ["ENABLED", "MIGRATION_REQUIRED"] }
           }
         }
       ]

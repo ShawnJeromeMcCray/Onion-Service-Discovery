@@ -85,8 +85,10 @@ final readonly class DirectVerifier
             if ($observation->type !== 'direct_observation' || $signedObservation->node_identity_public_key !== $this->nodeSigner->publicKey() || $signedObservation->manifest_hash !== $manifest->contentHash) { throw new ProtocolException('STORAGE_CORRUPT'); }
             $this->store->transaction(static function (StorageTransaction $tx) use ($job, $manifest, $observation, $now, $snapshot, $matched, $signedObservation): void {
                 $row = CandidateQueue::claimedRow($tx, $job);
-                // Recheck if concurrent evidence admission changed the derived identity basis.
-                if ($tx->state()['generation'] !== $snapshot['generation']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
+                // Recheck if concurrent evidence admission changed the derived identity basis: new records or another
+                // observation of this Onion. Unrelated writes (leases, peer rows) do not abort the check.
+                $current = $tx->state();
+                if ($current['last_sequence'] !== $snapshot['last_sequence'] || ($current['tables']['local_observations']['key:' . $job['onion']] ?? null) !== ($snapshot['tables']['local_observations']['key:' . $job['onion']] ?? null)) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
                 $tx->putRecord($observation);
                 $tx->set('local_observations', $job['onion'], ['manifest_hash' => $manifest->contentHash, 'observation_hash' => $observation->contentHash, 'observed_at' => strtotime($signedObservation->observed_at), 'local_checked_at' => $now, 'genesis_key' => $matched['genesis_key']]);
                 $row['state'] = 'VERIFIED'; $row['claim'] = null; $row['lease_until'] = 0; $row['error'] = null; $row['next_attempt'] = $now + 86400 + random_int(0, 3600); $tx->set('candidates', $job['onion'], $row);

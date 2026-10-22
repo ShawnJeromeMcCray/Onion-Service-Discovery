@@ -89,17 +89,20 @@ $result=runPeer($api,$root.'/target.sqlite',$onion,1700020000); if($result['erro
 $target->transaction(static function(StorageTransaction $tx) use($onion): void { $p=$tx->get('peers',$onion); $p['state']='CANDIDATE'; $p['next_attempt']=0; $tx->set('peers',$onion,$p); });
 $fork=clone $base; $fork->cursor='different-view'; $fork=$verifier->verify($signer->signRecord($fork)); $source->transaction(static function(StorageTransaction $tx) use($fork): void { $tx->putRecord($fork); $tx->set('node','published-snapshot',['hash'=>$fork->contentHash]); });
 $result=runPeer($api,$root.'/target.sqlite',$onion,1700030000); if($result['error']!=='SOURCE_CHECKPOINT_EQUIVOCATION'||$target->readRecord($fork->contentHash)===null||$target->readRecord($empty->contentHash)===null) { throw new RuntimeException('equivocation evidence lost'); }
-// Three small chunks permit resumable admission, then a broken final chunk cannot activate its cursor.
-$ordered=$records; usort($ordered,static fn($a,$b)=>strcmp($a->contentHash,$b->contentHash)); $chunks=[];
+// Small one-record chunks permit resumable admission (at most four per step), then a broken final chunk cannot activate its cursor.
+$ordered=[]; foreach($f->cases as $case) { if(in_array($case->id,['fork-same-revision','valid-rotation','valid-migration'],true)) { foreach($case->records as $document) { $one=$verifier->verify($document); $ordered[$one->contentHash]=$one; } } }
+$ordered=array_values($ordered); if(count($ordered)<5) { throw new RuntimeException('chunk fixture too small'); } usort($ordered,static fn($a,$b)=>strcmp($a->contentHash,$b->contentHash)); $chunks=[];
 foreach($ordered as $record) { $wire=CanonicalJson::encode([$record->document()]); $hash=SnapshotFormat::chunkHash($wire); $blobs->put($hash,$wire); $chunks[]=(object)['hash'=>$hash,'bytes'=>strlen($wire),'record_count'=>1]; }
-$partial=clone $base; $partial->generation=3; $partial->previous_checkpoint_hash=$empty->contentHash; $partial->chunks=$chunks; $partial->root_hash=SnapshotFormat::rootHash($chunks); $partial->record_count=3; $partial->cursor='three-chunks'; $partial=$verifier->verify($signer->signRecord($partial));
+$partial=clone $base; $partial->generation=3; $partial->previous_checkpoint_hash=$empty->contentHash; $partial->chunks=$chunks; $partial->root_hash=SnapshotFormat::rootHash($chunks); $partial->record_count=count($ordered); $partial->cursor='three-chunks'; $partial=$verifier->verify($signer->signRecord($partial));
 $source->transaction(static function(StorageTransaction $tx) use($partial): void { $tx->putRecord($partial); $tx->set('node','published-snapshot',['hash'=>$partial->contentHash]); });
 $staging=new SQLiteStore($root.'/partial.sqlite',create:true); PeerRegistry::add($staging,OnionAddress::parse($onion),$signer->publicKey());
-$result=runPeer($api,$root.'/partial.sqlite',$onion,1700040000); if($result['status']!=='PROGRESS'||$result['next_chunk']!==2||isset($staging->snapshot()['tables']['sync']['key:'.$onion]['generation'])) { throw new RuntimeException('partial snapshot activated'); }
+$result=runPeer($api,$root.'/partial.sqlite',$onion,1700040000); if($result['status']!=='PROGRESS'||$result['next_chunk']!==3||isset($staging->snapshot()['tables']['sync']['key:'.$onion]['generation'])) { throw new RuntimeException('partial snapshot activated'); }
 $result=runPeer($api,$root.'/partial.sqlite',$onion,1700040010,true); if($result['error']!=='SNAPSHOT_CHUNK_HASH_INVALID'||isset($staging->snapshot()['tables']['sync']['key:'.$onion]['generation'])) { throw new RuntimeException('broken final chunk activated'); }
 $beforeMaintenance=count($target->snapshot()['records']);
 $maintenance=(new \OnionServiceDiscovery\Node\LocalMaintenance($target))->run(1700700000);
-if($maintenance['assertions_removed']<3||$target->snapshot()['tables']['assertions']!==[]||count($target->snapshot()['records'])!==$beforeMaintenance) { throw new RuntimeException('assertion cleanup removed identity evidence or failed expiry'); }
+// Only the superseded first checkpoint goes: identity records, the anchor and both conflicting checkpoints stay.
+$after=$target->snapshot()['records']; $kept=true; foreach($records as $record) { $kept=$kept&&isset($after[$record->contentHash]); }
+if($maintenance['assertions_removed']<3||$target->snapshot()['tables']['assertions']!==[]||$maintenance['signed_records_removed']!==1||count($after)!==$beforeMaintenance-1||isset($after[$first['checkpoint_hash']])||!isset($after[$fork->contentHash],$after[$empty->contentHash])||!$kept) { throw new RuntimeException('assertion cleanup removed identity evidence or failed expiry: '.json_encode($maintenance)); }
 // A long absence must be catchable in finite steps without resetting trust.
 $source->transaction(static function(StorageTransaction $tx) use($first): void { $tx->set('node','published-snapshot',['hash'=>$first['checkpoint_hash']]); });
 $long=new SQLiteStore($root.'/long.sqlite',create:true); PeerRegistry::add($long,OnionAddress::parse($onion),$signer->publicKey());

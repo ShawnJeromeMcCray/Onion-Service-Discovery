@@ -14,6 +14,9 @@
 # per listener; onion-service-discovery.conf has the reference values.
 # Optional NoJS server search needs its own reviewed larger body limit; see
 # docs/operations/server-search.md. This file refuses bodies over 1 KiB.
+# The configuration path must be the file the publisher timer
+# (deployment/systemd/osd-publisher-check.service) checks: the status page reads the
+# evidence saved beside it. A Node or combined deployment points to its node.json.
 
 # Request paths can reveal what visitors look at. Apache cannot switch the access
 # log off for one location: this marks OSD requests (mod_setenvif), and you add
@@ -29,6 +32,6 @@ SetEnvIf Request_URI "^/(?:\.well-known/onion-service-discovery(?:-history)?\.js
         Require all denied
     </If>
     # Only OSD requests receive the configuration path; the site's PHP does not.
-    SetEnv ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/node.json
+    SetEnv ONION_SERVICE_DISCOVERY_CONFIG /etc/onion-service-discovery/publisher.json
 </LocationMatch>
 ProxyPassMatch "^/(?:\.well-known/onion-service-discovery(?:-history)?\.json|onion-service-discovery/.*)$" "unix:/run/php/onion-service-discovery.sock|fcgi://localhost/opt/onion-service-discovery/node-php/public/index.php"

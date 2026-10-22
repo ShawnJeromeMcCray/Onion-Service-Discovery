@@ -15,9 +15,19 @@ use OnionServiceDiscovery\Transport\ProtocolEndpoint;
 use OnionServiceDiscovery\Transport\TransportException;
 use OnionServiceDiscovery\Validation\StrictJson;
 
-/** Resumable bounded snapshot sync. Source views never replace global evidence. */
+/**
+ * Resumable bounded snapshot sync. Source views never replace global evidence. A pending checkpoint
+ * is verified to the end while its Node still serves it, so a large Node that publishes often is
+ * still followed. Of a peer's checkpoints only the anchor, the pending one, the newest WITNESSES
+ * seen as current and conflicting ones are kept (LocalMaintenance removes the rest).
+ */
 final class PeerSync
 {
+    /** Checkpoints a peer showed as current, kept above its anchor to detect a later conflict. */
+    public const WITNESSES = 4;
+    /** Every Node keeps at least its newest 64 checkpoints (LocalMaintenance keeps 256); an older missing one is a gap, not a fault. */
+    public const SERVED_CHECKPOINTS = 64;
+    private const CHUNKS_PER_STEP = 4;
     private int $requests = 0;
     public function __construct(private readonly StorageBackend $store, private readonly RecordVerifier $verifier, private readonly TorTransport $transport, private readonly bool $discoverServices = false) {}
     /** @return array<string,mixed> */
@@ -49,7 +59,7 @@ final class PeerSync
             $checkpoint = $this->verifier->verifyWire($wire); $document = $checkpoint->document();
             if ($checkpoint->type !== 'snapshot_descriptor' || $checkpoint->contentHash !== $remote->checkpoint_hash || $document->node_identity_public_key !== $peer['node_identity_public_key'] || $document->generation !== $remote->generation || $document->cursor !== $remote->cursor) { throw new ProtocolException('SOURCE_CHECKPOINT_BINDING_MISMATCH'); }
             if ($document->record_count > 10000 || array_sum(array_map(static fn (\stdClass $chunk): int => $chunk->bytes, $document->chunks)) > 33554432) { throw new ProtocolException('SOURCE_WORK_BUDGET_EXHAUSTED'); }
-            $this->observe($onion, $claim, $checkpoint);
+            $this->observe($onion, $claim, $checkpoint); $current = $checkpoint;
             $sync = $this->store->snapshot()['tables']['sync']['key:' . $onion->hostname] ?? [];
             $anchorGeneration = $sync['generation'] ?? 0; $anchorHash = $sync['checkpoint_hash'] ?? null;
             $legacyBaseline = ($sync['baseline_history_proven_version'] ?? 0) !== 2;
@@ -61,10 +71,15 @@ final class PeerSync
                 if ($legacyBaseline) { $this->saveSync($onion, $claim, $sync); }
                 $this->finish($onion, $claim, $now, 'ACTIVE'); return ['status' => 'CURRENT', 'generation' => $anchorGeneration];
             }
-            if (($sync['pending_hash'] ?? null) !== $checkpoint->contentHash) {
-                $sync = array_merge($sync, ['seen_generation' => $document->generation, 'pending_hash' => $checkpoint->contentHash, 'walk_hash' => $document->previous_checkpoint_hash, 'walk_generation' => $document->generation - 1, 'chain_complete' => $anchorGeneration === 0, 'chunk_index' => 0, 'received' => 0, 'transfer_bytes' => 0, 'last_record_hash' => null]);
-                $this->saveSync($onion, $claim, $sync);
+            $seen = ($sync['seen_generation'] ?? 0) < $document->generation; $sync['seen_generation'] = max($sync['seen_generation'] ?? 0, $document->generation);
+            // A newer checkpoint waits until the pending one is verified, as long as the Node still serves it.
+            $pendingWire = is_string($sync['pending_hash'] ?? null) && $sync['pending_hash'] !== $checkpoint->contentHash ? $this->store->readRecord($sync['pending_hash']) : null;
+            $pending = $pendingWire === null ? null : $this->verifier->verifyWire($pendingWire);
+            if ($pending !== null && $pending->type === 'snapshot_descriptor' && $pending->contentHash === $sync['pending_hash'] && $pending->document()->node_identity_public_key === $peer['node_identity_public_key'] && $pending->document()->generation > $anchorGeneration) {
+                $this->observe($onion, $claim, $pending); $checkpoint = $pending; $document = $pending->document();
             }
+            if (($sync['pending_hash'] ?? null) !== $checkpoint->contentHash) { $sync = self::restart($sync, $checkpoint, $anchorGeneration); $this->saveSync($onion, $claim, $sync); }
+            elseif ($seen) { $this->saveSync($onion, $claim, $sync); }
             $walks = 0;
             while (!$sync['chain_complete']) {
                 if ($sync['walk_hash'] === $anchorHash && $sync['walk_generation'] === $anchorGeneration) { $sync['chain_complete'] = true; $this->saveSync($onion, $claim, $sync); break; }
@@ -72,13 +87,27 @@ final class PeerSync
                 if (++$walks > 32) { $this->finish($onion, $claim, $now, 'CANDIDATE'); return ['status' => 'PROGRESS', 'phase' => 'CHECKPOINT_CHAIN']; }
                 $cached = $this->store->readRecord($sync['walk_hash']);
                 if ($cached === null && $this->requests >= 6) { $this->finish($onion, $claim, $now, 'CANDIDATE'); return ['status' => 'PROGRESS', 'phase' => 'CHECKPOINT_CHAIN']; }
-                $parent = $this->verifier->verifyWire($cached ?? $this->fetch($onion, ProtocolEndpoint::snapshot($sync['walk_hash']))); $p = $parent->document();
+                try { $parentWire = $cached ?? $this->fetch($onion, ProtocolEndpoint::snapshot($sync['walk_hash'])); }
+                catch (TransportException $error) {
+                    // A checkpoint older than the newest SERVED_CHECKPOINTS that the Node no longer serves leaves the chain
+                    // unproven, as on first contact: rollback is still refused, older history is no longer claimed.
+                    if ($error->getMessage() !== 'HTTP_NOT_FOUND' || $sync['seen_generation'] - $sync['walk_generation'] < self::SERVED_CHECKPOINTS) { throw $error; }
+                    $sync['chain_complete'] = true; $sync['chain_gap'] = true; $sync['baseline_history_proven'] = false; $this->saveSync($onion, $claim, $sync); break;
+                }
+                $parent = $this->verifier->verifyWire($parentWire); $p = $parent->document();
                 if ($parent->type !== 'snapshot_descriptor' || $parent->contentHash !== $sync['walk_hash'] || $p->node_identity_public_key !== $peer['node_identity_public_key'] || $p->generation !== $sync['walk_generation']) { throw new ProtocolException('SOURCE_CHECKPOINT_CHAIN_BROKEN'); }
-                $this->observe($onion, $claim, $parent); $sync['walk_hash'] = $p->previous_checkpoint_hash; --$sync['walk_generation']; $this->saveSync($onion, $claim, $sync);
+                $this->observe($onion, $claim, $parent, false); $sync['walk_hash'] = $p->previous_checkpoint_hash; --$sync['walk_generation']; $this->saveSync($onion, $claim, $sync);
             }
             $checker = new SnapshotChunkVerifier($this->verifier); $processed = 0; $queued = 0;
-            while ($sync['chunk_index'] < count($document->chunks) && $processed < 2 && $this->requests < 6) {
-                $chunk = $document->chunks[$sync['chunk_index']]; $bytes = $this->fetch($onion, ProtocolEndpoint::chunk($chunk->hash));
+            while ($sync['chunk_index'] < count($document->chunks) && $processed < self::CHUNKS_PER_STEP && $this->requests < 6) {
+                $chunk = $document->chunks[$sync['chunk_index']];
+                try { $bytes = $this->fetch($onion, ProtocolEndpoint::chunk($chunk->hash)); }
+                catch (TransportException $error) {
+                    // The Node no longer serves the superseded checkpoint's chunks: verify its current one instead.
+                    if ($error->getMessage() !== 'HTTP_NOT_FOUND' || $checkpoint->contentHash === $current->contentHash) { throw $error; }
+                    $this->saveSync($onion, $claim, self::restart($sync, $current, $anchorGeneration)); $this->finish($onion, $claim, $now, 'CANDIDATE');
+                    return ['status' => 'PROGRESS', 'phase' => 'CHECKPOINT_RESTARTED', 'generation' => $current->document()->generation];
+                }
                 $verified = $checker->verify($bytes, $checkpoint, $sync['chunk_index'], $sync['last_record_hash']);
                 $sync['received'] += count($verified['records']); $sync['transfer_bytes'] += strlen($bytes); ++$sync['chunk_index']; $sync['last_record_hash'] = $verified['last_hash'];
                 if ($sync['received'] > $document->record_count || $sync['transfer_bytes'] > 33554432) { throw new ProtocolException('SOURCE_WORK_BUDGET_EXHAUSTED'); }
@@ -106,9 +135,11 @@ final class PeerSync
             if ($sync['chunk_index'] === count($document->chunks)) {
                 if ($sync['received'] !== $document->record_count) { throw new ProtocolException('SOURCE_RECORD_COUNT_INVALID'); }
                 $sync['checkpoint_hash'] = $checkpoint->contentHash; $sync['generation'] = $document->generation; $sync['cursor'] = $document->cursor; $sync['last_sync'] = $now; $sync['baseline_history_proven'] = ($sync['baseline_history_proven'] ?? false) || $document->generation === 1;
-                $this->store->transaction(function (StorageTransaction $tx) use ($onion, $claim, $sync, $now): void {
+                // A newer checkpoint already seen is verified next, not an hour later.
+                $newer = $sync['seen_generation'] > $document->generation;
+                $this->store->transaction(function (StorageTransaction $tx) use ($onion, $claim, $sync, $now, $newer): void {
                     $row = $this->claimed($tx, $onion, $claim); $tx->set('sync', $onion->hostname, $sync);
-                    $row['state'] = 'ACTIVE'; $row['failures'] = 0; $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $now + 3600 + random_int(0,300); $row['error'] = null; $tx->set('peers', $onion->hostname, $row);
+                    $row['state'] = 'ACTIVE'; $row['failures'] = 0; $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $newer ? $now + 1 : $now + 3600 + random_int(0,300); $row['error'] = null; $tx->set('peers', $onion->hostname, $row);
                 });
                 return ['status' => 'CURRENT', 'generation' => $document->generation, 'record_count' => $document->record_count];
             }
@@ -122,11 +153,22 @@ final class PeerSync
                 // Local quota/disk failures are not authenticated peer misconduct.
                 if (!$localFailure) { ++$row['failures']; }
                 $row['state'] = !$localFailure && (!$transient || $row['failures'] >= 8) ? 'QUARANTINED' : 'BACKOFF';
-                $delay = $localFailure ? 3600 : min(86400,3600 * (2 ** min(5,$row['failures'] - 1)));
+                // Lock contention with another worker is momentary: retry at the next timer run, not in an hour.
+                $delay = $localFailure ? ($error->getMessage() === 'STORAGE_BUSY' ? 60 : 3600) : min(86400,3600 * (2 ** min(5,$row['failures'] - 1)));
                 $row['claim'] = null; $row['lease_until'] = 0; $row['next_attempt'] = $now + $delay + random_int(0,300); $row['error'] = $error->getMessage(); $tx->set('peers',$onion->hostname,$row); return $row['state'];
             });
             return ['status' => $failureState,'error' => $error->getMessage()];
         }
+    }
+    /**
+     * Starts verifying $checkpoint from its first chunk; its chain is walked back to the anchor first.
+     * @param array<array-key,mixed> $sync
+     * @return array<array-key,mixed>
+     */
+    private static function restart(array $sync, ValidatedRecord $checkpoint, int $anchorGeneration): array
+    {
+        $document = $checkpoint->document();
+        return array_merge($sync, ['pending_hash' => $checkpoint->contentHash, 'pending_generation' => $document->generation, 'walk_hash' => $document->previous_checkpoint_hash, 'walk_generation' => $document->generation - 1, 'chain_complete' => $anchorGeneration === 0, 'chain_gap' => false, 'chunk_index' => 0, 'received' => 0, 'transfer_bytes' => 0, 'last_record_hash' => null]);
     }
     private function fetch(OnionAddress $onion, ProtocolEndpoint $endpoint): string
     { if (++$this->requests > 6) { throw new ProtocolException('SOURCE_WORK_BUDGET_EXHAUSTED'); } return $this->transport->get($onion,$endpoint); }
@@ -138,14 +180,38 @@ final class PeerSync
     { $peer = $tx->get('peers',$onion->hostname); if ($peer === null || $peer['claim'] !== $claim) { throw new ProtocolException('PEER_CLAIM_LOST'); } return $peer; }
     private function finish(OnionAddress $onion,string $claim,int $now,string $state): void
     { $this->store->transaction(function (StorageTransaction $tx) use ($onion,$claim,$now,$state): void { $row=$this->claimed($tx,$onion,$claim); $row['state']=$state; $row['claim']=null; $row['lease_until']=0; $row['failures']=0; $row['error']=null; $row['next_attempt']=$state === 'ACTIVE' ? $now + 3600 : $now + 1; $tx->set('peers',$onion->hostname,$row); }); }
-    private function observe(OnionAddress $onion,string $claim,ValidatedRecord $checkpoint): void
+    /**
+     * Conflict detection. A Node descriptor and a checkpoint shown as current ($witness) are kept with
+     * a witness row per generation; a walked parent is only compared with existing rows. A conflict keeps
+     * both signed checkpoints and marks the row (quarantine:list). Witnesses below the anchor generation
+     * and beyond the newest WITNESSES above it are dropped, at most 256 per call.
+     */
+    private function observe(OnionAddress $onion,string $claim,ValidatedRecord $checkpoint,bool $witness=true): void
     {
-        $doc=$checkpoint->document(); $key=($checkpoint->type === 'snapshot_descriptor' ? 'checkpoint:' : 'descriptor:') . hash('sha256',$doc->node_identity_public_key) . ':' . ($checkpoint->type === 'snapshot_descriptor' ? $doc->generation : $doc->descriptor_revision);
-        $fork=$this->store->transaction(function (StorageTransaction $tx) use ($onion,$claim,$checkpoint,$key): bool {
-            $this->claimed($tx,$onion,$claim); $tx->putRecord($checkpoint); $evidence=$tx->get('checkpoint_evidence',$key) ?? ['hashes'=>[],'equivocated'=>false];
+        $doc=$checkpoint->document(); $snapshot=$checkpoint->type === 'snapshot_descriptor'; $node=hash('sha256',$doc->node_identity_public_key);
+        $key=($snapshot ? 'checkpoint:' : 'descriptor:') . $node . ':' . ($snapshot ? $doc->generation : $doc->descriptor_revision);
+        $fork=$this->store->transaction(function (StorageTransaction $tx) use ($onion,$claim,$checkpoint,$key,$witness,$snapshot,$node): bool {
+            $this->claimed($tx,$onion,$claim); $evidence=$tx->get('checkpoint_evidence',$key); $sync=$tx->get('sync',$onion->hostname) ?? [];
+            if ($evidence === null && !$witness) { return false; }
+            if ($evidence === null) {
+                // A dropped witness row starts again from the anchor or pending checkpoint of the same generation.
+                $evidence=['hashes'=>[],'equivocated'=>false];
+                foreach ($snapshot ? [['generation','checkpoint_hash'],['pending_generation','pending_hash']] : [] as [$generation,$hash]) { if (($sync[$generation] ?? null) === $checkpoint->document()->generation && is_string($sync[$hash] ?? null) && !in_array($sync[$hash],$evidence['hashes'],true)) { $evidence['hashes'][]=$sync[$hash]; } }
+            }
             if (!in_array($checkpoint->contentHash,$evidence['hashes'],true)) { if (count($evidence['hashes']) < 8) { $evidence['hashes'][]=$checkpoint->contentHash; sort($evidence['hashes'],SORT_STRING); } $evidence['equivocated']=count($evidence['hashes']) > 1; $tx->set('checkpoint_evidence',$key,$evidence); }
+            if ($witness || $evidence['equivocated']) { $tx->putRecord($checkpoint); }
+            if ($snapshot && $witness) {
+                $anchor=$sync['generation'] ?? 0; $prefix='key:checkpoint:' . $node . ':'; $above=[]; $removed=0;
+                foreach ($tx->state()['tables']['checkpoint_evidence'] as $rowKey => $row) {
+                    if (!str_starts_with((string)$rowKey,$prefix) || $row['equivocated'] === true || (string)$rowKey === $prefix . ($sync['pending_generation'] ?? '')) { continue; }
+                    $generation=(int)substr((string)$rowKey,strlen($prefix));
+                    if ($generation < $anchor) { if (++$removed <= 256) { $tx->deleteOperational('checkpoint_evidence',substr((string)$rowKey,4)); } }
+                    elseif ($generation > $anchor) { $above[$generation]=substr((string)$rowKey,4); }
+                }
+                krsort($above); foreach (array_slice($above,self::WITNESSES,null,true) as $stale) { if (++$removed <= 256) { $tx->deleteOperational('checkpoint_evidence',$stale); } }
+            }
             return $evidence['equivocated'];
         });
-        if ($fork) { throw new ProtocolException($checkpoint->type === 'snapshot_descriptor' ? 'SOURCE_CHECKPOINT_EQUIVOCATION' : 'NODE_DESCRIPTOR_ROLLBACK_OR_FORK'); }
+        if ($fork) { throw new ProtocolException($snapshot ? 'SOURCE_CHECKPOINT_EQUIVOCATION' : 'NODE_DESCRIPTOR_ROLLBACK_OR_FORK'); }
     }
 }

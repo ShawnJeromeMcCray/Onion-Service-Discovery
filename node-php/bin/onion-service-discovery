@@ -85,13 +85,15 @@ function failure(\Throwable $error, string $root): array
     return $output;
 }
 
-/** Unreferenced export blobs younger than this survive automatic pruning: a snapshot may be writing them. */
+/** Unreferenced export blobs younger than this survive automatic pruning: a snapshot may be writing them,
+ * or a peer may still be verifying a checkpoint that was current until less than this ago. */
 const EXPORT_PRUNE_GRACE_SECONDS = 3600;
 
 /**
  * Removes at most 256 export blobs the current published snapshot and the derived indexes do not
- * reference. With $olderThan only blobs written before it go, so a snapshot that is writing new
- * blobs at the same time is never cut short; without it the operator has stopped the workers.
+ * reference. With $olderThan only blobs written before it go, and the blobs of checkpoints that were
+ * current after it stay, so neither a snapshot writing new blobs nor a peer verifying the previous
+ * checkpoint is cut short; without it the operator has stopped the workers.
  * @return array<string,int>
  */
 function pruneExports(\OnionServiceDiscovery\Configuration\NodeConfig $config, \OnionServiceDiscovery\Storage\StorageBackend $store, RecordVerifier $verifier, ?int $olderThan): array
@@ -107,6 +109,13 @@ function pruneExports(\OnionServiceDiscovery\Configuration\NodeConfig $config, \
         $body = $blobs->get($chunk->hash);
         if ($body === null || strlen($body) !== $chunk->bytes || \OnionServiceDiscovery\Protocol\SnapshotFormat::chunkHash($body) !== $chunk->hash) { throw new ProtocolException('EXPORT_CORRUPT'); }
         $keep[] = $chunk->hash;
+    }
+    // Checkpoints that were current within the grace keep their blobs too, so a peer can finish verifying
+    // one that changed meanwhile (at most 16 generations; blobs already gone are not restored).
+    for ($document = $checkpoint->document(), $generations = 0; $olderThan !== null && $generations < 16 && is_string($document->previous_checkpoint_hash) && (int) strtotime($document->created_at) >= $olderThan && count($keep) < 2048; ++$generations) {
+        $wire = $store->readRecord($document->previous_checkpoint_hash); if ($wire === null) { break; }
+        $previous = $verifier->verifyWire($wire); $document = $previous->document();
+        foreach (array_merge([$previous->contentHash], array_column($document->chunks, 'hash')) as $hash) { if ($blobs->get($hash) !== null) { $keep[] = $hash; } }
     }
     foreach ($state['tables']['node'] as $key => $row) { if (str_starts_with($key, 'key:service-index-')) { $keep[] = $row['hash']; } }
     $search = $state['tables']['node']['key:server-search-index'] ?? null;
@@ -248,7 +257,7 @@ try {
                 'node:init ' . $path . ' --passphrase-file PRIVATE_FILE', 'node:snapshot ' . $path . ' --passphrase-file PRIVATE_FILE', 'node:identity ' . $path],
         };
         $output = ['status' => 'CONFIGURED', 'role' => $config->role, 'publishing_opt_in' => $config->features['publish_service'], 'features' => $config->features, 'source_count' => count($config->sources), 'publisher_node_count' => count($config->publisherNodes),
-            'keys_created' => false, 'manifest_installed' => false, 'storage_created' => false, 'network_side_effects' => false, 'next_action' => $role === 'publisher' ? $next[0] . ' Configure selected public sources explicitly; no production seed set is fabricated.' : $next];
+            'keys_created' => false, 'manifest_installed' => false, 'storage_created' => false, 'network_side_effects' => false, 'next_action' => $role === 'publisher' ? $next[0] . ($config->publisherNodes === [] ? ' Then add the Discovery Nodes you chose to publisher_nodes; no production seed set is fabricated.' : '') : $next];
     } elseif ($command === 'publisher:status') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
@@ -447,7 +456,7 @@ try {
         if (count($arguments) !== 2) { throw new ProtocolException('USAGE_ERROR'); }
         $output = match ($arguments[0]) {
             'filesystem' => \OnionServiceDiscovery\Storage\FilesystemStore::migrateFormat($arguments[1]),
-            'sqlite' => ['status' => 'UNCHANGED', 'storage_schema' => (new \OnionServiceDiscovery\Storage\SQLiteStore($arguments[1], readOnly: true))->snapshot()['storage_schema']],
+            'sqlite' => \OnionServiceDiscovery\Storage\SQLiteStore::migrateSchema($arguments[1]),
             default => throw new ProtocolException('STORAGE_BACKEND_INVALID'),
         };
     } elseif ($command === 'db:migrate') {
@@ -457,17 +466,28 @@ try {
             'sqlite' => new \OnionServiceDiscovery\Storage\SQLiteStore($arguments[1], readOnly: true),
             default => throw new ProtocolException('STORAGE_BACKEND_INVALID'),
         };
-        $output = ['status' => 'PASS', 'storage_schema' => $store->snapshot()['storage_schema'], 'migration_performed' => false, 'message' => 'Schema 1 is current; unknown schemas are refused.'];
+        $output = ['status' => 'PASS', 'storage_schema' => $store->snapshot()['storage_schema'], 'record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED', 'migration_performed' => false,
+            'message' => 'Schemas 1 and 2 are read; storage:migrate enables bounded checkpoint retention (schema 2) without rewriting evidence; unknown schemas are refused.'];
     } elseif ($command === 'release:info') {
         if ($arguments !== []) { throw new ProtocolException('USAGE_ERROR'); }
-        $output = ['status' => 'DEVELOPMENT', 'software_version' => '0.1.0-dev', 'protocol_versions' => [1], 'storage_schema' => 1, 'production_approved' => false, 'build' => buildIdentity($root), 'gates' => json_decode(boundedFile($root . '/docs/release-gates.json', 65536), true, 16, JSON_THROW_ON_ERROR)];
+        $output = ['status' => 'DEVELOPMENT', 'software_version' => '0.1.0-dev', 'protocol_versions' => [1], 'storage_schema' => 2, 'production_approved' => false, 'build' => buildIdentity($root), 'gates' => json_decode(boundedFile($root . '/docs/release-gates.json', 65536), true, 16, JSON_THROW_ON_ERROR)];
     } elseif (in_array($command, ['candidate:list', 'quarantine:list', 'sync:status'], true)) {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         $state = $config->store(readOnly: true)->snapshot();
-        $table = $command === 'sync:status' ? 'sync' : 'candidates'; $rows = []; $eligible = 0;
+        $iso = static fn (mixed $at): ?string => is_int($at) && $at > 0 ? gmdate('Y-m-d\TH:i:s\Z', $at) : null;
+        $table = $command === 'sync:status' ? 'peers' : 'candidates'; $rows = []; $eligible = 0;
         foreach ($state['tables'][$table] as $key => $row) {
+            if ($command === 'sync:status') {
+                // Every configured peer, including failing ones, with its state and the last complete synchronization.
+                ++$eligible;
+                if (count($rows) >= 256) { continue; }
+                $sync = $state['tables']['sync'][$key] ?? [];
+                $rows[] = ['onion' => substr($key, 4), 'state' => $row['state'] ?? null, 'error' => $row['error'] ?? null, 'next_attempt' => $iso($row['next_attempt'] ?? null),
+                    'generation' => $sync['generation'] ?? null, 'cursor' => $sync['cursor'] ?? null, 'last_sync' => $iso($sync['last_sync'] ?? null), 'resuming' => isset($sync['chunk_index']) && !isset($sync['last_sync'])];
+                continue;
+            }
             if ($command === 'quarantine:list' && ($row['state'] ?? null) !== 'QUARANTINED') { continue; }
             ++$eligible;
             if (count($rows) >= 256) { continue; }
@@ -494,7 +514,7 @@ try {
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         if (!in_array($config->role, ['client-host', 'combined'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         new \OnionServiceDiscovery\Storage\PublicBlobStore($config->exportPath, true);
-        $output = ['status' => 'INITIALIZED', 'role' => $config->role, 'source_count' => count($config->sources), 'signing_keys_required' => false];
+        $output = ['status' => 'INITIALIZED', 'role' => $config->role, 'source_count' => count($config->sources), 'signing_keys_required' => $config->role === 'combined'];
     } elseif ($command === 'config:validate' || $command === 'doctor' || $command === 'security:check') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
@@ -542,6 +562,13 @@ try {
             elseif ($command === 'sync:peer-step') {
                 if (!$config->features['sync_with_peers']) { throw new ProtocolException('SYNC_DISABLED'); }
                 $output = (new \OnionServiceDiscovery\Node\PeerSync($store,$verifier,$config->transport(),$config->features['discover_services']))->step($onion,time());
+                if ($output['status'] === 'IDLE') {
+                    // Not due, quarantined or disabled: say when it is due instead of a bare IDLE.
+                    $peer = $store->snapshot()['tables']['peers']['key:' . $onion->hostname] ?? [];
+                    $at = max((int) ($peer['next_attempt'] ?? 0), (int) ($peer['lease_until'] ?? 0));
+                    $output = ['status' => 'NOTHING_DUE', 'peer_state' => $peer['state'] ?? null, 'error' => $peer['error'] ?? null,
+                        'next_due_at' => in_array($peer['state'] ?? null, ['QUARANTINED', 'DISABLED'], true) || $at === 0 ? null : gmdate('Y-m-d\TH:i:s\Z', $at), 'network_side_effects' => false];
+                }
             } else {
                 $store->transaction(static function (\OnionServiceDiscovery\Storage\StorageTransaction $tx) use ($onion,$command): void {
                     $row=$tx->get('peers',$onion->hostname); if($row===null) { throw new ProtocolException('PEER_NOT_CONFIGURED'); }
@@ -610,8 +637,13 @@ try {
     } elseif ($command === 'node:status' || $command === 'node:maintain') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
-        if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
-        if ($command === 'node:status' && $config->role === 'publisher') {
+        if ($config->role === 'client-host' && $command === 'node:status') {
+            // A client host has no store or key: report what it serves instead of failing.
+            $output = ['status' => 'PASS', 'role' => 'client-host', 'source_count' => count($config->sources), 'pinned_source_keys' => count($config->sourceNodeKeys),
+                'visitor_sources' => (bool) ($config->features['visitor_sources'] ?? false), 'client_built' => is_file(dirname(__DIR__, 2) . '/web-local-search-client/dist/client.js'),
+                'next_action' => count($config->sources) === 0 && !($config->features['visitor_sources'] ?? false) ? 'Add Node sources with --source in init, or enable visitor_sources, so visitors have something to load.' : null, 'network_side_effects' => false];
+        } elseif ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        elseif ($command === 'node:status' && $config->role === 'publisher') {
             // A publisher has no store: status reports its publication instead of failing (spec 32 section 11).
             $facts = \OnionServiceDiscovery\Configuration\PublisherStatus::inspect($config, $verifier, dirname(__DIR__) . '/public/.well-known/onion-service-discovery.json', $arguments[0]);
             $output = ['status' => 'PASS', 'role' => 'publisher', 'onion' => $config->nodeOnion, 'roles' => $config->features, 'overall' => $facts['overall'], 'answer' => $facts['answer'],
@@ -632,7 +664,9 @@ try {
                 'exports' => $config->features['mirror_directory'] ? pruneExports($config, $store, $verifier, time() - EXPORT_PRUNE_GRACE_SECONDS) : 'NOT_APPLICABLE', 'network_side_effects' => false];
         } else {
             $counts = array_map('count', $state['tables']);
+            // Budget use (WARN from 80 %): node:maintain keeps it bounded once storage:migrate enabled record pruning.
             $output = ['status' => 'PASS', 'role' => $config->role, 'onion' => $config->nodeOnion, 'roles' => $config->features, 'backend' => $store->backendName(), 'storage_generation' => $state['generation'], 'signed_records' => count($state['records']), 'operational_counts' => $counts,
+                'storage_usage' => \OnionServiceDiscovery\Storage\StorageTransaction::usage($state, new \OnionServiceDiscovery\Storage\StorageLimits()) + ['record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED'],
                 'node' => \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $verifier, time()), 'network_side_effects' => false, 'aggregate_only' => true];
         }
         }

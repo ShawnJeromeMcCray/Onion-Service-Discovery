@@ -15,7 +15,7 @@ final readonly class ManifestInstaller
         if($manifest->type!=='service_manifest'||basename($hostnamePath)!=='hostname'||is_link($hostnamePath)||!is_file($hostnamePath)||filesize($hostnamePath)>64)throw new ProtocolException('PUBLIC_HOSTNAME_FILE_REQUIRED');
         $hostname=file_get_contents($hostnamePath);if($hostname===false)throw new ProtocolException('PUBLIC_HOSTNAME_FILE_REQUIRED');$onion=OnionAddress::parse(rtrim($hostname,"\r\n"));$current=$manifest->document();if($current->onion!==$onion->hostname)throw new ProtocolException('ONION_BINDING_MISMATCH');
         if(str_contains($webroot,'://')||is_link($webroot)||!is_dir($webroot))throw new ProtocolException('WEBROOT_INVALID');
-        $directory=$webroot.'/.well-known';if(is_link($directory)||(!is_dir($directory)&&!mkdir($directory,0755)))throw new ProtocolException('WEBROOT_INVALID');$path=$directory.'/onion-service-discovery.json';
+        $directory=$webroot.'/.well-known';if(is_link($directory)||(!is_dir($directory)&&(!mkdir($directory,0755)||!chmod($directory,0755))))throw new ProtocolException('WEBROOT_INVALID');$path=$directory.'/onion-service-discovery.json';
         $lockPath=$directory.'/.publisher.lock';if(is_link($lockPath))throw new ProtocolException('PUBLIC_MANIFEST_PATH_UNSAFE');
         $mask=umask(0077);try{$lock=fopen($lockPath,'c+b');}finally{umask($mask);}if($lock===false)throw new ProtocolException('PUBLIC_MANIFEST_WRITE_FAILED');
         $deadline=hrtime(true)+2000000000;while(!flock($lock,LOCK_EX|LOCK_NB)){if(hrtime(true)>=$deadline){fclose($lock);throw new ProtocolException('PUBLISHER_BUSY');}usleep(10000);}

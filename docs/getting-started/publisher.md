@@ -71,7 +71,7 @@ php node-php/bin/onion-service-discovery manifest:verify /absolute/private/osd-s
 ```
 
 The placeholder public key must be replaced with the exact generated string.
-Expect successful verification of revision 1. A draft alone is not a signed
+Expect `status: PASS` with `signature_valid: true`. A draft alone is not a signed
 publication. Retain every signed revision and continuity proof on the administrator
 machine; later offline membership checks need the complete owner history.
 
@@ -84,10 +84,10 @@ serve OSD (the templates use `osd-worker`), then run from that host's repository
 root:
 
 ```sh
-sudo install -d -m 0700 -o osd-worker -g osd /absolute/private/osd-publisher
-sudo -u osd-worker php node-php/bin/onion-service-discovery init /absolute/private/osd-publisher/config.json YOUR_CANONICAL_V3_ADDRESS.onion --publish
+sudo install -d -m 0700 -o osd-worker -g osd /etc/onion-service-discovery
+sudo -u osd-worker php node-php/bin/onion-service-discovery init /etc/onion-service-discovery/publisher.json YOUR_CANONICAL_V3_ADDRESS.onion --publish
 php node-php/bin/onion-service-discovery manifest:install /absolute/public-transfer/manifest.json /absolute/public-transfer/hostname /absolute/app/Onion-Service-Discovery/node-php/public
-sudo -u osd-worker php node-php/bin/onion-service-discovery publisher:status /absolute/private/osd-publisher/config.json
+sudo -u osd-worker php node-php/bin/onion-service-discovery publisher:status /etc/onion-service-discovery/publisher.json
 ```
 
 Run `init`, the status command and every later check as that same user: the web
@@ -120,8 +120,10 @@ reference templates assume a dedicated OSD listener.
 Set the actual loopback SOCKS port in the private configuration. Choose the
 Discovery Nodes you want to be found through, and obtain each Node's Onion and its
 expected Node public key through a channel you chose independently; never copy
-them from the Node's own response. Put them into `publisher_nodes` of the private
-configuration (at most 16), or pass them to `init` as `--node ONION KEY`:
+them from the Node's own response. Replace the empty `publisher_nodes` list that `init`
+wrote in the private configuration (at most 16 entries; a second
+`publisher_nodes` key is refused as `JSON_DUPLICATE_KEY`), or pass them to `init`
+as `--node ONION KEY`:
 
 ```json
 "publisher_nodes": [
@@ -137,7 +139,7 @@ fetch and verify your own published Manifest through Tor; without an Onion
 argument the command checks `node.onion` of the configuration:
 
 ```sh
-sudo -u osd-worker php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json
+sudo -u osd-worker php node-php/bin/onion-service-discovery service:verify /etc/onion-service-discovery/publisher.json
 ```
 
 Expect `SIGNATURE_AND_BINDING_VALID`. This establishes the fetched signature and
@@ -160,7 +162,7 @@ directly, and for a Service that has only its genesis Manifest, the signed
 `manifest.json` itself:
 
 ```sh
-sudo -u osd-worker php node-php/bin/onion-service-discovery service:membership /absolute/private/osd-publisher/config.json node-php/public/.well-known/onion-service-discovery-history.json
+sudo -u osd-worker php node-php/bin/onion-service-discovery service:membership /etc/onion-service-discovery/publisher.json node-php/public/.well-known/onion-service-discovery-history.json
 ```
 
 The history contains only public signed records; it never needs the Service key.
@@ -213,8 +215,8 @@ an older revision is ignored, and evidence older than seven days shows
 For a complete status page also save the self-check and announcement results:
 
 ```sh
-sudo -u osd-worker php node-php/bin/onion-service-discovery service:verify /absolute/private/osd-publisher/config.json --save-status
-sudo -u osd-worker php node-php/bin/onion-service-discovery network:announce /absolute/private/osd-publisher/config.json node-php/public/.well-known/onion-service-discovery.json --save-status
+sudo -u osd-worker php node-php/bin/onion-service-discovery service:verify /etc/onion-service-discovery/publisher.json --save-status
+sudo -u osd-worker php node-php/bin/onion-service-discovery network:announce /etc/onion-service-discovery/publisher.json node-php/public/.well-known/onion-service-discovery.json --save-status
 ```
 
 The page then lists ten steps (installation, configuration, identity, Manifest,
@@ -260,9 +262,19 @@ Every change is a new signed revision of your current Manifest. Work on the
 administrator machine, transfer only the signed public files, and keep every
 signed revision and proof: your complete history is what lets others verify
 continuity. The commands below are exercised by `node-php/tests/publisher-lifecycle.php`.
-Run them from the repository root after `C="php node-php/bin/onion-service-discovery"`.
+Run them inside the directory that holds your signed files, with the command's
+absolute path:
+
+```sh
+cd /absolute/private/osd-service
+C="php /absolute/app/Onion-Service-Discovery/node-php/bin/onion-service-discovery"
+```
+
 Numbered files keep each revision: `manifest-1.json` is the genesis `manifest.json`
-from step 3, `service.key` and `passphrase` are your current Service key files.
+from step 3 (`cp manifest.json manifest-1.json`), `service.key` and `passphrase`
+are your current Service key files and `hostname` is the public hostname file.
+`manifest:install` runs on the web host as in step 4; a command that names the
+publisher configuration runs there as `osd-worker` (`sudo -u osd-worker $C …`).
 
 ### Change metadata
 
@@ -305,7 +317,8 @@ $C record:sign service new.key migration/successor-draft.json --passphrase-file 
 $C manifest:install manifest-4.json NEW_HOSTNAME_DIRECTORY/hostname /absolute/app/Onion-Service-Discovery/node-php/public --migration migration.json
 ```
 
-Update `node.onion` in your publisher configuration to the new address.
+Update `node.onion` in your publisher configuration to the new address. From now
+on install with the new `hostname` file: the old one no longer matches.
 
 ### How Nodes learn your history
 
@@ -337,7 +350,7 @@ fallback, a Node operator can still admit a proof file directly with
 ```sh
 $C manifest:withdraw manifest-4.json > draft-5.json
 $C record:sign service new.key draft-5.json --passphrase-file new-passphrase > manifest-5.json
-$C manifest:install manifest-5.json hostname /absolute/app/Onion-Service-Discovery/node-php/public
+$C manifest:install manifest-5.json NEW_HOSTNAME_DIRECTORY/hostname /absolute/app/Onion-Service-Discovery/node-php/public
 ```
 
 Withdrawal removes your Service from normal results. Independent Nodes may keep
@@ -348,7 +361,7 @@ historical public records; global deletion cannot be guaranteed.
 Pass all signed files in order; no hand-made JSON is needed:
 
 ```sh
-$C network:discoverability-check /absolute/private/osd-publisher/config.json \
+sudo -u osd-worker $C network:discoverability-check /etc/onion-service-discovery/publisher.json \
   manifest-1.json manifest-2.json rotation.json manifest-3.json migration.json manifest-4.json \
   --node NODE.onion ed25519:NODE_KEY --save-status
 ```
@@ -357,7 +370,7 @@ On the web host the served history bundle holds the same records, which is what
 `osd-publisher-check.timer` uses:
 
 ```sh
-$C network:discoverability-check /absolute/private/osd-publisher/config.json \
+sudo -u osd-worker $C network:discoverability-check /etc/onion-service-discovery/publisher.json \
   /absolute/app/Onion-Service-Discovery/node-php/public/.well-known/onion-service-discovery-history.json \
   --node NODE.onion ed25519:NODE_KEY --save-status
 ```

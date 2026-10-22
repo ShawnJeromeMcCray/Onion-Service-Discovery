@@ -61,9 +61,13 @@ No remote pin sync exists. Clearing index data preserves pins/witnesses; an
 explicit separate confirmation is required to forget continuity safeguards.
 
 Default limits: 16 allowlisted sources and 8 visitor-added Nodes, 10,000 local
-evidence records, 64 chunks and 32 MiB per source, 90 seconds of network time
-per source, 15 seconds per fetch, 256 pins, a 256-character local query with at most 16 terms,
-1 MiB per imported record bundle and 256 KiB per pin backup. Results are not
+evidence records across all sources (a reloaded Node replaces the records only it
+supplied before), 64 chunks and 32 MiB per source, 90 seconds of network time per
+source plus one second per 20 KB of declared chunk bytes (at most 15 minutes), 15
+seconds per fetch plus one second per 20 KB of the response limit, 256 pins, a
+256-character local query with at most 16 terms, 1 MiB per imported record bundle
+(up to 10,000 records in its list) and 256 KiB per pin backup. Loading demo data
+replaces real records and importing real records replaces demo data. Results are not
 capped: matching identities with the same normalized name, description and state
 form one group, groups are shown 25 per page with previous and next buttons, and
 a group's similar entries are paged 25 at a time. Signature checking is not

@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-228 codes.
+233 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -40,7 +40,7 @@ for remedies.
 | `CLOCK_ROLLBACK` | Node worker | 3 | The system clock is earlier than the creation time of the last published snapshot, so node:snapshot refused to publish; correct the clock, then run node:snapshot again. |
 | `COMMAND_UNKNOWN` | CLI | 3 | help knows no command of that name; run help without arguments for the list. |
 | `CONFIGURATION_CREATE_REFUSED` | configuration and status | 3 | init could not create the configuration file because it already exists or the directory does not allow it; init never overwrites a configuration; choose a new path. |
-| `CONFIGURATION_INVALID` | browser client, configuration and status, storage | 3, 4 | The configuration file has a missing, unknown or wrongly typed key; see the configuration reference. |
+| `CONFIGURATION_INVALID` | Node worker, browser client, configuration and status, storage | 3, 4 | The configuration file has a missing, unknown or wrongly typed key; see the configuration reference. |
 | `CONFIGURATION_PATH_INVALID` | configuration and status | 3 | storage.path, export_path or node.key_path is not an absolute path of at most 1024 bytes without . or .. segments, control characters or ://, or it cannot be resolved; the detail names the key. |
 | `CONFIGURATION_PATH_UNSAFE` | configuration and status | 3 | init refused the configuration path: it must be an absolute path of at most 1024 bytes in an existing, non-symlinked, owner-only (0700) directory outside node-php/public. |
 | `CONFIGURATION_UNAVAILABLE` | configuration and status | 3 | The configuration file is missing, unreadable, a symlink or larger than 16 KiB. |
@@ -85,7 +85,8 @@ for remedies.
 | `IMPORT_REQUIRES_EMPTY_STAGING_STORE` | storage | 4 | storage:import writes only into a new, empty store, and the given staging store already holds records or changes; give a new staging path. |
 | `INPUT_FILE_UNAVAILABLE` | CLI, signing | 3 | An input file is missing, not a regular file, unreadable or given as a URL; check the path and read permission. |
 | `INTERNAL_ERROR` | CLI | 8 | An unexpected internal failure; details are withheld on purpose. Run storage:check if a store was involved and attach the reviewed diagnostics:export output when reporting it. |
-| `JSON_DEPTH_EXCEEDED` | browser client, encoding | 3 | The JSON nests objects or arrays more than 16 levels deep, beyond what the protocol allows. |
+| `JSON_DEPTH_EXCEEDED` | JSON parsing, browser client, encoding | 3 | The JSON nests objects or arrays more than 16 levels deep, beyond what the protocol allows. |
+| `JSON_DUPLICATE_KEY` | JSON parsing, browser client | 3 | The JSON repeats a member name inside one object; signed protocol JSON must have unique keys so every reader sees the same value. |
 | `KEY_DIRECTORY_UNSAFE` | signing | 4 | key:create refused the key path because it is a URL or its directory is a symlink, missing or open to group or others; create the directory with mode 0700 first. |
 | `KEY_ENVELOPE_INVALID` | signing | 4 | The key file is not a valid key envelope for this role (for example a service key used as a Node key) or is damaged, so the key was not unlocked; use the key file key:create made for this role. |
 | `KEY_FILE_UNAVAILABLE` | signing | 4 | The key file is missing, a symlink, not a regular file, open to group or others, larger than 4 KiB or unreadable, or key:create found an existing file or could not write it; keys must be owner-only (0600) regular files. |
@@ -97,6 +98,7 @@ for remedies.
 | `LOCAL_RESOURCE_TOO_LARGE` | browser client | – | The Client Host’s config.json exceeds 16 KiB or its demo.json exceeds 1 MiB, so the browser client stopped reading it. |
 | `LOCAL_RESOURCE_UNAVAILABLE` | browser client | – | The browser client could not load config.json or demo.json from its Client Host as a successful JSON response; without config.json no configured Nodes are offered. |
 | `MANIFEST_INVALID` | configuration and status | 3 | The installed public Manifest file holds a validly signed record that is not a Service Manifest, so the status page and publisher:status report the Manifest as invalid; install a signed Service Manifest with manifest:install. |
+| `MANIFEST_NOT_INSTALLED` | front controller | – | The front controller found no readable Manifest in node-php/public/.well-known: run manifest:install into this checkout, and keep .well-known readable (0755) for the web server user. |
 | `METADATA_INVALID` | signing | 3 | The metadata file for manifest:init or manifest:revise is not a JSON object with a service member and no members other than service, links and discovery. |
 | `METHOD_NOT_ALLOWED` | front controller, web routes | – | The route does not accept the request method (HTTP 405): the data, relay and client routes take GET or HEAD, and the announcement route takes only POST. |
 | `MIGRATION_INVALID` | browser client, protocol, signing | 3 | An address change without a valid migration proof for exactly this predecessor and revision. |
@@ -138,6 +140,7 @@ for remedies.
 | `PUBLISHER_BUSY` | configuration and status, signing | 3 | Another publisher command holds the lock on the same files; run it again when that command has finished. |
 | `PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT` | doctor | 6 | doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page. |
 | `PUBLISHER_NODES_NOT_CONFIGURED` | CLI, doctor | 3, 6 | No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key. |
+| `PUBLISHER_SELF_VERIFICATION_FAILED` | doctor | 6 | doctor warning: the last saved self-check through your own Onion failed or fetched a different Manifest; publisher:status names the cause and the fix. |
 | `PUBLISHER_TIMER_STALE` | doctor | 6 | doctor warning: the last saved publisher check is older than 36 hours although the timer runs every six hours; check osd-publisher-check.timer. |
 | `PUBLISHING_DISABLED` | CLI | 3 | Publishing is off in the configuration or the Manifest withdraws publication. |
 | `RATE_LIMIT_CONFIGURATION_INVALID` | web routes | 4 | A request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is a symlink or its limits are invalid, so requests fail with HTTP 503; remove the symlink. |
@@ -154,7 +157,7 @@ for remedies.
 | `ROLE_CONFIGURATION_INVALID` | CLI, Node worker, configuration and status | 3 | The command or feature is not available for this configuration role. |
 | `RUNTIME_DEPENDENCIES_MISSING` | CLI, front controller | 3 | PHP dependencies are missing: use the development runtime package, which bundles them, or run the locked Composer install. |
 | `RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX` | doctor | 6 | doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it. |
-| `SCHEMA_INVALID` | CLI, Node worker, browser client, encoding, input parsing, protocol, signing, web routes | 3 | The record does not match its draft schema. |
+| `SCHEMA_INVALID` | CLI, JSON parsing, Node worker, browser client, encoding, input parsing, protocol, signing, web routes | 3 | The record does not match its draft schema. |
 | `SEARCH_INDEX_CORRUPT` | server search | 3 | The server search index files in the export directory are missing, altered or malformed or do not match the published snapshot, so server search is unavailable; rebuild them with node:snapshot --rebuild-derived. |
 | `SEARCH_INDEX_STALE` | server search | 3 | The server search index was built for another snapshot than the one now published, or by an earlier release in an older format, so server search is unavailable; rebuild it with node:snapshot --rebuild-derived. |
 | `SEARCH_INDEX_UNAVAILABLE` | server search | 3 | Server search has no index because no snapshot was published or it was published with server search off, so server search is unavailable; run node:snapshot with server_search enabled. |
@@ -208,20 +211,22 @@ for remedies.
 | `SQLITE_DRIVER_UNAVAILABLE` | storage | 4 | The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend. |
 | `STORAGE_ADDRESS_INVALID` | storage | 4 | A record or export address is not sha256: followed by 64 lowercase hex digits, or an operational table or key name is invalid, so the store refused the request. |
 | `STORAGE_BACKEND_INVALID` | CLI, configuration and status | 3 | The storage backend, given as a command argument or as storage.backend in the configuration, is neither filesystem nor sqlite. |
-| `STORAGE_BUDGET_EXHAUSTED` | storage | 4 | The local store reached its record or byte quota; existing evidence is preserved. |
+| `STORAGE_BUDGET_EXHAUSTED` | storage | 4 | The local store reached its record or byte quota; existing evidence is preserved. Check storage_usage in doctor and that node:maintain runs on a store migrated with storage:migrate. |
+| `STORAGE_BUDGET_NEARLY_EXHAUSTED` | doctor | 6 | doctor warning: the store uses at least 80 % of its record, state-size or operational-row budget (storage_usage); check that the maintenance timer runs and that storage:migrate enabled record pruning. |
 | `STORAGE_BUSY` | storage | 4 | Another worker holds the store lock; let it finish. |
 | `STORAGE_CORRUPT` | CLI, Node worker, configuration and status, storage, web routes | 3, 4 | Stored data failed verification; run storage:check and restore from backup if needed. |
 | `STORAGE_ENCODING_INVALID` | storage | 4 | A value could not be put into the store’s strict internal JSON form (nesting over 32 levels, invalid UTF-8, a string over 64 KiB, an unsafe key or an unsupported type), so it was not written. |
 | `STORAGE_ERROR` | storage | 4 | A store operation failed at the operating-system or SQLite level (for example a write or sync on a full disk); data committed before is kept; free space or fix permissions and run the command again. |
-| `STORAGE_MIGRATION_REQUIRED` | storage | 4 | This store uses an older format; stop workers, back up, run storage:migrate. |
+| `STORAGE_MIGRATION_REQUIRED` | storage | 4 | This store uses an older format (a format-1 filesystem store, or one that cannot yet record pruned checkpoints); stop workers, back up, run storage:migrate. |
 | `STORAGE_MODE_INVALID` | storage | 4 | An internal check failed: a store cannot be opened for creation and read-only at the same time, so it was not opened. |
 | `STORAGE_NOT_REQUIRED_FOR_PUBLISHER` | configuration and status | 3 | The command needs a Node store, but this is a publisher configuration, which keeps none; use a node or combined configuration. |
 | `STORAGE_PATH_UNSAFE` | storage | 4 | The filesystem store path is a URL or a symlink; point it at the real directory. |
 | `STORAGE_PERMISSIONS_UNSAFE` | storage | 4 | The store directory, one of its subdirectories or the SQLite database file is open to group or others; chmod 700 the directories and 600 the SQLite file. |
+| `STORAGE_PRUNING_MIGRATION_REQUIRED` | doctor | 6 | doctor warning: the store predates bounded checkpoint retention, so superseded checkpoints are never removed and it eventually fills; stop workers, back up, run storage:migrate. |
 | `STORAGE_READ_ONLY` | storage | 4 | An internal check failed: a write was attempted on a store opened read-only, so nothing was changed. |
 | `STORAGE_RECOVERY_REQUIRED` | storage | 4 | An interrupted write must be recovered with storage:check before read-only use. |
 | `STORAGE_UNAVAILABLE` | storage | 4 | The store path does not exist (and this command does not create it), is a symlink or URL, or the store or one of its files or directories cannot be created or opened; check storage.path; node:init or storage:init creates a store. |
-| `STORAGE_VERSION_UNSUPPORTED` | storage | 4 | The store has a format this release cannot open: a filesystem storage-version other than 1 or 2, or a SQLite schema version other than 1 or SQLite without foreign-key support. |
+| `STORAGE_VERSION_UNSUPPORTED` | storage | 4 | The store has a format this release cannot open: a filesystem storage-version other than 1, 2 or 3, or a SQLite schema version other than 1 or 2 or SQLite without foreign-key support. |
 | `STREAMING_UNAVAILABLE` | browser client | – | The browser returned the Node’s answer without a readable body stream, which the bounded download requires, so nothing from it was used. |
 | `SYNC_DISABLED` | CLI | 3 | Peer sync is off in this configuration (features.sync_with_peers is false), so sync:run and sync:peer-step refused to run; enable it to sync with peers. |
 | `TOO_LARGE` | signing | 3 | Not an error: manifest:install reports the history state TOO_LARGE when the connected history exceeds 256 records or 1 MiB, so the history bundle was not updated. |

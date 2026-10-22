@@ -60,6 +60,10 @@ try {
     unset($queue, $store); $store = new SQLiteStore($root . '/state.sqlite'); $queue = new CandidateQueue($store);
     check($queue->claim(1001) === null && $queue->claim(999) === null, 'restart/clock reset work quota');
     check($queue->claim(4600) !== null, 'work quota never resumed');
+    // A clock that ran ahead once must not stall the queue until real time catches up.
+    $store->transaction(static function (StorageTransaction $tx): void { $tx->set('maintenance', 'candidate-work', ['start' => 90000000, 'last_seen' => 90000000, 'count' => 1, 'sources' => []]); });
+    check($queue->claim(8300) === null, 'clock rollback granted extra work');
+    check($queue->claim(11950) !== null, 'work stalled after a clock rollback');
     $key = 'ed25519:' . rtrim(strtr(base64_encode(sodium_crypto_sign_publickey(sodium_crypto_sign_seed_keypair(str_repeat("\x42", 32)))), '+/', '-_'), '=');
     for ($i = 0; $i < 256; ++$i) { check(PeerRegistry::add($store, address($i), $key), 'peer admission'); }
     check(!PeerRegistry::add($store, address(0), $key), 'peer dedup');

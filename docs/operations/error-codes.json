@@ -244,6 +244,7 @@
     "4"
    ],
    "components": [
+    "Node worker",
     "browser client",
     "configuration and status",
     "storage"
@@ -660,10 +661,21 @@
     "3"
    ],
    "components": [
+    "JSON parsing",
     "browser client",
     "encoding"
    ],
    "meaning": "The JSON nests objects or arrays more than 16 levels deep, beyond what the protocol allows."
+  },
+  "JSON_DUPLICATE_KEY": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "JSON parsing",
+    "browser client"
+   ],
+   "meaning": "The JSON repeats a member name inside one object; signed protocol JSON must have unique keys so every reader sees the same value."
   },
   "KEY_DIRECTORY_UNSAFE": {
    "cli_exit": [
@@ -765,6 +777,13 @@
     "configuration and status"
    ],
    "meaning": "The installed public Manifest file holds a validly signed record that is not a Service Manifest, so the status page and publisher:status report the Manifest as invalid; install a signed Service Manifest with manifest:install."
+  },
+  "MANIFEST_NOT_INSTALLED": {
+   "cli_exit": [],
+   "components": [
+    "front controller"
+   ],
+   "meaning": "The front controller found no readable Manifest in node-php/public/.well-known: run manifest:install into this checkout, and keep .well-known readable (0755) for the web server user."
   },
   "METADATA_INVALID": {
    "cli_exit": [
@@ -1143,6 +1162,15 @@
    ],
    "meaning": "No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key."
   },
+  "PUBLISHER_SELF_VERIFICATION_FAILED": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: the last saved self-check through your own Onion failed or fetched a different Manifest; publisher:status names the cause and the fix."
+  },
   "PUBLISHER_TIMER_STALE": {
    "cli_exit": [
     "6"
@@ -1291,6 +1319,7 @@
    ],
    "components": [
     "CLI",
+    "JSON parsing",
     "Node worker",
     "browser client",
     "encoding",
@@ -1776,7 +1805,16 @@
    "components": [
     "storage"
    ],
-   "meaning": "The local store reached its record or byte quota; existing evidence is preserved."
+   "meaning": "The local store reached its record or byte quota; existing evidence is preserved. Check storage_usage in doctor and that node:maintain runs on a store migrated with storage:migrate."
+  },
+  "STORAGE_BUDGET_NEARLY_EXHAUSTED": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: the store uses at least 80 % of its record, state-size or operational-row budget (storage_usage); check that the maintenance timer runs and that storage:migrate enabled record pruning."
   },
   "STORAGE_BUSY": {
    "cli_exit": [
@@ -1826,7 +1864,7 @@
    "components": [
     "storage"
    ],
-   "meaning": "This store uses an older format; stop workers, back up, run storage:migrate."
+   "meaning": "This store uses an older format (a format-1 filesystem store, or one that cannot yet record pruned checkpoints); stop workers, back up, run storage:migrate."
   },
   "STORAGE_MODE_INVALID": {
    "cli_exit": [
@@ -1864,6 +1902,15 @@
    ],
    "meaning": "The store directory, one of its subdirectories or the SQLite database file is open to group or others; chmod 700 the directories and 600 the SQLite file."
   },
+  "STORAGE_PRUNING_MIGRATION_REQUIRED": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: the store predates bounded checkpoint retention, so superseded checkpoints are never removed and it eventually fills; stop workers, back up, run storage:migrate."
+  },
   "STORAGE_READ_ONLY": {
    "cli_exit": [
     "4"
@@ -1898,7 +1945,7 @@
    "components": [
     "storage"
    ],
-   "meaning": "The store has a format this release cannot open: a filesystem storage-version other than 1 or 2, or a SQLite schema version other than 1 or SQLite without foreign-key support."
+   "meaning": "The store has a format this release cannot open: a filesystem storage-version other than 1, 2 or 3, or a SQLite schema version other than 1 or 2 or SQLite without foreign-key support."
   },
   "STREAMING_UNAVAILABLE": {
    "cli_exit": [],

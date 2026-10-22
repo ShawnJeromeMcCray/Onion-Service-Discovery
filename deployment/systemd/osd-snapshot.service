@@ -13,7 +13,10 @@ NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=strict
 ProtectHome=yes
-ReadWritePaths=/var/lib/onion-service-discovery
+# init --role node keeps the store, exports and Node key beside the configuration,
+# so the configuration directory is the one place the job writes. Add the directory
+# here if you moved storage.path or export_path elsewhere.
+ReadWritePaths=/etc/onion-service-discovery
 RestrictAddressFamilies=AF_UNIX
 # Local signing only: no network at all.
 PrivateNetwork=yes

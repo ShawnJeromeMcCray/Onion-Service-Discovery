@@ -50,13 +50,15 @@ final class PrivateBackup
         $verified = self::verifiedSpool($path, $verifier);
         $state = $verified['state']; $records = $verified['records']; $checksum = $verified['checksum']; $spool = $verified['spool'];
         try {
-            rewind($spool); $batch = []; $spoolBytes = 0;
+            rewind($spool); $batch = []; $spoolBytes = 0; $sequences = array_column($records, 'sequence');
             for ($index = 0; $index < count($records); ++$index) {
-                $batch[] = $verifier->verifyWire(substr(self::line($spool, 65537, $spoolBytes), 0, -1));
+                $batch[$sequences[$index]] = $verifier->verifyWire(substr(self::line($spool, 65537, $spoolBytes), 0, -1));
                 if (count($batch) === 256 || $index === count($records) - 1) {
-                    $destination->transaction(static function (StorageTransaction $tx) use ($batch): void { foreach ($batch as $record) { $tx->putRecord($record); } }); $batch = [];
+                    // Sequences that bounded retention removed at the source stay retired, so every record keeps its own.
+                    $destination->transaction(static function (StorageTransaction $tx) use ($batch): void { foreach ($batch as $sequence => $record) { $tx->retireSequences($sequence - $tx->state()['last_sequence'] - 1); $tx->putRecord($record); } }); $batch = [];
                 }
             }
+            $destination->transaction(static function (StorageTransaction $tx) use ($state): void { $tx->retireSequences($state['last_sequence'] - $tx->state()['last_sequence']); });
             foreach ($state['tables'] as $table => $rows) {
                 foreach (array_chunk($rows, 256, true) as $batch) {
                     $destination->transaction(static function (StorageTransaction $tx) use ($table, $batch): void {
@@ -65,7 +67,7 @@ final class PrivateBackup
                 }
             }
             $restored = $destination->snapshot();
-            if (StorageJson::encode($restored['records']) !== StorageJson::encode($state['records']) || StorageJson::encode($restored['tables']) !== StorageJson::encode($state['tables'])) { throw new StorageException('BACKUP_RESTORE_MISMATCH'); }
+            if (StorageJson::encode($restored['records']) !== StorageJson::encode($state['records']) || $restored['last_sequence'] !== $state['last_sequence'] || StorageJson::encode($restored['tables']) !== StorageJson::encode($state['tables'])) { throw new StorageException('BACKUP_RESTORE_MISMATCH'); }
             $destination->integrityCheck();
         } finally { fclose($spool); }
         return ['sha256' => $checksum, 'record_count' => count($records), 'source_generation' => $state['generation'], 'operational_state_restored' => true, 'staging_only' => true, 'keys_included' => false];
