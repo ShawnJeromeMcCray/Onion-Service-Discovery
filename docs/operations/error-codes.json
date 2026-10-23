@@ -155,6 +155,15 @@
    ],
    "meaning": "The snapshot checkpoint used for a membership check is not a snapshot descriptor signed with the expected Node key given for that Node; check the expected Node key."
   },
+  "CLIENT_ASSETS_MODIFIED": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor failure (D-028): a served browser client file is missing or differs from its build manifest; reinstall the verified package or rebuild from the reviewed source."
+  },
   "CLIENT_BUILD_UNAVAILABLE": {
    "cli_exit": [],
    "components": [
@@ -182,6 +191,15 @@
     "browser client"
    ],
    "meaning": "The client page lacks an element its script expects, so the served index.html does not match client.js; serve both from the same client build."
+  },
+  "CLIENT_NOT_BUILT": {
+   "cli_exit": [
+    "6"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor warning: this Client Host has no built browser client (web-local-search-client/dist/build-manifest.json); build it or install the development runtime package."
   },
   "CLIENT_ORIGIN_INVALID": {
    "cli_exit": [
@@ -1440,6 +1458,33 @@
    ],
    "meaning": "The signature does not verify; the record was changed after signing or signed by another key."
   },
+  "SIGNED_CHAIN_AHEAD_OF_STORE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": "This Node key already signed a newer snapshot checkpoint than the store holds (typically a restored older backup), so signing stops instead of publishing a conflicting generation that peers would quarantine; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain."
+  },
+  "SIGNED_CHAIN_UNRECOVERABLE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": "node:snapshot --adopt-signed-chain cannot find the checkpoint or Node descriptor the signing ledger names in the export directory, or it is not exactly what this key signed; restore a newer backup of the store instead."
+  },
+  "SIGNED_DESCRIPTOR_AHEAD_OF_STORE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": "This Node key already signed a newer Node descriptor revision than the store holds (typically a restored older backup), so signing stops; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain."
+  },
   "SIGNER_BINDING_MISMATCH": {
    "cli_exit": [
     "3"
@@ -1477,6 +1522,34 @@
     "signing"
    ],
    "meaning": "The key role cannot sign this record type (service keys sign Manifests, rotations and migrations; Node keys sign Node descriptors, observations and snapshots), or --rotation-confirmation was used on another record."
+  },
+  "SIGNING_LEDGER_AHEAD_OF_STORE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor failure: the store is older than what this Node key already signed (a restored backup?), so node:init and node:snapshot refuse to sign; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain."
+  },
+  "SIGNING_LEDGER_INVALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "Node worker",
+    "doctor"
+   ],
+   "meaning": "The signing ledger beside the Node key (KEY_PATH.signed) is damaged, a symlink, open to group or others or belongs to another key, so signing stops; it is never replaced silently. See the incident runbook."
+  },
+  "SIGNING_LEDGER_UNAVAILABLE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": "The signing ledger beside the Node key could not be locked, read or written; the Node key directory must be a real directory the worker may write and not writable by others."
   },
   "SNAPSHOT_CHUNK_HASH_INVALID": {
    "cli_exit": [

@@ -228,6 +228,12 @@ jobs:
           done
           cmp .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz .tools/runtime-b/onion-service-discovery-development-runtime.tar.gz
           .venv/bin/python tools/verify_candidate.py .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz
+      - name: Build two static client bundles and compare them (D-028)
+        run: |
+          python3 tools/build_release_candidate.py --profile static-client --output .tools/static-a
+          python3 tools/build_release_candidate.py --profile static-client --output .tools/static-b
+          cmp .tools/static-a/onion-service-discovery-static-client.tar.gz .tools/static-b/onion-service-discovery-static-client.tar.gz
+          .venv/bin/python tools/verify_candidate.py .tools/static-a/onion-service-discovery-static-client.tar.gz
       - name: Run the packaged runtime as shipped, without Composer or network
         run: .venv/bin/python tools/run_candidate_smoke.py .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz --expected-source "$(git rev-parse HEAD)" --execute-trusted-local-development-candidate
       - name: Authenticate runtime build provenance for the merge
@@ -254,6 +260,27 @@ jobs:
           cp "$SBOM_BUNDLE" .tools/runtime-a/sbom.sigstore.json
           gh attestation verify .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz --bundle "$PROVENANCE_BUNDLE" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/foundation.yml" --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners --format json > .tools/runtime-a/verified-provenance.json
           gh attestation verify .tools/runtime-a/onion-service-discovery-development-runtime.tar.gz --bundle "$SBOM_BUNDLE" --predicate-type https://cyclonedx.org/bom --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/foundation.yml" --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners --format json > .tools/runtime-a/verified-sbom.json
+      - name: Authenticate static client build provenance for the merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: static-provenance
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: .tools/static-a/onion-service-discovery-static-client.tar.gz
+      - name: Verify and preserve the static client authentication bundle
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          PROVENANCE_BUNDLE: ${{ steps.static-provenance.outputs.bundle-path }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp "$PROVENANCE_BUNDLE" .tools/static-a/provenance.sigstore.json
+          gh attestation verify .tools/static-a/onion-service-discovery-static-client.tar.gz --bundle "$PROVENANCE_BUNDLE" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/foundation.yml" --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners --format json > .tools/static-a/verified-provenance.json
+      - name: Publish the static client preview of this merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: static-client-preview-${{ github.sha }}
+          path: .tools/static-a/
+          retention-days: 90
       - name: Publish the development preview of this merge
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

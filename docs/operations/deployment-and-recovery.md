@@ -112,7 +112,8 @@ access. Never restore a peer-supplied file as a trusted backup. Signed fork,
 rotation/migration evidence, local observations and source high-water marks are
 preserved. Storage transaction generation is local and will change on restore.
 
-Back up separately: encrypted Service key, encrypted Node key, production config,
+Back up separately: encrypted Service key, encrypted Node key and its signing
+ledger (`KEY_PATH.signed`, see below), production config,
 public manifest, export blob directory and persistent TUF verifier state. Stop
 snapshot publishers when capturing export blobs with the database so that its
 published pointer and derived indexes have their corresponding blobs. Stop all
@@ -130,6 +131,71 @@ retain the old path until validation and switch configuration atomically while
 processes are stopped. Re-run doctor, integrity, bounded peer sync and end-to-end
 checks before re-enabling schedules. Test this drill regularly; physical
 power-loss/disk-full and live deployment restore drills remain open gates.
+
+### Restoring an older store: the signing ledger
+
+A Node key must never sign a checkpoint generation or Node descriptor revision it
+already published: peers and publishers treat two different records with the same
+number as equivocation (`SOURCE_CHECKPOINT_EQUIVOCATION`,
+`NODE_DESCRIPTOR_ROLLBACK_OR_FORK`) and quarantine the Node for good. A store
+restored from a backup older than the last publication would make the next
+`node:snapshot` sign exactly that. So every Node keeps a signing ledger beside its
+key, `KEY_PATH.signed` (for example `/etc/onion-service-discovery/node.key.signed`):
+an owner-only JSON file naming the newest checkpoint (generation and hash) and Node
+descriptor (revision and hash) this key signed and the store committed. It lives in
+the key's directory, outside the store and its backups, and is replaced atomically.
+
+- `node:init` and `node:snapshot` compare the ledger with the store before they
+  sign. A ledger ahead of the store stops them with `SIGNED_CHAIN_AHEAD_OF_STORE` or
+  `SIGNED_DESCRIPTOR_AHEAD_OF_STORE`, and nothing is signed, stored or exported.
+  `doctor` fails with `SIGNING_LEDGER_AHEAD_OF_STORE` and `node:status` reports
+  `"signing_ledger": "AHEAD_OF_STORE"`.
+- A ledger behind the store or missing (the first run after an upgrade, a lost
+  file, a crash between the store commit and the ledger write) is raised to the
+  store's pointers first; no action is needed (`doctor` shows `BEHIND_STORE` or
+  `NOT_PRESENT` meanwhile).
+- The guard only works while the ledger is newer than the restored store. When you
+  restore a store, keep the Node's current ledger: never copy an older ledger back
+  over it together with the store. Restore a ledger from backup only when the
+  current one is lost or damaged, and then from the newest copy you have.
+- A damaged ledger, a symlink, one open to group or others or one of another key stops
+  signing with `SIGNING_LEDGER_INVALID`; it is never replaced silently. Restore it
+  from the newest backup kept with the key, or see the
+  [incident runbook](incident-runbook.md#6-signing-ledger-ahead-of-the-store-or-damaged).
+
+After restoring an older store, keep the web server and the timers stopped and let
+the Node continue its own published chain before it serves anything:
+
+```sh
+php node-php/bin/onion-service-discovery doctor /etc/onion-service-discovery/node.json
+# signing_ledger: AHEAD_OF_STORE
+php node-php/bin/onion-service-discovery node:snapshot /etc/onion-service-discovery/node.json --passphrase-file PRIVATE_FILE --adopt-signed-chain
+```
+
+`--adopt-signed-chain` loads the checkpoint the ledger names from the export
+directory and, when the ledger's descriptor revision is ahead, the Node descriptor
+from the published-state copy beside the exports. It checks that each is exactly
+what this key signed (signature, type, key, number and hash), admits it into the
+store and points the store at it, then publishes as usual: the next checkpoint is
+the ledger's generation plus one and names the adopted checkpoint as its previous
+one. Its output has `"adopted_signed_chain": {"checkpoint": "ADOPTED"|"CURRENT",
+"descriptor": "ADOPTED"|"CURRENT"}`; running it again changes nothing. The export
+pruning of `node:maintain` and `exports:prune` keeps the ledger's checkpoint blob
+meanwhile.
+
+Generations between the restored store and the adopted checkpoint are simply
+absent from this Node: a peer that already holds the adopted checkpoint continues
+normally, a peer that held an older one sees a gap in the chain, and publishers
+whose evidence named a missing generation report it as `NOT_EVALUATED`. Records
+the Node admitted after the backup are not restored by adoption; peer sync and
+direct checks admit them again.
+
+If the needed blob or published-state copy is gone (the export directory was lost
+or restored from elsewhere), `--adopt-signed-chain` fails with
+`SIGNED_CHAIN_UNRECOVERABLE` and changes nothing. The remaining option is to
+restore a newer backup of the store, one taken at or after the ledger's
+generation. Never delete or edit the ledger to make signing proceed: that signs a
+conflicting generation, and peers quarantine the Node permanently.
 
 ## Degraded mode
 

@@ -98,6 +98,29 @@ stable releases use the same keyless Sigstore signing through GitHub
 attestations (owner decisions D-030 and D-031); production approval (D-050)
 remains a separate gate.
 
+## Static client bundle (D-028)
+
+`python3 tools/build_release_candidate.py --profile static-client --output DIR`
+packs only the built browser client (`web-local-search-client/dist/` with its
+`build-manifest.json`), the licence notices and the client contract
+(`onion-service-discovery-static-client.tar.gz`, profile `static-client-v1`). Its
+SBOM lists only what the browser bundle contains. `tools/verify_candidate.py`
+rejects such an archive if it holds server code or lacks the preview marking.
+
+CI builds it twice, compares both archives byte for byte and checks the structure.
+For every merge to `main` (owner decision D-028, 2026-10-22) it requests a GitHub
+build-provenance attestation, verifies it and keeps the bundle as the workflow
+artifact `static-client-preview-COMMIT` for 90 days. Verify it like the runtime
+package, with `onion-service-discovery-static-client.tar.gz` as the subject.
+
+The bundle's `config.json` has no sources, so a static host builds the client
+again from the same commit with its own configuration. Only `config.json` and the
+CSP line in `index.html` change. `client.js`, `verifier-worker.js` and
+`client.css` must keep the hashes in the bundle's `build-manifest.json`; compare
+them before you serve the page. On a PHP Client Host, `doctor` checks the served
+files against the build manifest (`client_assets`; `CLIENT_ASSETS_MODIFIED`
+fails it).
+
 ## Package smoke check
 
 The package smoke check explicitly executes only a trusted local candidate:

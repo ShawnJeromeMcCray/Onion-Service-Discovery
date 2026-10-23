@@ -235,11 +235,16 @@ lost. Until then the Node serves in degraded mode, and `doctor` reports
    processes are stopped, run `doctor`, start the timers. If export files are
    missing, `node:snapshot CONFIG --passphrase-file FILE --rebuild-derived`
    rebuilds them and signs the next generation.
-6. Lower generation: do not run `node:snapshot` with this key again. The next
-   snapshot would sign a generation number that peers already saw with other
-   content; peers would quarantine your Node and publishers would reject it.
-   Start a new Node identity (section 2) and carry the restored public records
-   over with `storage:export` from the staging path.
+6. Lower generation: a plain `node:snapshot` would sign a generation number that
+   peers already saw with other content, so the signing ledger beside the Node
+   key refuses it (`SIGNED_CHAIN_AHEAD_OF_STORE`, section 6). Switch the
+   configuration while all processes are stopped and, before starting the web
+   server or the timers, continue the published chain:
+   `node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain`. Then run
+   `doctor` (`signing_ledger` must be `CONSISTENT`) and start everything again.
+   Only if that fails with `SIGNED_CHAIN_UNRECOVERABLE` and no newer backup
+   exists, start a new Node identity (section 2) and carry the restored public
+   records over with `storage:export` from the staging path.
 
 ## 5. A passphrase file leaked
 
@@ -258,6 +263,50 @@ XChaCha20-Poly1305). Whoever holds both can sign with that key.
 4. Store the new passphrase only in an owner-only (0600) file or as a systemd
    credential, never in a command line or an ordinary environment variable. The
    timers read it through `LoadCredential=` when they start.
+
+## 6. Signing ledger ahead of the store or damaged
+
+Every Node keeps `KEY_PATH.signed` beside its key: the newest checkpoint and Node
+descriptor the key signed and the store committed ([deployment and
+recovery](deployment-and-recovery.md#restoring-an-older-store-the-signing-ledger)).
+It stops `node:init` and `node:snapshot` before they sign a number the key already
+used with other content, which peers would treat as equivocation for good.
+
+**`SIGNED_CHAIN_AHEAD_OF_STORE` or `SIGNED_DESCRIPTOR_AHEAD_OF_STORE`**
+(`doctor`: `SIGNING_LEDGER_AHEAD_OF_STORE`). The store is older than what the key
+signed: usually a restored backup, or a configuration pointing at an old store
+path. Nothing was signed.
+
+1. Stop the timers and the web server. Check that the configuration points at
+   the store you mean; if a newer store exists, switch back to it.
+2. Otherwise run `node:snapshot CONFIG --passphrase-file FILE
+   --adopt-signed-chain`. It continues from the checkpoint and descriptor the
+   ledger names, after checking that this key signed exactly those. The
+   generations in between stay absent; peers holding the newest one continue
+   normally.
+3. `SIGNED_CHAIN_UNRECOVERABLE`: the export directory no longer has the
+   checkpoint, or the published-state copy no longer has the descriptor. Restore
+   a newer store backup, or the export directory from the same backup set, and
+   try again. If neither exists, this key cannot continue safely: start a new
+   Node identity (section 2).
+
+**`SIGNING_LEDGER_INVALID`.** The ledger is not valid JSON of the expected shape,
+is a symlink, is open to group or others or names another key. It is never replaced
+automatically.
+
+1. Keep the file as evidence. Check permissions first: `chmod 600` and the
+   service user's ownership fix a ledger that is only too open.
+2. Restore the ledger from the backup taken with the key. A ledger that is older
+   than the store is raised automatically on the next run.
+3. Without any copy, move the damaged file aside only if you are sure the store
+   holds the newest checkpoint and descriptor this key published (compare the
+   store's `snapshot_generation` in `status CONFIG --check` with what peers'
+   `sync:status` accepted). The next run then writes a new ledger from the store.
+
+**`SIGNING_LEDGER_UNAVAILABLE`.** The key directory is not a real directory the
+worker may write, or is writable by others. The systemd units allow writes to
+`/etc/onion-service-discovery` (`ReadWritePaths=`); if you moved the key, add
+its directory there.
 
 ## Related
 

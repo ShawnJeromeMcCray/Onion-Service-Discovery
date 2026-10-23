@@ -12,18 +12,19 @@ use OnionServiceDiscovery\Storage\PublicBlobStore;
 
 final readonly class SnapshotProducer
 {
-    public function __construct(private StorageBackend $store, private PublicBlobStore $blobs, private RecordVerifier $verifier, private SignerProvider $signer, private bool $serverSearch = false, private bool $forceDerived = false)
+    public function __construct(private StorageBackend $store, private PublicBlobStore $blobs, private RecordVerifier $verifier, private SignerProvider $signer, private bool $serverSearch = false, private bool $forceDerived = false, private ?SigningLedger $ledger = null)
     { if ($signer->role() !== 'node') { throw new ProtocolException('SIGNER_ROLE_MISMATCH'); } }
     /**
      * Publishes a new generation when the public evidence changed, then copies the published state
      * beside the export blobs for degraded serving (D-045). The copy is written only after the store
      * committed, so it never names a snapshot the store did not publish; an UNCHANGED run repairs a
-     * missing or older copy, for example after an upgrade.
+     * missing or older copy, for example after an upgrade. With a signing ledger (the CLI always passes
+     * one) the run holds the key's signing lock and never signs a generation the key already signed.
      * @return array<array-key, mixed>
      */
     public function publish(int $now): array
     {
-        $result = $this->produce($now);
+        $result = $this->ledger === null ? $this->produce($now) : $this->ledger->exclusive(fn (): array => $this->produce($now));
         PublishedState::save($this->store, $this->blobs, $this->verifier);
         return $result;
     }
@@ -34,6 +35,8 @@ final readonly class SnapshotProducer
     {
         if ($now < 0 || $now > 253402300799) { throw new ProtocolException('CLOCK_INVALID'); }
         $state = $this->store->snapshot(); $all = [];
+        // A store older than what this key signed (a restored backup) must not be signed onward.
+        $this->ledger?->reconcile($this->signer->publicKey(), $this->store, $this->verifier, $state);
         foreach (array_chunk(array_keys($state['records']), 256) as $batch) {
             foreach ($this->store->readRecords($batch) as $hash => $wire) {
                 $record = $this->verifier->verifyWire($wire);
@@ -131,6 +134,8 @@ final readonly class SnapshotProducer
             else { $tx->deleteOperational('node', 'server-search-index'); }
             $tx->set('node', 'published-snapshot', ['hash' => $descriptor->contentHash, 'root_hash' => SnapshotFormat::rootHash($chunks), 'generation' => $generation, 'cursor' => (string) $publicCursor, 'service_index_version' => 2]);
         });
+        // Only a committed, so published, checkpoint enters the ledger; a crash before this line is raised by the next run.
+        $this->ledger?->record($this->signer->publicKey(), 'checkpoint', $generation, $descriptor->contentHash);
         return ['status' => 'PUBLISHED', 'checkpoint_hash' => $descriptor->contentHash, 'record_count' => $count, 'chunks' => count($chunks)];
     }
     /** @param list<\stdClass> $chunk

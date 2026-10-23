@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-233 codes.
+241 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -30,10 +30,12 @@ for remedies.
 | `CANDIDATE_CLAIM_LOST` | Node worker | 3 | This worker’s 2-minute claim on the candidate expired and another worker run released it before the result was saved, so the result was dropped and the candidate is checked again later. |
 | `CANDIDATE_NOT_FOUND` | Node worker | 3 | The candidate is not queued on this Node; candidate:add queues it first. |
 | `CHECKPOINT_NODE_MISMATCH` | browser client, protocol | 3 | The snapshot checkpoint used for a membership check is not a snapshot descriptor signed with the expected Node key given for that Node; check the expected Node key. |
+| `CLIENT_ASSETS_MODIFIED` | doctor | 4 | doctor failure (D-028): a served browser client file is missing or differs from its build manifest; reinstall the verified package or rebuild from the reviewed source. |
 | `CLIENT_BUILD_UNAVAILABLE` | web routes | – | The Client Host answered 503 because a browser client file is missing from web-local-search-client/dist, is a symlink or exceeds 2 MiB; build it with npm --prefix web-local-search-client run build. |
 | `CLIENT_BUSY` | browser client | – | Another load, import or clear operation is still running in this page, so the new one was not started; wait for it or cancel it first. |
 | `CLIENT_CONFIGURATION_INVALID` | browser client | – | The browser client got an unusable source setup (over 16 Nodes, an unknown delivery profile or a change during a load) or a load request with no Node, over 16 Nodes or one Node twice. |
 | `CLIENT_MARKUP_INVALID` | browser client | – | The client page lacks an element its script expects, so the served index.html does not match client.js; serve both from the same client build. |
+| `CLIENT_NOT_BUILT` | doctor | 6 | doctor warning: this Client Host has no built browser client (web-local-search-client/dist/build-manifest.json); build it or install the development runtime package. |
 | `CLIENT_ORIGIN_INVALID` | configuration and status | 3 | An allowed_client_origins entry is not exactly http:// followed by a v3 Onion address (no https, port, path or trailing slash); the detail names the entry. |
 | `CLIENT_RECORD_BUDGET_EXHAUSTED` | browser client | – | Admitting these records would grow the browser’s local index beyond 10000 signed records, so none of them were added; clear the index before loading more. |
 | `CLOCK_INVALID` | Node worker, signing, web routes | 3, 4 | The system clock reports a time before 1970 or beyond the supported range (the year 9999 for signed timestamps), so the operation was refused; correct the system clock. |
@@ -170,10 +172,16 @@ for remedies.
 | `SERVER_SEARCH_INDEX_UNAVAILABLE_OR_CORRUPT` | doctor | 4 | doctor: server search is on, but its index cannot be loaded because it is missing, stale or corrupt, so the search page answers 503; rebuild it with node:snapshot --rebuild-derived. |
 | `SERVICE_INDEX_NOT_READY` | web routes | – | This Node has not yet published a snapshot with the current (version 2) service lookup index, so service lookups answer 503; the operator runs node:snapshot. |
 | `SIGNATURE_INVALID` | browser client, protocol | 3 | The signature does not verify; the record was changed after signing or signed by another key. |
+| `SIGNED_CHAIN_AHEAD_OF_STORE` | Node worker | 4 | This Node key already signed a newer snapshot checkpoint than the store holds (typically a restored older backup), so signing stops instead of publishing a conflicting generation that peers would quarantine; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain. |
+| `SIGNED_CHAIN_UNRECOVERABLE` | Node worker | 4 | node:snapshot --adopt-signed-chain cannot find the checkpoint or Node descriptor the signing ledger names in the export directory, or it is not exactly what this key signed; restore a newer backup of the store instead. |
+| `SIGNED_DESCRIPTOR_AHEAD_OF_STORE` | Node worker | 4 | This Node key already signed a newer Node descriptor revision than the store holds (typically a restored older backup), so signing stops; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain. |
 | `SIGNER_BINDING_MISMATCH` | Node worker | 3 | The last published snapshot was signed by another Node key than the one unlocked, so node:snapshot refused to publish; use the Node key that signed this store’s snapshots. |
 | `SIGNER_KEY_MISMATCH` | signing | 4 | The record names another public key for its signer (new_public_key with --rotation-confirmation) than the key in this key file, so record:sign signed nothing; sign with the key the record names. |
 | `SIGNER_ROLE_INVALID` | signing | 4 | The key role is neither service nor node, so key:create or record:sign did nothing. |
 | `SIGNER_ROLE_MISMATCH` | Node worker, signing | 3, 4 | The key role cannot sign this record type (service keys sign Manifests, rotations and migrations; Node keys sign Node descriptors, observations and snapshots), or --rotation-confirmation was used on another record. |
+| `SIGNING_LEDGER_AHEAD_OF_STORE` | doctor | 4 | doctor failure: the store is older than what this Node key already signed (a restored backup?), so node:init and node:snapshot refuse to sign; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain. |
+| `SIGNING_LEDGER_INVALID` | Node worker, doctor | 4 | The signing ledger beside the Node key (KEY_PATH.signed) is damaged, a symlink, open to group or others or belongs to another key, so signing stops; it is never replaced silently. See the incident runbook. |
+| `SIGNING_LEDGER_UNAVAILABLE` | Node worker | 4 | The signing ledger beside the Node key could not be locked, read or written; the Node key directory must be a real directory the worker may write and not writable by others. |
 | `SNAPSHOT_CHUNK_HASH_INVALID` | browser client, protocol | 3 | A snapshot chunk’s size or hash does not match the signed checkpoint, so the chunk was rejected. |
 | `SNAPSHOT_INCOMPLETE` | CLI, browser client, protocol | 3 | A snapshot chunk is missing; the snapshot was not used. |
 | `SNAPSHOT_NOT_PUBLISHED` | doctor | 6 | doctor: directory mirroring is on but no snapshot was published yet (node:snapshot). |

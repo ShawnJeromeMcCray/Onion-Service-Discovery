@@ -45,12 +45,12 @@ foreach ($vectors->cases as $case) { if ($case->id === 'valid-successor') { $rec
 $service = $records[0]->document()->onion; $genesis = $records[0]->document()->service_identity_public_key; $origin = 'http://' . $service;
 $checks = 0;
 try {
-    $signer = ProtectedFileSigner::create($root . '/node.key', 'node', 'TEST ONLY degraded mode passphrase', $verifier);
     foreach (['filesystem', 'sqlite'] as $backend) {
-        $dir = $root . '/' . $backend; mkdir($dir, 0700); $exports = $dir . '/exports'; $configPath = $dir . '/config.json';
+        // One Node key per store: a key's signing ledger refuses a second, independent chain.
+        $dir = $root . '/' . $backend; mkdir($dir, 0700); $signer = ProtectedFileSigner::create($dir . '/node.key', 'node', 'TEST ONLY degraded mode passphrase', $verifier); $exports = $dir . '/exports'; $configPath = $dir . '/config.json';
         $storage = $dir . ($backend === 'filesystem' ? '/data' : '/data.sqlite');
         $v = json_decode((string) file_get_contents($project . '/node-php/config/node.example.json'), true, 32, JSON_THROW_ON_ERROR);
-        $v['storage'] = ['backend' => $backend, 'path' => $storage]; $v['export_path'] = $exports; $v['node']['key_path'] = $root . '/node.key'; $v['allowed_client_origins'] = [$origin];
+        $v['storage'] = ['backend' => $backend, 'path' => $storage]; $v['export_path'] = $exports; $v['node']['key_path'] = $dir . '/node.key'; $v['allowed_client_origins'] = [$origin];
         $v['features'] = array_replace($v['features'], ['mirror_directory' => true, 'discover_services' => true, 'accept_announcements' => true, 'server_search' => true]);
         file_put_contents($configPath, json_encode($v, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES)); chmod($configPath, 0600);
         $config = NodeConfig::load($configPath);

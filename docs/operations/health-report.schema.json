@@ -9,7 +9,7 @@
     "status", "software_version", "php_version", "protocol_versions", "db_schema", "role", "config_state",
     "crypto_state", "key_authentication_state", "tor_transport_state", "manifest_state", "publication",
     "sync_state", "source_concentration", "scheduler_state", "export_usage", "storage_usage", "backup_state", "disk_state",
-    "node_health", "next_action", "security_check_summary", "warnings", "failures", "generated_at",
+    "node_health", "next_action", "signing_ledger", "security_check_summary", "warnings", "failures", "generated_at",
     "network_side_effects", "production_approval"
   ],
   "properties": {
@@ -114,6 +114,10 @@
     },
     "node_health": { "enum": ["HEALTHY", "READ_ONLY", "DEGRADED", "ERROR", "NOT_INITIALIZED", "NOT_APPLICABLE"] },
     "next_action": { "type": ["string", "null"], "maxLength": 1000 },
+    "signing_ledger": {
+      "description": "The signing ledger beside the Node key compared with the store: CONSISTENT; BEHIND_STORE (the next signing run raises it); AHEAD_OF_STORE (the store is older than what the key signed, signing stops until node:snapshot --adopt-signed-chain); NOT_PRESENT (written by the next signing run); INVALID (signing stops); NOT_CHECKED (the store could not be compared); NOT_APPLICABLE without a Node key.",
+      "enum": ["CONSISTENT", "BEHIND_STORE", "AHEAD_OF_STORE", "NOT_PRESENT", "INVALID", "NOT_CHECKED", "NOT_APPLICABLE"]
+    },
     "security_check_summary": {
       "type": "object",
       "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },

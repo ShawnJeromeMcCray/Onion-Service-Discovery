@@ -85,6 +85,26 @@ explicit forgetting and unavailable-storage memory fallback. They are not Tor
 Browser Desktop/Android or independent accessibility/security UX approval.
 Those reviews and the external audit remain OPEN.
 
+## Supported browsers (D-003)
+
+Owner decision D-003 (2026-10-22) sets the supported baseline:
+
+| Browser | Security level | Support |
+| --- | --- | --- |
+| Current stable Tor Browser, desktop | Standard, Safer | Full local search, loading, pins and verification |
+| Current stable Tor Browser for Android | Standard, Safer | Full local search, loading, pins and verification |
+| Current Firefox and Chromium | Default | Full; used by the automated browser tests |
+| Any Tor Browser | Safest (JavaScript off) | No local search. The page explains this; the optional NoJS server search, if the host offers it, is the documented fallback |
+
+The build targets Firefox ESR 128 language features (`firefox128`), so the
+Firefox ESR line that the current Tor Browser is based on is covered. Older Tor
+Browser or ESR releases are not promised. At Safer, scripts run without a JIT:
+large indexes take longer, and the client stays responsive by rebuilding results
+only when the data changes. The page uses no WebAssembly, no `eval`, no inline
+script or style and only same-origin workers, so neither Safer nor the strict CSP
+disables a function. Real-device checks on Tor Browser desktop and Android remain
+a release gate (`ACTUAL_TOR_BROWSER_LOCAL_FUNCTIONS` covers the desktop profile).
+
 ## Static self-hosting
 
 `dist/` can be served without PHP. Build it with a configuration of exactly five
@@ -92,6 +112,11 @@ keys: `"client_config_version": 1`, `"mode": "client-host"`,
 `"delivery_profile": "direct-cross-origin"`, `"minimum_distinct_keys": 3` and the
 Node Onions in `allowed_sources`. The build writes `http://NODE.onion` for each
 source into the page's meta CSP `connect-src`.
+
+The verified way to get these files is the signed static client bundle of a
+merge to `main` ([D-028](../operations/release-candidate.md#static-client-bundle-d-028)):
+rebuild with your configuration from the same commit and compare `client.js`,
+`verifier-worker.js` and `client.css` with the bundle's `build-manifest.json`.
 
 Serve it with [nginx](../../deployment/nginx/static-client.conf.example) or
 [Apache](../../deployment/apache/static-client.conf.example). Both examples
