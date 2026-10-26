@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Licences and SBOMs: the full MIT texts of the npm code bundled into the browser
+  client (`@noble/curves`, `@noble/hashes`, the inlined `ajv` runtime helper) ship
+  in `third-party/` with the repository, the runtime package and the static client
+  bundle; the runtime and static client SBOMs list only what they ship, and the
+  static client bundle also gets an attested SBOM.
+- Documentation brought in line with the code: owner answers of 2026-10-15 and
+  2026-10-22 quoted in the decision register; data inventory and hardening matrix
+  cover checkpoint retention and the signing ledger; stale status statements
+  corrected; Tor Browser security levels named Standard/Safer/Safest.
 - Owner decisions of 2026-10-22: D-003 (current Tor Browser desktop and Android at
   Standard and Safer), D-026 (default source list stays empty until Nodes pass the
   drafted admission process in `docs/governance/source-node-admission.md`), D-028,

@@ -516,7 +516,7 @@
    "components": [
     "doctor"
    ],
-   "meaning": "doctor: the filesystem store uses format 1; plan storage:migrate."
+   "meaning": "doctor: the filesystem store uses format 1; plan storage:migrate (a format-2 store only lacks pruning, see STORAGE_PRUNING_MIGRATION_REQUIRED)."
   },
   "FILESYSTEM_SEMANTICS_UNSUPPORTED": {
    "cli_exit": [

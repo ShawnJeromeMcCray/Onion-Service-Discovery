@@ -5,7 +5,7 @@ manual candidate enqueue, candidates found by PeerSync and the owner-approved
 (D-018) bounded announcement endpoint, which shares the global budgets below
 through the fixed anonymous source `announcement`.
 
-Current provisional local defaults, requiring D-041 sizing/review:
+Current local defaults, owner-approved as development defaults (D-041, 2026-10-22); benchmarks with real Tor hosts may still change them:
 
 | Resource | Bound |
 | --- | --- |

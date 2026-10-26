@@ -115,7 +115,7 @@ DESCRIPTIONS = {
     'VISITOR_SOURCES_DISABLED': 'This Client Host does not relay visitor-chosen Nodes.',
     'VISITOR_SOURCE_LIMIT': 'At most 8 visitor-chosen Nodes can be added.',
     'WORK_BUDGET_EXHAUSTED': 'The input exceeds a bounded work limit and was refused.',
-    'FILESYSTEM_FORMAT_MIGRATION_REQUIRED': 'doctor: the filesystem store uses format 1; plan storage:migrate.',
+    'FILESYSTEM_FORMAT_MIGRATION_REQUIRED': 'doctor: the filesystem store uses format 1; plan storage:migrate (a format-2 store only lacks pruning, see STORAGE_PRUNING_MIGRATION_REQUIRED).',
     'NODE_KEY_MISSING_OR_UNSAFE': 'doctor: the Node key file is missing or readable by others (needs 0600).',
     'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX': 'doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it.',
     'SERVER_SEARCH_ENABLED_QUERIES_SENT_TO_NODE': 'doctor: server search is on, so search terms reach this Node.',

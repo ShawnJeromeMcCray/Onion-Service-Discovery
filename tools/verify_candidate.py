@@ -41,7 +41,7 @@ def verify(path):
   or any(name.startswith(('onion-service-discovery/node-php/vendor/phpstan/','onion-service-discovery/node-php/vendor/bin/'))for name in vendor)):raise ValueError('Development profile rejected')
  # The static client bundle (D-028) is the built browser client and its manifest, nothing executable on a server.
  if profile=='static-client-v1' and (metadata.get('unsigned_development_preview')is not True or not {'onion-service-discovery/web-local-search-client/dist/'+name for name in ('index.html','client.js','verifier-worker.js','build-manifest.json')}<=set(hashes)
-  or any(not name.startswith(('onion-service-discovery/web-local-search-client/dist/','onion-service-discovery/release/'))and name not in {'onion-service-discovery/LICENSE','onion-service-discovery/THIRD_PARTY_NOTICES.md','onion-service-discovery/docs/browser/client-contract.md'} for name in hashes)):raise ValueError('Development profile rejected')
+  or any(not name.startswith(('onion-service-discovery/web-local-search-client/dist/','onion-service-discovery/release/'))and not name.startswith('onion-service-discovery/third-party/')and name not in {'onion-service-discovery/LICENSE','onion-service-discovery/THIRD_PARTY_NOTICES.md','onion-service-discovery/docs/browser/client-contract.md'} for name in hashes)):raise ValueError('Development profile rejected')
  error=JsonStrictValidator(SchemaVersion.V1_6).validate_str(documents['release/SBOM.cdx.json'].decode())
  if error:raise ValueError('SBOM schema rejected')
  return {'status':'PASS','artifact_profile':profile,'files':count,'uncompressed_bytes':total,'source_commit':metadata['source_commit'],'authentication':'NOT_PERFORMED','executed':False,'production_approved':False}

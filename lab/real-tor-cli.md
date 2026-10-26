@@ -105,7 +105,7 @@ launcher and direct **local** connections. It verifies the real browser renders
 the app, its worker validates signed demo records, search creates no additional
 HTTP requests, synthetic content has no active visit/media links and pins work.
 It does not test public Onion navigation, the installed user's profile,
-Normal/Safer/Safest privacy behavior, mobile UI or Android. WebDriver preferences
+Standard/Safer/Safest privacy behavior, mobile UI or Android. WebDriver preferences
 are test harness choices and must not be copied into deployment browser guidance.
 
 ## Optional real private-Onion Tor Browser integration
@@ -134,5 +134,5 @@ address. It uses only W3C DOM operations in that session. The driver verifies
 query exclusion from URL/response/reference logs and absence of cookies.
 
 These are headless private-network functional checks. Public Tor, ordinary
-Normal/Safer/Safest desktop settings, Android, deployed process isolation and
+Standard/Safer/Safest desktop settings, Android, deployed process isolation and
 independent privacy/accessibility reviews remain separate gates.

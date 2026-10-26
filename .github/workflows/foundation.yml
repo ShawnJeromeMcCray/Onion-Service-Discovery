@@ -266,13 +266,23 @@ jobs:
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
         with:
           subject-path: .tools/static-a/onion-service-discovery-static-client.tar.gz
-      - name: Verify and preserve the static client authentication bundle
+      - name: Authenticate static client dependency inventory for the merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: static-sbom
+        uses: actions/attest-sbom@4651f806c01d8637787e274ac3bdf724ef169f34 # v3
+        with:
+          subject-path: .tools/static-a/onion-service-discovery-static-client.tar.gz
+          sbom-path: .tools/static-a/SBOM.cdx.json
+      - name: Verify and preserve the static client authentication bundles
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           PROVENANCE_BUNDLE: ${{ steps.static-provenance.outputs.bundle-path }}
+          SBOM_BUNDLE: ${{ steps.static-sbom.outputs.bundle-path }}
           GH_TOKEN: ${{ github.token }}
         run: |
           cp "$PROVENANCE_BUNDLE" .tools/static-a/provenance.sigstore.json
+          cp "$SBOM_BUNDLE" .tools/static-a/sbom.sigstore.json
+          gh attestation verify .tools/static-a/onion-service-discovery-static-client.tar.gz --bundle "$SBOM_BUNDLE" --predicate-type https://cyclonedx.org/bom --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/foundation.yml" --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners --format json > .tools/static-a/verified-sbom.json
           gh attestation verify .tools/static-a/onion-service-discovery-static-client.tar.gz --bundle "$PROVENANCE_BUNDLE" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/foundation.yml" --source-digest "$GITHUB_SHA" --source-ref "$GITHUB_REF" --deny-self-hosted-runners --format json > .tools/static-a/verified-provenance.json
       - name: Publish the static client preview of this merge
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

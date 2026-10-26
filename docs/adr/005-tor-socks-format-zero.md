@@ -1,7 +1,7 @@
 # ADR 005: explicit Tor SOCKS extension format zero
 
-Status: implemented development hardening; D-042 human Tor/security review and
-deployed/live Tor evidence remain open.
+Status: implemented; owner-approved as implemented (D-042, 2026-10-22).
+Independent Tor/security review and deployed/live Tor evidence remain open.
 Date: 2026-10-13
 
 The official [Tor SOCKS specification](https://spec.torproject.org/socks-extensions.html)
