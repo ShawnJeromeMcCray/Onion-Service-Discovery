@@ -4,20 +4,33 @@ const sourceMessages:{[code:string]:string}={
   SOURCE_FETCH_FAILED:'The Node did not answer. It may be offline or unreachable over Tor right now; try again later. The last verified local index stays available.',
   SOURCE_HTTP_STATUS_REJECTED:'The Node answered with an error page instead of signed data. Nothing from it was used; try again later.',
   SOURCE_TIMEOUT:'The Node answered too slowly. Nothing from this attempt was used; try again later.',
-  SOURCE_TIME_BUDGET_EXHAUSTED:'Downloading this Node’s data took more than 90 seconds in total, so nothing partial was used. Try again later; the Node or the Tor connection may be slow.',
+  SOURCE_TIME_BUDGET_EXHAUSTED:'Downloading this Node’s data took longer than the time allowed for this Node’s data (90 seconds plus time for its size), so nothing partial was used. Try again later; the Node or the Tor connection may be slow.',
   SOURCE_WORK_BUDGET_EXHAUSTED:'This Node offered more data than this page checks at once. Nothing from it was used.',
   RESPONSE_TOO_LARGE:'This Node offered more data than this page checks at once. Nothing from it was used.',
   SOURCE_CHECKPOINT_EQUIVOCATION:'This Node signed two different states for the same moment. Its data is set aside and both signatures are kept as evidence.',
   SOURCE_DESCRIPTOR_EQUIVOCATION:'This Node signed two different descriptions of itself. Its data is set aside and both signatures are kept as evidence.',
   SOURCE_CHECKPOINT_ROLLBACK:'This Node served an older state than it showed before. Its data is set aside.',
-  SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK:'This Node served an older or conflicting description of itself. Its data is set aside.',
+  SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK:'This Node served an older description of itself than it showed before. Its data is set aside.',
   SOURCE_CHECKPOINT_CHAIN_BROKEN:'This Node’s states do not connect to the one it showed before. Its data is set aside.',
   SOURCE_NODE_KEY_CHANGED:'This Node signed with a different key than expected. Check the key you entered; if it is right, another service may be answering at this address.',
   SOURCE_NODE_BINDING_MISMATCH:'The data does not belong to the Node at this address. Nothing from it was used.',
   SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE:'This Node’s current description does not connect to the one this browser saw earlier, so nothing from it was used. Loading again helps only once the Node serves the missing history.',
+  SOURCE_HISTORY_PROGRESS:'This Node has more checkpoint history than one load checks, so more history is needed before its new data is used. The part checked so far is kept: the next load continues where this one stopped. The last verified local index stays available.',
+  SOURCE_EQUIVOCATION_PRESERVED:'This browser already holds proof that this Node signed conflicting data, so it was not loaded again and its data stays set aside. The proof is kept until you choose Forget local data or reload the page.',
+  WITNESS_BUDGET_EXHAUSTED:'This browser’s memory for Node continuity evidence is full, so this Node’s new data was not used. Save any conflict evidence you need, then reload the page or load fewer Nodes.',
+  SOURCE_RECORD_COUNT_INVALID:'This Node’s data held a different number of records than its signed checkpoint states, so verification failed. Nothing from it was used.',
+  SOURCE_CHECKPOINT_BINDING_MISMATCH:'This Node’s current state does not match the signed checkpoint it points to, so verification failed. Nothing from it was used; try again later, the Node may have been updating.',
+  DOCUMENT_TOO_LARGE:'This Node sent a signed document larger than the protocol allows. Nothing from it was used.',
+  STREAMING_UNAVAILABLE:'This browser cannot read the Node’s answer piece by piece, which this page needs to keep downloads bounded. Nothing from it was used; try a current browser.',
   SOURCE_NOT_IN_HOST_ALLOWLIST:'This Node is not listed by this Client Host and was not added by you.',
 };
 const operationMessages:{[code:string]:string}={
+  PUBLIC_KEY_INVALID:'A public key is not valid: an expected Node key must be ed25519: followed by 43 characters, and a key inside an imported file must be well formed. Nothing was loaded or imported.',
+  ADDRESS_INVALID:'An onion address is not a valid v3 address (56 characters followed by .onion). Nothing was loaded or imported.',
+  EVIDENCE_UNAVAILABLE:'This browser does not hold two conflicting signed records of this Node, so nothing was saved.',
+  CLIENT_CONFIGURATION_INVALID:'The source selection is not valid: choose between 1 and 16 different Nodes. Nothing was loaded.',
+  SOURCE_NOT_IN_HOST_ALLOWLIST:'A selected Node is not listed by this Client Host and was not added by you, so nothing was loaded.',
+  IMPORT_CANCELLED:'You cancelled the import. Nothing from the file was added.',
   CLIENT_BUSY:'Another load is still running. Wait for it or cancel it first.',
   PIN_CONTEXT_UNAVAILABLE:'This identity cannot be pinned right now: it has no current published Manifest in the loaded data, or you already have 256 pins.',
   PIN_BUDGET_EXHAUSTED:'You can keep at most 256 pins. Remove some before importing more.',
@@ -30,5 +43,6 @@ const operationMessages:{[code:string]:string}={
   SIGNATURE_INVALID:'A record’s signature does not verify. Nothing from the file was used.',
   SCHEMA_INVALID:'A record does not have the required form. Nothing from the file was used.',
 };
-export function sourceMessage(code:string):string { return sourceMessages[code]??(/^(SIGNATURE|SCHEMA|JSON|ENCODING|HASH|CONTENT|HEADERS)_/.test(code)?'This Node sent data that failed verification. Nothing from it was used.':'Loading this Node failed. The last verified local index stays available.'); }
-export function operationMessage(code:string):string { return operationMessages[code]??'The operation stopped. Existing pins and evidence are unchanged.'; }
+const verification=/^(SIGNATURE|SCHEMA|JSON|ENCODING|HASH|PUBLIC_KEY|ADDRESS|PROTOCOL|KEY_ROTATION|MIGRATION|ONION_BINDING|SNAPSHOT|UNVERIFIED)_/;
+export function sourceMessage(code:string):string { return sourceMessages[code]??(verification.test(code)||/^(CONTENT|HEADERS)_/.test(code)?'This Node sent data that failed verification. Nothing from it was used.':'Loading this Node failed. The last verified local index stays available.'); }
+export function operationMessage(code:string):string { return operationMessages[code]??(verification.test(code)?'The file failed verification. Nothing from it was used.':'The operation stopped. Existing pins and evidence are unchanged.'); }

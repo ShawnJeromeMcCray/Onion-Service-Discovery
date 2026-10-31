@@ -639,6 +639,13 @@
    ],
    "meaning": "Two different signed revisions with the same number exist; the fork stays visible."
   },
+  "IMPORT_CANCELLED": {
+   "cli_exit": [],
+   "components": [
+    "browser client"
+   ],
+   "meaning": "You cancelled a record import while its signatures were checked, so nothing from the file was added."
+  },
   "IMPORT_FORMAT_INVALID": {
    "cli_exit": [],
    "components": [
@@ -1694,7 +1701,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": "The Node served an older Node descriptor than this browser saw before, or a different one with the same revision, so its data was set aside."
+   "meaning": "The Node served an older Node descriptor than this browser saw before, so its data was set aside. A different descriptor with the same revision is SOURCE_DESCRIPTOR_EQUIVOCATION."
   },
   "SOURCE_DUPLICATE": {
    "cli_exit": [
@@ -1711,7 +1718,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": "This browser already holds proof that the Node signed two conflicting states, so the Node was not loaded again and the evidence was kept."
+   "meaning": "This browser already holds proof that the Node signed two conflicting states or descriptors, so the Node was not loaded again and the evidence was kept."
   },
   "SOURCE_FETCH_FAILED": {
    "cli_exit": [],
@@ -1831,7 +1838,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": "Downloads from this Node took more than the browser\u2019s 90 seconds of network time for one source, so nothing partial was used; try again later. Signature checking does not count against this limit."
+   "meaning": "Downloads from this Node took longer than the time allowed for its data (90 seconds of network time plus one second per 20 KB of declared chunk bytes, at most 30 minutes), also when that time ran out during a download, so nothing partial was used; try again later. Signature checking does not count against this limit."
   },
   "SOURCE_WORK_BUDGET_EXHAUSTED": {
    "cli_exit": [
@@ -2155,7 +2162,7 @@
    "components": [
     "browser client"
    ],
-   "meaning": "The browser\u2019s memory for Node evidence is full (512 signed checkpoints and descriptors, or fork evidence for 16 Nodes) and never drops proofs, so further Node data was refused; save any evidence you need, then reload the page."
+   "meaning": "The browser\u2019s memory for Node evidence is full (512 signed checkpoints and descriptors, or fork evidence for 16 Nodes), so further Node data was refused. Witnesses below a Node\u2019s accepted anchor are dropped after each successful load and fork proofs never are, so this takes a very long history walk or many Nodes; save any evidence you need, then reload the page."
   },
   "WITNESS_CONFIGURATION_INVALID": {
    "cli_exit": [],

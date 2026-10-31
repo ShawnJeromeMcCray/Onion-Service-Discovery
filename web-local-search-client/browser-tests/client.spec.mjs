@@ -181,7 +181,7 @@ test('pin import keeps existing pins, adds new ones and reports skipped conflict
   await expect(page.locator('#pin-import-dialog')).toBeVisible();
   await expect(page.locator('.preview-pin.conflict')).toContainText('yours is kept');await expect(page.locator('.preview-pin').filter({hasText:'Imported pin'})).toContainText('New pin');
   await page.getByRole('button',{name:'Import reviewed pins',exact:true}).click();
-  await expect(page.locator('#operation-status')).toContainText('1 added, 0 updated to a newer remembered revision, 1 skipped');
+  await expect(page.locator('#operation-status')).toContainText('1 added, 0 updated (a newer remembered revision or a remembered conflict), 1 skipped');
   await expect(page.locator('.pin-card')).toHaveCount(2);await expect(page.locator('.pin-card').filter({hasText:'Imported impostor'})).toHaveCount(0);
   // The same file can be chosen again after the input was cleared.
   await page.locator('#import-pins').setInputFiles({name:'pins.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
