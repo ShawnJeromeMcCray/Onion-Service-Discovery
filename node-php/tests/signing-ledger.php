@@ -126,6 +126,9 @@ try {
         $assert($doctor['signing_ledger'] === 'AHEAD_OF_STORE' && in_array('SIGNING_LEDGER_AHEAD_OF_STORE', $doctor['failures'], true) && str_contains((string) $doctor['next_action'], '--adopt-signed-chain'), $backend . ': doctor names the ledger state');
         $status = cli(['node:status', $restoredConfig], 6);
         $assert($status['signing_ledger'] === 'AHEAD_OF_STORE' && str_contains($status['next_action'], '--adopt-signed-chain'), $backend . ': node:status names the ledger state');
+        // Monitoring sees it too: the card may say HEALTHY, but signing has stopped (exit 4 like doctor's FAIL).
+        $check = cli(['status', $restoredConfig, '--check'], 4);
+        $assert($check['signing_ledger'] === 'AHEAD_OF_STORE' && str_contains((string) ($check['node']['next_action'] ?? ''), '--adopt-signed-chain'), $backend . ': status --check names the ledger state ' . json_encode($check['node'] ?? null));
         // Export pruning keeps the checkpoint the ledger names although the restored store does not reference it.
         cli(['exports:prune', $restoredConfig, '--workers-stopped'], 0);
         $assert($blobs->get($heads[4]) !== null, $backend . ': ledger checkpoint survives exports:prune');

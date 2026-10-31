@@ -1,7 +1,8 @@
 # Operator CLI contract
 
 Entry point: `php node-php/bin/onion-service-discovery help`; `help COMMAND` shows
-that command's syntax and whether it makes Tor requests, writes local state,
+that command's syntax (every form, for an alias also those of the command it runs,
+named in `alias_of`) and whether it makes Tor requests, writes local state,
 saves status evidence or reads a private key. All output is JSON;
 `--json` and `--no-interaction` are accepted. No command waits for an interactive
 confirmation. A failure prints `{"status":"FAIL","error":CODE}` plus `detail`
@@ -26,7 +27,12 @@ two days (`SNAPSHOT_TIMER_STALE`) or publisher checks older than 36 hours
 `DEGRADED`, `ERROR` or `NOT_INITIALIZED`), with a `next_action` when the store
 needs attention, and warns `PUBLISHED_STATE_STALE` when the export directory's
 copy of the published state, which [degraded mode](deployment-and-recovery.md#degraded-mode)
-serves, does not match the store. Unsupported/unobserved checks
+serves, does not match the store. It warns `RATE_LIMIT_CORRUPT` for a damaged
+request budget file in the export directory (the next request refills and
+rewrites it) and `RATE_LIMIT_UNAVAILABLE` for one the web server cannot use.
+Every failed check adds its own registered code to `failures` (for example
+`EXPORT_DIRECTORY_UNSAFE`, `NODE_DESCRIPTOR_MISMATCH`, `PHP_EXTENSION_MISSING`;
+see the [error registry](error-codes.md)). Unsupported/unobserved checks
 are explicitly marked: Tor connectivity, backup freshness, deployed headers and
 independent security/release review are not inferred from local configuration.
 `security:check` adds focused findings, each with a remediation: configuration
@@ -40,21 +46,29 @@ appear unreviewed.
 
 `status CONFIG` (alias of `node:status`) reports the role, the own Onion and the
 roles in use: for a publisher the publication state, the Logical Service
-Identifier, current key, its fingerprint and key epoch, and the next action; for a Node
+Identifier, current key, its fingerprint and key epoch, and the next action, with
+`status` and exit code following `overall` as for `--check` (`FAIL`/4 for an
+invalid Manifest or an identity conflict, `WARN`/6 while waiting); for a Node
 its store counts plus identity, snapshot generation and last direct check and
-sync. While the store cannot be read it fails with the store's error code (exit
+sync. Before `node:init` (no store yet) a Node reports `WARN` with `state`
+`NOT_INITIALIZED`, exit 6 and a `next_action` naming `key:create` and `node:init`;
+`status --check` and `doctor` say the same (`doctor` warns
+`NODE_NOT_INITIALIZED` instead of failing storage checks). While the store cannot be read it fails with the store's error code (exit
 4) and adds the Node card and a `next_action` from the
 [incident runbook](incident-runbook.md#4-store-corruption-or-an-interrupted-write).
-With a readable store, `status CONFIG` and `doctor CONFIG` also report
+With a readable store, `status CONFIG`, `status CONFIG --check` and `doctor CONFIG` also report
 `signing_ledger`, the Node key's signing ledger compared with the store:
 `CONSISTENT`, `BEHIND_STORE` or `NOT_PRESENT` (the next signing run raises or
 writes it), `AHEAD_OF_STORE` (the store is older than what the key signed: `doctor`
-fails with `SIGNING_LEDGER_AHEAD_OF_STORE`, `status` exits 6, and `next_action`
-names `--adopt-signed-chain`), `INVALID` (signing stops), `NOT_CHECKED` or
+fails with `SIGNING_LEDGER_AHEAD_OF_STORE`, `status` exits 6, `status --check`
+exits 4, and `next_action` names `--adopt-signed-chain`), `INVALID` (signing
+stops; `doctor` and `status --check` fail as for `AHEAD_OF_STORE`), `NOT_CHECKED` or
 `NOT_APPLICABLE`; see [signed chain](#signed-chain-after-a-restore).
 `status CONFIG --check` prints the full status page facts and exits 0 when
-nothing needs attention, 6 while waiting or degraded, 4 on an error or conflict
-and while the Node's store cannot be read. Use separate
+nothing needs attention, 6 while waiting or degraded or while the export
+directory's copy of the published state is stale (`published_state_copy`
+`STALE`, as `doctor`'s `PUBLISHED_STATE_STALE`), 4 on an error or conflict, while
+the Node's store cannot be read and while the signing ledger stops signing. Use separate
 transport/browser tests and operator acceptance to establish those properties.
 The ordinary data/status web routes open a read-only store and do not repair
 journals; while it cannot be read they serve the last published snapshot
@@ -102,7 +116,10 @@ Changing a Node identity means a new explicitly pinned source; the v1 protocol
 has no Service-style Node key-rotation proof. Do not simulate one by editing rows.
 
 List commands show at most 256 entries and indicate truncation. `peers:list
-CONFIG` shows every configured peer with its state, failures and next attempt.
+CONFIG` (also `peer:list`) opens the store read-only, like `candidate:list`, and
+prints `{"status","rows","limit":256,"partial"}`; each row has the peer's `onion`,
+`state`, `error`, `failures`, `next_attempt` (UTC ISO time or null),
+`node_identity_public_key` and `local_group` (from `peers:group`, or null).
 `sync:run CONFIG` without a peer performs one bounded step for the peer that is
 due first (`NOTHING_DUE` with the next due time otherwise), so one timer can serve
 every peer; `sync:run CONFIG ONION` still steps one named peer.
@@ -271,9 +288,11 @@ and the ten-step pipeline of specification 47 section 11 from these facts only.
 - `status CONFIG --check` runs the same read-only derivation as the status page
   (answer, ten-step pipeline, Node card) for monitoring: exit 0 when nothing
   needs attention, 6 while waiting for external evidence, when it is older than
-  seven days or before `node:init`, 4 for an invalid Manifest, an identity
-  conflict or an unreadable store (also while the Node serves its last published
-  snapshot in degraded mode; the card's `next_action` names the next step).
+  seven days, before `node:init` or with a stale published-state copy, 4 for an
+  invalid Manifest, an identity conflict, an unreadable store (also while the
+  Node serves its last published snapshot in degraded mode) or a signing ledger
+  that stops signing (`signing_ledger` `AHEAD_OF_STORE` or `INVALID`); the
+  card's `next_action` names the next step.
   `status CONFIG` without `--check` keeps the Node counts.
 - `history:verify WEBROOT` checks offline whether the served history bundle
   connects to the installed Manifest (`CONNECTED`; `MISSING`/`INCOMPLETE` exit 6).

@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- Operator surface: `status CONFIG --check` reports `signing_ledger` and
+  `published_state_copy` like `doctor` and exits 4 while the ledger stops signing
+  (6 for a stale published-state copy); `status` for a publisher derives its
+  status and exit code from `overall`; before `node:init`, `status`,
+  `status --check` and `doctor` report `NOT_INITIALIZED` (exit 6, warning
+  `NODE_NOT_INITIALIZED`) with the next step instead of storage failures.
+  `peers:list` opens the store read-only and prints bounded rows (`limit` 256,
+  `partial`) without internal claim/lease fields. `help COMMAND` resolves aliases
+  (`alias_of`), accepts two-colon names, shows every form and corrects
+  `writes_local_state` (`storage:migrate`; `manifest:rotate`/`manifest:migrate`
+  with `--output-dir`).
+- The data API answers `EXPORT_CORRUPT`/`STORAGE_CORRUPT` with 503 and an
+  oversized own response (`RESPONSE_TOO_LARGE`) with 500 instead of 400/413. The
+  announcement route answers every refusal as `{"error":CODE}`; only 202 keeps
+  `{"status":"HINT_RECEIVED_UNCONFIRMED"}` (publishers classify by status, as
+  before).
+- A damaged request budget file no longer takes the budgeted routes offline: it
+  counts as a full budget and is rewritten, now through a temporary file and a
+  rename; `doctor` warns `RATE_LIMIT_CORRUPT`/`RATE_LIMIT_UNAVAILABLE`.
+- Error registry: `doctor` failures use explicit registered codes
+  (`RUNTIME_NOT_64_BIT`, `PHP_EXTENSION_MISSING`, `PUBLISHER_MANIFEST_NOT_VALID`,
+  `SQLITE_DRIVER_UNAVAILABLE`, `EXPORT_DIRECTORY_UNSAFE`, `EXPORT_BUDGET_EXHAUSTED`,
+  `NODE_DESCRIPTOR_MISMATCH`) instead of upper-cased check names; the generator
+  also finds codes in `fail(...)` ternaries and `response(NNN, 'CODE')` calls
+  (`JSON_INVALID`, `ADMISSION_DEFERRED` now registered).
+- The Apache existing-site example also routes the bare `/onion-service-discovery`
+  to the front controller (relative 301); the status page sends
+  `X-Frame-Options: DENY`.
+
 - Owner decisions of 2026-10-22: D-003 (current Tor Browser desktop and Android at
   Standard and Safer), D-026 (default source list stays empty until Nodes pass the
   drafted admission process in `docs/governance/source-node-admission.md`), D-028,

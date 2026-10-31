@@ -29,13 +29,16 @@ try {
             ['POST','application/json',json_encode(['protocol_version'=>2,'onion'=>hintAddress(0)]),400],
             ['POST','application/json',json_encode(['protocol_version'=>1,'onion'=>strtoupper(hintAddress(0))]),400],
         ] as [$method,$type,$body,$status]){
-            if($api->handle($method,$type,$body,1000)['status']!==$status)throw new RuntimeException('invalid hint accepted');
+            $reply=$api->handle($method,$type,$body,1000);
+            if($reply['status']!==$status)throw new RuntimeException('invalid hint accepted');
+            if(array_keys(json_decode($reply['body'],true))!==['error'])throw new RuntimeException('refusal without {"error":CODE}: '.$reply['body']);
             if($store->snapshot()!==$before)throw new RuntimeException('invalid hint mutated storage');
         }
         for($i=0;$i<40;++$i){
             $reply=$api->handle('POST','application/json; charset=utf-8',json_encode(['protocol_version'=>1,'onion'=>hintAddress($i)]),1000);
             if($reply['status']!==($i<32?202:429))throw new RuntimeException('anonymous source cap bypass');
             if($i<32&&json_decode($reply['body'],true)!==['status'=>'HINT_RECEIVED_UNCONFIRMED'])throw new RuntimeException('hint claimed verification');
+            if($i>=32&&json_decode($reply['body'],true)!==['error'=>'ADMISSION_DEFERRED'])throw new RuntimeException('deferred hint body: '.$reply['body']);
         }
         $state=$store->snapshot();
         if(count($state['tables']['candidates'])!==32||$state['records']!==[]||$state['tables']['local_observations']!==[])throw new RuntimeException('announcement verified/signed evidence');

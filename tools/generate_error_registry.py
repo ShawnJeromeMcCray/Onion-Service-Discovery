@@ -16,8 +16,11 @@ THROW = re.compile(r"new \\?(ProtocolException|StorageException|TransportExcepti
 LITERAL = re.compile(r"'([A-Z][A-Z0-9_]{2,})'")
 RESPONSE = re.compile(r"""(?:'error'\s*=>\s*'|"error":\s*")([A-Z][A-Z0-9_]{2,})""")
 DOCTOR = re.compile(r"\$(failures|warnings)\[\]\s*=\s*'([A-Z][A-Z0-9_]{2,})'")
-# The strict JSON parsers raise through a local fail('CODE') helper, so a THROW pattern alone misses them.
-FAIL = re.compile(r"(?:self::|\b)fail\(\s*'([A-Z][A-Z0-9_]{2,})'")
+# The strict JSON parsers raise through a local fail('CODE') helper, so a THROW pattern alone misses them;
+# its argument may choose the code in a ternary, so every literal inside the call counts.
+FAIL = re.compile(r"(?:self::|\b)fail\(([^;]*?)\)\s*[;}]")
+# Route helpers that answer with a status and a code, such as response(429, 'ADMISSION_DEFERRED').
+RESPONSE_CALL = re.compile(r"response\(\s*[45][0-9]{2}\s*,\s*'([A-Z][A-Z0-9_]{2,})'")
 CLI_LITERAL_EXITS = {'RUNTIME_DEPENDENCIES_MISSING': '3', 'INTERNAL_ERROR': '8'}
 EXITS = {'StorageException': '4', 'SignerException': '4', 'TransportException': '5', 'ProtocolException': '3', 'InvalidArgumentException': '3'}
 COMPONENTS = {
@@ -34,10 +37,16 @@ DESCRIPTIONS = {
     'COMMAND_UNKNOWN': 'help knows no command of that name; run help without arguments for the list.',
     'CONFIGURATION_INVALID': 'The configuration file has a missing, unknown or wrongly typed key; see the configuration reference.',
     'CONFIGURATION_UNAVAILABLE': 'The configuration file is missing, unreadable, a symlink or larger than 16 KiB.',
-    'CONTENT_TYPE_REJECTED': 'A Node or Service answered without application/json; nothing was verified.',
+    'CONTENT_TYPE_REJECTED': 'A Node or Service answered without application/json, so nothing was verified; or, from the announcement route (HTTP 415), the hint was not sent as application/json.',
+    'ADMISSION_DEFERRED': 'The announcement route answered 429: this Node’s hourly candidate admission budget (overall or for this source bucket) is used up, so the hint was not queued; retry after Retry-After (one hour). Publishers report it as ANNOUNCEMENT_RATE_LIMITED.',
+    'JSON_INVALID': 'The input is not valid JSON (a syntax error, trailing data, or a value JSON does not allow), so nothing in it was used.',
+    'NODE_DESCRIPTOR_MISMATCH': 'doctor failure: the store’s signed Node descriptor does not match this installation: its Onion differs from node.onion, its key from the Node key file, or its hash from the stored pointer. Check that the configuration, key and store belong together.',
+    'PHP_EXTENSION_MISSING': 'doctor failure: a required PHP extension (json, sodium, iconv or curl) is not loaded for this PHP; install and enable it for the CLI and the web server’s PHP-FPM.',
+    'PUBLISHER_MANIFEST_NOT_VALID': 'doctor failure: publishing is on, but the installed public Manifest is missing or not valid for node.onion (see manifest_state); install a signed Manifest with manifest:install, then run publisher:status.',
+    'RUNTIME_NOT_64_BIT': 'doctor failure: this PHP is not a 64-bit build; OSD needs 64-bit integers for sequences, sizes and times. Install a 64-bit PHP.',
     'DOCUMENT_TOO_LARGE': 'An input file exceeds the limit for its record type.',
     'EVIDENCE_WRITE_FAILED': 'Saved status evidence could not be written beside the configuration; check directory permissions.',
-    'ANNOUNCEMENT_RATE_LIMITED': 'The Node answered 429: its shared announcement budget is exhausted. The bounded schedule retries no earlier than a day later.',
+    'ANNOUNCEMENT_RATE_LIMITED': 'The Node answered 429: its shared request budget is exhausted or it deferred admission of new hints (ADMISSION_DEFERRED). The bounded schedule retries no earlier than a day later.',
     'ANNOUNCEMENT_RESPONSE_INVALID': 'The Node did not answer with exactly HINT_RECEIVED_UNCONFIRMED; no other claim is accepted as an announcement result.',
     'PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT': 'doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page.',
     'PUBLISHER_NODES_NOT_CONFIGURED': 'No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key.',
@@ -205,8 +214,8 @@ DESCRIPTIONS = {
     'PUBLIC_MANIFEST_WRITE_FAILED': 'The publisher lock, the new Manifest or the history bundle could not be created, written, synced or renamed in WEBROOT/.well-known; check that the installing user can write there.',
     'RATE_LIMIT_CONFIGURATION_INVALID': 'A request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is a symlink or its limits are invalid, so requests fail with HTTP 503; remove the symlink.',
     'PUBLISHED_STATE_STALE': 'doctor warning: the copy of the published state that the export directory keeps for degraded serving (D-045) is missing or does not match the store’s published snapshot and Node descriptor; node:snapshot rewrites it, unless the copy names a newer generation than the store (a restored older backup): then follow the incident runbook, section 4, first.',
-    'RATE_LIMIT_CORRUPT': 'A request budget file in the export directory is larger than 1 KiB or holds no valid budget state, so requests fail with HTTP 503; delete the file; it is recreated with a full budget.',
-    'RATE_LIMIT_UNAVAILABLE': 'A request budget file in the export directory cannot be created or written or is open to group or others, so requests fail with HTTP 503; let the web server user own it with mode 0600.',
+    'RATE_LIMIT_CORRUPT': 'doctor warning: a request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is larger than 1 KiB or holds no valid budget state, for example after a crash or a full disk. Requests continue: the next one counts it as a full budget and rewrites it; check free disk space.',
+    'RATE_LIMIT_UNAVAILABLE': 'A request budget file in the export directory cannot be created or written or is open to group or others, so requests fail with HTTP 503 (doctor warns); let the web server user own it with mode 0600.',
     'REQUEST_INVALID': 'The request is malformed (HTTP 400): a path over 256 bytes or with spaces or control characters, an invalid Onion address in the path, or an announcement that is not the exact hint JSON.',
     'REQUEST_TOO_LARGE': 'An announcement request declared or sent more than 256 bytes, or its Content-Length is malformed (HTTP 413).',
     'REVISION_DOWNGRADE': 'A Service or source served an older Manifest revision than one already known for that identity (node:work-one quarantines the candidate; a browser pin keeps the newer revision); load other sources.',
@@ -282,8 +291,8 @@ def collect() -> dict:
             component = next(name for prefix, name in COMPONENTS.items() if relative.startswith(prefix))
             text = path.read_text(encoding='utf-8')
             found = [(exception, code) for exception, arguments in THROW.findall(text) for code in LITERAL.findall(arguments)]
-            found += [('InvalidArgumentException' if path.suffix == '.php' else 'Error', code) for code in FAIL.findall(text)]
-            found += [('HTTP', code) for code in RESPONSE.findall(text)]
+            found += [('InvalidArgumentException' if path.suffix == '.php' else 'Error', code) for arguments in FAIL.findall(text) for code in LITERAL.findall(arguments)]
+            found += [('HTTP', code) for code in RESPONSE.findall(text) + RESPONSE_CALL.findall(text)]
             found += [('doctor-' + kind, code) for kind, code in DOCTOR.findall(text)]
             for exception, code in found:
                 entry = codes.setdefault(code, {'components': set(), 'cli_exit': set()})

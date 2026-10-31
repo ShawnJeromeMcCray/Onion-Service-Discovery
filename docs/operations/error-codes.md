@@ -9,12 +9,13 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-241 codes.
+247 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
 | `ADDRESS_INVALID` | browser client, input parsing | 3 | Not a canonical, checksum-valid v3 Onion address (56 lowercase characters plus .onion). |
-| `ANNOUNCEMENT_RATE_LIMITED` | Tor transport | 5 | The Node answered 429: its shared announcement budget is exhausted. The bounded schedule retries no earlier than a day later. |
+| `ADMISSION_DEFERRED` | web routes | – | The announcement route answered 429: this Node’s hourly candidate admission budget (overall or for this source bucket) is used up, so the hint was not queued; retry after Retry-After (one hour). Publishers report it as ANNOUNCEMENT_RATE_LIMITED. |
+| `ANNOUNCEMENT_RATE_LIMITED` | Tor transport | 5 | The Node answered 429: its shared request budget is exhausted or it deferred admission of new hints (ADMISSION_DEFERRED). The bounded schedule retries no earlier than a day later. |
 | `ANNOUNCEMENT_RESPONSE_INVALID` | Tor transport | 5 | The Node did not answer with exactly HINT_RECEIVED_UNCONFIRMED; no other claim is accepted as an announcement result. |
 | `ARCHIVE_BUDGET_EXHAUSTED` | storage | 4 | The archive given to storage:import is larger than the 256 MiB import limit, so nothing was imported. |
 | `ARCHIVE_INVALID` | storage | 4 | The public record archive is malformed (a wrong header or more than 10000 records, a non-canonical, duplicate, overlong or unterminated record line, or a wrong footer checksum or count), so nothing was imported. |
@@ -49,7 +50,7 @@ for remedies.
 | `CONFIGURATION_WRITE_FAILED` | configuration and status | 3 | init created the configuration file but could not write or sync it or sync its directory, so the file may be incomplete; check free space, remove the file and run init again. |
 | `CONFUSABLE_DATA_INVALID` | browser client | – | The confusable table built into the browser client does not decode to its recorded entry count, so look-alike names cannot be checked; serve an unmodified client build. |
 | `CONTENT_ENCODING_REJECTED` | Tor transport, browser client | 5 | A Node or Service answered with a Content-Encoding other than identity (a compressed answer), which OSD does not accept, so nothing from it was verified; serve the OSD paths without compression. |
-| `CONTENT_TYPE_REJECTED` | Tor transport, browser client | 5 | A Node or Service answered without application/json; nothing was verified. |
+| `CONTENT_TYPE_REJECTED` | Tor transport, browser client, web routes | 5 | A Node or Service answered without application/json, so nothing was verified; or, from the announcement route (HTTP 415), the hint was not sent as application/json. |
 | `CRYPTO_ALGORITHM_UNSUPPORTED` | browser client | – | An internal browser check failed: without Web Crypto, the client’s built-in hash fallback supports only SHA-256, and another algorithm was requested. |
 | `CURSOR_INVALID` | Tor transport, web routes | 3, 5 | A changes cursor is out of range: beyond this Node’s last record sequence number (HTTP 400 on the changes route), or negative or above the largest safe integer; use a cursor the Node returned, or 0. |
 | `DISCOVERY_DISABLED` | CLI | 3 | Service discovery is off for this configuration (features.discover_services is false or the role is client-host), so candidate:add, candidate:retry and node:work-one refuse to run; use a node or combined configuration with it enabled. |
@@ -63,11 +64,11 @@ for remedies.
 | `EVIDENCE_WRITE_FAILED` | configuration and status | 3 | Saved status evidence could not be written beside the configuration; check directory permissions. |
 | `EXISTING_MANIFEST_INVALID` | signing | 3 | The Manifest installed at WEBROOT/.well-known/onion-service-discovery.json is missing (for history commands), larger than 16 KiB, unreadable or not a Service Manifest; check it with manifest:verify. |
 | `EXPECTED_NODE_KEY_REQUIRED` | browser client | – | A visitor-chosen Node needs its expected public key. |
-| `EXPORT_BUDGET_EXHAUSTED` | storage | 4 | The public export directory reached its limit of 4096 files or 256 MiB, or a single export file would exceed 512 KiB; remove unreferenced files with exports:prune or node:maintain. |
+| `EXPORT_BUDGET_EXHAUSTED` | doctor, storage | 4 | The public export directory reached its limit of 4096 files or 256 MiB, or a single export file would exceed 512 KiB; remove unreferenced files with exports:prune or node:maintain. |
 | `EXPORT_BUDGET_NEARLY_EXHAUSTED` | doctor | 6 | doctor warning: the export directory uses at least 80 % of its 4,096-file or 256 MiB limit; check that the maintenance timer runs (node:maintain prunes old blobs). |
 | `EXPORT_BUSY` | storage | 4 | Another process held the export directory’s writer lock for more than 2 seconds, so this write or prune did not run; run it again when the other command has finished. |
 | `EXPORT_CORRUPT` | CLI, Node worker, configuration and status, storage, web routes | 3, 4 | Published snapshot files, or the copy of the published state kept beside them for degraded serving, do not match their signed records; rebuild with node:snapshot --rebuild-derived. |
-| `EXPORT_DIRECTORY_UNSAFE` | storage | 4 | The export directory (export_path) is a URL, a symlink, missing or open to group or others, or it contains a symlink, a subdirectory or a file that is not an OSD export file; node:init or client:init creates it with mode 0700. |
+| `EXPORT_DIRECTORY_UNSAFE` | doctor, storage | 4 | The export directory (export_path) is a URL, a symlink, missing or open to group or others, or it contains a symlink, a subdirectory or a file that is not an OSD export file; node:init or client:init creates it with mode 0700. |
 | `EXPORT_UNAVAILABLE` | storage | 4 | An export file or the export directory’s lock file could not be created, written, synced, renamed, read or deleted; check the ownership and free space of export_path. |
 | `FILESYSTEM_FORMAT_MIGRATION_REQUIRED` | doctor | 6 | doctor: the filesystem store uses format 1; plan storage:migrate. |
 | `FILESYSTEM_SEMANTICS_UNSUPPORTED` | signing, storage | 3, 4 | After an atomic rename, the directory holding the store, the exports or the installed public records could not be opened or synced, so the write is not known to be durable; use a local filesystem that supports syncing directories. |
@@ -89,6 +90,7 @@ for remedies.
 | `INTERNAL_ERROR` | CLI | 8 | An unexpected internal failure; details are withheld on purpose. Run storage:check if a store was involved and attach the reviewed diagnostics:export output when reporting it. |
 | `JSON_DEPTH_EXCEEDED` | JSON parsing, browser client, encoding | 3 | The JSON nests objects or arrays more than 16 levels deep, beyond what the protocol allows. |
 | `JSON_DUPLICATE_KEY` | JSON parsing, browser client | 3 | The JSON repeats a member name inside one object; signed protocol JSON must have unique keys so every reader sees the same value. |
+| `JSON_INVALID` | JSON parsing | 3 | The input is not valid JSON (a syntax error, trailing data, or a value JSON does not allow), so nothing in it was used. |
 | `KEY_DIRECTORY_UNSAFE` | signing | 4 | key:create refused the key path because it is a URL or its directory is a symlink, missing or open to group or others; create the directory with mode 0700 first. |
 | `KEY_ENVELOPE_INVALID` | signing | 4 | The key file is not a valid key envelope for this role (for example a service key used as a Node key) or is damaged, so the key was not unlocked; use the key file key:create made for this role. |
 | `KEY_FILE_UNAVAILABLE` | signing | 4 | The key file is missing, a symlink, not a regular file, open to group or others, larger than 4 KiB or unreadable, or key:create found an existing file or could not write it; keys must be owner-only (0600) regular files. |
@@ -108,6 +110,7 @@ for remedies.
 | `NODE_DEGRADED_READ_ONLY` | front controller, web routes | – | The Node cannot read its store, so it keeps serving only its last published snapshot (D-045) and answers HTTP 503 on routes that need the store, announcements included; the operator follows the incident runbook, section 4. |
 | `NODE_DESCRIPTOR_HISTORY_INCOMPLETE` | Node worker | 3 | A peer’s new Node descriptor skips a revision or does not name the previously seen descriptor as its predecessor, so the peer was quarantined; after checking, release it with peers:retry. |
 | `NODE_DESCRIPTOR_INVALID` | configuration and status, doctor | 3, 4 | The Node descriptor in the store does not verify or names another Onion than node.onion (doctor also reports a published snapshot that fails verification this way); check that storage.path and node.onion belong to this Node. |
+| `NODE_DESCRIPTOR_MISMATCH` | doctor | 4 | doctor failure: the store’s signed Node descriptor does not match this installation: its Onion differs from node.onion, its key from the Node key file, or its hash from the stored pointer. Check that the configuration, key and store belong together. |
 | `NODE_DESCRIPTOR_ROLLBACK_OR_FORK` | Node worker | 3 | A peer served an older Node descriptor than seen before, or two different descriptors with the same revision, so the peer was quarantined and the descriptors were kept as evidence; quarantine:list shows the evidence. |
 | `NODE_IDENTITY_CHANGED` | CLI | 3 | The Node descriptor in the store names another Node key or Onion than the unlocked key file and node.onion, so node:snapshot or node:work-one refused to run; use the original key and Onion. |
 | `NODE_IDENTITY_CHANGE_REQUIRES_MIGRATION` | Node worker | 3 | node:init found a Node descriptor in the store with another Node key or Onion than this key file and node.onion, and protocol v1 cannot change a Node identity; use the original key and Onion or set up a new Node. |
@@ -129,6 +132,7 @@ for remedies.
 | `PEER_KEY_CHANGE_REQUIRES_EXPLICIT_RESET` | Node worker | 3 | This Onion is already a peer pinned to another Node key, and peers:add never replaces a pinned key, so nothing was changed; a Node with a new key is added under its new Onion (incident runbook). |
 | `PEER_NOT_CONFIGURED` | CLI, Node worker | 3 | The Onion is not in this Node’s peer list, so the peer command or sync step had nothing to act on; add it with peers:add first. |
 | `PEER_POOL_FULL` | Node worker | 3 | This Node already lists 256 peers, the maximum, counting disabled peers too, so no peer was added. |
+| `PHP_EXTENSION_MISSING` | doctor | 4 | doctor failure: a required PHP extension (json, sodium, iconv or curl) is not loaded for this PHP; install and enable it for the CLI and the web server’s PHP-FPM. |
 | `PIN_BACKUP_INVALID` | browser client | – | The file is not a valid pin backup from this client: it needs pin_backup_version 1 and at most 256 distinct pins, each with a valid key, Onion, hashes, revision and a label of at most 128 characters. |
 | `PIN_BUDGET_EXHAUSTED` | browser client | – | Restoring these pins would exceed the limit of 256 pins, so none were restored; remove some pins before importing more. |
 | `PIN_CONTEXT_UNAVAILABLE` | browser client | – | This identity cannot be pinned: it is not in the loaded index, is withdrawn or forked, or has no current Onion, or 256 pins already exist. |
@@ -141,16 +145,17 @@ for remedies.
 | `PUBLISHED_STATE_STALE` | doctor | 6 | doctor warning: the copy of the published state that the export directory keeps for degraded serving (D-045) is missing or does not match the store’s published snapshot and Node descriptor; node:snapshot rewrites it, unless the copy names a newer generation than the store (a restored older backup): then follow the incident runbook, section 4, first. |
 | `PUBLISHER_BUSY` | configuration and status, signing | 3 | Another publisher command holds the lock on the same files; run it again when that command has finished. |
 | `PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT` | doctor | 6 | doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page. |
+| `PUBLISHER_MANIFEST_NOT_VALID` | doctor | 4 | doctor failure: publishing is on, but the installed public Manifest is missing or not valid for node.onion (see manifest_state); install a signed Manifest with manifest:install, then run publisher:status. |
 | `PUBLISHER_NODES_NOT_CONFIGURED` | CLI, doctor | 3, 6 | No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key. |
 | `PUBLISHER_SELF_VERIFICATION_FAILED` | doctor | 6 | doctor warning: the last saved self-check through your own Onion failed or fetched a different Manifest; publisher:status names the cause and the fix. |
 | `PUBLISHER_TIMER_STALE` | doctor | 6 | doctor warning: the last saved publisher check is older than 36 hours although the timer runs every six hours; check osd-publisher-check.timer. |
 | `PUBLISHING_DISABLED` | CLI | 3 | Publishing is off in the configuration or the Manifest withdraws publication. |
 | `RATE_LIMIT_CONFIGURATION_INVALID` | web routes | 4 | A request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is a symlink or its limits are invalid, so requests fail with HTTP 503; remove the symlink. |
-| `RATE_LIMIT_CORRUPT` | web routes | 4 | A request budget file in the export directory is larger than 1 KiB or holds no valid budget state, so requests fail with HTTP 503; delete the file; it is recreated with a full budget. |
-| `RATE_LIMIT_UNAVAILABLE` | web routes | 4 | A request budget file in the export directory cannot be created or written or is open to group or others, so requests fail with HTTP 503; let the web server user own it with mode 0600. |
+| `RATE_LIMIT_CORRUPT` | doctor | 6 | doctor warning: a request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is larger than 1 KiB or holds no valid budget state, for example after a crash or a full disk. Requests continue: the next one counts it as a full budget and rewrites it; check free disk space. |
+| `RATE_LIMIT_UNAVAILABLE` | doctor, web routes | 4, 6 | A request budget file in the export directory cannot be created or written or is open to group or others, so requests fail with HTTP 503 (doctor warns); let the web server user own it with mode 0600. |
 | `REQUEST_BUDGET_EXHAUSTED` | front controller | – | The shared request budget is used up; retry after a second. |
 | `REQUEST_INVALID` | web routes | – | The request is malformed (HTTP 400): a path over 256 bytes or with spaces or control characters, an invalid Onion address in the path, or an announcement that is not the exact hint JSON. |
-| `REQUEST_TOO_LARGE` | front controller | – | An announcement request declared or sent more than 256 bytes, or its Content-Length is malformed (HTTP 413). |
+| `REQUEST_TOO_LARGE` | front controller, web routes | – | An announcement request declared or sent more than 256 bytes, or its Content-Length is malformed (HTTP 413). |
 | `RESPONSE_TOO_LARGE` | browser client, web routes | 3 | A response exceeded its byte limit and was discarded. |
 | `RESTORE_REQUIRES_EMPTY_STAGING_STORE` | storage | 4 | Restores and migrations write only into a new, empty store path. |
 | `REVISION_CHAIN_BROKEN` | signing | 3 | The new Manifest is not the next revision of the installed one. |
@@ -158,6 +163,7 @@ for remedies.
 | `REVISION_EXHAUSTED` | signing | 3 | The current Manifest already has the highest possible revision (9007199254740991), so no successor revision can be drafted. |
 | `ROLE_CONFIGURATION_INVALID` | CLI, Node worker, configuration and status | 3 | The command or feature is not available for this configuration role. |
 | `RUNTIME_DEPENDENCIES_MISSING` | CLI, front controller | 3 | PHP dependencies are missing: use the development runtime package, which bundles them, or run the locked Composer install. |
+| `RUNTIME_NOT_64_BIT` | doctor | 4 | doctor failure: this PHP is not a 64-bit build; OSD needs 64-bit integers for sequences, sizes and times. Install a 64-bit PHP. |
 | `RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX` | doctor | 6 | doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it. |
 | `SCHEMA_INVALID` | CLI, JSON parsing, Node worker, browser client, encoding, input parsing, protocol, signing, web routes | 3 | The record does not match its draft schema. |
 | `SEARCH_INDEX_CORRUPT` | server search | 3 | The server search index files in the export directory are missing, altered or malformed or do not match the published snapshot, so server search is unavailable; rebuild them with node:snapshot --rebuild-derived. |
@@ -216,7 +222,7 @@ for remedies.
 | `SOURCE_TIMEOUT` | browser client | – | The Node did not answer in time; the existing local index is unchanged. |
 | `SOURCE_TIME_BUDGET_EXHAUSTED` | browser client | – | Downloads from this Node took more than the browser’s 90 seconds of network time for one source, so nothing partial was used; try again later. Signature checking does not count against this limit. |
 | `SOURCE_WORK_BUDGET_EXHAUSTED` | Node worker, browser client | 3 | The Node’s signed snapshot exceeds the checking limits (over 10000 records or 32 MiB of chunks, or over 64 chunks in the browser), so the browser discards the load and a Node worker quarantines the peer. |
-| `SQLITE_DRIVER_UNAVAILABLE` | storage | 4 | The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend. |
+| `SQLITE_DRIVER_UNAVAILABLE` | doctor, storage | 4 | The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend. |
 | `STORAGE_ADDRESS_INVALID` | storage | 4 | A record or export address is not sha256: followed by 64 lowercase hex digits, or an operational table or key name is invalid, so the store refused the request. |
 | `STORAGE_BACKEND_INVALID` | CLI, configuration and status | 3 | The storage backend, given as a command argument or as storage.backend in the configuration, is neither filesystem nor sqlite. |
 | `STORAGE_BUDGET_EXHAUSTED` | storage | 4 | The local store reached its record or byte quota; existing evidence is preserved. Check storage_usage in doctor and that node:maintain runs on a store migrated with storage:migrate. |

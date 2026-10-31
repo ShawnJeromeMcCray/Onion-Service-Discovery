@@ -35,12 +35,16 @@ its public `hostname` file. The application never provisions or reads Tor keys.
    feature explicitly. `server_search` defaults to false. Enable it only on a Node/combined role
    after reviewing the explicit [server-search privacy and deployment contract](server-search.md). Source/onion metadata is intentionally
    public; private paths and credentials are not browser configuration.
-6. Run `php node-php/bin/onion-service-discovery config:validate CONFIG` and
-   `doctor CONFIG`. Initialize the selected backend with `storage:init BACKEND
-   PATH`. A Client Host instead uses `client:init CONFIG` and does not need keys.
+6. Run `php node-php/bin/onion-service-discovery config:validate CONFIG`. A
+   Client Host then uses `client:init CONFIG` and does not need keys; run
+   `doctor CONFIG` afterwards. Until step 7 a Node's `doctor` and `status`
+   report `NOT_INITIALIZED` (warning `NODE_NOT_INITIALIZED`, exit 6) with the
+   next step; that is expected, not a fault.
 7. For a Node, create a separate protected Node key using `key:create node KEY
    --passphrase-file PRIVATE_FILE`, then `node:init CONFIG --passphrase-file
-   PRIVATE_FILE`. Protect that file with 0600 and its directory with 0700. The
+   PRIVATE_FILE`, which creates the selected store (`storage:init BACKEND PATH`
+   can create it beforehand) and the export directory; then run `doctor CONFIG`.
+   Protect that file with 0600 and its directory with 0700. The
    signer never takes a passphrase on the command line or in ordinary environment
    variables. Create/sign Service records offline with a different key. The web
    runtime must have no Service-key access. The basic staging pool shares the

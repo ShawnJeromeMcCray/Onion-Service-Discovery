@@ -183,27 +183,32 @@ $arguments = array_slice($argv, 1);
 $command = array_shift($arguments) ?? 'help';
 $arguments = array_values(array_filter($arguments, static fn (string $value): bool => !in_array($value, ['--json', '--no-interaction'], true)));
 if (in_array($command, ['key:service:generate', 'key:node:generate'], true)) { array_unshift($arguments, $command === 'key:service:generate' ? 'service' : 'node'); $command = 'key:create'; }
-$command = ['manifest:generate'=>'manifest:init', 'snapshot:build'=>'node:snapshot', 'peer:remove'=>'peers:disable', 'key:service:rotate'=>'manifest:rotate', 'network:discoverability-check'=>'service:membership', 'network:announce'=>'service:announce', 'sync:run'=>'sync:peer-step', 'status'=>'node:status', 'peer:list'=>'peers:list', 'peer:add'=>'peers:add', 'peer:disable'=>'peers:disable', 'backup:create'=>'storage:backup', 'db:verify'=>'storage:verify', 'restore:verify'=>'storage:verify', 'manifest:show'=>'protocol:inspect'][$command] ?? $command;
+$aliases = ['manifest:generate'=>'manifest:init', 'snapshot:build'=>'node:snapshot', 'peer:remove'=>'peers:disable', 'key:service:rotate'=>'manifest:rotate', 'network:discoverability-check'=>'service:membership', 'network:announce'=>'service:announce', 'sync:run'=>'sync:peer-step', 'status'=>'node:status', 'peer:list'=>'peers:list', 'peer:add'=>'peers:add', 'peer:disable'=>'peers:disable', 'backup:create'=>'storage:backup', 'db:verify'=>'storage:verify', 'restore:verify'=>'storage:verify', 'manifest:show'=>'protocol:inspect'];
+$command = $aliases[$command] ?? $command;
 $exitCode = 0;
 $root = dirname(__DIR__, 2);
 $verifier = new RecordVerifier($root . '/protocol/schemas');
 
 try {
     if ($command === 'help') {
-        $commands = ['init <private-config-path> <onion> [--publish] [--node <node-onion> <expected-node-key>]...', 'init <private-config-path> [<onion>] --role node|combined|client-host [--sqlite] [--source <onion> [<expected-node-key>]]... [--visitor-sources]', 'publisher:status <config>', 'manifest:verify <file>', 'manifest:generate <onion> <service-public-key> <metadata-file>', 'service:verify <config> [<own-onion>] [--save-status]', 'service:announce <config> <signed-manifest-file> <node-onion> [--save-status]', 'service:announce <config> <signed-manifest-file> [--node <node-onion> <expected-node-key>]... [--if-due | --save-status] (no --node: the publisher_nodes of the configuration)', 'service:membership <config> <own-history-bundle-or-signed-record-file>... [--node <node-onion> <expected-node-key>]... [--save-status] (no --node: the publisher_nodes of the configuration)', 'network:discoverability-check (alias of service:membership)', 'network:announce (alias of service:announce)', 'storage:migrate-backend <from-backend> <from-path> <to-backend> <new-staging-path>', 'diagnostics:export <config>', 'node:identity <config>', 'history:install <webroot> <signed-record-file>...', 'history:verify <webroot>', 'status <config> --check (same checks as the status page)', 'storage:verify <backend> <path> (read-only integrity check; never repairs)', 'snapshot:build (alias of node:snapshot)', 'peer:remove (alias of peers:disable; evidence is preserved)', 'key:service:rotate (alias of manifest:rotate)', 'key:node:rotate (unsupported in protocol v1: add a new explicitly pinned Node instead)', 'sync:run <config> [<peer-onion>] (one bounded step; without a peer the one due first)', 'key:service:generate <key-path> --passphrase-file <file>', 'key:node:generate <key-path> --passphrase-file <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>', 'index:verify-inclusion <checkpoint-file> <private-chunks-directory> <own-history-file> <expected-node-key>', 'peers:group <config> <onion> <local-group|--clear>', 'storage:init <filesystem|sqlite> <path>', 'storage:check <backend> <path>', 'storage:admit <backend> <path> <signed-record>', 'storage:backup <backend> <path> <private-backup>', 'storage:restore <backend> <new-staging-path> <private-backup> --trusted-private-backup', 'storage:export <backend> <path> <archive>', 'storage:import <backend> <new-staging-path> <archive>', 'manifest:install <signed-manifest> <public-hostname-file> <webroot> [--rotation <proof>] [--migration <proof>]', 'manifest:init <onion> <service-public-key> <metadata-file>', 'manifest:revise <signed-manifest> <metadata-file>', 'manifest:withdraw <signed-manifest>', 'manifest:rotate <signed-manifest> <new-public-key> [--output-dir <dir>]', 'manifest:migrate <signed-manifest> <new-onion> [--output-dir <dir>]', 'peers:add <config> <onion> --expected-node-key <public-key>', 'peers:list <config>', 'peers:disable <config> <onion>', 'peers:retry <config> <onion> --acknowledge-quarantine', 'sync:peer-step <config> [<onion>]', 'client:init <config>', 'config:validate <config>', 'doctor <config>', 'security:check <config>', 'release:info', 'backup:verify <private-backup>', 'db:migrate <backend> <path>', 'storage:migrate <backend> <path>', 'candidate:list <config>', 'quarantine:list <config>', 'sync:status <config>', 'node:status <config>', 'node:maintain <config>', 'exports:prune <config> --workers-stopped', 'candidate:add <config> <onion>', 'candidate:retry <config> <onion> --acknowledge-quarantine', 'node:init <config> --passphrase-file <file>', 'node:snapshot <config> --passphrase-file <file> [--rebuild-derived] [--adopt-signed-chain]', 'node:work-one <config> --passphrase-file <file>', 'key:create <service|node> <key-path> --passphrase-file <private-file>', 'record:sign <role> <key-path> <record> --passphrase-file <private-file> [--rotation-confirmation]' ];
+        $commands = ['init <private-config-path> <onion> [--publish] [--node <node-onion> <expected-node-key>]...', 'init <private-config-path> [<onion>] --role node|combined|client-host [--sqlite] [--source <onion> [<expected-node-key>]]... [--visitor-sources]', 'publisher:status <config>', 'manifest:verify <file>', 'manifest:generate <onion> <service-public-key> <metadata-file>', 'service:verify <config> [<own-onion>] [--save-status]', 'service:announce <config> <signed-manifest-file> <node-onion> [--save-status]', 'service:announce <config> <signed-manifest-file> [--node <node-onion> <expected-node-key>]... [--if-due | --save-status] (no --node: the publisher_nodes of the configuration)', 'service:membership <config> <own-history-bundle-or-signed-record-file>... [--node <node-onion> <expected-node-key>]... [--save-status] (no --node: the publisher_nodes of the configuration)', 'network:discoverability-check (alias of service:membership)', 'network:announce (alias of service:announce)', 'storage:migrate-backend <from-backend> <from-path> <to-backend> <new-staging-path>', 'diagnostics:export <config>', 'node:identity <config>', 'history:install <webroot> <signed-record-file>...', 'history:verify <webroot>', 'status <config> --check (same checks as the status page)', 'storage:verify <backend> <path> (read-only integrity check; never repairs)', 'snapshot:build (alias of node:snapshot)', 'peer:remove (alias of peers:disable; evidence is preserved)', 'key:service:rotate (alias of manifest:rotate)', 'key:node:rotate (unsupported in protocol v1: add a new explicitly pinned Node instead)', 'sync:run <config> [<peer-onion>] (one bounded step; without a peer the one due first)', 'key:service:generate <key-path> --passphrase-file <file>', 'key:node:generate <key-path> --passphrase-file <file>', 'protocol:inspect <file>', 'protocol:canonicalize <file>', 'protocol:hash <file>', 'protocol:apply-sequence <file>', 'index:verify-inclusion <checkpoint-file> <private-chunks-directory> <own-history-file> <expected-node-key>', 'peers:group <config> <onion> <local-group|--clear>', 'storage:init <filesystem|sqlite> <path>', 'storage:check <backend> <path>', 'storage:admit <backend> <path> <signed-record>', 'storage:backup <backend> <path> <private-backup>', 'storage:restore <backend> <new-staging-path> <private-backup> --trusted-private-backup', 'storage:export <backend> <path> <archive>', 'storage:import <backend> <new-staging-path> <archive>', 'manifest:install <signed-manifest> <public-hostname-file> <webroot> [--rotation <proof>] [--migration <proof>]', 'manifest:init <onion> <service-public-key> <metadata-file>', 'manifest:revise <signed-manifest> <metadata-file>', 'manifest:withdraw <signed-manifest>', 'manifest:rotate <signed-manifest> <new-public-key> [--output-dir <dir>]', 'manifest:migrate <signed-manifest> <new-onion> [--output-dir <dir>]', 'peers:add <config> <onion> --expected-node-key <public-key>', 'peers:list <config>', 'peers:disable <config> <onion>', 'peers:retry <config> <onion> --acknowledge-quarantine', 'sync:peer-step <config> [<onion>]', 'client:init <config>', 'config:validate <config>', 'doctor <config>', 'security:check <config>', 'release:info', 'backup:verify <private-backup>', 'db:migrate <backend> <path>', 'storage:migrate <backend> <path>', 'candidate:list <config>', 'quarantine:list <config>', 'sync:status <config>', 'node:status <config> [--check]', 'node:maintain <config>', 'exports:prune <config> --workers-stopped', 'candidate:add <config> <onion>', 'candidate:retry <config> <onion> --acknowledge-quarantine', 'node:init <config> --passphrase-file <file>', 'node:snapshot <config> --passphrase-file <file> [--rebuild-derived] [--adopt-signed-chain]', 'node:work-one <config> --passphrase-file <file>', 'key:create <service|node> <key-path> --passphrase-file <private-file>', 'record:sign <role> <key-path> <record> --passphrase-file <private-file> [--rotation-confirmation]' ];
         // help COMMAND: the matching syntax lines and what the command touches (spec 32 section 26).
         if ($arguments === []) { $output = ['status' => 'DEVELOPMENT', 'commands' => $commands, 'detail' => 'help COMMAND shows one command with its effects.', 'network_side_effects' => false]; }
         else {
-            if (count($arguments) !== 1 || preg_match('/\A[a-z]+(?::[a-z-]+)?\z/D', $arguments[0]) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
-            $syntax = array_values(array_filter($commands, static fn (string $line): bool => $line === $arguments[0] || str_starts_with($line, $arguments[0] . ' ')));
+            if (count($arguments) !== 1 || preg_match('/\A[a-z][a-z-]*(?::[a-z-]+){0,2}\z/D', $arguments[0]) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
+            // An alias shows its own lines and those of the command it runs (status: both the --check form and node:status).
+            $name = $arguments[0];
+            $target = $aliases[$name] ?? ['key:service:generate' => 'key:create', 'key:node:generate' => 'key:create', 'canonicalize' => 'protocol:canonicalize', 'apply-sequence' => 'protocol:apply-sequence', 'validate-manifest' => 'manifest:verify'][$name] ?? $name;
+            $syntax = array_values(array_filter($commands, static fn (string $line): bool => in_array($line, [$name, $target], true) || str_starts_with($line, $name . ' ') || str_starts_with($line, $target . ' ')));
             if ($syntax === []) { throw new ProtocolException('COMMAND_UNKNOWN'); }
-            $tor = ['service:verify', 'service:announce', 'network:announce', 'service:membership', 'network:discoverability-check', 'sync:peer-step', 'sync:run', 'node:work-one'];
-            $writes = ['init', 'manifest:install', 'history:install', 'key:create', 'key:service:generate', 'key:node:generate', 'record:sign', 'storage:init', 'storage:check', 'storage:admit', 'storage:backup', 'backup:create', 'storage:restore', 'storage:import', 'storage:export', 'storage:migrate-backend',
-                'node:init', 'node:snapshot', 'snapshot:build', 'node:maintain', 'node:work-one', 'peers:add', 'peers:disable', 'peers:retry', 'peers:group', 'peer:add', 'peer:disable', 'peer:remove', 'candidate:add', 'candidate:retry', 'exports:prune', 'client:init', 'sync:peer-step', 'sync:run'];
-            $output = ['status' => 'PASS', 'command' => $arguments[0], 'syntax' => $syntax,
-                'tor_requests' => in_array($arguments[0], $tor, true), 'writes_local_state' => in_array($arguments[0], $writes, true),
-                'saves_status_evidence' => in_array($arguments[0], ['service:verify', 'service:announce', 'network:announce', 'service:membership', 'network:discoverability-check'], true) ? 'only with --save-status (or --if-due)' : false,
-                'reads_private_keys' => in_array($arguments[0], ['node:init', 'node:snapshot', 'snapshot:build', 'node:work-one', 'record:sign'], true),
+            $tor = ['service:verify', 'service:announce', 'service:membership', 'sync:peer-step', 'node:work-one'];
+            $writes = ['init', 'manifest:install', 'history:install', 'key:create', 'record:sign', 'storage:init', 'storage:check', 'storage:admit', 'storage:backup', 'storage:restore', 'storage:import', 'storage:export', 'storage:migrate-backend', 'storage:migrate',
+                'node:init', 'node:snapshot', 'node:maintain', 'node:work-one', 'peers:add', 'peers:disable', 'peers:retry', 'peers:group', 'candidate:add', 'candidate:retry', 'exports:prune', 'client:init', 'sync:peer-step'];
+            $output = ['status' => 'PASS', 'command' => $name] + ($target !== $name ? ['alias_of' => $target] : []) + ['syntax' => $syntax,
+                'tor_requests' => in_array($target, $tor, true),
+                'writes_local_state' => in_array($target, $writes, true) ? true : (in_array($target, ['manifest:rotate', 'manifest:migrate'], true) ? 'only with --output-dir (new draft files, never overwritten)' : false),
+                'saves_status_evidence' => in_array($target, ['service:verify', 'service:announce', 'service:membership'], true) ? 'only with --save-status (or --if-due)' : false,
+                'reads_private_keys' => in_array($target, ['node:init', 'node:snapshot', 'node:work-one', 'record:sign'], true),
                 'help' => 'docs/operations/cli.md', 'network_side_effects' => false];
         }
     } elseif ($command === 'index:verify-inclusion') {
@@ -540,15 +545,26 @@ try {
         if (in_array($config->role, ['publisher', 'client-host'], true)) { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         \OnionServiceDiscovery\Node\PeerRegistry::group($config->store(), OnionAddress::parse($arguments[1]), $arguments[2] === '--clear' ? null : $arguments[2]);
         $output = ['status' => 'PASS', 'grouping' => 'LOCAL_OPERATOR_POLICY', 'identity_authority_changed' => false, 'network_side_effects' => false];
-    } elseif (in_array($command, ['peers:add','peers:list','peers:disable','peers:retry','sync:peer-step'], true)) {
-        $expectedCount = $command === 'peers:add' ? 4 : ($command === 'peers:list' || ($command === 'sync:peer-step' && count($arguments) === 1) ? 1 : ($command === 'peers:retry' ? 3 : 2));
+    } elseif ($command === 'peers:list') {
+        if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
+        $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
+        if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
+        // Read-only like candidate:list: no journal recovery, and a format-1 store can still be listed.
+        $rows = []; $eligible = 0;
+        foreach ($config->store(readOnly: true)->snapshot()['tables']['peers'] as $key => $row) {
+            if (++$eligible > 256) { continue; }
+            $rows[] = ['onion' => substr($key, 4), 'state' => $row['state'] ?? null, 'error' => $row['error'] ?? null, 'failures' => $row['failures'] ?? 0,
+                'next_attempt' => is_int($row['next_attempt'] ?? null) && $row['next_attempt'] > 0 ? gmdate('Y-m-d\TH:i:s\Z', $row['next_attempt']) : null,
+                'node_identity_public_key' => $row['node_identity_public_key'] ?? null, 'local_group' => $row['source_group'] ?? null];
+        }
+        $output = ['status' => 'PASS', 'rows' => $rows, 'limit' => 256, 'partial' => $eligible > count($rows), 'network_side_effects' => false];
+    } elseif (in_array($command, ['peers:add','peers:disable','peers:retry','sync:peer-step'], true)) {
+        $expectedCount = $command === 'peers:add' ? 4 : ($command === 'sync:peer-step' && count($arguments) === 1 ? 1 : ($command === 'peers:retry' ? 3 : 2));
         if (count($arguments) !== $expectedCount || ($command === 'peers:add' && $arguments[2] !== '--expected-node-key') || ($command === 'peers:retry' && $arguments[2] !== '--acknowledge-quarantine')) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         if ($config->role === 'client-host') { throw new ProtocolException('ROLE_CONFIGURATION_INVALID'); }
         $store = $config->store();
-        if ($command === 'peers:list') {
-            $output = ['status' => 'PASS', 'peers' => $store->snapshot()['tables']['peers']];
-        } elseif ($command === 'sync:peer-step' && count($arguments) === 1) {
+        if ($command === 'sync:peer-step' && count($arguments) === 1) {
             // sync:run CONFIG: one bounded step for the peer that is due first, so one timer serves every peer (spec 32 section 17).
             if (!$config->features['sync_with_peers']) { throw new ProtocolException('SYNC_DISABLED'); }
             $now = time(); $due = null; $next = null;
@@ -633,12 +649,23 @@ try {
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
         $output = \OnionServiceDiscovery\Configuration\PublisherStatus::inspect($config, $verifier, dirname(__DIR__) . '/public/.well-known/onion-service-discovery.json', $arguments[0]);
         $output['node'] = \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $verifier, time());
-        $nodeAction = \OnionServiceDiscovery\Configuration\NodeStatus::nextAction($output['node']['storage_state'] ?? '');
+        $nodeAction = \OnionServiceDiscovery\Configuration\NodeStatus::nextAction($output['node']['storage_state'] ?? '') ?? (($output['node']['identity'] ?? null) === 'NOT_INITIALIZED' ? \OnionServiceDiscovery\Configuration\NodeStatus::nextAction('NOT_INITIALIZED') : null);
+        // With a readable store, the same signing ledger and published-state copy checks as doctor: signing may have stopped although the card says HEALTHY.
+        if (in_array($output['node']['storage_state'] ?? null, ['HEALTHY', 'READ_ONLY'], true)) {
+            try {
+                $store = $config->store(readOnly: true); $state = $store->snapshot();
+                $output['signing_ledger'] = \OnionServiceDiscovery\Configuration\Diagnostics::signingLedger($config, $verifier, $store, $state);
+                $output['published_state_copy'] = \OnionServiceDiscovery\Configuration\Diagnostics::publishedStateCopy($config, $verifier, $state) ?? 'NOT_APPLICABLE';
+            } catch (\Throwable) { $output['signing_ledger'] ??= 'NOT_CHECKED'; $output['published_state_copy'] = 'NOT_CHECKED'; }
+            $nodeAction ??= \OnionServiceDiscovery\Node\SigningLedger::nextAction($output['signing_ledger']);
+            if ($output['published_state_copy'] === 'STALE') { $nodeAction ??= 'The export directory\'s copy of the published state (served in degraded mode) does not match the store: run node:snapshot CONFIG --passphrase-file FILE, unless the copy names a newer generation than the store (follow docs/operations/incident-runbook.md section 4 first).'; }
+        }
         if ($nodeAction !== null) { $output['node']['next_action'] = $nodeAction; }
         $output['network_side_effects'] = false;
-        // 0: nothing needs attention; 6: waiting or degraded; 4: error, identity conflict or a store that cannot be read (also while degraded serving continues, D-045).
-        $exitCode = in_array($output['overall'], ['ERROR', 'IDENTITY_CONFLICT'], true) || in_array($output['node']['storage_state'] ?? null, ['ERROR', 'DEGRADED'], true) ? 4
-            : (in_array($output['answer'], ['NOT YET', 'DEGRADED'], true) || ($output['node']['identity'] ?? null) === 'NOT_INITIALIZED' || ($output['node']['storage_state'] ?? null) === 'READ_ONLY' ? 6 : 0);
+        // 0: nothing needs attention; 6: waiting, degraded serving or a stale published-state copy; 4: error, identity conflict, a store that cannot be read
+        // (also while degraded serving continues, D-045) or a signing ledger that stops signing.
+        $exitCode = in_array($output['overall'], ['ERROR', 'IDENTITY_CONFLICT'], true) || in_array($output['node']['storage_state'] ?? null, ['ERROR', 'DEGRADED'], true) || \OnionServiceDiscovery\Node\SigningLedger::nextAction($output['signing_ledger'] ?? 'NOT_APPLICABLE') !== null ? 4
+            : (in_array($output['answer'], ['NOT YET', 'DEGRADED'], true) || ($output['node']['identity'] ?? null) === 'NOT_INITIALIZED' || in_array($output['node']['storage_state'] ?? null, ['READ_ONLY', 'NOT_INITIALIZED'], true) || ($output['published_state_copy'] ?? null) === 'STALE' ? 6 : 0);
     } elseif ($command === 'node:status' || $command === 'node:maintain') {
         if (count($arguments) !== 1) { throw new ProtocolException('USAGE_ERROR'); }
         $config = \OnionServiceDiscovery\Configuration\NodeConfig::load($arguments[0]);
@@ -651,14 +678,21 @@ try {
         elseif ($command === 'node:status' && $config->role === 'publisher') {
             // A publisher has no store: status reports its publication instead of failing (spec 32 section 11).
             $facts = \OnionServiceDiscovery\Configuration\PublisherStatus::inspect($config, $verifier, dirname(__DIR__) . '/public/.well-known/onion-service-discovery.json', $arguments[0]);
-            $output = ['status' => 'PASS', 'role' => 'publisher', 'onion' => $config->nodeOnion, 'roles' => $config->features, 'overall' => $facts['overall'], 'answer' => $facts['answer'],
+            // Status and exit follow the publication like status --check: 4 for an invalid Manifest or an identity conflict, 6 while waiting.
+            $exitCode = in_array($facts['overall'], ['ERROR', 'IDENTITY_CONFLICT'], true) ? 4 : (in_array($facts['answer'], ['NOT YET', 'DEGRADED'], true) ? 6 : 0);
+            $output = ['status' => [0 => 'PASS', 4 => 'FAIL', 6 => 'WARN'][$exitCode], 'role' => 'publisher', 'onion' => $config->nodeOnion, 'roles' => $config->features, 'overall' => $facts['overall'], 'answer' => $facts['answer'],
                 'manifest' => array_intersect_key($facts['manifest'], array_flip(['state', 'revision', 'hash', 'logical_service_id', 'current_key', 'current_key_fingerprint', 'key_epoch'])), 'self_verification' => $facts['self_verification'], 'publisher_node_count' => count($config->publisherNodes),
                 'next_action' => $facts['next_action'], 'network_side_effects' => false];
         } else {
         $unreadable = null; $state = null;
         try { $store = $config->store(readOnly: $command === 'node:status'); if ($command === 'node:status') { $state = $store->snapshot(); } }
         catch (\OnionServiceDiscovery\Storage\StorageException $error) { if ($command !== 'node:status') { throw $error; } $unreadable = $error; }
-        if ($unreadable !== null) {
+        if ($unreadable !== null && $command === 'node:status' && !file_exists($config->storagePath) && !is_link($config->storagePath)) {
+            // Before node:init there is no store yet: setup in progress, not a fault (the status page says NOT_INITIALIZED too).
+            $output = ['status' => 'WARN', 'state' => 'NOT_INITIALIZED', 'role' => $config->role, 'onion' => $config->nodeOnion, 'roles' => $config->features,
+                'node' => \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $verifier, time()), 'next_action' => \OnionServiceDiscovery\Configuration\NodeStatus::nextAction('NOT_INITIALIZED'), 'network_side_effects' => false];
+            $exitCode = 6;
+        } elseif ($unreadable !== null) {
             // The store's own error, what the public sees meanwhile (DEGRADED or ERROR, D-045) and the next step.
             $output = failure($unreadable, $root); $output['node'] = \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $verifier, time()); $exitCode = 4;
             $nodeAction = \OnionServiceDiscovery\Configuration\NodeStatus::nextAction($output['node']['storage_state'] ?? '');
@@ -674,7 +708,7 @@ try {
                 'storage_usage' => \OnionServiceDiscovery\Storage\StorageTransaction::usage($state, new \OnionServiceDiscovery\Storage\StorageLimits()) + ['record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED'],
                 'node' => \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $verifier, time()), 'network_side_effects' => false, 'aggregate_only' => true];
             $output['signing_ledger'] = \OnionServiceDiscovery\Configuration\Diagnostics::signingLedger($config, $verifier, $store, $state);
-            $ledgerAction = \OnionServiceDiscovery\Node\SigningLedger::nextAction($output['signing_ledger']);
+            $ledgerAction = \OnionServiceDiscovery\Node\SigningLedger::nextAction($output['signing_ledger']) ?? (($output['node']['identity'] ?? null) === 'NOT_INITIALIZED' ? \OnionServiceDiscovery\Configuration\NodeStatus::nextAction('NOT_INITIALIZED') : null);
             if ($ledgerAction !== null) { $output['status'] = 'WARN'; $output['next_action'] = $ledgerAction; $exitCode = 6; }
         }
         }

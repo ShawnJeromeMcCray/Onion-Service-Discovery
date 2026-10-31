@@ -61,7 +61,8 @@ try {
     elseif ($asset !== null) { $response = $asset; }
     elseif (str_starts_with($target, '/onion-service-discovery/relay/') && in_array($config->role, ['client-host', 'combined'], true)) {
         $relay = new ClientHostRelay($config);
-        // Visitor-chosen Nodes draw on a separate, smaller budget; abuse cannot starve operator-configured sources.
+        // Visitor-chosen Nodes draw on their own budget (burst 64, refilled at one request per second) separate from
+        // the operator-configured sources' budget (burst 20, two per second), so abuse of one cannot starve the other.
         $budget = $relay->isVisitorSource($target) ? new PublicRequestBudget($config->exportPath . '/.visitor-relay-budget', 64, 1.0) : new PublicRequestBudget($config->exportPath . '/.relay-budget');
         if (!$budget->admit(microtime(true))) { $response = ['status' => 429, 'headers' => ['Retry-After' => '1'], 'body' => '{"error":"REQUEST_BUDGET_EXHAUSTED"}']; }
         else { $response = $relay->handle($method, $target); }

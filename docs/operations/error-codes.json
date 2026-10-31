@@ -10,6 +10,13 @@
    ],
    "meaning": "Not a canonical, checksum-valid v3 Onion address (56 lowercase characters plus .onion)."
   },
+  "ADMISSION_DEFERRED": {
+   "cli_exit": [],
+   "components": [
+    "web routes"
+   ],
+   "meaning": "The announcement route answered 429: this Node\u2019s hourly candidate admission budget (overall or for this source bucket) is used up, so the hint was not queued; retry after Retry-After (one hour). Publishers report it as ANNOUNCEMENT_RATE_LIMITED."
+  },
   "ANNOUNCEMENT_RATE_LIMITED": {
    "cli_exit": [
     "5"
@@ -17,7 +24,7 @@
    "components": [
     "Tor transport"
    ],
-   "meaning": "The Node answered 429: its shared announcement budget is exhausted. The bounded schedule retries no earlier than a day later."
+   "meaning": "The Node answered 429: its shared request budget is exhausted or it deferred admission of new hints (ADMISSION_DEFERRED). The bounded schedule retries no earlier than a day later."
   },
   "ANNOUNCEMENT_RESPONSE_INVALID": {
    "cli_exit": [
@@ -328,9 +335,10 @@
    ],
    "components": [
     "Tor transport",
-    "browser client"
+    "browser client",
+    "web routes"
    ],
-   "meaning": "A Node or Service answered without application/json; nothing was verified."
+   "meaning": "A Node or Service answered without application/json, so nothing was verified; or, from the announcement route (HTTP 415), the hint was not sent as application/json."
   },
   "CRYPTO_ALGORITHM_UNSUPPORTED": {
    "cli_exit": [],
@@ -455,6 +463,7 @@
     "4"
    ],
    "components": [
+    "doctor",
     "storage"
    ],
    "meaning": "The public export directory reached its limit of 4096 files or 256 MiB, or a single export file would exceed 512 KiB; remove unreferenced files with exports:prune or node:maintain."
@@ -496,6 +505,7 @@
     "4"
    ],
    "components": [
+    "doctor",
     "storage"
    ],
    "meaning": "The export directory (export_path) is a URL, a symlink, missing or open to group or others, or it contains a symlink, a subdirectory or a file that is not an OSD export file; node:init or client:init creates it with mode 0700."
@@ -695,6 +705,15 @@
    ],
    "meaning": "The JSON repeats a member name inside one object; signed protocol JSON must have unique keys so every reader sees the same value."
   },
+  "JSON_INVALID": {
+   "cli_exit": [
+    "3"
+   ],
+   "components": [
+    "JSON parsing"
+   ],
+   "meaning": "The input is not valid JSON (a syntax error, trailing data, or a value JSON does not allow), so nothing in it was used."
+  },
   "KEY_DIRECTORY_UNSAFE": {
    "cli_exit": [
     "4"
@@ -867,6 +886,15 @@
     "doctor"
    ],
    "meaning": "The Node descriptor in the store does not verify or names another Onion than node.onion (doctor also reports a published snapshot that fails verification this way); check that storage.path and node.onion belong to this Node."
+  },
+  "NODE_DESCRIPTOR_MISMATCH": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor failure: the store\u2019s signed Node descriptor does not match this installation: its Onion differs from node.onion, its key from the Node key file, or its hash from the stored pointer. Check that the configuration, key and store belong together."
   },
   "NODE_DESCRIPTOR_ROLLBACK_OR_FORK": {
    "cli_exit": [
@@ -1064,6 +1092,15 @@
    ],
    "meaning": "This Node already lists 256 peers, the maximum, counting disabled peers too, so no peer was added."
   },
+  "PHP_EXTENSION_MISSING": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor failure: a required PHP extension (json, sodium, iconv or curl) is not loaded for this PHP; install and enable it for the CLI and the web server\u2019s PHP-FPM."
+  },
   "PIN_BACKUP_INVALID": {
    "cli_exit": [],
    "components": [
@@ -1169,6 +1206,15 @@
    ],
    "meaning": "doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page."
   },
+  "PUBLISHER_MANIFEST_NOT_VALID": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor failure: publishing is on, but the installed public Manifest is missing or not valid for node.onion (see manifest_state); install a signed Manifest with manifest:install, then run publisher:status."
+  },
   "PUBLISHER_NODES_NOT_CONFIGURED": {
    "cli_exit": [
     "3",
@@ -1218,21 +1264,23 @@
   },
   "RATE_LIMIT_CORRUPT": {
    "cli_exit": [
-    "4"
+    "6"
    ],
    "components": [
-    "web routes"
+    "doctor"
    ],
-   "meaning": "A request budget file in the export directory is larger than 1 KiB or holds no valid budget state, so requests fail with HTTP 503; delete the file; it is recreated with a full budget."
+   "meaning": "doctor warning: a request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is larger than 1 KiB or holds no valid budget state, for example after a crash or a full disk. Requests continue: the next one counts it as a full budget and rewrites it; check free disk space."
   },
   "RATE_LIMIT_UNAVAILABLE": {
    "cli_exit": [
-    "4"
+    "4",
+    "6"
    ],
    "components": [
+    "doctor",
     "web routes"
    ],
-   "meaning": "A request budget file in the export directory cannot be created or written or is open to group or others, so requests fail with HTTP 503; let the web server user own it with mode 0600."
+   "meaning": "A request budget file in the export directory cannot be created or written or is open to group or others, so requests fail with HTTP 503 (doctor warns); let the web server user own it with mode 0600."
   },
   "REQUEST_BUDGET_EXHAUSTED": {
    "cli_exit": [],
@@ -1251,7 +1299,8 @@
   "REQUEST_TOO_LARGE": {
    "cli_exit": [],
    "components": [
-    "front controller"
+    "front controller",
+    "web routes"
    ],
    "meaning": "An announcement request declared or sent more than 256 bytes, or its Content-Length is malformed (HTTP 413)."
   },
@@ -1321,6 +1370,15 @@
     "front controller"
    ],
    "meaning": "PHP dependencies are missing: use the development runtime package, which bundles them, or run the locked Composer install."
+  },
+  "RUNTIME_NOT_64_BIT": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "doctor"
+   ],
+   "meaning": "doctor failure: this PHP is not a 64-bit build; OSD needs 64-bit integers for sequences, sizes and times. Install a 64-bit PHP."
   },
   "RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX": {
    "cli_exit": [
@@ -1848,6 +1906,7 @@
     "4"
    ],
    "components": [
+    "doctor",
     "storage"
    ],
    "meaning": "The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend."

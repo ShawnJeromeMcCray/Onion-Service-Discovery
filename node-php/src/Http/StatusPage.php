@@ -11,7 +11,7 @@ final class StatusPage
      */
     public static function render(array $facts, string $method = 'GET'): array
     {
-        $headers = ['Content-Type' => 'text/html; charset=utf-8', 'Cache-Control' => 'no-store', 'Referrer-Policy' => 'no-referrer', 'X-Content-Type-Options' => 'nosniff'];
+        $headers = ['Content-Type' => 'text/html; charset=utf-8', 'Cache-Control' => 'no-store', 'Referrer-Policy' => 'no-referrer', 'X-Content-Type-Options' => 'nosniff', 'X-Frame-Options' => 'DENY'];
         if (!in_array($method, ['GET','HEAD'], true)) { return ['status' => 405, 'headers' => $headers + ['Allow' => 'GET, HEAD'], 'body' => 'Method not allowed']; }
         $css = 'body{font:1rem system-ui,sans-serif;max-width:52rem;margin:0 auto;padding:1.25rem;line-height:1.6;background:#111827;color:#f3f4f6}h1,h2{line-height:1.3}section{border:1px solid #6b7280;border-radius:.5rem;padding:1rem;margin:1rem 0}dt{font-weight:bold}dd{margin:0 0 1rem;overflow-wrap:anywhere}a{color:#c4b5fd}a:focus{outline:3px solid #fff}code{overflow-wrap:anywhere}.answer{font-size:1.25rem}.state{display:inline-block;min-width:9.5rem;font-family:monospace;font-weight:bold}.warning{border:2px solid #fbbf24}li{margin:.5rem 0}';
         $headers['Content-Security-Policy'] = "default-src 'none'; style-src 'sha256-" . base64_encode(hash('sha256', $css, true)) . "'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
