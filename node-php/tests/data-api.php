@@ -36,7 +36,11 @@ $origin = 'http://' . $records[0]->document()->onion;
 $cors = new DataApi($store, $blobs, $verifier, true, [$origin]);
 if (($cors->handle('GET', '/onion-service-discovery/v1/state', $origin)['headers']['Access-Control-Allow-Origin'] ?? null) !== $origin || isset($cors->handle('GET', '/onion-service-discovery/v1/state', 'http://example.org')['headers']['Access-Control-Allow-Origin'])) { throw new RuntimeException('CORS allowlist'); }
 unset($cors);
+// Damaged local exports are the server's fault: 503 (spec 12 section 20), never a 400 that blames the request.
+$chunkFile = $root . '/exports/' . substr($checkpoint->chunks[0]->hash, 7) . '.json'; $original = file_get_contents($chunkFile);
+file_put_contents($chunkFile, str_repeat(' ', strlen($original))); $damaged = $api->handle('GET', $chunkTarget); file_put_contents($chunkFile, $original);
+if ($damaged['status'] !== 503 || json_decode($damaged['body'], true) !== ['error' => 'EXPORT_CORRUPT']) { throw new RuntimeException('export corruption not 503: ' . json_encode($damaged)); }
 unset($store, $api, $disabled, $producer, $blobs, $signer);
 $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
 foreach ($iterator as $file) { $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname()); } rmdir($root);
-echo "PASS: read-only data API, snapshot/chunk/delta, mirror flag and HEAD\n";
+echo "PASS: read-only data API, snapshot/chunk/delta, mirror flag, HEAD and 503 for damaged exports\n";

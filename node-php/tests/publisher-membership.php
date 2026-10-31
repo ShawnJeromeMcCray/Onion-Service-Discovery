@@ -213,9 +213,9 @@ try {
         && !str_contains(json_encode($evidence, JSON_THROW_ON_ERROR), $unreachable), 'recorded failures'); ++$checks;
     $assert(!file_exists($root . '/must-not-be-created') && !file_exists($root . '/exports-must-not-be-created'), 'publisher storage created'); ++$checks;
     $assert(cli(['service:membership', $root . '/publisher.json'], 2)['error'] === 'USAGE_ERROR', 'no history'); ++$checks;
-    // status works for a publisher too: it reports the publication instead of asking for a store.
-    $status = cli(['status', $root . '/publisher.json'], 0);
-    $assert($status['role'] === 'publisher' && $status['manifest']['state'] === 'MISSING' && $status['overall'] === 'ERROR' && is_string($status['next_action']) && $status['publisher_node_count'] === 0, 'publisher status'); ++$checks;
+    // status works for a publisher too: it reports the publication instead of asking for a store; status and exit follow overall (ERROR: FAIL, 4).
+    $status = cli(['status', $root . '/publisher.json'], 4);
+    $assert($status['status'] === 'FAIL' && $status['role'] === 'publisher' && $status['manifest']['state'] === 'MISSING' && $status['overall'] === 'ERROR' && is_string($status['next_action']) && $status['publisher_node_count'] === 0, 'publisher status'); ++$checks;
     $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json', '--peer', $unreachable, $nodes['included']['key']], 2)['error'] === 'USAGE_ERROR', 'wrong flag'); ++$checks;
     $assert(cli(['service:membership', $root . '/publisher.json', $root . '/history.json', '--node', $unreachable, 'ed25519:invalid'], 3)['error'] === 'PUBLIC_KEY_INVALID', 'invalid key'); ++$checks;
 } finally {

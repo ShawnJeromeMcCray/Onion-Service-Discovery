@@ -58,6 +58,8 @@ signed protocol record. It contributes neither a identity nor an observation.
 This does not promise verification, index inclusion, direct observation, queue
 execution time or retention. Other statuses: 400 malformed hint, 405 method,
 413 oversize, 415 media, 429 budget; operational failures normalize to 503.
+Every non-202 answer has the body `{"error":CODE}` (for example
+`{"error":"ADMISSION_DEFERRED"}`); publishers classify by status alone.
 No redirect, wildcard CORS, credential or authentication assertion is added.
 No new signed Node capability token is invented by this experiment.
 

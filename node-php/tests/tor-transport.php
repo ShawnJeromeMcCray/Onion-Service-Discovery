@@ -35,6 +35,12 @@ $cases['cli-announce'] = ["HTTP/1.1 202 Accepted\r\nContent-Type: application/js
 $falseReply = '{"status":"CURRENT_STATE_INCLUDED"}';
 $cases['cli-announce-false-proof'] = ["HTTP/1.1 202 Accepted\r\nContent-Type: application/json\r\nContent-Length: " . strlen($falseReply) . "\r\n\r\n" . $falseReply, ['status'=>'FAIL','error'=>'ANNOUNCEMENT_RESPONSE_INVALID']];
 $cases['cli-announce-rate-limit'] = ["HTTP/1.1 429 Too Many Requests\r\nContent-Type: application/json\r\nContent-Length: 2\r\n\r\n{}", ['status'=>'FAIL','error'=>'ANNOUNCEMENT_RATE_LIMITED']];
+// The Node's refusals carry {"error":CODE}; the publisher classifies them by status alone, so every 429 stays a rate limit and other refusals are rejected statuses.
+foreach (['cli-announce-deferred' => ['429 Too Many Requests', 'ADMISSION_DEFERRED', 'ANNOUNCEMENT_RATE_LIMITED'], 'cli-announce-budget' => ['429 Too Many Requests', 'REQUEST_BUDGET_EXHAUSTED', 'ANNOUNCEMENT_RATE_LIMITED'],
+    'cli-announce-media' => ['415 Unsupported Media Type', 'CONTENT_TYPE_REJECTED', 'HTTP_STATUS_REJECTED'], 'cli-announce-degraded' => ['503 Service Unavailable', 'NODE_DEGRADED_READ_ONLY', 'HTTP_SERVER_ERROR']] as $name => [$line, $code, $expected]) {
+    $refusal = '{"error":"' . $code . '"}';
+    $cases[$name] = ["HTTP/1.1 " . $line . "\r\nContent-Type: application/json\r\nContent-Length: " . strlen($refusal) . "\r\n\r\n" . $refusal, ['status'=>'FAIL','error'=>$expected]];
+}
 $checks = 0;
 $isolationParameters = [];
 foreach ($cases as $name => [$response, $expected]) {
@@ -98,7 +104,7 @@ foreach ($cases as $name => [$response, $expected]) {
         if (is_file($private.'/manifest.json')) { unlink($private.'/manifest.json'); }
         unlink($private.'/config.json'); rmdir($private);
     }
-    $expectedExit = $name === 'cli-invalid' ? 3 : (in_array($name, ['cli-redirect','cli-announce-false-proof','cli-announce-rate-limit'], true) ? 5 : 0);
+    $expectedExit = $name === 'cli-invalid' ? 3 : ((in_array($name, ['cli-redirect','cli-announce-false-proof','cli-announce-rate-limit'], true) || ($expected['status'] ?? null) === 'FAIL') ? 5 : 0);
     $actual = json_decode($output, true);
     // CLI failures also carry the registry meaning and a help page; the typed code is what is compared.
     if (is_array($actual) && ($actual['status'] ?? null) === 'FAIL') { if (($actual['help'] ?? null) !== 'docs/operations/error-codes.md' || !is_string($actual['meaning'] ?? null) || $actual['meaning'] === '') { throw new RuntimeException('failure without meaning or help: ' . $name); } unset($actual['meaning'], $actual['help']); }

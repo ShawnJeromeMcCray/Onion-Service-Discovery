@@ -72,6 +72,7 @@ final class NodeStatus
             'DEGRADED' => 'The store cannot be read. The web routes keep serving the last published snapshot and refuse announcements, server search and lookups that need the store. Follow docs/operations/incident-runbook.md section 4: storage:verify BACKEND PATH names the cause without changing anything; stop the timers, back up the store and run storage:check BACKEND PATH, or restore a private backup if it reports STORAGE_CORRUPT; then run doctor and start the timers.',
             'ERROR' => 'The store cannot be read and no published snapshot can be served in its place, so the data routes answer 503. Follow docs/operations/incident-runbook.md section 4, starting with storage:verify BACKEND PATH, which changes nothing.',
             'READ_ONLY' => 'The filesystem store uses format 1: it can be read, but every writer refuses it. Stop the workers, back up the store and run storage:migrate filesystem PATH.',
+            'NOT_INITIALIZED' => 'Setup is not finished: create the Node key with key:create node KEY_PATH --passphrase-file PRIVATE_FILE (KEY_PATH as in node.key_path), then run node:init CONFIG --passphrase-file PRIVATE_FILE, which creates the store and the export directory.',
             default => null,
         };
     }
