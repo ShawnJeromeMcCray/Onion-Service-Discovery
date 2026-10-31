@@ -69,6 +69,25 @@
   to the front controller (relative 301); the status page sends
   `X-Frame-Options: DENY`.
 
+- Signing-ledger and storage recovery fixes. `node:snapshot --adopt-signed-chain`
+  now admits the Node's own checkpoints between the restored store and the signed
+  one (walked back through the export directory), so a peer anchored on one of
+  them is no longer quarantined for a chain it cannot prove; one of the newest 64
+  missing fails with the new `SIGNED_CHAIN_INCOMPLETE` and changes nothing, and
+  export pruning keeps the newest 64 checkpoint files of the Node's own chain.
+  The signing ledger holds each checkpoint and descriptor as pending before the
+  commit (`pending_checkpoint`, `pending_descriptor`, written only while set, so
+  older ledgers still load), and the next run adopts a pending record whose
+  commit was lost, so a crash followed by a restore no longer re-signs that
+  generation. Export pruning no longer fails with `EXPORT_CORRUPT` when the
+  ledger names a checkpoint whose file is gone. `storage:backup`,
+  `storage:export` and `storage:migrate-backend` retry when `node:maintain`
+  prunes concurrently (`EVIDENCE_CHANGED_RETRY` after three attempts, never
+  `STORAGE_CORRUPT`); pruning-only transactions commit at the byte budget;
+  `storage_usage` reports `store_bytes`/`max_store_bytes` (health-report schema
+  updated); `storage:check` reclaims filesystem object files orphaned by a crash
+  during pruning; and peer and candidate retries or leases dated beyond any
+  scheduled wait (the clock ran ahead, then back) are due at once.
 - Owner decisions of 2026-10-22: D-003 (current Tor Browser desktop and Android at
   Standard and Safer), D-026 (default source list stays empty until Nodes pass the
   drafted admission process in `docs/governance/source-node-admission.md`), D-028,

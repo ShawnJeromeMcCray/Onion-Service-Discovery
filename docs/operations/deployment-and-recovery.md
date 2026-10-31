@@ -155,9 +155,17 @@ the key's directory, outside the store and its backups, and is replaced atomical
   `doctor` fails with `SIGNING_LEDGER_AHEAD_OF_STORE` and `node:status` reports
   `"signing_ledger": "AHEAD_OF_STORE"`.
 - A ledger behind the store or missing (the first run after an upgrade, a lost
-  file, a crash between the store commit and the ledger write) is raised to the
-  store's pointers first; no action is needed (`doctor` shows `BEHIND_STORE` or
-  `NOT_PRESENT` meanwhile).
+  file) is raised to the store's pointers first; no action is needed (`doctor`
+  shows `BEHIND_STORE` or `NOT_PRESENT` meanwhile).
+- Before each commit the ledger holds the new checkpoint or descriptor as pending
+  (`pending_checkpoint`, `pending_descriptor`), after it as signed. A crash
+  between the commit and the ledger write leaves the pending entry. The next
+  `node:snapshot` or `node:init` adopts it from its export blob when it directly
+  follows the store's head (the commit was lost, or a backup from just before it
+  was restored), so that generation is never signed twice; otherwise it refuses
+  as above. `doctor` and `node:status` report `AHEAD_OF_STORE` until then. A
+  ledger without pending entries is the file earlier releases wrote and still
+  loads; a file with one is refused by earlier releases (`SIGNING_LEDGER_INVALID`).
 - The guard only works while the ledger is newer than the restored store. When you
   restore a store, keep the Node's current ledger: never copy an older ledger back
   over it together with the store. Restore a ledger from backup only when the
@@ -176,30 +184,46 @@ php node-php/bin/onion-service-discovery doctor /etc/onion-service-discovery/nod
 php node-php/bin/onion-service-discovery node:snapshot /etc/onion-service-discovery/node.json --passphrase-file PRIVATE_FILE --adopt-signed-chain
 ```
 
-`--adopt-signed-chain` loads the checkpoint the ledger names from the export
-directory and, when the ledger's descriptor revision is ahead, the Node descriptor
-from the published-state copy beside the exports. It checks that each is exactly
-what this key signed (signature, type, key, number and hash), admits it into the
-store and points the store at it, then publishes as usual: the next checkpoint is
-the ledger's generation plus one and names the adopted checkpoint as its previous
-one. Its output has `"adopted_signed_chain": {"checkpoint": "ADOPTED"|"CURRENT",
-"descriptor": "ADOPTED"|"CURRENT"}`; running it again changes nothing. The export
-pruning of `node:maintain` and `exports:prune` keeps the ledger's checkpoint blob
-meanwhile.
+`--adopt-signed-chain` loads the checkpoint the ledger names (or its pending one)
+from the export directory and, when the ledger's descriptor revision is ahead, the
+Node descriptor from the published-state copy beside the exports (or its export
+blob). It checks that each is exactly what this key signed (signature, type, key,
+number and hash). It then walks the checkpoint's `previous_checkpoint_hash` back
+through the export directory to the restored store's generation and admits every
+checkpoint of that chain the store lacks (at most 255), so the store holds the
+Node's chain without a hole. It points the store at the signed checkpoint and
+publishes as usual: the next checkpoint is the ledger's generation plus one and
+names the adopted checkpoint as its previous one. Its output has
+`"adopted_signed_chain": {"checkpoint": "ADOPTED"|"CURRENT", "descriptor":
+"ADOPTED"|"CURRENT"}`; running it again changes nothing. The export pruning of
+`node:maintain` and `exports:prune` keeps the checkpoint files of the newest 64
+checkpoints of the Node's own chain (below the store's checkpoint and below the
+ledger's), so they are there when needed.
 
-Generations between the restored store and the adopted checkpoint are simply
-absent from this Node: a peer that already holds the adopted checkpoint continues
-normally, a peer that held an older one sees a gap in the chain, and publishers
-whose evidence named a missing generation report it as `NOT_EVALUATED`. Records
-the Node admitted after the backup are not restored by adoption; peer sync and
-direct checks admit them again.
+A peer that held any checkpoint of that chain therefore walks back to it and
+continues normally. Publishers whose evidence named a generation the walk could
+not reach report it as `NOT_EVALUATED`. Records the Node admitted after the backup
+are not restored by adoption; peer sync and direct checks admit them again.
 
-If the needed blob or published-state copy is gone (the export directory was lost
-or restored from elsewhere), `--adopt-signed-chain` fails with
+The 64 newest checkpoints below the signed one must all be found: a peer treats a
+checkpoint missing within the newest 64 as a fault and would quarantine the Node
+after its retries. If one of them is gone, `--adopt-signed-chain` fails with
+`SIGNED_CHAIN_INCOMPLETE` and changes nothing; put the missing checkpoint files
+(`HASH.json`, from a backup of the export directory) back, or restore a newer
+backup of the store. Older checkpoints that are gone end the walk: peers anchored
+below them see a gap, which they accept for checkpoints that old. Export
+directories pruned by releases before this one kept only the current checkpoint,
+so a restore right after the upgrade may need the newer store backup.
+
+If the signed checkpoint itself or the published-state copy is gone (the export
+directory was lost or restored from elsewhere), `--adopt-signed-chain` fails with
 `SIGNED_CHAIN_UNRECOVERABLE` and changes nothing. The remaining option is to
 restore a newer backup of the store, one taken at or after the ledger's
 generation. Never delete or edit the ledger to make signing proceed: that signs a
-conflicting generation, and peers quarantine the Node permanently.
+conflicting generation, and peers quarantine the Node permanently. When neither
+the files nor a newer backup exist, the Node cannot continue its chain without
+leaving peers a gap they quarantine; it can only be replaced by a new Node with
+a new key that peers pin explicitly.
 
 ## Degraded mode
 

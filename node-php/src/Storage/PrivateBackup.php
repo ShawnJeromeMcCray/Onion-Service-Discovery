@@ -7,11 +7,45 @@ use OnionServiceDiscovery\Protocol\RecordVerifier;
 final class PrivateBackup
 {
     private const MAX_BYTES = 268435456;
+    /** Attempts of an export that concurrent maintenance pruning invalidated (EVIDENCE_CHANGED_RETRY after them). */
+    public const PRUNE_RETRIES = 3;
     /** @return array<string,mixed> */
     public static function export(StorageBackend $store, string $path): array
     {
         if (in_array(basename($path), ['hs_ed25519_secret_key', 'private_key'], true) || str_contains($path, '://') || is_link($path)) { throw new StorageException('BACKUP_PATH_INVALID'); }
-        // A consistent snapshot references immutable objects; later appends cannot change it.
+        return self::retryPruned(static fn (): array => self::exportOnce($store, $path));
+    }
+
+    /**
+     * Runs an export again when node:maintain removed a record of its snapshot meanwhile (prunedSince() threw
+     * EVIDENCE_CHANGED_RETRY), at most PRUNE_RETRIES times; the failed attempt has already removed its file.
+     * @template T
+     * @param callable(): T $export
+     * @return T
+     */
+    public static function retryPruned(callable $export): mixed
+    {
+        for ($attempt = 1; ; ++$attempt) {
+            try { return $export(); }
+            catch (StorageException $error) { if ($error->getMessage() !== 'EVIDENCE_CHANGED_RETRY' || $attempt >= self::PRUNE_RETRIES) { throw $error; } }
+        }
+    }
+
+    /**
+     * A record of $state the store no longer returns: EVIDENCE_CHANGED_RETRY when the store moved on (retention
+     * pruned it after the snapshot was read), STORAGE_CORRUPT when the same state lost it.
+     * @param array<array-key,mixed> $state
+     */
+    public static function missingRecord(StorageBackend $store, array $state): StorageException
+    {
+        $now = $store->snapshot();
+        return new StorageException($now['generation'] !== $state['generation'] || ($now['pruned_records'] ?? 0) !== ($state['pruned_records'] ?? 0) ? 'EVIDENCE_CHANGED_RETRY' : 'STORAGE_CORRUPT');
+    }
+
+    /** @return array<string,mixed> */
+    private static function exportOnce(StorageBackend $store, string $path): array
+    {
+        // A consistent snapshot references immutable objects; later appends cannot change it, pruning can (retried).
         $state = $store->snapshot();
         $header = StorageJson::encode(['private_backup_version' => 1, 'state' => $state]);
         if (strlen($header) > 33554432) { throw new StorageException('BACKUP_BUDGET_EXHAUSTED'); }
@@ -27,7 +61,8 @@ final class PrivateBackup
                 $wires = $store->readRecords($batch);
                 foreach ($batch as $hash) {
                     $wire = $wires[$hash] ?? null;
-                    if ($wire === null || hash('sha256', $wire) !== $records[$hash]['object_hash']) { throw new StorageException('STORAGE_CORRUPT'); }
+                    if ($wire === null) { throw self::missingRecord($store, $state); }
+                    if (hash('sha256', $wire) !== $records[$hash]['object_hash']) { throw new StorageException('STORAGE_CORRUPT'); }
                     self::write($stream, $wire . "\n", $digest, $bytes);
                 }
             }

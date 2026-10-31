@@ -118,11 +118,8 @@ function pruneExports(\OnionServiceDiscovery\Configuration\NodeConfig $config, \
         foreach (array_merge([$previous->contentHash], array_column($document->chunks, 'hash')) as $hash) { if ($blobs->get($hash) !== null) { $keep[] = $hash; } }
     }
     foreach ($state['tables']['node'] as $key => $row) { if (str_starts_with($key, 'key:service-index-')) { $keep[] = $row['hash']; } }
-    // While a restored store is behind the signing ledger, the last checkpoint this key signed stays for node:snapshot --adopt-signed-chain.
-    if ($config->nodeKeyPath !== null) {
-        try { $signed = \OnionServiceDiscovery\Node\SigningLedger::forKey($config->nodeKeyPath)->read(null)['checkpoint'] ?? null; if ($signed !== null) { $keep[] = $signed[1]; } }
-        catch (\OnionServiceDiscovery\Storage\StorageException) {}
-    }
+    // The newest checkpoints of this Node's own chain, and those the signing ledger names, stay for node:snapshot --adopt-signed-chain (only blobs still present).
+    if ($config->nodeKeyPath !== null) { $keep = array_merge($keep, \OnionServiceDiscovery\Node\SigningLedger::forKey($config->nodeKeyPath)->retainedBlobs($store, $blobs, $verifier, $state)); }
     $search = $state['tables']['node']['key:server-search-index'] ?? null;
     if ($search !== null) { $keep = array_merge($keep, \OnionServiceDiscovery\Search\SearchIndex::references($blobs, $search['hash'])); }
     return $blobs->pruneUnreferenced(array_values(array_unique($keep)), $olderThan);
@@ -705,7 +702,7 @@ try {
             $counts = array_map('count', $state['tables']);
             // Budget use (WARN from 80 %): node:maintain keeps it bounded once storage:migrate enabled record pruning.
             $output = ['status' => 'PASS', 'role' => $config->role, 'onion' => $config->nodeOnion, 'roles' => $config->features, 'backend' => $store->backendName(), 'storage_generation' => $state['generation'], 'signed_records' => count($state['records']), 'operational_counts' => $counts,
-                'storage_usage' => \OnionServiceDiscovery\Storage\StorageTransaction::usage($state, new \OnionServiceDiscovery\Storage\StorageLimits()) + ['record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED'],
+                'storage_usage' => \OnionServiceDiscovery\Storage\StorageTransaction::usage($state, new \OnionServiceDiscovery\Storage\StorageLimits(), $store) + ['record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED'],
                 'node' => \OnionServiceDiscovery\Configuration\NodeStatus::inspect($config, $verifier, time()), 'network_side_effects' => false, 'aggregate_only' => true];
             $output['signing_ledger'] = \OnionServiceDiscovery\Configuration\Diagnostics::signingLedger($config, $verifier, $store, $state);
             $ledgerAction = \OnionServiceDiscovery\Node\SigningLedger::nextAction($output['signing_ledger']) ?? (($output['node']['identity'] ?? null) === 'NOT_INITIALIZED' ? \OnionServiceDiscovery\Configuration\NodeStatus::nextAction('NOT_INITIALIZED') : null);
