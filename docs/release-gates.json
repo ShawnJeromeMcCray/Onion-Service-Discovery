@@ -199,7 +199,7 @@
         "docs/conformance/tor-browser-local-report.json",
         "lab/tor-browser-local.py"
       ],
-      "remaining": "Headless local direct-loopback profile only; desktop Normal/Safer/Safest, Android and privacy reviews remain open."
+      "remaining": "Headless local direct-loopback profile only; desktop Standard/Safer/Safest, Android and privacy reviews remain open."
     },
     {
       "id": "BOUNDED_ANNOUNCEMENT_EXPERIMENT",
@@ -233,7 +233,7 @@
         "lab/tor-browser-private-onion.py",
         "lab/real-tor-cli.md"
       ],
-      "remaining": "Real isolated private Tor and headless browser with explicit lab direct-source profile only. Public Tor, Normal/Safer/Safest desktop, Android, deployed isolation and independent privacy/accessibility reviews remain open."
+      "remaining": "Real isolated private Tor and headless browser with explicit lab direct-source profile only. Public Tor, Standard/Safer/Safest desktop, Android, deployed isolation and independent privacy/accessibility reviews remain open."
     }
   ]
 }

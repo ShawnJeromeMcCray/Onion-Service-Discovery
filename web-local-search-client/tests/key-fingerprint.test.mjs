@@ -11,3 +11,6 @@ test('an invalid key has no fingerprint', () => {
   assert.throws(() => keyFingerprint('ed25519:short'), { message: 'PUBLIC_KEY_INVALID' });
   assert.throws(() => keyFingerprint(vectors.cases[0].public_key.replace('ed25519:', 'x25519:')), { message: 'PUBLIC_KEY_INVALID' });
 });
+test('keys that are not strict Ed25519 points have no fingerprint, as in the PHP node', () => {
+  for (const item of vectors.rejected) assert.throws(() => keyFingerprint(item.public_key), { message: item.error }, item.id);
+});

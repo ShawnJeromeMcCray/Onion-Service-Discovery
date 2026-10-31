@@ -102,14 +102,20 @@ remains a separate gate.
 
 `python3 tools/build_release_candidate.py --profile static-client --output DIR`
 packs only the built browser client (`web-local-search-client/dist/` with its
-`build-manifest.json`), the licence notices and the client contract
+`build-manifest.json`), the licence notices with the full third-party licence
+texts (`third-party/`) and the client contract
 (`onion-service-discovery-static-client.tar.gz`, profile `static-client-v1`). Its
-SBOM lists only what the browser bundle contains. `tools/verify_candidate.py`
+SBOM lists only what the browser bundle contains: the npm packages bundled into
+the client (`@noble/curves`, `@noble/hashes` and the inlined `ajv` runtime helper)
+and the Unicode data. The build refuses to run when the client imports any other
+package until that package's notice is added. The runtime package's SBOM likewise
+lists only what it ships: the bundled npm packages, the Composer runtime packages
+and the Unicode data. `tools/verify_candidate.py`
 rejects such an archive if it holds server code or lacks the preview marking.
 
 CI builds it twice, compares both archives byte for byte and checks the structure.
-For every merge to `main` (owner decision D-028, 2026-10-22) it requests a GitHub
-build-provenance attestation, verifies it and keeps the bundle as the workflow
+For every merge to `main` (owner decision D-028, 2026-10-22) it requests GitHub
+build-provenance and SBOM attestations, verifies them and keeps the bundle as the workflow
 artifact `static-client-preview-COMMIT` for 90 days. Verify it like the runtime
 package, with `onion-service-discovery-static-client.tar.gz` as the subject.
 

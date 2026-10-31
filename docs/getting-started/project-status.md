@@ -1,6 +1,6 @@
 # Practical use, evidence and remaining work
 
-Assessment date: **14 October 2026**. Release channel: **development preview**.
+Assessment date: **14 October 2026**, updated **26 October 2026**. Release channel: **development preview**.
 The owner’s goal is a practical, well-documented public project. Completed local
 workflows are usable; Production Stable is a separate, evidence-based claim.
 Documentation, a screenshot or passing tests cannot turn an unfinished external
@@ -25,7 +25,7 @@ and a normal operator completing external onboarding. Some evidence has advanced
 | Assessment item | Current implementation/evidence | Still open |
 | --- | --- | --- |
 | Core black-box cases | [Expanded report](../conformance/production-completion-core-report.json): 226 exact-output cases per language, including membership cases; CI now runs 248 per language, including the PCP-004 history cases | Full revised-spec conformance and independent review |
-| Tor tests only local/offline | [Real private-Tor application](../conformance/private-tor-onion-report.json) and [actual Tor Browser on a private Onion](../conformance/tor-browser-private-onion-report.json) | Public Tor, Android, desktop Normal/Safer/Safest, slow-network matrix |
+| Tor tests only local/offline | [Real private-Tor application](../conformance/private-tor-onion-report.json) and [actual Tor Browser on a private Onion](../conformance/tor-browser-private-onion-report.json) | Public Tor, Android, desktop Standard/Safer/Safest, slow-network matrix |
 | Restricted JavaScript unsupported | [JavaScript-disabled actual-browser check](../conformance/tor-browser-nojs-report.json), private-Onion NoJS form tests, [optional server-search contract](../operations/server-search.md) | Full security-level/platform certification and accessibility review |
 | Snapshot membership | Exact-current-state verification in PHP/TypeScript/Python; wrong key, stale state, omissions, forks and corrupt chunks reject | Frozen active-index checkpoint type and automated fresh multi-Node workflow |
 | Long absence / contradictory histories | Bounded resumed checkpoint ancestry and authenticated conflicting-witness retention | Longer operational soak, changing-head stress and broader chaos evidence |
@@ -67,6 +67,19 @@ evaluated across the publisher's checks; operator independence is not, so it doe
 not establish “current revision in 2 of 3 fresh independent Nodes.” Existing complete-snapshot evidence is not silently
 renamed to the pending active-index checkpoint protocol.
 
+## Changes since 14 October 2026
+
+- Nodes prune superseded checkpoints with a bounded retention (D-040) and keep a
+  signing ledger beside the key, so a restored old backup cannot make them sign a
+  generation twice (`--adopt-signed-chain` continues the chain).
+- Peer sync resumes large, often-changing peers instead of restarting.
+- Every merge to `main` produces a reproducible, attested static client bundle
+  (D-028); `doctor` checks the files a Client Host serves against their manifest.
+- Supported browsers are fixed (D-003): current Tor Browser desktop and Android at
+  Standard and Safer; Safest falls back to the optional NoJS search.
+- The default source list stays empty until Nodes pass the drafted admission
+  process (D-026/D-027).
+
 ## Remaining engineering that can be developed
 
 - Final active-index checkpoint semantics, exact wire bytes and continuity design, then implementation/adversarial vectors after the required protocol decisions are reviewed.
@@ -85,7 +98,7 @@ performed. Public Tor TCP access is currently restricted in this environment;
 a private Tor lab is not a substitute. These are explicit prerequisites, not
 engineering tasks marked complete by omission.
 
-The detailed review is [production-completion-review.md](../production-completion-review.md).
+The 13 October review [production-completion-review.md](../production-completion-review.md) is kept as a historical snapshot.
 The [decision register](../governance/decision-register.md),
 [release gates](../release-gates.json) and
 [47-section production readiness matrix](../production-readiness.json) retain

@@ -8,4 +8,8 @@ foreach ($vectors['cases'] as $case) {
 }
 try { KeyFingerprint::of('ed25519:short'); throw new RuntimeException('invalid key fingerprinted'); }
 catch (InvalidArgumentException $error) { if ($error->getMessage() !== 'PUBLIC_KEY_INVALID') { throw $error; } }
-echo 'PASS: ' . count($vectors['cases']) . " shared D-025 key fingerprint vectors and invalid-key refusal\n";
+foreach ($vectors['rejected'] as $case) {
+    try { KeyFingerprint::of($case['public_key']); throw new RuntimeException('weak key fingerprinted: ' . $case['id']); }
+    catch (InvalidArgumentException $error) { if ($error->getMessage() !== $case['error']) { throw $error; } }
+}
+echo 'PASS: ' . count($vectors['cases']) . ' shared D-025 key fingerprint vectors, ' . count($vectors['rejected']) . " rejected point encodings and invalid-key refusal\n";

@@ -12,8 +12,16 @@ final class RecordArchive
     public static function export(StorageBackend $store, string $path, ?RecordVerifier $verifier = null): array
     {
         if (in_array(basename($path), ['hs_ed25519_secret_key', 'private_key'], true) || str_contains($path, '://')) { throw new StorageException('ARCHIVE_PATH_INVALID'); }
-        $snapshot = $store->snapshot();
         $verifier ??= new RecordVerifier(dirname(__DIR__, 3) . '/protocol/schemas');
+        // Concurrent maintenance pruning removes records of the snapshot: the export starts again (PrivateBackup::retryPruned).
+        return PrivateBackup::retryPruned(static fn (): array => self::exportOnce($store, $path, $verifier));
+    }
+    /**
+     * @return array<array-key, mixed>
+     */
+    private static function exportOnce(StorageBackend $store, string $path, RecordVerifier $verifier): array
+    {
+        $snapshot = $store->snapshot();
         $validated = [];
         foreach (array_chunk(array_keys($snapshot['records']), 256) as $batch) {
             foreach ($store->readRecords($batch) as $hash => $wire) {
@@ -22,7 +30,7 @@ final class RecordArchive
                 $validated[] = $record;
             }
         }
-        if (count($validated) !== count($snapshot['records'])) { throw new StorageException('STORAGE_CORRUPT'); }
+        if (count($validated) !== count($snapshot['records'])) { throw PrivateBackup::missingRecord($store, $snapshot); }
         $public = \OnionServiceDiscovery\Node\PublicEvidencePolicy::select($validated);
         foreach ($validated as $record) { if ($record->type === 'snapshot_descriptor') { $public[$record->contentHash] = true; } }
         $records = array_intersect_key($snapshot['records'], $public);
@@ -37,7 +45,8 @@ final class RecordArchive
                 $wires = $store->readRecords($batch);
                 foreach ($batch as $hash) {
                     $wire = $wires[$hash] ?? null;
-                    if ($wire === null || hash('sha256', $wire) !== $records[$hash]['object_hash']) { throw new StorageException('STORAGE_CORRUPT'); }
+                    if ($wire === null) { throw PrivateBackup::missingRecord($store, $snapshot); }
+                    if (hash('sha256', $wire) !== $records[$hash]['object_hash']) { throw new StorageException('STORAGE_CORRUPT'); }
                     self::write($stream, $wire . "\n", $digest);
                 }
             }

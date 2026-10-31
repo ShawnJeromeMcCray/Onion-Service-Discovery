@@ -9,6 +9,8 @@ final class StorageTransaction
 {
     public const TABLES = ['peers', 'candidates', 'candidate_sources', 'quarantine', 'sync', 'node', 'maintenance', 'local_observations', 'assertions', 'snapshots', 'checkpoint_evidence', 'moderation'];
     private bool $changed = false;
+    /** Whether the transaction admits a record or writes an operational row (removals only otherwise). */
+    private bool $adds = false;
     private int $admissions = 0;
     private int $operationalMutations = 0;
     /**
@@ -94,7 +96,7 @@ final class StorageTransaction
         $objectHash = hash('sha256', $record->canonicalWire);
         $this->newObjects[$objectHash] = $record->canonicalWire; unset($this->removedObjects[$objectHash]);
         $this->state['records'][$record->contentHash] = ['object_hash' => $objectHash, 'record_type' => $record->type, 'sequence' => ++$this->state['last_sequence']];
-        $this->changed = true;
+        $this->changed = true; $this->adds = true;
         return true;
     }
 
@@ -122,16 +124,19 @@ final class StorageTransaction
     }
 
     /**
-     * Use of the record, state and operational-row budgets for node:status and doctor; WARN from 80 %.
+     * Use of the record, state, operational-row and on-disk byte budgets for node:status and doctor; WARN from 80 %.
+     * The store's bytes come from $store (both backends report them), so a full disk budget warns before admission stops.
      * @param array<array-key, mixed> $state
-     * @return array<string, int|string>
+     * @return array<string, int|string|null>
      */
-    public static function usage(array $state, StorageLimits $limits): array
+    public static function usage(array $state, StorageLimits $limits, ?StorageBackend $store = null): array
     {
         $bytes = strlen(StorageJson::encode($state)); $rows = array_sum(array_map('count', $state['tables']));
-        $ratio = max(count($state['records']) / $limits->maxRecords, $bytes / $limits->maxCheckpointBytes, $rows / $limits->maxOperationalRows);
+        $disk = $store instanceof SQLiteStore || $store instanceof FilesystemStore ? $store->diskBytes() : null;
+        $ratio = max(count($state['records']) / $limits->maxRecords, $bytes / $limits->maxCheckpointBytes, $rows / $limits->maxOperationalRows, ($disk ?? 0) / $limits->maxBytes);
         return ['signed_records' => count($state['records']), 'max_records' => $limits->maxRecords, 'pruned_records' => $state['pruned_records'] ?? 0,
             'state_bytes' => $bytes, 'max_state_bytes' => $limits->maxCheckpointBytes, 'operational_rows' => $rows, 'max_operational_rows' => $limits->maxOperationalRows,
+            'store_bytes' => $disk, 'max_store_bytes' => $limits->maxBytes,
             'usage_percent' => (int) floor($ratio * 100), 'state' => $ratio >= 1 ? 'FAIL' : ($ratio >= 0.8 ? 'WARN' : 'PASS')];
     }
 
@@ -178,7 +183,7 @@ final class StorageTransaction
                 throw new StorageException('WORK_BUDGET_EXHAUSTED');
             }
             $this->state['tables'][$table][$key] = $value;
-            $this->changed = true;
+            $this->changed = true; $this->adds = true;
         }
     }
 
@@ -196,6 +201,8 @@ final class StorageTransaction
     }
 
     public function changed(): bool { return $this->changed; }
+    /** Only removals (bounded retention, row deletes): the backends let it commit at the byte budget, since it frees space. */
+    public function removalOnly(): bool { return $this->changed && !$this->adds; }
     /**
      * @return array<array-key, mixed>
      */

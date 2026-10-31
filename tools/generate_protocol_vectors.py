@@ -77,6 +77,17 @@ mut=copy.deepcopy(genesis);mut['signature']=encode_bytes(sig[:32]+(int.from_byte
 mut=copy.deepcopy(genesis);mut['signature']=encode_bytes(b'\x01'+bytes(63),'ed25519sig:');add('small-order-signature-r',mut,'SIGNATURE_INVALID')
 add('raw-wire-limit',genesis,'DOCUMENT_TOO_LARGE',raw=canonical_json(genesis).encode()+b' '*16384)
 add('reordered-wire',genesis,raw=json.dumps(dict(reversed(list(genesis.items()))),ensure_ascii=False).encode())
+# A final LF must not satisfy an anchored schema pattern (Python re `$` would accept it; ECMAScript and PCRE with D do not).
+for ident,rec,k,path,value in [('service-name',genesis,service,('service','name'),'Example\n'),('description',genesis,service,('service','description'),'desc\n'),('clearnet',genesis,service,('links','clearnet'),['https://a.example\n']),('onion',genesis,service,('onion',),a+'\n'),('software-name',node_record,node,('software','name'),'x\n'),('capability',node_record,node,('capabilities',),['abc\n']),('cursor',snapshot,node,('cursor',),'abc\n')]:
+ mut=copy.deepcopy(rec);target=mut
+ for part in path[:-1]:target=target[part]
+ target[path[-1]]=value;add('trailing-lf-'+ident,signed(mut,k),'SCHEMA_INVALID')
+# Capabilities are compared as strings: numeric-looking values are distinct members of a sorted set.
+for ident,capabilities in [('zero',['0','0.0']),('one',['1','1.','1.0']),('exponent',['10','1e1']),('hundred',['100','1e2'])]:
+ mut=copy.deepcopy(node_record);mut['capabilities']=capabilities;add('capabilities-numeric-strings-'+ident,signed(mut,node))
+# links.clearnet is limited to 2048 UTF-8 bytes (protocol/limits.json clearnet_url_bytes), not 2048 code points.
+for ident,count,error in [('2048-bytes',1015,None),('over-2048-bytes',1100,'SCHEMA_INVALID')]:
+ mut=copy.deepcopy(genesis);mut['links']['clearnet']=['https://a.example/'+'\u00e9'*count];add('clearnet-url-'+ident,signed(mut,service),error)
 (ROOT/'protocol/test-vectors/signed-records.json').write_text(json.dumps({'format_version':1,'status':'DRAFT_CRYPTO_CORE','warning':'ALL SEEDS ARE PUBLIC TEST ONLY. Not a protocol freeze approval.','test_seed_labels':['service-1','service-2','node-1'],'cases':cases,'stories':{'genesis':genesis,'successor':revision,'rotation':rotation,'rotated':rotated,'migration':migration,'migrated':migrated}},indent=2,ensure_ascii=False)+'\n')
 canonical_cases=[
  ('ordering','{"z":0,"a":1}','{"a":1,"z":0}'),

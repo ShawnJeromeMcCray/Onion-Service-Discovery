@@ -145,7 +145,10 @@ final readonly class DataApi
             }
             return $this->response(404, ['error' => 'NOT_FOUND'], $headers);
         } catch (ProtocolException $error) {
-            return $this->response($error->getMessage() === 'NOT_FOUND' ? 404 : ($error->getMessage() === 'RESPONSE_TOO_LARGE' ? 413 : 400), ['error' => $error->getMessage()], $headers);
+            // Spec 12 section 20: 400 only for a malformed request; damaged local data is the server's fault and
+            // temporary (503), and a response over this Node's own limit is an internal failure (500), not a client body error.
+            $status = match ($error->getMessage()) { 'NOT_FOUND' => 404, 'EXPORT_CORRUPT', 'STORAGE_CORRUPT' => 503, 'RESPONSE_TOO_LARGE' => 500, default => 400 };
+            return $this->response($status, ['error' => $error->getMessage()], $headers);
         } catch (\InvalidArgumentException) { return $this->response(400, ['error' => 'REQUEST_INVALID'], $headers); }
     }
     /**

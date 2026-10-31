@@ -145,9 +145,8 @@ final class SQLiteStore implements StorageBackend
     public function transaction(callable $mutation): mixed
     {
         if ($this->readOnly) { throw new StorageException('STORAGE_READ_ONLY'); }
-        if ($this->diskUsage() >= $this->limits->maxBytes) {
-            throw new StorageException('STORAGE_BUDGET_EXHAUSTED');
-        }
+        // At the byte budget only a transaction that removes (bounded retention) may still commit: it frees space.
+        $full = $this->diskUsage() >= $this->limits->maxBytes;
         try {
             $this->database->exec('BEGIN IMMEDIATE');
         } catch (\PDOException) {
@@ -162,6 +161,7 @@ final class SQLiteStore implements StorageBackend
                 $this->database->exec('ROLLBACK');
                 return $result;
             }
+            if ($full && !$transaction->removalOnly()) { throw new StorageException('STORAGE_BUDGET_EXHAUSTED'); }
             $state = $transaction->state();
             $schemaVersion = $this->schemaVersion();
             if ($state['storage_schema'] !== 1 && $schemaVersion !== 2) { throw new StorageException('STORAGE_MIGRATION_REQUIRED'); }
@@ -170,7 +170,7 @@ final class SQLiteStore implements StorageBackend
             }
             $state['generation']++;
             $incoming = array_sum(array_map('strlen', $transaction->newObjects())) + strlen(StorageJson::encode($state)) * 2 + 4096;
-            if ($this->diskUsage() + $incoming > $this->limits->maxBytes) {
+            if (!$transaction->removalOnly() && $this->diskUsage() + $incoming > $this->limits->maxBytes) {
                 throw new StorageException('STORAGE_BUDGET_EXHAUSTED');
             }
             $insertObject = $this->prepare('INSERT INTO immutable_objects(object_hash,wire) VALUES (:hash,:wire) ON CONFLICT(object_hash) DO NOTHING');
@@ -346,6 +346,9 @@ final class SQLiteStore implements StorageBackend
             throw new StorageException('STORAGE_CORRUPT');
         }
     }
+
+    /** Bytes of the database and its WAL files, for StorageTransaction::usage(). */
+    public function diskBytes(): int { return $this->diskUsage(); }
 
     private function diskUsage(): int
     {

@@ -45,7 +45,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-037 | Default Operator Switches | OWNER-APPROVED AS IMPLEMENTED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | Publishing only with `init --publish`; mirroring and discovery only for the node and combined roles; peer sync, server search, announcement intake and visitor-chosen Nodes stay off until explicitly enabled. |
 | D-038 | Manifest Auto-Regeneration | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-039 | Key Backup UX | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
-| D-040 | Database Retention Defaults | OWNER-APPROVED (2026-10-22) | Project owner / reviewer | CONDITIONAL / REVIEW | As implemented: `node:maintain` keeps the Node's newest 256 own checkpoints, each peer's anchor, pending checkpoint and newest four witnesses, and every conflicting checkpoint; superseded checkpoints are removed. Service history (Manifests, proofs, observations) is never removed. See [storage contract](../storage/contract.md). |
+| D-040 | Storage Retention Defaults | OWNER-APPROVED (2026-10-22) | Project owner / reviewer | CONDITIONAL / REVIEW | As implemented: `node:maintain` keeps the Node's newest 256 own checkpoints, each peer's anchor, pending checkpoint and newest four witnesses, and every conflicting checkpoint; superseded checkpoints are removed. Service history (Manifests, proofs, observations) is never removed. See [storage contract](../storage/contract.md). |
 | D-041 | Rate Limit and Work Budget Defaults | OWNER-APPROVED AS DEVELOPMENT DEFAULT (2026-10-22) / BENCHMARKS OPEN | Project owner / reviewer | YES (final values) | The current values ([candidate budgets](../operations/candidate-budgets.md), request budget burst 20 at 2 per second, relay and visitor-relay budgets) apply until load tests with real Tor hosts confirm or change them. |
 | D-042 | Tor Stream Isolation Strategy | OWNER-APPROVED (2026-10-22) / TOR-REVIEW-OPEN | Project owner / reviewer | YES (independent Tor review) | As implemented: Tor SOCKS extended format 0 with a fresh random isolation value per request, so no two requests share a circuit ([ADR 005](../adr/005-tor-socks-format-zero.md)). |
 | D-043 | HTTP Compression | OWNER-APPROVED (2026-10-22) | Project owner / reviewer | YES | As implemented: verification paths request and accept only `identity`; any other `Content-Encoding` is refused (`CONTENT_ENCODING_REJECTED`) in the PHP transport and the browser client. |
@@ -57,7 +57,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-049 | External Audit Provider | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-050 | Production Release Approval | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 
-The refreshed source decision register adds four release blockers; D-051 and D-052 are now owner-approved, D-053 and D-054 remain open:
+The refreshed source decision register adds four release blockers; all four are owner-approved (D-051 and D-052 on 2026-10-13/14, D-053 and D-054 on 2026-10-15), and their independent reviews remain open:
 
 | ID | Decision | State | Owner | Release blocker | Source recommendation |
 | --- | --- | --- | --- | --- | --- |
@@ -66,7 +66,7 @@ The refreshed source decision register adds four release blockers; D-051 and D-0
 | D-053 | Category Registry v1 Immutability | OWNER-APPROVED (2026-10-15) / INDEPENDENT REVIEW OPEN | Human Protocol/Product reviewer | YES | The 38 v1 IDs are frozen: they cannot change or silently expand; extensions need explicit versioning. |
 | D-054 | Language Tag Wire Grammar | OWNER-APPROVED (2026-10-15) / INDEPENDENT REVIEW OPEN | Human Protocol/I18N reviewer | YES | One tested RFC 5646 grammar, lowercase ASCII wire form (at most 35 characters, 16 entries) and canonical uniqueness. |
 
-D-052 is owner-approved as implemented (see the second set of 2026-10-14 decisions); D-053 and D-054 remain source recommendations, not approvals. D-001 remains approved by the owner's earlier explicit CC0 instruction.
+D-052 is owner-approved as implemented (see the second set of 2026-10-14 decisions); D-053 and D-054 are owner-approved as proposed (2026-10-15); their independent Protocol/Product and I18N reviews remain open. D-001 remains approved by the owner's earlier explicit CC0 instruction.
 
 PCP-001 records the current category/language implementation experiment and stricter
 draft acceptance. Tests do not approve these freeze decisions.
@@ -133,3 +133,45 @@ conversation. Each answer selected one listed option:
   decision. The recommendation offered with the question was to wait for a
   review; the owner chose to accept now.
 
+## Owner decisions on 2026-10-15
+
+Recorded from the owner's answers to explicit questions in the continuation
+conversation. Each answer selected one listed option; the quoted text is the
+option the owner chose:
+
+- **D-002:** "8.3+, 8.5 bevorzugt": PHP 8.3, 8.4 and 8.5 are supported, 8.5 is
+  preferred; CI runs all three.
+- **D-036 (rest):** a Node checkpoint counts toward a publisher's discoverability
+  only while it is at most 7 days old (300 s clock tolerance).
+- **D-034:** "Nichts (wie bisher)": no request or query logging.
+- **D-045:** "Letzten Snapshot weiter ausliefern": a Node whose store cannot be
+  read keeps serving its last published snapshot read-only.
+- **D-023:** "Textrelevanz-Stufen": ranking version 2, text-relevance tiers only.
+- **D-024:** "UTS-#39-Warnungen": look-alike name warnings from UTS #39 skeletons.
+- **D-025:** "Gruppierter Base32-Code": six groups of five Base32 characters.
+- **D-004:** "Wie umgesetzt freigeben".
+- **D-030/D-031:** "Sigstore keyless (GitHub)".
+- **D-037:** "Wie umgesetzt freigeben".
+- **D-053/D-054:** "Beides wie vorgeschlagen".
+
+## Owner decisions on 2026-10-22
+
+Recorded from the owner's answers to explicit questions in the continuation
+conversation. Each answer selected one listed option; the quoted text is the
+option the owner chose:
+
+- **Generation guard (D-052):** "Harter Schutz": a Node never signs a checkpoint
+  generation or descriptor revision it already signed (signing ledger beside the
+  key; `--adopt-signed-chain` to continue after restoring an old store).
+- **D-040:** "Wie umgesetzt freigeben": retention as implemented.
+- **D-041:** "Als Entwicklungs-Standard freigeben": the current budgets apply until
+  load tests with real Tor hosts confirm or change them.
+- **D-042:** "Wie umgesetzt freigeben": per-request Tor SOCKS isolation.
+- **D-003:** "Aktueller Tor Browser": current stable Tor Browser desktop and
+  Android at Standard and Safer; Safest falls back to the NoJS search.
+- **D-028:** "Paket + separates Bundle": the client ships in the runtime package
+  and as a separately attested static bundle.
+- **D-043:** "Keine Kompression".
+- **D-026:** "Aufnahmeprozess festlegen": the default source list stays empty until
+  Nodes pass the admission process. The process text itself (D-027) is a draft
+  awaiting the owner's confirmation.

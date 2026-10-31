@@ -1,4 +1,4 @@
-import { localSearch, metadataWarnings, pinNameMatcher, type AdultVisibility, type ClientView, type LocalPin } from './view-model.ts';
+import { loadedSourceOnions, localSearch, metadataWarnings, pinNameMatcher, type AdultVisibility, type ClientView, type LocalPin } from './view-model.ts';
 import { CATEGORY_IDS, CATEGORY_LABELS } from '../protocol/category-id.ts';
 import { groupLead, groupSimilarResults } from './result-groups.ts';
 import { importedPinMatcher, lookAlikeEntries, lookAlikePins, pinLookAlikeMatcher, sameNameEntries } from './look-alike-names.ts';
@@ -16,7 +16,7 @@ const storageKey='onion-service-discovery-pins-v1';
 const sourceStorageKey='onion-service-discovery-sources-v1';
 const visitorErrors:{[code:string]:string}={ADDRESS_INVALID:'Check the onion address: it must be a 56-character v3 address ending in .onion.',PUBLIC_KEY_INVALID:'Check the expected Node key: it starts with ed25519: followed by 43 characters.',EXPECTED_NODE_KEY_REQUIRED:'Enter the Node’s expected public key. Without it, a different Node could answer in its place.',SOURCE_ALREADY_CONFIGURED:'This Node is already listed by this Client Host.',SOURCE_ALREADY_ADDED:'You have already added this Node.',VISITOR_SOURCE_LIMIT:'You can add up to 8 Nodes. Remove one first.',VISITOR_SOURCES_DISABLED:'This Client Host does not load visitor-chosen Nodes.'};
 let configuredSourceCount=0; let renderedVisitorSources='';
-let lastOperation:'load'|'import'|null=null; let wasBusy=false; let pinStates=new Map<string,string>();
+let lastOperation:'load'|'import'|null=null; let wasBusy=false; let operationFailed=false; let pinStates=new Map<string,string>();
 const worker=new Worker(new URL('verifier-worker.js',document.baseURI),{type:'module'});
 let view:ClientView={services:[],pins:[],recordCount:0,pendingCount:0}; let shownViewVersion=-1; let synthetic=false; let busy=false; let pendingPinImport:ArrayBuffer|null=null;
 // Saved pins are overwritten only after they were restored: an empty first view or a failed
@@ -241,11 +241,12 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
       el('storage-status').textContent='Your saved pins could not be read ('+message.code+') and were left unchanged in this browser profile. New pins stay in this session; turning on “Remember pins” again replaces the saved ones.';
       return;
     }
-    operation(operationMessage(message.code)+' (code '+message.code+')'); return;
+    // A load or import that failed reports only its error, not a finished summary.
+    if(message.op==='load'||message.op==='import-records') operationFailed=wasBusy; operation(operationMessage(message.code)+' (code '+message.code+')'); return;
   }
   if(message.type==='pins-restored') {
     if(message.origin==='profile') { profilePins='restored'; persistPins(); return; }
-    operation('Pin import: '+message.added+' added, '+message.updated+' updated to a newer remembered revision, '+message.skipped+' skipped because they conflict with your existing pins, which were kept.'); return;
+    operation('Pin import: '+message.added+' added, '+message.updated+' updated (a newer remembered revision or a remembered conflict), '+message.skipped+' skipped because they conflict with your existing pins, which were kept.'); return;
   }
   if(message.type==='evidence') {
     // Two signed records by one Node key for the same position: reportable proof, without pins or searches.
@@ -260,7 +261,7 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
     return;
   }
   if(message.type==='pin-preview') {
-    const statusText:{[status:string]:string}={NEW:'New pin',SAME:'Already pinned; nothing changes',UPDATES_REVISION:'Already pinned; remembers a newer revision',CONFLICT_KEEPS_EXISTING:'Conflicts with your existing pin; yours is kept and this one is skipped'};
+    const statusText:{[status:string]:string}={NEW:'New pin',SAME:'Already pinned; nothing changes',MARKS_CONFLICT:'Already pinned; marks your pin as having seen conflicting signed history',UPDATES_REVISION:'Already pinned; remembers a newer revision',CONFLICT_KEEPS_EXISTING:'Conflicts with your existing pin; yours is kept and this one is skipped'};
     const preview=el('pin-preview'); preview.replaceChildren(); for(const {pin,status} of message.pins) { const item=text('div','','preview-pin'+(status==='CONFLICT_KEEPS_EXISTING'?' conflict':'')); item.append(text('strong',pin.label)); for(const warning of metadataWarnings(pin.label,'')) item.append(notice('attention',warning)); item.append(text('div',statusText[status]??status),text('div',pin.genesisKey,'key-value'),fingerprintLine(pin.genesisKey),text('div',pin.contextOnion,'onion-address')); preview.append(item); }
     // D-024: an imported label equal to or looking like a held pin's name under another key, right after the label.
     const resembles=importedPinMatcher(view.pins.map(row=>row.pin),view.services); message.pins.forEach(({pin},index)=>{ const match=resembles(pin); if(match!==undefined) preview.children[index]?.querySelector('strong')?.after(notice('danger',(match.same?'Same name as':'Name looks like')+' your pinned “'+match.label+'”, but a different identity key. Do not import it unless you chose this key yourself.')); });
@@ -269,7 +270,7 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
   el('client-startup-notice').hidden=true;
   const focus=focusKeyNow();
   // Status-only updates carry the same view: the language list, pins and results then stay as they are.
-  const loaded=message.sources.filter(source=>['COMPLETE','STALE','PARTIAL'].includes(source.status)).map(source=>source.onion);
+  const loaded=loadedSourceOnions(message.sources);
   const viewChanged=message.viewVersion!==shownViewVersion||message.synthetic!==synthetic||loaded.join(' ')!==loadedSources.join(' '); shownViewVersion=message.viewVersion;
   view=message.view; synthetic=message.synthetic; busy=message.busy; el('synthetic-notice').hidden=!synthetic;
   loadedSources=loaded;
@@ -283,7 +284,8 @@ worker.onmessage=(event:MessageEvent<WorkerMessage>)=>{
   renderVisitorSources(message.visitorSources); renderSources(message.sources); if(viewChanged) { renderPins(); renderResults(false); persistPins(); }
   // The status line changes when work starts or ends, not on every update, and says what actually happened.
   if(busy&&!wasBusy) operation(lastOperation==='load'?'Loading generic signed data. You can keep searching the existing local index.':'Checking the signatures of the imported records.');
-  if(!busy&&wasBusy) { const summary=finishedSummary(message.sources,message.witnessCount); operation(summary); announce(summary); }
+  if(!busy&&wasBusy&&!operationFailed) { const summary=finishedSummary(message.sources,message.witnessCount); operation(summary); announce(summary); }
+  if(!busy) operationFailed=false;
   wasBusy=busy;
   for(const row of view.pins) {
     const previous=pinStates.get(row.pin.genesisKey);

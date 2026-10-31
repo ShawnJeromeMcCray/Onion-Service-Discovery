@@ -3,7 +3,8 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import {browserCryptoProviders} from '../src/protocol/crypto-providers.ts';
 import {verifyRecord,verifyWire} from '../src/protocol/record-verifier.ts';
-import {buildView,pinIdentity,localSearch,metadataWarnings,pinNameMatcher} from '../src/client/view-model.ts';
+import {buildView,pinIdentity,localSearch,metadataWarnings,pinNameMatcher,loadedSourceOnions} from '../src/client/view-model.ts';
+import {operationMessage,sourceMessage} from '../src/client/messages.ts';
 import {parsePinBackup,serializePins,mergePins,classifyPinImport} from '../src/client/pins.ts';
 const crypto=browserCryptoProviders();const f=JSON.parse(readFileSync(new URL('../../protocol/test-vectors/signed-records.json',import.meta.url),'utf8'));const stories=f.stories;
 test('pins follow authorized rotation/migration and preserve a fork warning',async()=>{
@@ -58,6 +59,10 @@ test('importing pins keeps existing ones: new pins are added, conflicts skipped,
   assert.equal(classifyPinImport(pin,newer),'UPDATES_REVISION');assert.equal(classifyPinImport(pin,otherAnchor),'CONFLICT_KEEPS_EXISTING');
   assert.equal(classifyPinImport(pin,sameRevisionOtherHash),'CONFLICT_KEEPS_EXISTING');assert.equal(classifyPinImport(newer,pin),'SAME');
   const raised=mergePins([pin],[newer]);assert.deepEqual([raised.added,raised.updated,raised.skipped],[0,1,0]);assert.equal(raised.pins[0].highestRevision,pin.highestRevision+1);
+  // A remembered conflict alone is not 'nothing changes': the preview says so and the merge counts it as an update.
+  const conflicted={...pin,conflicted:true};assert.equal(classifyPinImport(pin,conflicted),'MARKS_CONFLICT');assert.equal(classifyPinImport(conflicted,pin),'SAME');assert.equal(classifyPinImport(conflicted,conflicted),'SAME');
+  const marked=mergePins([pin],[conflicted]);assert.deepEqual([marked.added,marked.updated,marked.skipped],[0,1,0]);assert.equal(marked.pins[0].conflicted,true);
+  const unchanged=mergePins([conflicted],[pin]);assert.deepEqual([unchanged.added,unchanged.updated,unchanged.skipped],[0,0,0]);assert.equal(unchanged.pins[0].conflicted,true);
   const kept=mergePins([pin],[otherAnchor,stranger]);assert.deepEqual([kept.added,kept.updated,kept.skipped],[1,0,1]);
   assert.equal(kept.pins.find(item=>item.genesisKey===pin.genesisKey).label,pin.label);
   assert.equal(mergePins([newer],[pin]).pins[0].highestRevision,newer.highestRevision);
@@ -111,4 +116,15 @@ test('the view says which source supplied which revision, the current key, earli
   const observation=JSON.parse(records.find(record=>record.type==='direct_observation').canonicalWire);
   const observed=buildView(records,[]).services[0];
   assert.deepEqual(observed.observers,[observation.node_identity_public_key]);assert.equal(observed.latestObservationAt,observation.observed_at);assert.equal(observed.observationClaims,1);
+});
+test('only fully verified sources count as loaded',()=>{
+  const sources=['COMPLETE','STALE','PARTIAL','FAILED','QUARANTINED','CANCELLED','LOADING'].map((status,index)=>({onion:'n'+index,status}));
+  assert.deepEqual(loadedSourceOnions(sources),['n0','n1']);
+});
+test('every code the worker can report has a specific message',()=>{
+  const fallbackSource=sourceMessage('UNKNOWN_CODE');const fallbackOperation=operationMessage('UNKNOWN_CODE');
+  for(const code of ['SOURCE_HISTORY_PROGRESS','SOURCE_EQUIVOCATION_PRESERVED','WITNESS_BUDGET_EXHAUSTED','SNAPSHOT_CHUNK_HASH_INVALID','SNAPSHOT_RECORD_ORDER_INVALID','SOURCE_RECORD_COUNT_INVALID','SOURCE_CHECKPOINT_BINDING_MISMATCH','DOCUMENT_TOO_LARGE','STREAMING_UNAVAILABLE','SOURCE_DESCRIPTOR_EQUIVOCATION','PROTOCOL_UNSUPPORTED','KEY_ROTATION_INVALID']) assert.notEqual(sourceMessage(code),fallbackSource,code);
+  for(const code of ['PUBLIC_KEY_INVALID','ADDRESS_INVALID','EVIDENCE_UNAVAILABLE','CLIENT_CONFIGURATION_INVALID','SOURCE_NOT_IN_HOST_ALLOWLIST','IMPORT_CANCELLED','HASH_INVALID','JSON_DUPLICATE_KEY']) assert.notEqual(operationMessage(code),fallbackOperation,code);
+  assert.match(sourceMessage('SNAPSHOT_CHUNK_HASH_INVALID'),/failed verification/);assert.match(sourceMessage('SOURCE_HISTORY_PROGRESS'),/next load continues/);
+  assert.doesNotMatch(sourceMessage('SOURCE_TIME_BUDGET_EXHAUSTED'),/90 seconds in total/);
 });

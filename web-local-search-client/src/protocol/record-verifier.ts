@@ -81,6 +81,8 @@ export async function verifyRecord(input: WireRecord, crypto: CryptoProviders, e
       sets.push(related);
       for (const onion of related) validateOnionAddress(requiredString(onion), crypto.sha3);
     }
+    // protocol/limits.json clearnet_url_bytes: the schema maxLength counts code points, the limit is UTF-8 bytes.
+    if (links.clearnet !== undefined) for (const url of requiredArray(links.clearnet)) if (new TextEncoder().encode(requiredString(url)).byteLength > 2048) throw new Error('SCHEMA_INVALID');
   }
   for (const field of ['capabilities', 'supported_protocol_versions']) {
     if (record[field] !== undefined) sets.push(requiredArray(record[field]));

@@ -47,9 +47,11 @@ offline Service signing and established release trust-root verification.
 D-001 CC0-1.0 is approved under the owner's unrestricted-use instruction. The
 owner also approved D-005 to D-018, D-029, D-051, D-052 and, on 2026-10-15,
 D-002, D-004, D-023, D-024, D-025, D-030, D-031, D-034, D-037, D-045, D-053,
-D-054 and more of D-036 (see the
-[decision register](governance/decision-register.md)); independent reviews and
-the other decisions remain open.
+D-054 and more of D-036, and on 2026-10-22 D-003, D-026 (admission process;
+default source list still empty), D-028, D-040, D-041 (development defaults),
+D-042, D-043 and the hard generation guard under D-052 (see the
+[decision register](governance/decision-register.md)); independent reviews, the
+D-027 admission draft and the other decisions remain open.
 
 ## Executed development evidence
 
@@ -66,7 +68,7 @@ the other decisions remain open.
 - The seeded differential malformed-input run rejects 1,024 inputs per language
   with matching error classifications. This is smoke fuzzing, not exhaustive
   or coverage-guided assurance.
-- Four controlled Chromium browser tests verify signed three-source import,
+- Fourteen controlled Chromium browser tests verify signed three-source import,
   query isolation, text-only hostile metadata, withdrawal, local pin handling,
   blocked profile storage, local category/adult filters and continued local search after a failed refresh.
   They are not Tor Browser desktop/Android evidence.
@@ -102,11 +104,13 @@ sink checks. Ten thousand rotated sources cannot reset the tested global quota.
 A separate 100,001-row presentation test preserves all grouped result identities;
 it does not measure verified signature import or live-network capacity.
 
-FilesystemStore format 2 obeys durable journal COMMIT before HEAD. Explicit
-format-1 migration preserves old accepted records/cursors, including interrupted
-legacy commits, and rejects corrupted objects before modification. See ADR 004.
-Category/language tightening has no automatic continuity-preserving migration;
-PCP-001 remains a release blocker. Security inventories cover 345 ASVS requirements
+FilesystemStore format 3 (format 2 plus bounded checkpoint retention, D-040)
+obeys durable journal COMMIT before HEAD. Explicit format-1 and format-2
+migrations preserve old accepted records/cursors, including interrupted legacy
+commits, and reject corrupted objects before modification. See ADR 004.
+Category/language tightening (D-053/D-054, owner-approved 2026-10-15) has no
+automatic continuity-preserving migration for pre-PCP-001 records; that migration
+and the independent review keep PCP-001 a release blocker. Security inventories cover 345 ASVS requirements
 and current OWASP/CWE classes but still require applicability/evidence review.
 
 Strict bounded parsing/canonicalization, six signed-record schemas and mature
@@ -152,9 +156,10 @@ operational-heavy multi-peer soak, broader capacity/profile evidence; independen
 release-builder review, production provenance acceptance policy, license review and production trust
 root/threshold ceremony. No verified production seed infrastructure is invented.
 
-The 318 extracted candidate requirements now have partial evidence pointers for
-283 blocks. These pointers are review starting points, not exhaustive MUST-level
-coverage or acceptance of the whole source section. Detailed traceability and
+The current requirement inventory (`requirements.json`, format 2) has 2,813
+source-hashed sections, all still REVIEW_REQUIRED; the earlier 318 candidate
+requirements with partial evidence pointers for 283 blocks are historical. Neither
+is exhaustive MUST-level coverage or acceptance of a whole source section. Detailed traceability and
 standards/freeze review remain open. See the [draft public handbook](protocol/handbook.md),
 [operator runbook](operations/deployment-and-recovery.md), [CLI contract](operations/cli.md)
 and [well-known registration preparation](standards/well-known-registration-draft.md).

@@ -1,7 +1,7 @@
 import { assertVerifiedRecord, requiredString, type VerifiedRecord } from '../protocol/record-verifier.ts';
 import { parseStrictJson } from '../protocol/strict-json.ts';
 
-/** Session-only authenticated Node evidence. Limits fail closed, never evict proofs. */
+/** Session-only authenticated Node evidence. Limits fail closed; fork proofs are never evicted. */
 export class SourceWitnesses {
   #records=new Map<string,VerifiedRecord>();
   #positions=new Map<string,string>();
@@ -14,6 +14,13 @@ export class SourceWitnesses {
   }
   get size():number { return this.#records.size+this.#forks.size; }
   clear():void { this.#records.clear();this.#positions.clear();this.#forks.clear(); }
+  /** Drops a Node's ordinary witnesses below its accepted anchor, as the PHP Node's LocalMaintenance does: they no longer detect anything. */
+  retain(nodeKey:string,generation:number,descriptorRevision:number):void {
+    for(const [position,hash] of this.#positions){
+      const [type,key,sequence]=position.split('|');
+      if(key===nodeKey&&Number(sequence)<(type==='snapshot_descriptor'?generation:descriptorRevision)){this.#positions.delete(position);this.#records.delete(hash);}
+    }
+  }
   forkEvidence(nodeKey:string):readonly VerifiedRecord[] { return [...(this.#forks.get(nodeKey)??[])]; }
   observe(evidence:VerifiedRecord):boolean {
     assertVerifiedRecord(evidence);
