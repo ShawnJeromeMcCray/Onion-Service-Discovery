@@ -39,7 +39,8 @@ final readonly class CandidateAnnouncement
      */
     private function response(int $status, string $code, array $extra = []): array
     {
-        $body = json_encode(['status' => $code], JSON_THROW_ON_ERROR);
+        // One shape per outcome, as on every other route: {"status":...} for the accepted hint only, {"error":CODE} otherwise.
+        $body = json_encode([$status === 202 ? 'status' : 'error' => $code], JSON_THROW_ON_ERROR);
         return ['status' => $status, 'headers' => $extra + ['Content-Type' => 'application/json; charset=utf-8', 'Content-Length' => (string)strlen($body), 'Cache-Control' => 'no-store', 'X-Content-Type-Options' => 'nosniff', 'Referrer-Policy' => 'no-referrer', 'Content-Security-Policy' => "default-src 'none'; frame-ancestors 'none'"], 'body' => $body];
     }
 }

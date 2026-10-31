@@ -53,12 +53,12 @@ export function parseStrictValue(bytes: Uint8Array, maxBytes = 16384, outerArray
           whitespace();
           if (source[cursor] !== '"') return fail();
           const key = string();
-          if (key.includes('\0')) return fail('ENCODING_INVALID');
           if (keys.has(key)) return fail('JSON_DUPLICATE_KEY');
           if (keys.size >= 128) return fail('SCHEMA_INVALID');
           keys.add(key);
           whitespace();
           if (source[cursor++] !== ':') return fail();
+          if (key.includes('\0')) return fail('ENCODING_INVALID');
           object[key] = value(depth + 1);
           whitespace();
           const separator = source[cursor++];

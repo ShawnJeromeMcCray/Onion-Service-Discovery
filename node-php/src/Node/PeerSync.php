@@ -28,6 +28,11 @@ final class PeerSync
     /** Every Node keeps at least its newest 64 checkpoints (LocalMaintenance keeps 256); an older missing one is a gap, not a fault. */
     public const SERVED_CHECKPOINTS = 64;
     private const CHUNKS_PER_STEP = 4;
+    /**
+     * Longer than any wait this class schedules (a lease of 300 s, a retry of at most 86400 + 300 s): a next attempt or
+     * lease further ahead was written while the clock ran ahead, so it is due now instead of when the clock catches up.
+     */
+    public const SCHEDULE_HORIZON = 172800;
     private int $requests = 0;
     public function __construct(private readonly StorageBackend $store, private readonly RecordVerifier $verifier, private readonly TorTransport $transport, private readonly bool $discoverServices = false) {}
     /** @return array<string,mixed> */
@@ -38,7 +43,8 @@ final class PeerSync
         $peer = $this->store->transaction(static function (StorageTransaction $tx) use ($onion, $now, $claim): ?array {
             $peer = $tx->get('peers', $onion->hostname);
             if ($peer === null) { throw new ProtocolException('PEER_NOT_CONFIGURED'); }
-            if (in_array($peer['state'], ['QUARANTINED','DISABLED'], true) || $peer['next_attempt'] > $now || $peer['lease_until'] > $now) { return null; }
+            $waits = static fn (int $until): bool => $until > $now && $until <= $now + self::SCHEDULE_HORIZON;
+            if (in_array($peer['state'], ['QUARANTINED','DISABLED'], true) || $waits($peer['next_attempt']) || $waits($peer['lease_until'])) { return null; }
             $peer['claim'] = $claim; $peer['lease_until'] = $now + 300; $tx->set('peers', $onion->hostname, $peer); return $peer;
         });
         if ($peer === null) { return ['status' => 'IDLE']; }

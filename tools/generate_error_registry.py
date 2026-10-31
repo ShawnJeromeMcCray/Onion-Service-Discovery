@@ -16,8 +16,11 @@ THROW = re.compile(r"new \\?(ProtocolException|StorageException|TransportExcepti
 LITERAL = re.compile(r"'([A-Z][A-Z0-9_]{2,})'")
 RESPONSE = re.compile(r"""(?:'error'\s*=>\s*'|"error":\s*")([A-Z][A-Z0-9_]{2,})""")
 DOCTOR = re.compile(r"\$(failures|warnings)\[\]\s*=\s*'([A-Z][A-Z0-9_]{2,})'")
-# The strict JSON parsers raise through a local fail('CODE') helper, so a THROW pattern alone misses them.
-FAIL = re.compile(r"(?:self::|\b)fail\(\s*'([A-Z][A-Z0-9_]{2,})'")
+# The strict JSON parsers raise through a local fail('CODE') helper, so a THROW pattern alone misses them;
+# its argument may choose the code in a ternary, so every literal inside the call counts.
+FAIL = re.compile(r"(?:self::|\b)fail\(([^;]*?)\)\s*[;}]")
+# Route helpers that answer with a status and a code, such as response(429, 'ADMISSION_DEFERRED').
+RESPONSE_CALL = re.compile(r"response\(\s*[45][0-9]{2}\s*,\s*'([A-Z][A-Z0-9_]{2,})'")
 CLI_LITERAL_EXITS = {'RUNTIME_DEPENDENCIES_MISSING': '3', 'INTERNAL_ERROR': '8'}
 EXITS = {'StorageException': '4', 'SignerException': '4', 'TransportException': '5', 'ProtocolException': '3', 'InvalidArgumentException': '3'}
 COMPONENTS = {
@@ -34,10 +37,16 @@ DESCRIPTIONS = {
     'COMMAND_UNKNOWN': 'help knows no command of that name; run help without arguments for the list.',
     'CONFIGURATION_INVALID': 'The configuration file has a missing, unknown or wrongly typed key; see the configuration reference.',
     'CONFIGURATION_UNAVAILABLE': 'The configuration file is missing, unreadable, a symlink or larger than 16 KiB.',
-    'CONTENT_TYPE_REJECTED': 'A Node or Service answered without application/json; nothing was verified.',
+    'CONTENT_TYPE_REJECTED': 'A Node or Service answered without application/json, so nothing was verified; or, from the announcement route (HTTP 415), the hint was not sent as application/json.',
+    'ADMISSION_DEFERRED': 'The announcement route answered 429: this Node’s hourly candidate admission budget (overall or for this source bucket) is used up, so the hint was not queued; retry after Retry-After (one hour). Publishers report it as ANNOUNCEMENT_RATE_LIMITED.',
+    'JSON_INVALID': 'The input is not valid JSON (a syntax error, trailing data, or a value JSON does not allow), so nothing in it was used.',
+    'NODE_DESCRIPTOR_MISMATCH': 'doctor failure: the store’s signed Node descriptor does not match this installation: its Onion differs from node.onion, its key from the Node key file, or its hash from the stored pointer. Check that the configuration, key and store belong together.',
+    'PHP_EXTENSION_MISSING': 'doctor failure: a required PHP extension (json, sodium, iconv or curl) is not loaded for this PHP; install and enable it for the CLI and the web server’s PHP-FPM.',
+    'PUBLISHER_MANIFEST_NOT_VALID': 'doctor failure: publishing is on, but the installed public Manifest is missing or not valid for node.onion (see manifest_state); install a signed Manifest with manifest:install, then run publisher:status.',
+    'RUNTIME_NOT_64_BIT': 'doctor failure: this PHP is not a 64-bit build; OSD needs 64-bit integers for sequences, sizes and times. Install a 64-bit PHP.',
     'DOCUMENT_TOO_LARGE': 'An input file exceeds the limit for its record type.',
     'EVIDENCE_WRITE_FAILED': 'Saved status evidence could not be written beside the configuration; check directory permissions.',
-    'ANNOUNCEMENT_RATE_LIMITED': 'The Node answered 429: its shared announcement budget is exhausted. The bounded schedule retries no earlier than a day later.',
+    'ANNOUNCEMENT_RATE_LIMITED': 'The Node answered 429: its shared request budget is exhausted or it deferred admission of new hints (ADMISSION_DEFERRED). The bounded schedule retries no earlier than a day later.',
     'ANNOUNCEMENT_RESPONSE_INVALID': 'The Node did not answer with exactly HINT_RECEIVED_UNCONFIRMED; no other claim is accepted as an announcement result.',
     'PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT': 'doctor warning: a Node in the last publisher check contradicted the checkpoint it served before (D-052); see the status page.',
     'PUBLISHER_NODES_NOT_CONFIGURED': 'No --node was given and the configuration has no publisher_nodes; add the Discovery Nodes you chose, each with its independently obtained key.',
@@ -115,7 +124,7 @@ DESCRIPTIONS = {
     'VISITOR_SOURCES_DISABLED': 'This Client Host does not relay visitor-chosen Nodes.',
     'VISITOR_SOURCE_LIMIT': 'At most 8 visitor-chosen Nodes can be added.',
     'WORK_BUDGET_EXHAUSTED': 'The input exceeds a bounded work limit and was refused.',
-    'FILESYSTEM_FORMAT_MIGRATION_REQUIRED': 'doctor: the filesystem store uses format 1; plan storage:migrate.',
+    'FILESYSTEM_FORMAT_MIGRATION_REQUIRED': 'doctor: the filesystem store uses format 1; plan storage:migrate (a format-2 store only lacks pruning, see STORAGE_PRUNING_MIGRATION_REQUIRED).',
     'NODE_KEY_MISSING_OR_UNSAFE': 'doctor: the Node key file is missing or readable by others (needs 0600).',
     'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX': 'doctor: this PHP version is newer than the tested 8.3, 8.4 and 8.5; it may work, but no test has run on it.',
     'SERVER_SEARCH_ENABLED_QUERIES_SENT_TO_NODE': 'doctor: server search is on, so search terms reach this Node.',
@@ -153,7 +162,7 @@ DESCRIPTIONS = {
     'DISCOVERY_DISABLED': 'Service discovery is off for this configuration (features.discover_services is false or the role is client-host), so candidate:add, candidate:retry and node:work-one refuse to run; use a node or combined configuration with it enabled.',
     'ENCODING_INVALID': 'JSON input was rejected for its encoding: a byte order mark, invalid UTF-8, a lone surrogate or a NUL character in a property name; save it as UTF-8 without a byte order mark.',
     'ERROR_CODE_INVALID': 'An internal check failed: a candidate check ended with an error that is not a plain uppercase code, so the failure could not be recorded on the candidate.',
-    'EVIDENCE_CHANGED_RETRY': 'Other evidence was committed to the store while node:init, node:snapshot or node:work-one prepared its result, so that result was not saved (node:work-one backs off and retries the candidate); run node:init or node:snapshot again.',
+    'EVIDENCE_CHANGED_RETRY': 'Other evidence was committed to the store while node:init, node:snapshot or node:work-one prepared its result, so that result was not saved (node:work-one backs off and retries the candidate), or node:maintain kept pruning records while storage:backup, storage:export or storage:migrate-backend copied the store (three attempts); run the command again.',
     'EVIDENCE_PATH_UNSAFE': 'The saved status evidence file beside the configuration (NAME.discoverability.json) is a symlink, so --save-status and --if-due runs refused to write it; remove the symlink.',
     'EVIDENCE_TOO_LARGE': 'Saving this status evidence would make the evidence file beside the configuration larger than 16 KiB, so the update was not saved.',
     'EXISTING_MANIFEST_INVALID': 'The Manifest installed at WEBROOT/.well-known/onion-service-discovery.json is missing (for history commands), larger than 16 KiB, unreadable or not a Service Manifest; check it with manifest:verify.',
@@ -166,6 +175,7 @@ DESCRIPTIONS = {
     'FORKED': 'Not an error: FORKED is the state of an identity, search result or pin when two different signed Manifests share a revision number or rotation or migration proofs conflict, so no current Manifest is selected.',
     'HASH_INVALID': 'A value that must be a content hash (for example a checkpoint or chunk hash a Node served) is not sha256: followed by 64 lowercase hex digits.',
     'HEADERS_TOO_LARGE': 'A Node or Service answered with more than 8 KiB of response headers (or, for the PHP transport, a header line over 2 KiB), so nothing from it was used.',
+    'IMPORT_CANCELLED': 'You cancelled a record import while its signatures were checked, so nothing from the file was added.',
     'IMPORT_FORMAT_INVALID': 'The imported file is neither a single signed record nor a record bundle (bundle_version 1 with a records list), so nothing was imported.',
     'IMPORT_REQUIRES_EMPTY_STAGING_STORE': 'storage:import writes only into a new, empty store, and the given staging store already holds records or changes; give a new staging path.',
     'INPUT_FILE_UNAVAILABLE': 'An input file is missing, not a regular file, unreadable or given as a URL; check the path and read permission.',
@@ -205,8 +215,8 @@ DESCRIPTIONS = {
     'PUBLIC_MANIFEST_WRITE_FAILED': 'The publisher lock, the new Manifest or the history bundle could not be created, written, synced or renamed in WEBROOT/.well-known; check that the installing user can write there.',
     'RATE_LIMIT_CONFIGURATION_INVALID': 'A request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is a symlink or its limits are invalid, so requests fail with HTTP 503; remove the symlink.',
     'PUBLISHED_STATE_STALE': 'doctor warning: the copy of the published state that the export directory keeps for degraded serving (D-045) is missing or does not match the store’s published snapshot and Node descriptor; node:snapshot rewrites it, unless the copy names a newer generation than the store (a restored older backup): then follow the incident runbook, section 4, first.',
-    'RATE_LIMIT_CORRUPT': 'A request budget file in the export directory is larger than 1 KiB or holds no valid budget state, so requests fail with HTTP 503; delete the file; it is recreated with a full budget.',
-    'RATE_LIMIT_UNAVAILABLE': 'A request budget file in the export directory cannot be created or written or is open to group or others, so requests fail with HTTP 503; let the web server user own it with mode 0600.',
+    'RATE_LIMIT_CORRUPT': 'doctor warning: a request budget file in the export directory (.request-budget, .relay-budget or .visitor-relay-budget) is larger than 1 KiB or holds no valid budget state, for example after a crash or a full disk. Requests continue: the next one counts it as a full budget and rewrites it; check free disk space.',
+    'RATE_LIMIT_UNAVAILABLE': 'A request budget file in the export directory cannot be created or written or is open to group or others, so requests fail with HTTP 503 (doctor warns); let the web server user own it with mode 0600.',
     'REQUEST_INVALID': 'The request is malformed (HTTP 400): a path over 256 bytes or with spaces or control characters, an invalid Onion address in the path, or an announcement that is not the exact hint JSON.',
     'REQUEST_TOO_LARGE': 'An announcement request declared or sent more than 256 bytes, or its Content-Length is malformed (HTTP 413).',
     'REVISION_DOWNGRADE': 'A Service or source served an older Manifest revision than one already known for that identity (node:work-one quarantines the candidate; a browser pin keeps the newer revision); load other sources.',
@@ -222,6 +232,7 @@ DESCRIPTIONS = {
     'SERVICE_INDEX_NOT_READY': 'This Node has not yet published a snapshot with the current (version 2) service lookup index, so service lookups answer 503; the operator runs node:snapshot.',
     'SIGNED_CHAIN_AHEAD_OF_STORE': 'This Node key already signed a newer snapshot checkpoint than the store holds (typically a restored older backup), so signing stops instead of publishing a conflicting generation that peers would quarantine; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain.',
     'SIGNED_DESCRIPTOR_AHEAD_OF_STORE': 'This Node key already signed a newer Node descriptor revision than the store holds (typically a restored older backup), so signing stops; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain.',
+    'SIGNED_CHAIN_INCOMPLETE': 'node:snapshot --adopt-signed-chain found the checkpoint the signing ledger names, but not all of the newest 64 checkpoints of the chain below it (store or export directory), so peers anchored on one of them could not follow, and changed nothing; restore those checkpoint files into the export directory, or restore a newer backup of the store.',
     'SIGNED_CHAIN_UNRECOVERABLE': 'node:snapshot --adopt-signed-chain cannot find the checkpoint or Node descriptor the signing ledger names in the export directory, or it is not exactly what this key signed; restore a newer backup of the store instead.',
     'SIGNING_LEDGER_INVALID': 'The signing ledger beside the Node key (KEY_PATH.signed) is damaged, a symlink, open to group or others or belongs to another key, so signing stops; it is never replaced silently. See the incident runbook.',
     'SIGNING_LEDGER_UNAVAILABLE': 'The signing ledger beside the Node key could not be locked, read or written; the Node key directory must be a real directory the worker may write and not writable by others.',
@@ -236,8 +247,8 @@ DESCRIPTIONS = {
     'SOURCE_CANCELLED': 'The visitor cancelled loading, so nothing from the Node being loaded was used and Nodes not yet started are shown as cancelled.',
     'SOURCE_DESCRIPTOR_EQUIVOCATION': 'The Node signed two different Node descriptors with the same revision, so the browser set its data aside and kept both signed records as evidence; save them with Save the conflicting signed records.',
     'SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE': 'The Node’s newer descriptor does not connect revision by revision to the one seen before through the descriptors in its snapshot, so its data from this load was not used.',
-    'SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK': 'The Node served an older Node descriptor than this browser saw before, or a different one with the same revision, so its data was set aside.',
-    'SOURCE_EQUIVOCATION_PRESERVED': 'This browser already holds proof that the Node signed two conflicting states, so the Node was not loaded again and the evidence was kept.',
+    'SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK': 'The Node served an older Node descriptor than this browser saw before, so its data was set aside. A different descriptor with the same revision is SOURCE_DESCRIPTOR_EQUIVOCATION.',
+    'SOURCE_EQUIVOCATION_PRESERVED': 'This browser already holds proof that the Node signed two conflicting states or descriptors, so the Node was not loaded again and the evidence was kept.',
     'SOURCE_GROUP_ASSIGNMENTS_INCONSISTENT': 'doctor warning: active peers that share one Node key are in different local source groups, or only some of them have a group; give them one group with peers:group.',
     'SOURCE_GROUP_INVALID': 'A source group name is not 1 to 32 lowercase letters, digits or inner hyphens, or a stored peer has an invalid group or Node key.',
     'SOURCE_HTTP_STATUS_REJECTED': 'The Node or the Client Host relay answered with an HTTP status other than 200, so nothing from it was used; try again later.',
@@ -245,7 +256,7 @@ DESCRIPTIONS = {
     'SOURCE_NODE_BINDING_MISMATCH': 'The record served at the Node’s node route is not a Node descriptor for the Onion address that was loaded, so nothing from that Node was used.',
     'SOURCE_RECORD_COUNT_INVALID': 'The Node’s snapshot chunks held a different number of records than its signed checkpoint declares (the browser discards the load; a Node worker quarantines the peer).',
     'SOURCE_STATE_INVALID': 'The Node’s state answer has no valid sha256 checkpoint hash, so service:membership rejected that Node’s evidence.',
-    'SOURCE_TIME_BUDGET_EXHAUSTED': 'Downloads from this Node took more than the browser’s 90 seconds of network time for one source, so nothing partial was used; try again later. Signature checking does not count against this limit.',
+    'SOURCE_TIME_BUDGET_EXHAUSTED': 'Downloads from this Node took longer than the time allowed for its data (90 seconds of network time plus one second per 20 KB of declared chunk bytes, at most 30 minutes), also when that time ran out during a download, so nothing partial was used; try again later. Signature checking does not count against this limit.',
     'SOURCE_WORK_BUDGET_EXHAUSTED': 'The Node’s signed snapshot exceeds the checking limits (over 10000 records or 32 MiB of chunks, or over 64 chunks in the browser), so the browser discards the load and a Node worker quarantines the peer.',
     'SQLITE_DRIVER_UNAVAILABLE': 'The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend.',
     'STORAGE_ADDRESS_INVALID': 'A record or export address is not sha256: followed by 64 lowercase hex digits, or an operational table or key name is invalid, so the store refused the request.',
@@ -266,7 +277,7 @@ DESCRIPTIONS = {
     'TRANSPORT_UNAVAILABLE': 'PHP curl could not prepare the request through Tor (its handle or a required option could not be set), so nothing was sent; check the curl extension of this PHP runtime.',
     'UNVERIFIED_RECORD': 'An internal browser check failed: a record reached a step that accepts only records this page verified itself, so it was refused.',
     'WEBROOT_INVALID': 'The webroot is a URL, a symlink or not a directory, or its .well-known directory is a symlink, missing (history:install) or cannot be created (manifest:install).',
-    'WITNESS_BUDGET_EXHAUSTED': 'The browser’s memory for Node evidence is full (512 signed checkpoints and descriptors, or fork evidence for 16 Nodes) and never drops proofs, so further Node data was refused; save any evidence you need, then reload the page.',
+    'WITNESS_BUDGET_EXHAUSTED': 'The browser’s memory for Node evidence is full (512 signed checkpoints and descriptors, or fork evidence for 16 Nodes), so further Node data was refused. Witnesses below a Node’s accepted anchor are dropped after each successful load and fork proofs never are, so this takes a very long history walk or many Nodes; save any evidence you need, then reload the page.',
     'WITNESS_CONFIGURATION_INVALID': 'An internal browser check failed: the memory for Node evidence was created with limits outside 1 to 512 records or 1 to 16 forks.',
     'WITNESS_TYPE_INVALID': 'An internal browser check failed: only signed checkpoints and Node descriptors can be kept as Node evidence, and another record type was offered.',
 }
@@ -282,8 +293,8 @@ def collect() -> dict:
             component = next(name for prefix, name in COMPONENTS.items() if relative.startswith(prefix))
             text = path.read_text(encoding='utf-8')
             found = [(exception, code) for exception, arguments in THROW.findall(text) for code in LITERAL.findall(arguments)]
-            found += [('InvalidArgumentException' if path.suffix == '.php' else 'Error', code) for code in FAIL.findall(text)]
-            found += [('HTTP', code) for code in RESPONSE.findall(text)]
+            found += [('InvalidArgumentException' if path.suffix == '.php' else 'Error', code) for arguments in FAIL.findall(text) for code in LITERAL.findall(arguments)]
+            found += [('HTTP', code) for code in RESPONSE.findall(text) + RESPONSE_CALL.findall(text)]
             found += [('doctor-' + kind, code) for kind, code in DOCTOR.findall(text)]
             for exception, code in found:
                 entry = codes.setdefault(code, {'components': set(), 'cli_exit': set()})

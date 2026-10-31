@@ -76,6 +76,8 @@ def main() -> int:
         ('php-storage-contract', php + ['node-php/tests/storage-conformance.php'], ROOT),
         ('php-storage-backup', php + ['node-php/tests/storage-backup.php'], ROOT),
         ('php-signing-ledger', php + ['node-php/tests/signing-ledger.php'], ROOT),
+        ('php-signing-ledger-recovery', php + ['node-php/tests/signing-ledger-recovery.php'], ROOT),
+        ('php-storage-maintenance-races', php + ['node-php/tests/storage-maintenance-races.php'], ROOT),
         ('php-storage-archive', php + ['node-php/tests/storage-archive.php'], ROOT),
         ('php-storage-crash-recovery', php + ['node-php/tests/storage-crash.php'], ROOT),
         ('php-storage-format-migration', php + ['node-php/tests/storage-format-migration.php'], ROOT),

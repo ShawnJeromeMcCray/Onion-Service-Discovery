@@ -1,5 +1,12 @@
 # Production completion continuation review
 
+> **Historical snapshot (2026-10-13).** This review records the state at that date
+> and is not updated. Later work changed several statements below: the online
+> publisher check now also evaluates checkpoint freshness (D-036, 7 days), and the
+> owner approved further decisions on 2026-10-14, 2026-10-15 and 2026-10-22. For
+> the current state see the [decision register](governance/decision-register.md),
+> the [release gates](release-gates.json) and [project status](getting-started/project-status.md).
+
 Status: development changes tested; the requested Production Stable outcome is
 not complete and is not approved.
 Date: 2026-10-13

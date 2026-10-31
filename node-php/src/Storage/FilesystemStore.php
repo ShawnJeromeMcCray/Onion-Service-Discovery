@@ -123,7 +123,8 @@ final class FilesystemStore implements StorageBackend
                 throw new StorageException('STORAGE_BUDGET_EXHAUSTED');
             }
             $incomingBytes = strlen($checkpointBytes) + array_sum(array_map('strlen', $transaction->newObjects())) + 4096;
-            if ($this->diskUsage() + $incomingBytes > $this->limits->maxBytes) {
+            // At the byte budget only a transaction that removes (bounded retention) may still commit: it frees space.
+            if (!$transaction->removalOnly() && $this->diskUsage() + $incomingBytes > $this->limits->maxBytes) {
                 throw new StorageException('STORAGE_BUDGET_EXHAUSTED');
             }
             foreach ($transaction->newObjects() as $hash => $bytes) {
@@ -197,6 +198,8 @@ final class FilesystemStore implements StorageBackend
     }
 
     /**
+     * Verifies every held object. A writable store (storage:check) also removes object files a crash during
+     * pruning left behind (reclaimOrphans).
      * @return array<array-key, mixed>
      */
     public function integrityCheck(): array
@@ -210,8 +213,41 @@ final class FilesystemStore implements StorageBackend
                     throw new StorageException('STORAGE_CORRUPT');
                 }
             }
-            return ['backend' => 'filesystem', 'backend_format' => $this->formatVersion, 'storage_schema' => $state['storage_schema'], 'generation' => $state['generation'], 'records' => count($state['records']), 'pruned_records' => $state['pruned_records'] ?? 0, 'integrity' => 'PASS'];
+            return ['backend' => 'filesystem', 'backend_format' => $this->formatVersion, 'storage_schema' => $state['storage_schema'], 'generation' => $state['generation'], 'records' => count($state['records']), 'pruned_records' => $state['pruned_records'] ?? 0, 'integrity' => 'PASS']
+                + ($this->readOnly ? [] : ['orphaned_objects_removed' => $this->reclaimOrphans()]);
         });
+    }
+
+    /**
+     * Under the writer lock, after recover(): deletes object files (and stale temporary files) under objects/ that
+     * no checkpoint file names. A crash between HEAD and the unlinks of a pruning commit leaves such files. No
+     * transaction is running (the lock), recover() rolled a committed but unpublished HEAD forward and aborted
+     * the rest, and HEAD's checkpoint and the previous one (which readers of the last generation may still use)
+     * both stay in checkpoints/, so only objects no reader can reach go. More than 4 checkpoint files (a crash
+     * before their cleanup), or one that does not verify, keeps everything.
+     */
+    private function reclaimOrphans(): int
+    {
+        $referenced = []; $files = 0;
+        foreach (new \DirectoryIterator($this->root . '/checkpoints') as $file) {
+            if ($file->isDot() || preg_match('/\A([0-9a-f]{64})\.json\z/D', $file->getFilename(), $match) !== 1) { continue; }
+            if ($file->isLink() || !$file->isFile() || ++$files > 4) { return 0; }
+            $bytes = $this->readBounded($file->getPathname(), $this->limits->maxCheckpointBytes);
+            if (!hash_equals($match[1], hash('sha256', $bytes))) { return 0; }
+            $checkpoint = StorageJson::decode($bytes, $this->limits->maxCheckpointBytes); StorageTransaction::validateState($checkpoint, $this->limits);
+            foreach ($checkpoint['records'] as $metadata) { $referenced[$metadata['object_hash'] . '.json'] = true; }
+        }
+        $removed = 0; $scanned = 0;
+        foreach (new \DirectoryIterator($this->root . '/objects') as $directory) {
+            if ($directory->isDot() || $directory->isLink() || !$directory->isDir() || preg_match('/\A[0-9a-f]{2}\z/D', $directory->getFilename()) !== 1) { continue; }
+            foreach (new \DirectoryIterator($directory->getPathname()) as $file) {
+                if ($file->isDot() || $file->isLink() || !$file->isFile() || ++$scanned > $this->limits->maxRecords * 4 + 100000) { continue; }
+                $name = $file->getFilename();
+                $orphan = (preg_match('/\A[0-9a-f]{64}\.json\z/D', $name) === 1 && str_starts_with($name, $directory->getFilename()) && !isset($referenced[$name])) || preg_match('/\A\.tmp-[0-9a-f]{32}\z/D', $name) === 1;
+                if ($orphan) { if (!unlink($file->getPathname())) { throw new StorageException('STORAGE_ERROR'); } ++$removed; }
+            }
+        }
+        return $removed;
     }
 
     /**
@@ -514,7 +550,10 @@ final class FilesystemStore implements StorageBackend
 
     private function fault(string $stage): void { if ($this->faultHook !== null) { ($this->faultHook)($stage); } }
 
-    private function diskUsage(): int
+    /** Bytes under the store directory, for StorageTransaction::usage() (beyond the budget too). */
+    public function diskBytes(): int { return $this->diskUsage(false); }
+
+    private function diskUsage(bool $bounded = true): int
     {
         $bytes = 0;
         $files = 0;
@@ -526,7 +565,7 @@ final class FilesystemStore implements StorageBackend
             if ($file->isFile()) {
                 $bytes += $file->getSize();
             }
-            if ($bytes > $this->limits->maxBytes) {
+            if ($bounded && $bytes > $this->limits->maxBytes) {
                 throw new StorageException('STORAGE_BUDGET_EXHAUSTED');
             }
         }

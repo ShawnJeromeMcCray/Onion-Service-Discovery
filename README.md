@@ -102,7 +102,7 @@ The current code includes three-language protocol/membership vectors, bounded
 Tor transport, crash and disk-full recovery tests, resumable snapshot ancestry,
 and browser privacy checks. Actual signature-verified Tor Browser tests pass over
 an **isolated real private Tor network**, including a JavaScript-disabled profile.
-Public Tor, Android and desktop Normal/Safer/Safest certification remain open.
+Public Tor, Android and desktop Standard/Safer/Safest certification remain open.
 
 See [the evidence map and comparison with the October 2026 assessment](docs/getting-started/project-status.md),
 [measured capacity](docs/performance/README.md), [deployment and recovery](docs/operations/deployment-and-recovery.md),

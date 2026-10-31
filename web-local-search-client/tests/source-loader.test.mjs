@@ -174,3 +174,49 @@ test('cancel while signatures are checked stops the load',async()=>{
   await assert.rejects(new SourceLoader(cancelling).load(pick(served.sources[0]),undefined,controller.signal),{message:'SOURCE_CANCELLED'});
  }finally{served.restore();}
 });
+
+test('a second signed Node descriptor at the same revision is kept as evidence and stays set aside',async()=>{
+ const fixture=await setup(); const loader=new SourceLoader(crypto); const witnesses=new SourceWitnesses(); let ledger;
+ const observe=(value,evidence)=>{
+  const conflict=witnesses.observe(evidence); value.equivocated ||= conflict; ledger=structuredClone(value);
+  if(value.equivocated)throw new Error(evidence.type==='node_descriptor'?'SOURCE_DESCRIPTOR_EQUIVOCATION':'SOURCE_CHECKPOINT_EQUIVOCATION');
+ };
+ const original=source.node_descriptor; const fork=structuredClone(original); fork.software.version+='-fork';
+ fork.signature='ed25519sig:'+Buffer.from(ed25519.sign(signedMessage(fork),seed)).toString('base64url');
+ try{
+  ledger=(await loader.load(selection,undefined,new AbortController().signal,observe)).ledger;
+  source.node_descriptor=fork;
+  await assert.rejects(loader.load(selection,ledger,new AbortController().signal,observe),{message:'SOURCE_DESCRIPTOR_EQUIVOCATION'});
+  assert.equal(ledger.equivocated,true);
+  assert.deepEqual(witnesses.forkEvidence(selection.expectedKey).map(record=>record.contentHash),[await recordHash(original,crypto.subtle),await recordHash(fork,crypto.subtle)]);
+  // Serving the original again does not clear it: the conflict is sticky like a checkpoint fork.
+  source.node_descriptor=original;
+  await assert.rejects(loader.load(selection,ledger,new AbortController().signal,observe),{message:'SOURCE_EQUIVOCATION_PRESERVED'});
+  // Without the witness store, the ledger alone still detects the same-revision conflict.
+  source.node_descriptor=fork; const bare=(await new SourceLoader(crypto).load(selection,undefined,new AbortController().signal)).ledger; source.node_descriptor=original;
+  await assert.rejects(new SourceLoader(crypto).load(selection,bare,new AbortController().signal),{message:'SOURCE_DESCRIPTOR_EQUIVOCATION'});
+ }finally{source.node_descriptor=original; fixture.restore();}
+});
+
+test('hourly refreshes never fill the witness store: witnesses below the accepted anchor are dropped',async()=>{
+ const fixture=await setup(); const loader=new SourceLoader(crypto); const witnesses=new SourceWitnesses(4); let ledger;
+ const observe=(value,evidence)=>{ value.equivocated ||= witnesses.observe(evidence); ledger=structuredClone(value); };
+ try{
+  for(let generation=1;generation<=37;generation++){
+   fixture.setGeneration(generation);
+   ledger=(await loader.load(selection,ledger,new AbortController().signal,observe)).ledger;
+   witnesses.retain(ledger.nodeKey,ledger.generation,ledger.descriptorRevision);
+   // The accepted checkpoint and descriptor stay: they still detect a conflicting reload.
+   assert.equal(witnesses.size,2);
+  }
+  assert.equal(ledger.generation,37);
+ }finally{fixture.restore();}
+});
+
+test('running out of the source time budget during a fetch is reported as such, not as a slow answer',async()=>{
+ const original=globalThis.fetch;
+ globalThis.fetch=(url,options)=>new Promise((resolve,reject)=>options.signal.addEventListener('abort',()=>reject(new DOMException('aborted','AbortError'))));
+ try{
+  await assert.rejects(new SourceLoader(crypto,'direct-cross-origin',{networkBudgetMs:50}).load(selection,undefined,new AbortController().signal),{message:'SOURCE_TIME_BUDGET_EXHAUSTED'});
+ }finally{globalThis.fetch=original;}
+});

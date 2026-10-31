@@ -38,8 +38,10 @@ final class Diagnostics
     public static function inspect(NodeConfig $config, RecordVerifier $verifier, ?string $manifestPath = null, ?string $configPath = null): array
     {
         $checks = []; $warnings = []; $failures = [];
+        // Every FAIL names its own registered failure code (docs/operations/error-codes.md).
         $checks['runtime'] = PHP_INT_SIZE === 8 ? 'PASS' : 'FAIL';
-        foreach (self::EXTENSIONS as $extension) { $checks['extension_' . $extension] = extension_loaded($extension) ? 'PASS' : 'FAIL'; }
+        if ($checks['runtime'] === 'FAIL') { $failures[] = 'RUNTIME_NOT_64_BIT'; }
+        foreach (self::EXTENSIONS as $extension) { $checks['extension_' . $extension] = extension_loaded($extension) ? 'PASS' : 'FAIL'; if (!extension_loaded($extension)) { $failures[] = 'PHP_EXTENSION_MISSING'; } }
         if (!in_array(PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION, self::TESTED_MINORS, true)) { $warnings[] = 'RUNTIME_OUTSIDE_EXECUTED_MINOR_MATRIX'; }
         $publication = null; $scheduler = []; $exportUsage = null; $storageUsage = null;
         if ($manifestPath !== null && $config->nodeOnion !== null && $config->features['publish_service']) {
@@ -49,6 +51,7 @@ final class Diagnostics
                 'active_index_membership' => $facts['active_index_membership'], 'source_integrity' => $facts['source_integrity'] ?? 'NOT_CHECKED'];
             $state = $facts['manifest']['state'];
             $checks['publisher_manifest'] = $state === 'SIGNATURE_VALID' ? 'PASS' : 'FAIL';
+            if ($state !== 'SIGNATURE_VALID') { $failures[] = 'PUBLISHER_MANIFEST_NOT_VALID'; }
             if (($facts['source_integrity'] ?? null) !== null && $facts['source_integrity'] !== 'NO_CONFLICT_DETECTED') { $warnings[] = 'PUBLISHER_CHECKED_NODE_CHECKPOINT_CONFLICT'; }
             // Without chosen Nodes neither the timer nor a plain command can check or announce anything.
             $checks['publisher_nodes'] = $config->publisherNodes === [] ? 'WARN' : 'PASS';
@@ -62,6 +65,7 @@ final class Diagnostics
         }
         if (!in_array($config->role, ['client-host','publisher'], true) && $config->backend === 'sqlite') {
             $checks['sqlite_driver'] = class_exists(\PDO::class) && in_array('sqlite', \PDO::getAvailableDrivers(), true) ? 'PASS' : 'FAIL';
+            if ($checks['sqlite_driver'] === 'FAIL') { $failures[] = 'SQLITE_DRIVER_UNAVAILABLE'; }
         }
         $checks['tor_transport_configuration'] = 'PASS'; // NodeConfig already restricts loopback SOCKS and finite timeout.
         $checks['server_search_disabled'] = $config->features['server_search'] ? 'WARN' : 'PASS';
@@ -72,7 +76,12 @@ final class Diagnostics
             if ($checks['client_assets'] === 'WARN') { $warnings[] = 'CLIENT_NOT_BUILT'; } elseif ($checks['client_assets'] === 'FAIL') { $failures[] = 'CLIENT_ASSETS_MODIFIED'; }
         }
         if ($config->features['visitor_sources'] ?? false) { $checks['visitor_source_relay'] = 'WARN'; $warnings[] = 'VISITOR_SOURCE_RELAY_ENABLED_OUTBOUND_TO_VISITOR_CHOSEN_NODES'; }
-        if ($config->role !== 'publisher') { $checks['export_directory'] = !is_link($config->exportPath) && is_dir($config->exportPath) && (fileperms($config->exportPath) & 0077) === 0 ? 'PASS' : 'FAIL'; }
+        // Before node:init nothing exists yet: setup in progress, not a fault (node:init creates the store and the export directory).
+        $uninitialized = in_array($config->role, ['node', 'combined'], true) && !file_exists($config->storagePath) && !is_link($config->storagePath);
+        if ($config->role !== 'publisher' && !($uninitialized && !file_exists($config->exportPath) && !is_link($config->exportPath))) {
+            $checks['export_directory'] = !is_link($config->exportPath) && is_dir($config->exportPath) && (fileperms($config->exportPath) & 0077) === 0 ? 'PASS' : 'FAIL';
+            if ($checks['export_directory'] === 'FAIL') { $failures[] = 'EXPORT_DIRECTORY_UNSAFE'; }
+        }
         if ($config->role !== 'publisher' && ($checks['export_directory'] ?? null) === 'PASS') {
             // Export budget (spec 18 section 17): snapshots fail with EXPORT_BUDGET_EXHAUSTED at the limit.
             $files = 0; $bytes = 0;
@@ -84,7 +93,12 @@ final class Diagnostics
             $usage = max($files / self::EXPORT_MAX_FILES, $bytes / self::EXPORT_MAX_BYTES);
             $exportUsage = ['blob_files' => $files, 'blob_bytes' => $bytes, 'max_files' => self::EXPORT_MAX_FILES, 'max_bytes' => self::EXPORT_MAX_BYTES];
             $checks['export_budget'] = $usage >= 1 ? 'FAIL' : ($usage >= 0.8 ? 'WARN' : 'PASS');
-            if ($checks['export_budget'] === 'WARN') { $warnings[] = 'EXPORT_BUDGET_NEARLY_EXHAUSTED'; }
+            if ($checks['export_budget'] === 'WARN') { $warnings[] = 'EXPORT_BUDGET_NEARLY_EXHAUSTED'; } elseif ($checks['export_budget'] === 'FAIL') { $failures[] = 'EXPORT_BUDGET_EXHAUSTED'; }
+            // The front controller's request budgets: an unusable file answers 503, a damaged one is refilled by the next request.
+            $budgets = array_map(static fn (string $name): string => \OnionServiceDiscovery\Http\PublicRequestBudget::inspect($config->exportPath . '/' . $name), \OnionServiceDiscovery\Http\PublicRequestBudget::FILES);
+            $checks['request_budget_files'] = array_intersect($budgets, ['UNAVAILABLE', 'CORRUPT']) === [] ? 'PASS' : 'WARN';
+            if (in_array('UNAVAILABLE', $budgets, true)) { $warnings[] = 'RATE_LIMIT_UNAVAILABLE'; }
+            if (in_array('CORRUPT', $budgets, true)) { $warnings[] = 'RATE_LIMIT_CORRUPT'; }
         }
         if ($config->nodeKeyPath !== null) {
             $checks['node_key_permissions'] = !is_link($config->nodeKeyPath) && is_file($config->nodeKeyPath) && (fileperms($config->nodeKeyPath) & 0077) === 0 ? 'PASS' : 'WARN';
@@ -96,12 +110,13 @@ final class Diagnostics
             catch (\OnionServiceDiscovery\Signing\SignerException) { $checks['node_key_envelope_header'] = 'FAIL'; $failures[] = 'NODE_KEY_ENVELOPE_INVALID'; }
         }
         $state = null; $ledger = $config->nodeKeyPath === null || in_array($config->role, ['client-host','publisher'], true) ? 'NOT_APPLICABLE' : 'NOT_CHECKED';
-        if (!in_array($config->role, ['client-host','publisher'], true)) {
+        if ($uninitialized) { $checks['node_descriptor'] = 'WARN'; $warnings[] = 'NODE_NOT_INITIALIZED'; }
+        elseif (!in_array($config->role, ['client-host','publisher'], true)) {
             try {
                 $store = $config->store(readOnly: true); $state = $store->snapshot(); $store->integrityCheck(); $checks['storage_integrity'] = 'PASS';
                 if ($store instanceof \OnionServiceDiscovery\Storage\FilesystemStore && $store->formatVersion() === 1) { $warnings[] = 'FILESYSTEM_FORMAT_MIGRATION_REQUIRED'; }
                 // Record and state budgets: at the limit admission stops with STORAGE_BUDGET_EXHAUSTED.
-                $storageUsage = \OnionServiceDiscovery\Storage\StorageTransaction::usage($state, new \OnionServiceDiscovery\Storage\StorageLimits()) + ['record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED'];
+                $storageUsage = \OnionServiceDiscovery\Storage\StorageTransaction::usage($state, new \OnionServiceDiscovery\Storage\StorageLimits(), $store) + ['record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED'];
                 $checks['storage_budget'] = $storageUsage['state'];
                 if ($storageUsage['state'] === 'WARN') { $warnings[] = 'STORAGE_BUDGET_NEARLY_EXHAUSTED'; }
                 if (!$store->supportsPruning()) { $warnings[] = 'STORAGE_PRUNING_MIGRATION_REQUIRED'; }
@@ -112,6 +127,7 @@ final class Diagnostics
                     if ($wire === null) { throw new StorageException('STORAGE_CORRUPT'); }
                     $record = $verifier->verifyWire($wire); $doc = $record->document();
                     $checks['node_descriptor'] = $record->type === 'node_descriptor' && $record->contentHash === $descriptor['hash'] && $doc->node_onion === $config->nodeOnion && ($envelope === null || $envelope['public_key'] === $doc->node_identity_public_key) ? 'PASS' : 'FAIL';
+                    if ($checks['node_descriptor'] === 'FAIL') { $failures[] = 'NODE_DESCRIPTOR_MISMATCH'; }
                 }
                 $published = $state['tables']['node']['key:published-snapshot'] ?? null;
                 if ($config->features['mirror_directory'] && $published === null) { $checks['snapshot_exports'] = 'WARN'; $warnings[] = 'SNAPSHOT_NOT_PUBLISHED'; }
@@ -147,14 +163,11 @@ final class Diagnostics
                     $ledger = self::signingLedger($config, $verifier, $store, $state, $envelope['public_key'] ?? null);
                     if ($ledger === 'AHEAD_OF_STORE') { $failures[] = 'SIGNING_LEDGER_AHEAD_OF_STORE'; } elseif ($ledger === 'INVALID') { $failures[] = 'SIGNING_LEDGER_INVALID'; }
                 }
-                // D-045: degraded serving uses a copy of exactly the store's published snapshot and Node descriptor.
-                $copy = ($checks['export_directory'] ?? null) === 'PASS' ? \OnionServiceDiscovery\Node\PublishedState::load(new \OnionServiceDiscovery\Storage\PublicBlobStore($config->exportPath), $verifier, $config->nodeOnion) : null;
-                if (($copy === null ? null : [$copy->checkpoint->contentHash, $copy->nodeDescriptor?->contentHash]) !== ($published === null ? null : [$published['hash'], $descriptor['hash'] ?? null])) { $checks['published_state_copy'] = 'WARN'; $warnings[] = 'PUBLISHED_STATE_STALE'; }
-                elseif ($copy !== null) { $checks['published_state_copy'] = 'PASS'; }
+                $copy = ($checks['export_directory'] ?? null) === 'PASS' ? self::publishedStateCopy($config, $verifier, $state) : ($published === null ? null : 'STALE');
+                if ($copy === 'STALE') { $checks['published_state_copy'] = 'WARN'; $warnings[] = 'PUBLISHED_STATE_STALE'; } elseif ($copy === 'PASS') { $checks['published_state_copy'] = 'PASS'; }
             } catch (StorageException $error) { $checks[str_starts_with($error->getMessage(), 'EXPORT_') ? 'snapshot_exports' : 'storage_integrity'] = 'FAIL'; $failures[] = $error->getMessage(); }
             catch (\InvalidArgumentException) { $checks['node_descriptor'] = 'FAIL'; $failures[] = 'NODE_DESCRIPTOR_INVALID'; }
         }
-        foreach ($checks as $name => $result) { if ($result === 'FAIL') { $failures[] = strtoupper($name); } }
         $latestSync = 0; $quarantined = 0;
         foreach ($state['tables']['sync'] ?? [] as $row) { $latestSync = max($latestSync, $row['last_sync'] ?? 0); }
         foreach ($state['tables']['peers'] ?? [] as $row) { if (($row['state'] ?? null) === 'QUARANTINED') { ++$quarantined; } }
@@ -164,8 +177,23 @@ final class Diagnostics
         $checks['source_concentration'] = $concentration['concentrated'] || $concentration['grouping_inconsistent'] ? 'WARN' : 'PASS';
         // What the public sees of this Node (the status page's storage state) and, if needed, the next step.
         $nodeHealth = NodeStatus::inspect($config, $verifier, time())['storage_state'] ?? null;
-        $health = ['node_health' => $nodeHealth ?? 'NOT_APPLICABLE', 'next_action' => ($nodeHealth === null ? null : NodeStatus::nextAction($nodeHealth)) ?? \OnionServiceDiscovery\Node\SigningLedger::nextAction($ledger), 'signing_ledger' => $ledger];
+        $health = ['node_health' => $nodeHealth ?? 'NOT_APPLICABLE', 'next_action' => ($nodeHealth === null ? null : NodeStatus::nextAction($nodeHealth)) ?? \OnionServiceDiscovery\Node\SigningLedger::nextAction($ledger)
+            ?? (in_array('NODE_NOT_INITIALIZED', $warnings, true) ? NodeStatus::nextAction('NOT_INITIALIZED') : null), 'signing_ledger' => $ledger];
         return ['status' => $failures !== [] ? 'FAIL' : ($warnings !== [] ? 'WARN' : 'PASS'), 'software_version' => '0.1.0-dev', 'php_version' => PHP_VERSION, 'protocol_versions' => [1], 'db_schema' => $state['storage_schema'] ?? null, 'role' => $config->role, 'config_state' => 'PASS', 'crypto_state' => 'RUNTIME_EXTENSIONS_ONLY', 'key_authentication_state' => 'NOT_UNLOCKED_UNAUTHENTICATED_HEADER', 'tor_transport_state' => 'CONFIGURED_NOT_PROBED', 'manifest_state' => $publication['manifest_state'] ?? 'NOT_APPLICABLE', 'publication' => $publication, 'sync_state' => ['latest_sync_epoch' => $latestSync, 'quarantined_peers' => $quarantined], 'source_concentration' => $concentration, 'scheduler_state' => $scheduler === [] ? 'NOT_OBSERVED' : $scheduler, 'export_usage' => $exportUsage, 'storage_usage' => $storageUsage, 'backup_state' => 'NOT_OBSERVED', 'disk_state' => ['free_bytes' => is_dir($config->exportPath) ? disk_free_space($config->exportPath) : null], 'security_check_summary' => $checks, 'warnings' => $warnings, 'failures' => array_values(array_unique($failures)), 'generated_at' => gmdate('Y-m-d\TH:i:s\Z'), 'network_side_effects' => false, 'production_approval' => 'OPEN'] + $health;
+    }
+
+    /**
+     * D-045: degraded serving uses a copy of exactly the store's published snapshot and Node descriptor.
+     * PASS when the export directory's copy matches the store, STALE when it is missing or differs, null
+     * when there is nothing to compare (no published snapshot and no copy).
+     * @param array<array-key,mixed> $state
+     */
+    public static function publishedStateCopy(NodeConfig $config, RecordVerifier $verifier, array $state): ?string
+    {
+        $published = $state['tables']['node']['key:published-snapshot'] ?? null; $descriptor = $state['tables']['node']['key:descriptor'] ?? null;
+        $copy = \OnionServiceDiscovery\Node\PublishedState::load(new \OnionServiceDiscovery\Storage\PublicBlobStore($config->exportPath), $verifier, $config->nodeOnion);
+        if (($copy === null ? null : [$copy->checkpoint->contentHash, $copy->nodeDescriptor?->contentHash]) !== ($published === null ? null : [$published['hash'], $descriptor['hash'] ?? null])) { return 'STALE'; }
+        return $copy === null ? null : 'PASS';
     }
 
     /**

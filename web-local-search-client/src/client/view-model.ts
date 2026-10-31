@@ -106,6 +106,8 @@ export function buildView(records: readonly VerifiedRecord[], pins: readonly Loc
   return {services:rows,pins:pinRows,recordCount:records.length,pendingCount:identities.pending_hashes.length};
 }
 
+/** Sources whose signed snapshot was fully verified: a partly verified or failed source supplied nothing this load. */
+export function loadedSourceOnions(sources:readonly {onion:string;status:string}[]):string[] { return sources.filter(source=>source.status==='COMPLETE'||source.status==='STALE').map(source=>source.onion); }
 export function pinIdentity(identity:ServiceRow,label=identity.name):LocalPin {
   if(identity.status!=='PUBLISHED'||identity.onion===null||identity.currentHash===null) throw new Error('PIN_CONTEXT_UNAVAILABLE');
   return {genesisKey:identity.genesisKey,contextOnion:identity.onion,anchorHash:identity.currentHash,latestHash:identity.currentHash,highestRevision:identity.revision,label:[...label].slice(0,128).join(''),conflicted:false}; // code points: never split a surrogate pair

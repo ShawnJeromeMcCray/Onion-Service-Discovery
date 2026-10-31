@@ -11,13 +11,27 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def git(*args):return subprocess.check_output(['git',*args],cwd=ROOT,text=True).strip()
 def encoded(value):return (json.dumps(value,sort_keys=True,indent=2,ensure_ascii=False)+'\n').encode()
+# npm packages whose code is inside the built browser client; bundled_npm() refuses a build that imports another.
+BROWSER_BUNDLED={'@noble/curves','@noble/hashes','ajv'}
+def bundled_npm():
+ found=set()
+ for folder in ('web-local-search-client/src','web-local-search-client/generated'):
+  for path in sorted((ROOT/folder).rglob('*')):
+   if path.suffix not in {'.ts','.mjs','.js'}:continue
+   text=path.read_text(encoding='utf-8')
+   for name in re.findall(r'''(?:from\s+|require\()['"]([^.'"/][^'"]*)['"]''',text):
+    found.add('/'.join(name.split('/')[:2]) if name.startswith('@') else name.split('/')[0])
+ if found!=BROWSER_BUNDLED:raise ValueError('Browser bundle imports changed; update BROWSER_BUNDLED and THIRD_PARTY_NOTICES.md: '+', '.join(sorted(found^BROWSER_BUNDLED)))
+ return found
 def sbom(commit,epoch,profile='source-browser'):
- components={}
+ # The source archive lists every locked component; a package lists only what it ships.
+ components={};full=profile=='source-browser';bundled=None if full else bundled_npm()
  npm=json.loads((ROOT/'web-local-search-client/package-lock.json').read_text())
  for location,item in npm['packages'].items():
   if not location:continue
   name=item.get('name',location.rsplit('node_modules/',1)[-1]);version=item['version'];purl=f'pkg:npm/{name.replace("@","%40")}@{version}'
-  row={'type':'library','name':name,'version':version,'purl':purl,'bom-ref':purl,'scope':'optional' if item.get('dev') else 'required'}
+  if bundled is not None and (name not in bundled or location!='node_modules/'+name):continue
+  row={'type':'library','name':name,'version':version,'purl':purl,'bom-ref':purl,'scope':'required' if bundled is not None or not item.get('dev') else 'optional'}
   integrity=item.get('integrity','')
   if integrity.startswith(('sha512-','sha256-')):
    algorithm,data=integrity.split('-',1);row['hashes']=[{'alg':'SHA-512' if algorithm=='sha512' else 'SHA-256','content':base64.b64decode(data).hex()}]
@@ -25,14 +39,13 @@ def sbom(commit,epoch,profile='source-browser'):
   if isinstance(license,str) and re.fullmatch('[A-Za-z0-9.+-]+',license):row['licenses']=[{'license':{'id':license}}]
   components[purl]=row
  client=profile=='static-client'
- if client:components={key:row for key,row in components.items() if row['scope']=='required'}
  composer=json.loads((ROOT/'node-php/composer.lock').read_text())
- for group in (() if client else ('packages','packages-dev')):
+ for group in (() if client else ('packages',) if not full else ('packages','packages-dev')):
   for item in composer[group]:
    purl=f"pkg:composer/{item['name']}@{item['version'].lstrip('v')}";row={'type':'library','name':item['name'],'version':item['version'].lstrip('v'),'purl':purl,'bom-ref':purl,'scope':'required' if group=='packages' else 'optional'}
    if item.get('license'):row['licenses']=[{'license':{'id':name}} for name in item['license']]
    components[purl]=row
- for lock in (() if client else ('validator-python/requirements.lock','release-tools/requirements.lock','tools/audit-requirements.lock')):
+ for lock in (('validator-python/requirements.lock','release-tools/requirements.lock','tools/audit-requirements.lock') if full else ()):
   source=(ROOT/lock).read_text().replace('\\\n',' ')
   for line in source.splitlines():
    match=re.match(r'^([a-zA-Z0-9_.-]+)(?:\[[^]]+\])?==([^\s]+)',line)
@@ -77,7 +90,7 @@ def build(destination,profile='source-browser'):
   if path.is_file() and not path.is_symlink():files[str(path.relative_to(ROOT))]=path.read_bytes()
  runtime=profile=='runtime'
  if static:
-  for name in ('LICENSE','THIRD_PARTY_NOTICES.md','docs/browser/client-contract.md'):
+  for name in ('LICENSE','THIRD_PARTY_NOTICES.md','docs/browser/client-contract.md',*sorted(str(path.relative_to(ROOT)) for path in (ROOT/'third-party').glob('*.txt'))):
    if (ROOT/name).is_file():files[name]=(ROOT/name).read_bytes()
   files['release/STATIC-CLIENT.txt']=('UNSIGNED DEVELOPMENT PREVIEW of the browser client at commit '+commit+'.\nStatic self-hosting bundle (decision D-028): serve web-local-search-client/dist/ as described in docs/browser/client-contract.md.\nCheck every file against web-local-search-client/dist/build-manifest.json and verify the GitHub build provenance first.\n').encode()
  if runtime:

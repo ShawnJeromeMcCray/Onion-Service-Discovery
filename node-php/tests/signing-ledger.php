@@ -126,6 +126,9 @@ try {
         $assert($doctor['signing_ledger'] === 'AHEAD_OF_STORE' && in_array('SIGNING_LEDGER_AHEAD_OF_STORE', $doctor['failures'], true) && str_contains((string) $doctor['next_action'], '--adopt-signed-chain'), $backend . ': doctor names the ledger state');
         $status = cli(['node:status', $restoredConfig], 6);
         $assert($status['signing_ledger'] === 'AHEAD_OF_STORE' && str_contains($status['next_action'], '--adopt-signed-chain'), $backend . ': node:status names the ledger state');
+        // Monitoring sees it too: the card may say HEALTHY, but signing has stopped (exit 4 like doctor's FAIL).
+        $check = cli(['status', $restoredConfig, '--check'], 4);
+        $assert($check['signing_ledger'] === 'AHEAD_OF_STORE' && str_contains((string) ($check['node']['next_action'] ?? ''), '--adopt-signed-chain'), $backend . ': status --check names the ledger state ' . json_encode($check['node'] ?? null));
         // Export pruning keeps the checkpoint the ledger names although the restored store does not reference it.
         cli(['exports:prune', $restoredConfig, '--workers-stopped'], 0);
         $assert($blobs->get($heads[4]) !== null, $backend . ': ledger checkpoint survives exports:prune');
@@ -135,7 +138,7 @@ try {
         $assert($adopted['status'] === 'PUBLISHED' && $adopted['adopted_signed_chain'] === ['checkpoint' => 'ADOPTED', 'descriptor' => 'ADOPTED'], $backend . ': adopted ' . json_encode($adopted));
         $head = $verifier->verifyWire((string) $blobs->get($adopted['checkpoint_hash']))->document(); $state = $restored->snapshot();
         $assert($head->generation === 5 && $head->previous_checkpoint_hash === $heads[4] && $state['tables']['node']['key:published-snapshot']['service_index_version'] === 2
-            && $state['tables']['node']['key:descriptor']['hash'] === $lastDescriptor && $restored->readRecord($heads[4]) !== null && $restored->readRecord($heads[3]) === null, $backend . ': chain continues from the adopted head');
+            && $state['tables']['node']['key:descriptor']['hash'] === $lastDescriptor && $restored->readRecord($heads[4]) !== null && $restored->readRecord($heads[3]) !== null, $backend . ': chain continues from the adopted head, generation 3 admitted between');
         $assert($ledgerOf($ledgerPath)['checkpoint'] === ['generation' => 5, 'hash' => $adopted['checkpoint_hash']] && $ledgerOf($ledgerPath)['descriptor']['hash'] === $lastDescriptor, $backend . ': ledger at generation 5');
         $doctor = cli(['doctor', $restoredConfig], 0); assertHealthReport($doctor);
         $assert($doctor['signing_ledger'] === 'CONSISTENT', $backend . ': doctor CONSISTENT after adoption');
@@ -181,7 +184,7 @@ try {
         $published = cli(['node:snapshot', $restoredConfig, ...$pass, '--rebuild-derived'], 0);
         $assert($ledgerOf($ledgerPath)['checkpoint'] === ['generation' => 8, 'hash' => $published['checkpoint_hash']], $backend . ': behind ledger raised and advanced');
 
-        // The ledger is written only after the commit: a failing commit leaves it and the store unchanged.
+        // A failing commit leaves the store unchanged and the checkpoint pending in the ledger (its blob written first).
         $failing = new class ($restored) implements StorageBackend {
             public function __construct(private StorageBackend $inner) {}
             public function backendName(): string { return $this->inner->backendName(); }
@@ -195,9 +198,12 @@ try {
         $ledgerBytes = file_get_contents($ledgerPath); $before = $restored->snapshot();
         try { (new SnapshotProducer($failing, $blobs, $verifier, $signer, false, true, SigningLedger::forKey($dir . '/node.key')))->publish(time()); throw new RuntimeException('failing commit published'); }
         catch (StorageException $error) { $assert($error->getMessage() === 'STORAGE_UNAVAILABLE', $backend . ': commit failure surfaces'); }
-        $assert(file_get_contents($ledgerPath) === $ledgerBytes && $restored->snapshot() === $before, $backend . ': uncommitted checkpoint not recorded');
-        $published = cli(['node:snapshot', $restoredConfig, ...$pass, '--rebuild-derived'], 0);
-        $assert($ledgerOf($ledgerPath)['checkpoint']['generation'] === 9, $backend . ': the uncommitted generation is signed again without refusal');
+        $pendingEntry = $ledgerOf($ledgerPath)['pending_checkpoint'] ?? null;
+        $assert($restored->snapshot() === $before && $ledgerOf($ledgerPath)['checkpoint'] === json_decode($ledgerBytes, true)['checkpoint'] && ($pendingEntry['generation'] ?? null) === 9 && $blobs->get($pendingEntry['hash']) !== null, $backend . ': uncommitted checkpoint held as pending');
+        $assert(cli(['node:status', $restoredConfig], 6)['signing_ledger'] === 'AHEAD_OF_STORE', $backend . ': node:status reports the pending checkpoint');
+        // The next run adopts the pending generation 9 (it directly follows the store's head) instead of signing generation 9 again.
+        $published = cli(['node:snapshot', $restoredConfig, ...$pass, '--rebuild-derived'], 0); $ledger = $ledgerOf($ledgerPath);
+        $assert($ledger['checkpoint']['generation'] === 10 && !isset($ledger['pending_checkpoint']) && $verifier->verifyWire((string) $blobs->get($published['checkpoint_hash']))->document()->previous_checkpoint_hash === $pendingEntry['hash'], $backend . ': pending checkpoint adopted, chain continues from it');
 
         // Nothing to adopt from: the ledger names a checkpoint whose blob is gone.
         $assert(cli(['storage:restore', $backend, $dir . '/lost' . $suffix, $dir . '/old.backup', '--trusted-private-backup'], 0)['status'] === 'PASS', $backend . ': second restore');

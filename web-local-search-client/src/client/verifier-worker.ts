@@ -12,6 +12,8 @@ const crypto=browserCryptoProviders(); let loader=new SourceLoader(crypto);
 const records=new Map<string,VerifiedRecord>(); const ledgers=new Map<string,SourceLedger>(); const witnesses=new SourceWitnesses();
 // Which origin supplied each admitted record: a loaded Node's onion, 'local file' or 'demonstration'.
 const provenance=new Map<string,Set<string>>();
+// Nodes set aside for conflicting signed data, until one of them loads again successfully or the index is cleared.
+const setAside=new Set<string>();
 // Visitor-chosen Nodes (onion -> expected key) exist only when the Client Host explicitly relays them.
 const MAX_VISITOR_SOURCES=8; const visitor=new Map<string,string>(); let visitorEnabled=false;
 let pins:LocalPin[]=[]; let allowed=new Set<string>(); let controller:AbortController|null=null; let busy=false; let synthetic=false;
@@ -26,9 +28,8 @@ function currentView(quarantined:ReadonlySet<string>):ReturnType<typeof buildVie
 }
 function code(error:unknown):string { return error instanceof Error&&/^[A-Z_]{1,80}$/.test(error.message)?error.message:'CLIENT_OPERATION_FAILED'; }
 function publish():void {
-  const quarantined=new Set(statuses.filter(status=>status.status==='QUARANTINED').map(status=>status.onion));
   for(const status of statuses){const key=ledgers.get(status.onion)?.nodeKey??null;status.evidenceAvailable=key!==null&&witnesses.forkEvidence(key).length===2;}
-  const view=currentView(quarantined); pins=view.pins.map(row=>row.pin);
+  const view=currentView(setAside); pins=view.pins.map(row=>row.pin);
   scope.postMessage({type:'view',view,viewVersion,sources:statuses,synthetic,busy,witnessCount:witnesses.size,visitorSources:[...visitor].map(([onion,expectedKey])=>({onion,expectedKey}))});
 }
 function admit(incoming:readonly VerifiedRecord[],origin:string,replace=false):void {
@@ -38,6 +39,7 @@ function admit(incoming:readonly VerifiedRecord[],origin:string,replace=false):v
   const superseded=replace?[...provenance].filter(([hash,origins])=>origins.size===1&&origins.has(origin)&&!incomingHashes.has(hash)).map(([hash])=>hash):[];
   if(records.size-superseded.length+added.size>10000) throw new Error('CLIENT_RECORD_BUDGET_EXHAUSTED');
   for(const hash of superseded) { records.delete(hash); provenance.delete(hash); }
+  if(replace) setAside.delete(origin);
   ++recordsVersion;
   for(const record of incoming) { records.set(record.contentHash,record); const origins=provenance.get(record.contentHash)??new Set<string>(); origins.add(origin); provenance.set(record.contentHash,origins); }
 }
@@ -87,25 +89,26 @@ async function command(message:Command):Promise<void> {
     scope.postMessage({type:'pins-restored',origin:message.origin,added:result.added,updated:result.updated,skipped:result.skipped}); return;
   }
   if(busy) throw new Error('CLIENT_BUSY');
-  if(message.op==='clear-all') { records.clear(); provenance.clear(); ledgers.clear(); witnesses.clear(); loader.clear(); pins=[]; statuses=[]; synthetic=false; visitor.clear(); ++recordsVersion; ++pinsVersion; publish(); return; }
-  if(message.op==='clear-index') { records.clear(); provenance.clear(); loader.forgetVerified(); statuses=[]; synthetic=false; ++recordsVersion; publish(); return; }
+  if(message.op==='clear-all') { records.clear(); provenance.clear(); setAside.clear(); ledgers.clear(); witnesses.clear(); loader.clear(); pins=[]; statuses=[]; synthetic=false; visitor.clear(); ++recordsVersion; ++pinsVersion; publish(); return; }
+  if(message.op==='clear-index') { records.clear(); provenance.clear(); setAside.clear(); loader.forgetVerified(); statuses=[]; synthetic=false; ++recordsVersion; publish(); return; }
   busy=true; publish();
   try {
     if(message.op==='import-records') {
+      controller=new AbortController(); const signal=controller.signal;
       // A bundle's record list may be as long as the 1 MiB file allows; every record inside keeps the protocol limits.
       const bundle=parseStrictJson(new Uint8Array(message.bytes),1048576,10000);
       const incoming=bundle.protocol==='Onion Service Discovery'?[bundle]:bundle.bundle_version===1&&Object.keys(bundle).length===2&&Array.isArray(bundle.records)?bundle.records:null;
       if(incoming===null)throw new Error('IMPORT_FORMAT_INVALID');
       const verified:VerifiedRecord[]=[];
-      for(const item of incoming) { verified.push(await verifyRecord(requiredObject(item),crypto)); if(verified.length%32===0) await new Promise(resolve=>setTimeout(resolve,0)); }
+      for(const item of incoming) { verified.push(await verifyRecord(requiredObject(item),crypto)); if(verified.length%32===0) await new Promise(resolve=>setTimeout(resolve,0)); if(signal.aborted) throw new Error('IMPORT_CANCELLED'); }
       // Demo data and real records never mix: either kind replaces the other.
-      if(message.synthetic===true||synthetic) { records.clear(); provenance.clear(); statuses=[]; synthetic=message.synthetic===true; ++recordsVersion; }
+      if(message.synthetic===true||synthetic) { records.clear(); provenance.clear(); setAside.clear(); statuses=[]; synthetic=message.synthetic===true; ++recordsVersion; }
       admit(verified,message.synthetic===true?'demonstration':'local file');
     } else if(message.op==='load') {
       if(message.sources.length<1||message.sources.length>16||new Set(message.sources.map(source=>source.onion)).size!==message.sources.length) throw new Error('CLIENT_CONFIGURATION_INVALID');
       // A visitor-chosen Node loads only with exactly the key the visitor entered for it.
       for(const selection of message.sources) { loader.validate(selection); if(!allowed.has(selection.onion)&&!(visitorEnabled&&visitor.get(selection.onion)!==undefined&&visitor.get(selection.onion)===selection.expectedKey)) throw new Error('SOURCE_NOT_IN_HOST_ALLOWLIST'); }
-      if(synthetic) { records.clear(); provenance.clear(); synthetic=false; ++recordsVersion; }
+      if(synthetic) { records.clear(); provenance.clear(); setAside.clear(); synthetic=false; ++recordsVersion; }
       controller=new AbortController();
       statuses=message.sources.map(selection=>({onion:selection.onion,status:'NOT_STARTED',nodeKey:null,generation:null,createdAt:null,error:null,baselineHistoryProven:false,evidenceAvailable:false}));
       for(let index=0;index<message.sources.length;++index) {
@@ -115,18 +118,22 @@ async function command(message:Command):Promise<void> {
             // A small message per verified chunk; the full view is rebuilt only when the source ends.
             (done,total)=>scope.postMessage({type:'progress',onion:selection.onion,records:done,total}));
           admit(result.records,selection.onion,true); ledgers.set(selection.onion,result.ledger);
+          // Ordinary witnesses below the accepted anchor no longer detect anything; fork pairs stay.
+          witnesses.retain(result.ledger.nodeKey,result.ledger.generation,result.ledger.descriptorRevision);
           const now=typeof message.now==='number'&&Number.isFinite(message.now)?message.now:Date.now();
           const age=now-Date.parse(result.createdAt); status.status=age>604800000||age< -300000?'STALE':'COMPLETE'; status.nodeKey=result.ledger.nodeKey; status.generation=result.ledger.generation; status.createdAt=result.createdAt; status.baselineHistoryProven=result.baselineHistoryProven;
         } catch(error) {
           status.error=code(error);
           status.status=status.error==='SOURCE_CANCELLED'?'CANCELLED':status.error==='SOURCE_HISTORY_PROGRESS'?'PARTIAL':/EQUIVOCATION|ROLLBACK|FORK|KEY_CHANGED|CHAIN_BROKEN/.test(status.error)?'QUARANTINED':'FAILED';
-          if(status.status==='CANCELLED') status.error=null;
+          if(status.status==='CANCELLED') status.error=null; if(status.status==='QUARANTINED') setAside.add(selection.onion);
         }
         publish(); if(controller.signal.aborted) break;
       }
       // Sources the user's cancel stopped before they began are reported as such, not as loading.
       for(const status of statuses) if(status.status==='NOT_STARTED') status.status='CANCELLED';
     }
-  } finally { controller=null; busy=false; publish(); }
+  // A failure is reported before the final update, so the page never announces it as a finished operation.
+  } catch(error) { scope.postMessage({type:'error',code:code(error),op:message.op,origin:null}); }
+  finally { controller=null; busy=false; publish(); }
 }
 scope.onmessage=event=>{void command(event.data).catch(error=>{scope.postMessage({type:'error',code:code(error),op:event.data.op,origin:event.data.op==='restore-pins'?event.data.origin:null});});};

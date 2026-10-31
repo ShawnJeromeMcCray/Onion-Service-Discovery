@@ -37,4 +37,16 @@ test('normal capacity cannot prevent retention of a signed fork pair',async()=>{
  assert.equal(store.size,3);
  store.clear(); assert.equal(store.size,0); assert.equal(store.observe(other),false);
 });
+test('retain drops only ordinary witnesses below the accepted anchor of that Node',async()=>{
+ const store=new SourceWitnesses(8,2); const key=sources[0].node_descriptor.node_identity_public_key;
+ const anchor=await verified(sources[0].checkpoint); const descriptor=await verified(sources[0].node_descriptor); const other=await verified(sources[1].checkpoint);
+ const generation=JSON.parse(anchor.canonicalWire).generation; const revision=JSON.parse(descriptor.canonicalWire).descriptor_revision;
+ store.observe(anchor); store.observe(descriptor); store.observe(other); assert.equal(store.size,3);
+ store.retain(key,generation,revision); assert.equal(store.size,3);
+ store.retain(key,generation+1,revision); assert.equal(store.size,2);
+ store.retain(key,generation+1,revision+1); assert.equal(store.size,1);
+ // A fork pair survives retention, and the other Node's witness is untouched.
+ store.observe(anchor); assert.equal(store.observe(await fork(0)),true); store.retain(key,generation+5,revision+5);
+ assert.equal(store.forkEvidence(key).length,2); assert.equal(store.observe(other),false); assert.equal(store.size,2);
+});
 const forgedRecord={type:'snapshot_descriptor',contentHash:'sha256:'+'0'.repeat(64),canonicalWire:'{}'};

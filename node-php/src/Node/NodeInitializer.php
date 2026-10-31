@@ -11,7 +11,8 @@ final class NodeInitializer
 {
     /**
      * Signs the next Node descriptor revision when the capabilities changed. The signing ledger beside the
-     * Node key refuses a store older than what the key signed (SIGNED_DESCRIPTOR_AHEAD_OF_STORE).
+     * Node key refuses a store older than what the key signed (SIGNED_DESCRIPTOR_AHEAD_OF_STORE) and holds
+     * the new revision as pending until the store committed it.
      * @return array<array-key, mixed>
      */
     public static function initialize(NodeConfig $config, SignerProvider $signer, RecordVerifier $verifier): array
@@ -26,7 +27,7 @@ final class NodeInitializer
     private static function sign(NodeConfig $config, SignerProvider $signer, RecordVerifier $verifier, SigningLedger $ledger): array
     {
         $store = $config->store(true); $blobs = new PublicBlobStore($config->exportPath, true);
-        $state = $store->snapshot(); $ledger->reconcile($signer->publicKey(), $store, $verifier, $state); $pointer = $state['tables']['node']['key:descriptor'] ?? null; $previous = null;
+        $state = $ledger->reconcile($signer->publicKey(), $store, $verifier, $store->snapshot(), $blobs); $pointer = $state['tables']['node']['key:descriptor'] ?? null; $previous = null;
         if ($pointer !== null) {
             $wire = $store->readRecord($pointer['hash']); if ($wire === null) { throw new ProtocolException('STORAGE_CORRUPT'); }
             $previous = $verifier->verifyWire($wire)->document();
@@ -44,10 +45,14 @@ final class NodeInitializer
             'supported_protocol_versions' => [1], 'capabilities' => $capabilities,
             'software' => (object) ['name' => 'Onion Service Discovery', 'version' => '0.1.0-dev'],
         ]));
-        $store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor): void {
-            if ($tx->state()['generation'] !== $state['generation']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
-            $tx->putRecord($descriptor); $tx->set('node', 'descriptor', ['hash' => $descriptor->contentHash]);
-        });
+        // The blob and a pending ledger entry first, so a crash after the commit is adopted, never signed over.
+        $blobs->put($descriptor->contentHash, $descriptor->canonicalWire); $ledger->prepare($signer->publicKey(), 'descriptor', $revision, $descriptor->contentHash);
+        try {
+            $store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor): void {
+                if ($tx->state()['generation'] !== $state['generation']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
+                $tx->putRecord($descriptor); $tx->set('node', 'descriptor', ['hash' => $descriptor->contentHash]);
+            });
+        } catch (ProtocolException $error) { if ($error->getMessage() === 'EVIDENCE_CHANGED_RETRY') { $ledger->cancel($signer->publicKey(), 'descriptor', $descriptor->contentHash); } throw $error; }
         $ledger->record($signer->publicKey(), 'descriptor', $revision, $descriptor->contentHash);
         // A Node that already published keeps the new descriptor for degraded serving too (D-045).
         PublishedState::save($store, $blobs, $verifier);
