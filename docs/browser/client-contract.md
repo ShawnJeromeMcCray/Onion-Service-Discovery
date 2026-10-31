@@ -30,9 +30,12 @@ behavior for both profiles remains a release gate.
 The page's search/filter operations run locally. No query appears in a request,
 URL, worker command or saved profile. Loading a source downloads generic bounded
 signed chunks, verifies all records and completes the source snapshot before
-adding Service evidence to the local union. One failed/omitting source does not
-delete existing evidence. Checkpoint rollback/equivocation and Node key changes
-are rejected; fork warnings cannot be cleared by source counts. Several Node
+adding Service evidence to the local union. A failed source deletes nothing; a
+successful reload of a Node replaces only the records that Node alone supplied
+before, so records another source or a local file also supplied stay. Records of
+a Node set aside for conflicting signed data stay marked as such until that Node
+loads successfully again or the index is cleared. Checkpoint and descriptor
+rollback/equivocation and Node key changes are rejected; fork warnings cannot be cleared by source counts. Several Node
 keys do not establish independent operators or global completeness.
 
 Metadata uses text-only DOM operations and isolated ASCII onion/key displays.
@@ -63,7 +66,8 @@ explicit separate confirmation is required to forget continuity safeguards.
 Default limits: 16 allowlisted sources and 8 visitor-added Nodes, 10,000 local
 evidence records across all sources (a reloaded Node replaces the records only it
 supplied before), 64 chunks and 32 MiB per source, 90 seconds of network time per
-source plus one second per 20 KB of declared chunk bytes (at most 15 minutes), 15
+source plus one second per 20 KB of declared chunk bytes (at most 30 minutes, which
+covers the 32 MiB maximum at 20 KB/s), 15
 seconds per fetch plus one second per 20 KB of the response limit, 256 pins, a
 256-character local query with at most 16 terms, 1 MiB per imported record bundle
 (up to 10,000 records in its list) and 256 KiB per pin backup. Loading demo data
@@ -93,7 +97,7 @@ Owner decision D-003 (2026-10-22) sets the supported baseline:
 | --- | --- | --- |
 | Current stable Tor Browser, desktop | Standard, Safer | Full local search, loading, pins and verification |
 | Current stable Tor Browser for Android | Standard, Safer | Full local search, loading, pins and verification |
-| Current Firefox and Chromium | Default | Full; used by the automated browser tests |
+| Current Firefox and Chromium | Default | Full; the automated browser tests run in Chromium |
 | Any Tor Browser | Safest (JavaScript off) | No local search. The page explains this; the optional NoJS server search, if the host offers it, is the documented fallback |
 
 The build targets Firefox ESR 128 language features (`firefox128`), so the
@@ -175,10 +179,15 @@ trust, direct Service presence or the still-unimplemented active-index scheme.
 The session witness/storage caps and withheld/changing history remain availability
 limits; a browser restart loses its session walk progress.
 
-Signed ancestors are compared with session witnesses as well as the current
-checkpoint. Conflicting records at the same Node/type/sequence position quarantine
-the Node and preserve the accepted anchor. The session witness registry retains
-at most 512 ordinary records plus a reserved signed fork pair for at most 16
-Node keys (at most 528 distinct records). Saturation fails closed instead of
-evicting evidence. Clear All Data explicitly erases these witnesses. This is a
+Signed ancestors and the Node descriptor are compared with session witnesses as
+well as the current checkpoint. Conflicting records at the same Node/type/sequence
+position (two checkpoints of one generation, or two descriptors of one revision)
+quarantine the Node, preserve the accepted anchor, stay sticky for the session
+and can be saved as evidence. The session witness registry retains at most 512
+ordinary records plus a reserved signed fork pair for at most 16 Node keys (at
+most 528 distinct records). After each successful load, a Node's ordinary
+witnesses below its accepted checkpoint and descriptor are dropped, as the PHP
+Node's local maintenance does: they no longer detect anything, while fork pairs
+are never evicted. Saturation (for example a very long history walk) fails closed
+with `WITNESS_BUDGET_EXHAUSTED`. Clear All Data explicitly erases these witnesses. This is a
 bounded session policy, not unlimited history retention or automatic fork discovery.

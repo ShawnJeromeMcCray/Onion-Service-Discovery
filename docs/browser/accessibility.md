@@ -18,7 +18,8 @@ security texts themselves are listed in the
   on the pinned Onion, a fork). The page no longer re-announces every update.
   While a source loads, its card shows how many records have been checked; that
   line is updated in place and deliberately not announced.
-- **Focus**: views are rebuilt on every worker update, but keyboard focus returns
+- **Focus**: views are rebuilt when the results, pins or loaded sources change
+  (status-only updates leave them as they are), and keyboard focus returns
   to the same control (for example from "Pin this identity" to "Remove pin" of
   the same Service), opened details stay open and the result page is kept.
   When a control disappears, focus moves to the heading of its section.

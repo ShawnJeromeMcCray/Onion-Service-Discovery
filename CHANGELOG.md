@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Browser client: records of a Node set aside for conflicting signed data keep
+  their notice after the next load, a reload in progress, Clear index of other
+  data or a failed load, until that Node loads successfully again. A second signed
+  Node descriptor at the same revision is now `SOURCE_DESCRIPTOR_EQUIVOCATION`:
+  both records are kept as evidence that can be saved, and the Node stays set aside
+  (`SOURCE_EQUIVOCATION_PRESERVED`) even if it serves the original again. After
+  each successful load, ordinary witnesses below a Node's accepted checkpoint and
+  descriptor are dropped (fork pairs never are), so hourly refreshes no longer fill
+  the 512-entry store with `WITNESS_BUDGET_EXHAUSTED`. Partly verified sources no
+  longer count as loaded in result coverage. Cancel stops a record import
+  (`IMPORT_CANCELLED`, nothing added), and a failed load or import shows its error
+  instead of a finished summary. Running out of a source's time during a download
+  is `SOURCE_TIME_BUDGET_EXHAUSTED`, not `SOURCE_TIMEOUT`, and the cap is now 30
+  minutes so the 32 MiB maximum stays loadable at 20 KB/s. A pin import that only
+  adds a remembered conflict is previewed as such and counted as updated. More
+  error codes have specific plain-language messages.
 - Owner decisions of 2026-10-22: D-003 (current Tor Browser desktop and Android at
   Standard and Safer), D-026 (default source list stays empty until Nodes pass the
   drafted admission process in `docs/governance/source-node-admission.md`), D-028,

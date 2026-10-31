@@ -39,7 +39,9 @@ async function fetchBytes(onion: string, endpoint: Endpoint, limit: number, pare
   const abort = () => controller.abort(); parent.addEventListener('abort', abort, { once: true });
   if (parent.aborted) controller.abort();
   // 15 s to answer plus time for the body at a slow Tor circuit's 20 KB/s: a full 512 KiB chunk gets about 41 s.
-  const timeout = setTimeout(abort, Math.min(15000 + Math.ceil(limit / 20), Math.max(1, budget.remainingMs)));
+  // When the source's remaining time is shorter, running out of it is reported as such, not as a slow answer.
+  const allowed = 15000 + Math.ceil(limit / 20); const capped = budget.remainingMs < allowed;
+  const timeout = setTimeout(abort, capped ? Math.max(1, budget.remainingMs) : allowed);
   try {
     const destination=delivery==='client-host-proxy'?new URL('relay/'+onion+'/'+path(endpoint).slice(prefix.length),new URL('./',import.meta.url)).href:'http://'+onion+path(endpoint);
     const response = await fetch(destination, { method: 'GET', credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer', cache: 'no-store', mode: 'cors', headers: { Accept: 'application/json' }, signal: controller.signal });
@@ -65,7 +67,7 @@ async function fetchBytes(onion: string, endpoint: Endpoint, limit: number, pare
     return result;
   } catch (error) {
     if (error instanceof Error && /^(?:SOURCE_|HEADERS_|CONTENT_|RESPONSE_|STREAMING_)/.test(error.message)) throw error;
-    throw new Error(parent.aborted ? 'SOURCE_CANCELLED' : controller.signal.aborted ? 'SOURCE_TIMEOUT' : 'SOURCE_FETCH_FAILED');
+    throw new Error(parent.aborted ? 'SOURCE_CANCELLED' : controller.signal.aborted ? (capped ? 'SOURCE_TIME_BUDGET_EXHAUSTED' : 'SOURCE_TIMEOUT') : 'SOURCE_FETCH_FAILED');
   } finally { clearTimeout(timeout); parent.removeEventListener('abort', abort); budget.remainingMs -= performance.now() - started; }
 }
 
@@ -92,14 +94,18 @@ export class SourceLoader {
     if (descriptor.type !== 'node_descriptor' || node.node_onion !== selection.onion) throw new Error('SOURCE_NODE_BINDING_MISMATCH');
     const nodeKey = requiredString(node.node_identity_public_key);
     if ((selection.expectedKey !== undefined && nodeKey !== selection.expectedKey) || (prior !== undefined && nodeKey !== prior.nodeKey)) throw new Error('SOURCE_NODE_KEY_CHANGED');
-    if (prior !== undefined && (Number(node.descriptor_revision) < prior.descriptorRevision || (Number(node.descriptor_revision) === prior.descriptorRevision && descriptor.contentHash !== prior.descriptorHash))) throw new Error('SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK');
+    const ledger: SourceLedger = prior === undefined ? { nodeKey, generation: 0, seenGeneration:0, checkpointHash: '', descriptorRevision: Number(node.descriptor_revision), descriptorHash: descriptor.contentHash, equivocated: false, observed: Object.create(null) as { [position: string]: string[] } } : structuredClone(prior);
+    // A second signed descriptor at the accepted revision is equivocation: kept as evidence and sticky, like a checkpoint fork.
+    ledger.equivocated ||= prior !== undefined && Number(node.descriptor_revision) === prior.descriptorRevision && descriptor.contentHash !== prior.descriptorHash;
+    observe(ledger, descriptor);
+    if (ledger.equivocated) throw new Error('SOURCE_DESCRIPTOR_EQUIVOCATION');
+    if (prior !== undefined && Number(node.descriptor_revision) < prior.descriptorRevision) throw new Error('SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK');
     const remote = parseStrictJson(await fetchBytes(selection.onion, 'state', 16384, signal, budget,this.delivery), 16384);
     if (Object.keys(remote).length !== 6 || Object.keys(remote).some(key => !['protocol','protocol_version','checkpoint_hash','generation','cursor','node_identity_public_key'].includes(key)) || remote.protocol !== 'Onion Service Discovery' || remote.protocol_version !== 1 || remote.node_identity_public_key !== nodeKey) throw new Error('SCHEMA_INVALID');
     const checkpointHash = hash(requiredString(remote.checkpoint_hash));
     const checkpoint = await verifyWire(await fetchBytes(selection.onion, { snapshot: checkpointHash }, 65536, signal, budget,this.delivery), this.crypto);
     const document = parseStrictJson(new TextEncoder().encode(checkpoint.canonicalWire), 65536);
     if (checkpoint.type !== 'snapshot_descriptor' || checkpoint.contentHash !== checkpointHash || document.node_identity_public_key !== nodeKey || document.generation !== remote.generation || document.cursor !== remote.cursor) throw new Error('SOURCE_CHECKPOINT_BINDING_MISMATCH');
-    const ledger: SourceLedger = prior === undefined ? { nodeKey, generation: 0, seenGeneration:0, checkpointHash: '', descriptorRevision: Number(node.descriptor_revision), descriptorHash: descriptor.contentHash, equivocated: false, observed: Object.create(null) as { [position: string]: string[] } } : structuredClone(prior);
     const position = String(document.generation); const seen = ledger.observed[position] ?? [];
     if (!seen.includes(checkpointHash)) seen.push(checkpointHash);
     ledger.observed[position] = seen.slice(0, 8); ledger.equivocated ||= seen.length > 1;
@@ -112,9 +118,9 @@ export class SourceLoader {
     if (!Array.isArray(document.chunks) || document.chunks.length > 64 || typeof document.record_count !== 'number' || document.record_count > 10000) throw new Error('SOURCE_WORK_BUDGET_EXHAUSTED');
     let sum = 0; for (const item of document.chunks) sum += Number(requiredObject(item).bytes);
     if (sum > 33554432) throw new Error('SOURCE_WORK_BUDGET_EXHAUSTED');
-    // The fixed budget covers the small requests; the declared chunk bytes add time at 20 KB/s, so a large
-    // Node stays loadable over a slow Tor circuit. At most 15 minutes in total per source.
-    budget.remainingMs = Math.min(budget.remainingMs + Math.ceil(sum / 20), 900000);
+    // The fixed budget covers the small requests; the declared chunk bytes add time at 20 KB/s, so even the
+    // 32 MiB maximum (about 28 minutes) stays loadable over a slow Tor circuit. At most 30 minutes per source.
+    budget.remainingMs = Math.min(budget.remainingMs + Math.ceil(sum / 20), 1800000);
     let ancestor = document; let walks = 0;
     if (ledger.generation > 0 && Number(document.generation) > ledger.generation) {
       const pending=this.#ancestry.get(selection.onion);

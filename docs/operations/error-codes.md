@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-241 codes.
+242 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -83,6 +83,7 @@ for remedies.
 | `HTTP_STATUS_REJECTED` | Tor transport | 5 | The remote answered with an unexpected HTTP status other than 404, a redirect or 5xx; nothing was verified. |
 | `IDENTITY_CHANGED` | Node worker | 3 | Another Service identity now answers at an address this Node already knew; the old evidence is preserved. |
 | `IDENTITY_FORKED` | Node worker | 3 | Two different signed revisions with the same number exist; the fork stays visible. |
+| `IMPORT_CANCELLED` | browser client | – | You cancelled a record import while its signatures were checked, so nothing from the file was added. |
 | `IMPORT_FORMAT_INVALID` | browser client | – | The imported file is neither a single signed record nor a record bundle (bundle_version 1 with a records list), so nothing was imported. |
 | `IMPORT_REQUIRES_EMPTY_STAGING_STORE` | storage | 4 | storage:import writes only into a new, empty store, and the given staging store already holds records or changes; give a new staging path. |
 | `INPUT_FILE_UNAVAILABLE` | CLI, signing | 3 | An input file is missing, not a regular file, unreadable or given as a URL; check the path and read permission. |
@@ -197,9 +198,9 @@ for remedies.
 | `SOURCE_CHECKPOINT_ROLLBACK` | Node worker, browser client, configuration and status | 3 | The Node served an older checkpoint than already seen; a peer is quarantined, a publisher check rejects that Node. |
 | `SOURCE_DESCRIPTOR_EQUIVOCATION` | browser client | – | The Node signed two different Node descriptors with the same revision, so the browser set its data aside and kept both signed records as evidence; save them with Save the conflicting signed records. |
 | `SOURCE_DESCRIPTOR_HISTORY_INCOMPLETE` | browser client | – | The Node’s newer descriptor does not connect revision by revision to the one seen before through the descriptors in its snapshot, so its data from this load was not used. |
-| `SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK` | browser client | – | The Node served an older Node descriptor than this browser saw before, or a different one with the same revision, so its data was set aside. |
+| `SOURCE_DESCRIPTOR_ROLLBACK_OR_FORK` | browser client | – | The Node served an older Node descriptor than this browser saw before, so its data was set aside. A different descriptor with the same revision is SOURCE_DESCRIPTOR_EQUIVOCATION. |
 | `SOURCE_DUPLICATE` | CLI, configuration and status | 3 | The same Node was listed twice. |
-| `SOURCE_EQUIVOCATION_PRESERVED` | browser client | – | This browser already holds proof that the Node signed two conflicting states, so the Node was not loaded again and the evidence was kept. |
+| `SOURCE_EQUIVOCATION_PRESERVED` | browser client | – | This browser already holds proof that the Node signed two conflicting states or descriptors, so the Node was not loaded again and the evidence was kept. |
 | `SOURCE_FETCH_FAILED` | browser client | – | The Node could not be reached through the relay or Tor. |
 | `SOURCE_GROUP_ASSIGNMENTS_INCONSISTENT` | doctor | 6 | doctor warning: active peers that share one Node key are in different local source groups, or only some of them have a group; give them one group with peers:group. |
 | `SOURCE_GROUP_INVALID` | Node worker | 3 | A source group name is not 1 to 32 lowercase letters, digits or inner hyphens, or a stored peer has an invalid group or Node key. |
@@ -214,7 +215,7 @@ for remedies.
 | `SOURCE_SET_CONCENTRATED` | doctor | 6 | doctor: most configured peers share one source group; diversity is low. |
 | `SOURCE_STATE_INVALID` | configuration and status | 3 | The Node’s state answer has no valid sha256 checkpoint hash, so service:membership rejected that Node’s evidence. |
 | `SOURCE_TIMEOUT` | browser client | – | The Node did not answer in time; the existing local index is unchanged. |
-| `SOURCE_TIME_BUDGET_EXHAUSTED` | browser client | – | Downloads from this Node took more than the browser’s 90 seconds of network time for one source, so nothing partial was used; try again later. Signature checking does not count against this limit. |
+| `SOURCE_TIME_BUDGET_EXHAUSTED` | browser client | – | Downloads from this Node took longer than the time allowed for its data (90 seconds of network time plus one second per 20 KB of declared chunk bytes, at most 30 minutes), also when that time ran out during a download, so nothing partial was used; try again later. Signature checking does not count against this limit. |
 | `SOURCE_WORK_BUDGET_EXHAUSTED` | Node worker, browser client | 3 | The Node’s signed snapshot exceeds the checking limits (over 10000 records or 32 MiB of chunks, or over 64 chunks in the browser), so the browser discards the load and a Node worker quarantines the peer. |
 | `SQLITE_DRIVER_UNAVAILABLE` | storage | 4 | The sqlite storage backend needs PHP PDO with the SQLite driver, which the PHP runtime running this code lacks; enable pdo_sqlite in that runtime or use the filesystem backend. |
 | `STORAGE_ADDRESS_INVALID` | storage | 4 | A record or export address is not sha256: followed by 64 lowercase hex digits, or an operational table or key name is invalid, so the store refused the request. |
@@ -250,7 +251,7 @@ for remedies.
 | `VISITOR_SOURCE_LIMIT` | browser client | – | At most 8 visitor-chosen Nodes can be added. |
 | `VISITOR_SOURCE_RELAY_ENABLED_OUTBOUND_TO_VISITOR_CHOSEN_NODES` | doctor | 6 | doctor: the Client Host relays Nodes chosen by visitors. |
 | `WEBROOT_INVALID` | signing | 3 | The webroot is a URL, a symlink or not a directory, or its .well-known directory is a symlink, missing (history:install) or cannot be created (manifest:install). |
-| `WITNESS_BUDGET_EXHAUSTED` | browser client | – | The browser’s memory for Node evidence is full (512 signed checkpoints and descriptors, or fork evidence for 16 Nodes) and never drops proofs, so further Node data was refused; save any evidence you need, then reload the page. |
+| `WITNESS_BUDGET_EXHAUSTED` | browser client | – | The browser’s memory for Node evidence is full (512 signed checkpoints and descriptors, or fork evidence for 16 Nodes), so further Node data was refused. Witnesses below a Node’s accepted anchor are dropped after each successful load and fork proofs never are, so this takes a very long history walk or many Nodes; save any evidence you need, then reload the page. |
 | `WITNESS_CONFIGURATION_INVALID` | browser client | – | An internal browser check failed: the memory for Node evidence was created with limits outside 1 to 512 records or 1 to 16 forks. |
 | `WITNESS_TYPE_INVALID` | browser client | – | An internal browser check failed: only signed checkpoints and Node descriptors can be kept as Node evidence, and another record type was offered. |
 | `WORK_BUDGET_EXHAUSTED` | Node worker, browser client, protocol, storage | 3, 4 | The input exceeds a bounded work limit and was refused. |
