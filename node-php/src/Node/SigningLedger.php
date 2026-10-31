@@ -21,15 +21,26 @@ use OnionServiceDiscovery\Validation\StrictJson;
  * forgive. Before signing, the store must have reached what the ledger names: a ledger ahead of the
  * store refuses (SIGNED_CHAIN_AHEAD_OF_STORE, SIGNED_DESCRIPTOR_AHEAD_OF_STORE) until
  * node:snapshot --adopt-signed-chain continues from the signed records; a ledger behind the store
- * (lost, first run after an upgrade, a crash after the commit) is raised to the store first. The
- * ledger is written only after the store committed, so a record that was signed but never committed,
- * and so never published, is never held against the Node. A damaged ledger or one of another key
- * stops signing (SIGNING_LEDGER_INVALID) and is never replaced silently.
+ * (lost, first run after an upgrade) is raised to the store first. Before each commit the ledger holds
+ * the new record as pending (pending_checkpoint, pending_descriptor: present only while set, so a
+ * ledger without one is the version 1 file older releases wrote), after the commit as signed. A crash
+ * between the two leaves the pending entry: the next signing run adopts it from its export blob when
+ * it directly follows the store's head (the commit was lost, or a restored backup predates it), and
+ * otherwise refuses as for any record the key signed beyond the store. A damaged ledger or one of
+ * another key stops signing (SIGNING_LEDGER_INVALID) and is never replaced silently.
  */
 final class SigningLedger
 {
     public const MAX_BYTES = 4096;
+    /**
+     * Own checkpoints --adopt-signed-chain must find below the signed head (exports:prune keeps their blobs): a peer
+     * treats a missing parent within PeerSync::SERVED_CHECKPOINTS of the newest checkpoint as a fault, not a gap.
+     */
+    public const CHAIN_BLOBS = PeerSync::SERVED_CHECKPOINTS;
+    /** Checkpoints one adoption admits at most (one transaction, with the descriptor). */
+    private const MAX_ADOPTED = 255;
     private const KEYS = ['checkpoint', 'descriptor', 'ledger_version', 'node_identity_public_key'];
+    private const EMPTY = ['checkpoint' => null, 'descriptor' => null, 'pending' => ['checkpoint' => null, 'descriptor' => null]];
     private int $depth = 0;
     /** @var resource|null */
     private $lock = null;
@@ -59,9 +70,9 @@ final class SigningLedger
     }
 
     /**
-     * The ledger's entries as [generation or revision, content hash], or null while there is no ledger.
-     * With $publicKey the ledger must belong to that key.
-     * @return array{checkpoint: array{int,string}|null, descriptor: array{int,string}|null}|null
+     * The ledger's entries as [generation or revision, content hash], with the pending ones written before
+     * their commit, or null while there is no ledger. With $publicKey the ledger must belong to that key.
+     * @return array{checkpoint: array{int,string}|null, descriptor: array{int,string}|null, pending: array{checkpoint: array{int,string}|null, descriptor: array{int,string}|null}}|null
      */
     public function read(?string $publicKey): ?array
     {
@@ -73,27 +84,69 @@ final class SigningLedger
         if ($bytes === false) { throw new StorageException('SIGNING_LEDGER_UNAVAILABLE'); }
         try {
             $fields = get_object_vars(StrictJson::parse($bytes, self::MAX_BYTES)); ksort($fields, SORT_STRING);
-            if (array_keys($fields) !== self::KEYS || $fields['ledger_version'] !== 1 || !is_string($fields['node_identity_public_key'])) { throw new StorageException('SIGNING_LEDGER_INVALID'); }
+            $pending = ['checkpoint' => self::entry($fields['pending_checkpoint'] ?? null, 'generation'), 'descriptor' => self::entry($fields['pending_descriptor'] ?? null, 'revision')];
+            // A pending entry is written only while it is set, never as null.
+            if (array_keys(array_diff_key($fields, ['pending_checkpoint' => 0, 'pending_descriptor' => 0])) !== self::KEYS || (array_key_exists('pending_checkpoint', $fields) && $pending['checkpoint'] === null)
+                || (array_key_exists('pending_descriptor', $fields) && $pending['descriptor'] === null) || $fields['ledger_version'] !== 1 || !is_string($fields['node_identity_public_key'])) { throw new StorageException('SIGNING_LEDGER_INVALID'); }
             Encoding::publicKey($fields['node_identity_public_key']);
             if ($publicKey !== null && $fields['node_identity_public_key'] !== $publicKey) { throw new StorageException('SIGNING_LEDGER_INVALID'); }
-            return ['checkpoint' => self::entry($fields['checkpoint'], 'generation'), 'descriptor' => self::entry($fields['descriptor'], 'revision')];
+            return ['checkpoint' => self::entry($fields['checkpoint'], 'generation'), 'descriptor' => self::entry($fields['descriptor'], 'revision'), 'pending' => $pending];
         } catch (\Throwable) { throw new StorageException('SIGNING_LEDGER_INVALID'); }
     }
 
     /**
      * Before signing: refuses when this key already signed beyond the store's published checkpoint or
-     * Node descriptor, and raises a ledger that is missing or behind to the store.
+     * Node descriptor, adopts a pending record whose commit was lost when it directly follows the store's
+     * head (its blob in $blobs), and raises a ledger that is missing or behind to the store. Returns the
+     * store state to sign against: $state, or the state after such an adoption.
      * @param array<array-key,mixed> $state The store state the signature will be committed against.
+     * @return array<array-key,mixed>
      */
-    public function reconcile(string $publicKey, StorageBackend $store, RecordVerifier $verifier, array $state): void
+    public function reconcile(string $publicKey, StorageBackend $store, RecordVerifier $verifier, array $state, ?PublicBlobStore $blobs = null): array
     {
-        $this->exclusive(function () use ($publicKey, $store, $verifier, $state): void {
+        return $this->exclusive(function () use ($publicKey, $store, $verifier, $state, $blobs): array {
             $stored = self::stored($store, $verifier, $state); $ledger = $this->read($publicKey);
-            $signed = $ledger ?? ['checkpoint' => null, 'descriptor' => null];
+            $signed = $ledger ?? self::EMPTY;
             if (self::relation($signed['checkpoint'], $stored['checkpoint']) === 'AHEAD') { throw new StorageException('SIGNED_CHAIN_AHEAD_OF_STORE'); }
             if (self::relation($signed['descriptor'], $stored['descriptor']) === 'AHEAD') { throw new StorageException('SIGNED_DESCRIPTOR_AHEAD_OF_STORE'); }
-            // Neither entry is ahead, so the store's pointers are the newest this key published.
-            if ($signed !== $stored && ($ledger !== null || $stored['checkpoint'] !== null || $stored['descriptor'] !== null)) { $this->write($publicKey, $stored); }
+            foreach (['checkpoint', 'descriptor'] as $kind) {
+                $pending = $signed['pending'][$kind];
+                // Committed (the store has it) or superseded: the store's pointer below replaces it.
+                if ($pending === null || self::relation($pending, $stored[$kind]) !== 'AHEAD') { continue; }
+                $record = $blobs === null ? null : self::successor($kind, $pending, $stored[$kind], $blobs, $verifier, $publicKey);
+                if ($record === null) { throw new StorageException($kind === 'checkpoint' ? 'SIGNED_CHAIN_AHEAD_OF_STORE' : 'SIGNED_DESCRIPTOR_AHEAD_OF_STORE'); }
+                $state = self::admit($store, $state, $kind === 'checkpoint' ? [$record] : [], $kind === 'descriptor' ? $record : null);
+                $stored = self::stored($store, $verifier, $state);
+            }
+            // Nothing is ahead or pending any more, so the store's pointers are the newest this key published.
+            $next = ['checkpoint' => $stored['checkpoint'], 'descriptor' => $stored['descriptor'], 'pending' => self::EMPTY['pending']];
+            if ($next !== $signed && ($ledger !== null || $stored['checkpoint'] !== null || $stored['descriptor'] !== null)) { $this->write($publicKey, $next); }
+            return $state;
+        });
+    }
+
+    /**
+     * Before the store commits a signed checkpoint or Node descriptor (its blob already written): holds it as
+     * pending, so a crash before record() still keeps it from being signed over.
+     * @param 'checkpoint'|'descriptor' $kind
+     */
+    public function prepare(string $publicKey, string $kind, int $number, string $hash): void
+    {
+        $this->exclusive(function () use ($publicKey, $kind, $number, $hash): void {
+            $ledger = $this->read($publicKey) ?? self::EMPTY; $ledger['pending'][$kind] = [$number, $hash]; $this->write($publicKey, $ledger);
+        });
+    }
+
+    /**
+     * The commit was refused before it wrote anything (EVIDENCE_CHANGED_RETRY): the pending record was never published.
+     * @param 'checkpoint'|'descriptor' $kind
+     */
+    public function cancel(string $publicKey, string $kind, string $hash): void
+    {
+        $this->exclusive(function () use ($publicKey, $kind, $hash): void {
+            $ledger = $this->read($publicKey);
+            if ($ledger === null || ($ledger['pending'][$kind][1] ?? null) !== $hash) { return; }
+            $ledger['pending'][$kind] = null; $this->write($publicKey, $ledger);
         });
     }
 
@@ -104,24 +157,29 @@ final class SigningLedger
     public function record(string $publicKey, string $kind, int $number, string $hash): void
     {
         $this->exclusive(function () use ($publicKey, $kind, $number, $hash): void {
-            $ledger = $this->read($publicKey) ?? ['checkpoint' => null, 'descriptor' => null]; $current = $ledger[$kind];
+            $ledger = $this->read($publicKey) ?? self::EMPTY; $current = $ledger[$kind];
             if ($current !== null && ($current[0] > $number || ($current[0] === $number && $current[1] !== $hash))) { throw new StorageException($kind === 'checkpoint' ? 'SIGNED_CHAIN_AHEAD_OF_STORE' : 'SIGNED_DESCRIPTOR_AHEAD_OF_STORE'); }
-            if ($current === [$number, $hash]) { return; }
-            $ledger[$kind] = [$number, $hash]; $this->write($publicKey, $ledger);
+            $next = $ledger; $next[$kind] = [$number, $hash];
+            if ($ledger['pending'][$kind] === [$number, $hash]) { $next['pending'][$kind] = null; }
+            if ($next !== $ledger) { $this->write($publicKey, $next); }
         });
     }
 
     /**
      * Read-only comparison for doctor and node:status: CONSISTENT, BEHIND_STORE (raised by the next
-     * signing run), AHEAD_OF_STORE (the store is older than what the key signed), NOT_PRESENT or INVALID.
+     * signing run), AHEAD_OF_STORE (the store is older than what the key signed, or lacks a pending record
+     * the next signing run adopts), NOT_PRESENT or INVALID.
      * @param array<array-key,mixed> $state
      */
     public function inspect(?string $publicKey, StorageBackend $store, RecordVerifier $verifier, array $state): string
     {
         try { $ledger = $this->read($publicKey); } catch (StorageException) { return 'INVALID'; }
         if ($ledger === null) { return 'NOT_PRESENT'; }
-        $stored = self::stored($store, $verifier, $state);
-        $relations = [self::relation($ledger['checkpoint'], $stored['checkpoint']), self::relation($ledger['descriptor'], $stored['descriptor'])];
+        $stored = self::stored($store, $verifier, $state); $relations = [];
+        foreach (['checkpoint', 'descriptor'] as $kind) {
+            $relations[] = self::relation($ledger[$kind], $stored[$kind]);
+            if ($ledger['pending'][$kind] !== null) { $relations[] = self::relation($ledger['pending'][$kind], $stored[$kind]) === 'AHEAD' ? 'AHEAD' : 'BEHIND'; }
+        }
         return in_array('AHEAD', $relations, true) ? 'AHEAD_OF_STORE' : (in_array('BEHIND', $relations, true) ? 'BEHIND_STORE' : 'CONSISTENT');
     }
 
@@ -137,39 +195,59 @@ final class SigningLedger
 
     /**
      * node:snapshot --adopt-signed-chain: admits the checkpoint (from the export directory) and the Node
-     * descriptor (from the published-state copy) that the ledger names but the store lacks, after checking
-     * that this key signed exactly those, and points the store at them. The next snapshot then continues at
-     * the ledger's generation plus one; the generations between the restored store and the adopted one stay
-     * absent. SIGNED_CHAIN_UNRECOVERABLE when a needed record is gone.
+     * descriptor (from the published-state copy or its blob) that the ledger names but the store lacks,
+     * after checking that this key signed exactly those, and points the store at them. The checkpoints
+     * between the store's and the signed one are admitted too, walked back through previous_checkpoint_hash
+     * (export blobs; at most 255), so a peer anchored on any of them still proves the chain. The newest
+     * CHAIN_BLOBS below the signed one must be found (SIGNED_CHAIN_INCOMPLETE otherwise); older ones that are
+     * gone leave a gap peers accept as one. SIGNED_CHAIN_UNRECOVERABLE when the signed record itself is gone.
      * @return array{checkpoint:string,descriptor:string}
      */
     public function adopt(string $publicKey, StorageBackend $store, PublicBlobStore $blobs, RecordVerifier $verifier, ?string $nodeOnion): array
     {
         return $this->exclusive(function () use ($publicKey, $store, $blobs, $verifier, $nodeOnion): array {
             $state = $store->snapshot(); $stored = self::stored($store, $verifier, $state);
-            $signed = $this->read($publicKey) ?? ['checkpoint' => null, 'descriptor' => null]; $checkpoint = null; $descriptor = null;
-            if ($signed['checkpoint'] !== null && self::relation($signed['checkpoint'], $stored['checkpoint']) === 'AHEAD') {
-                try { $wire = $blobs->get($signed['checkpoint'][1]); } catch (StorageException) { $wire = null; }
-                $checkpoint = self::signed($wire, $verifier, $publicKey, 'snapshot_descriptor', $signed['checkpoint'][1]);
-                if ($checkpoint->document()->generation !== $signed['checkpoint'][0]) { throw new StorageException('SIGNED_CHAIN_UNRECOVERABLE'); }
+            $signed = $this->read($publicKey) ?? self::EMPTY; $chain = []; $descriptor = null;
+            $checkpoint = self::head($signed['checkpoint'], $signed['pending']['checkpoint']); $signedDescriptor = self::head($signed['descriptor'], $signed['pending']['descriptor']);
+            if ($checkpoint !== null && self::relation($checkpoint, $stored['checkpoint']) === 'AHEAD') { $chain = self::chain($checkpoint, $stored['checkpoint'], $store, $blobs, $verifier, $publicKey); }
+            if ($signedDescriptor !== null && self::relation($signedDescriptor, $stored['descriptor']) === 'AHEAD') {
+                try { $copy = PublishedState::load($blobs, $verifier, $nodeOnion)?->nodeDescriptor; } catch (StorageException) { $copy = null; }
+                try { $wire = $copy?->contentHash === $signedDescriptor[1] ? $copy->canonicalWire : $blobs->get($signedDescriptor[1]); } catch (StorageException) { $wire = null; }
+                $descriptor = self::signed($wire, $verifier, $publicKey, 'node_descriptor', $signedDescriptor[1]);
+                if ($descriptor->document()->descriptor_revision !== $signedDescriptor[0] || $descriptor->document()->node_onion !== $nodeOnion) { throw new StorageException('SIGNED_CHAIN_UNRECOVERABLE'); }
             }
-            if ($signed['descriptor'] !== null && self::relation($signed['descriptor'], $stored['descriptor']) === 'AHEAD') {
-                try { $wire = PublishedState::load($blobs, $verifier, $nodeOnion)?->nodeDescriptor?->canonicalWire; } catch (StorageException) { $wire = null; }
-                $descriptor = self::signed($wire, $verifier, $publicKey, 'node_descriptor', $signed['descriptor'][1]);
-                if ($descriptor->document()->descriptor_revision !== $signed['descriptor'][0] || $descriptor->document()->node_onion !== $nodeOnion) { throw new StorageException('SIGNED_CHAIN_UNRECOVERABLE'); }
-            }
-            if ($checkpoint === null && $descriptor === null) { return ['checkpoint' => 'CURRENT', 'descriptor' => 'CURRENT']; }
-            $store->transaction(static function (StorageTransaction $tx) use ($state, $checkpoint, $descriptor): void {
-                if ($tx->state()['tables']['node'] !== $state['tables']['node']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
-                if ($checkpoint !== null) {
-                    // service_index_version 1: the derived indexes still describe the restored store, so the next run re-signs and rebuilds them.
-                    $document = $checkpoint->document(); $tx->putRecord($checkpoint);
-                    $tx->set('node', 'published-snapshot', ['hash' => $checkpoint->contentHash, 'root_hash' => $document->root_hash, 'generation' => $document->generation, 'cursor' => $document->cursor, 'service_index_version' => 1]);
-                }
-                if ($descriptor !== null) { $tx->putRecord($descriptor); $tx->set('node', 'descriptor', ['hash' => $descriptor->contentHash]); }
-            });
-            return ['checkpoint' => $checkpoint === null ? 'CURRENT' : 'ADOPTED', 'descriptor' => $descriptor === null ? 'CURRENT' : 'ADOPTED'];
+            if ($chain === [] && $descriptor === null) { return ['checkpoint' => 'CURRENT', 'descriptor' => 'CURRENT']; }
+            self::admit($store, $state, $chain, $descriptor);
+            return ['checkpoint' => $chain === [] ? 'CURRENT' : 'ADOPTED', 'descriptor' => $descriptor === null ? 'CURRENT' : 'ADOPTED'];
         });
+    }
+
+    /**
+     * Export blobs exports:prune keeps for --adopt-signed-chain: the newest CHAIN_BLOBS checkpoints of this Node's
+     * own chain below the store's published checkpoint and below those the ledger names, and the descriptors the
+     * ledger names. Only blobs that exist and hold exactly the record; a damaged ledger keeps only the store's chain.
+     * @param array<array-key,mixed> $state
+     * @return list<string>
+     */
+    public function retainedBlobs(StorageBackend $store, PublicBlobStore $blobs, RecordVerifier $verifier, array $state): array
+    {
+        try { $ledger = $this->read(null) ?? self::EMPTY; } catch (StorageException) { $ledger = self::EMPTY; }
+        $keep = []; $seen = [];
+        foreach ([$state['tables']['node']['key:published-snapshot']['hash'] ?? null, $ledger['checkpoint'][1] ?? null, $ledger['pending']['checkpoint'][1] ?? null] as $hash) {
+            for ($walked = 0; is_string($hash) && !isset($seen[$hash]) && $walked < self::CHAIN_BLOBS; ++$walked) {
+                $seen[$hash] = true;
+                try {
+                    $blob = $blobs->get($hash); $record = $verifier->verifyWire($blob ?? $store->readRecord($hash) ?? throw new StorageException('NOT_FOUND'));
+                } catch (StorageException | \InvalidArgumentException) { break; }
+                if ($record->type !== 'snapshot_descriptor' || $record->contentHash !== $hash) { break; }
+                if ($blob === $record->canonicalWire) { $keep[] = $hash; }
+                $hash = $record->document()->previous_checkpoint_hash;
+            }
+        }
+        foreach ([$ledger['descriptor'][1] ?? null, $ledger['pending']['descriptor'][1] ?? null] as $hash) {
+            try { if (is_string($hash) && $blobs->get($hash) !== null) { $keep[] = $hash; } } catch (StorageException) {}
+        }
+        return $keep;
     }
 
     /**
@@ -187,6 +265,86 @@ final class SigningLedger
             $descriptor = [(int) $record->document()->descriptor_revision, $record->contentHash];
         }
         return ['checkpoint' => $published === null ? null : [$published['generation'], $published['hash']], 'descriptor' => $descriptor];
+    }
+
+    /**
+     * The signed checkpoint $head and its own ancestors the store lacks, newest first, down to the store's
+     * generation. A missing ancestor within CHAIN_BLOBS of $head would leave peers anchored below it a gap
+     * they treat as a fault, so it refuses (SIGNED_CHAIN_INCOMPLETE); an older one ends the walk.
+     * @param array{int,string} $head
+     * @param array{int,string}|null $stored
+     * @return list<ValidatedRecord>
+     */
+    private static function chain(array $head, ?array $stored, StorageBackend $store, PublicBlobStore $blobs, RecordVerifier $verifier, string $publicKey): array
+    {
+        $record = self::signed(self::wire($head[1], $store, $blobs), $verifier, $publicKey, 'snapshot_descriptor', $head[1]);
+        if ($record->document()->generation !== $head[0]) { throw new StorageException('SIGNED_CHAIN_UNRECOVERABLE'); }
+        $chain = [$record]; $floor = $stored[0] ?? 0;
+        while (count($chain) < self::MAX_ADOPTED && ($document = $record->document())->generation - 1 > $floor) {
+            $parent = $document->previous_checkpoint_hash; $wire = is_string($parent) ? self::wire($parent, $store, $blobs) : null;
+            if ($wire === null) {
+                if ($head[0] - ($document->generation - 1) < self::CHAIN_BLOBS) { throw new StorageException('SIGNED_CHAIN_INCOMPLETE'); }
+                break;
+            }
+            $record = self::signed($wire, $verifier, $publicKey, 'snapshot_descriptor', $parent);
+            if ($record->document()->generation !== $document->generation - 1) { throw new StorageException('SIGNED_CHAIN_UNRECOVERABLE'); }
+            $chain[] = $record;
+        }
+        return $chain;
+    }
+
+    /**
+     * The newest record of a kind the key signed: the pending one when it is beyond the committed one.
+     * @param array{int,string}|null $entry
+     * @param array{int,string}|null $pending
+     * @return array{int,string}|null
+     */
+    private static function head(?array $entry, ?array $pending): ?array
+    {
+        return $pending !== null && ($entry === null || $pending[0] > $entry[0]) ? $pending : $entry;
+    }
+
+    /** A record from the store, else its export blob, or null. */
+    private static function wire(string $hash, StorageBackend $store, PublicBlobStore $blobs): ?string
+    {
+        try { return $store->readRecord($hash) ?? $blobs->get($hash); } catch (StorageException) { return null; }
+    }
+
+    /**
+     * A pending record whose blob holds exactly what this key signed and that directly follows the store's
+     * record of its kind, or null.
+     * @param array{int,string} $pending
+     * @param array{int,string}|null $stored
+     */
+    private static function successor(string $kind, array $pending, ?array $stored, PublicBlobStore $blobs, RecordVerifier $verifier, string $publicKey): ?ValidatedRecord
+    {
+        try { $record = self::signed($blobs->get($pending[1]), $verifier, $publicKey, $kind === 'checkpoint' ? 'snapshot_descriptor' : 'node_descriptor', $pending[1]); }
+        catch (StorageException) { return null; }
+        $document = $record->document();
+        [$number, $previous] = $kind === 'checkpoint' ? [$document->generation, $document->previous_checkpoint_hash] : [$document->descriptor_revision, $document->previous_descriptor_hash];
+        return $number === $pending[0] && $number === ($stored[0] ?? 0) + 1 && $previous === ($stored[1] ?? null) ? $record : null;
+    }
+
+    /**
+     * Admits signed checkpoints (newest first; the store then points at the first) and a Node descriptor in one
+     * transaction over exactly the Node rows of $state, and returns the new state.
+     * @param array<array-key,mixed> $state
+     * @param list<ValidatedRecord> $checkpoints
+     * @return array<array-key,mixed>
+     */
+    private static function admit(StorageBackend $store, array $state, array $checkpoints, ?ValidatedRecord $descriptor): array
+    {
+        $store->transaction(static function (StorageTransaction $tx) use ($state, $checkpoints, $descriptor): void {
+            if ($tx->state()['tables']['node'] !== $state['tables']['node']) { throw new ProtocolException('EVIDENCE_CHANGED_RETRY'); }
+            foreach (array_reverse($checkpoints) as $checkpoint) { $tx->putRecord($checkpoint); }
+            if ($checkpoints !== []) {
+                // service_index_version 1: the derived indexes still describe the older store, so the next run re-signs and rebuilds them.
+                $document = $checkpoints[0]->document();
+                $tx->set('node', 'published-snapshot', ['hash' => $checkpoints[0]->contentHash, 'root_hash' => $document->root_hash, 'generation' => $document->generation, 'cursor' => $document->cursor, 'service_index_version' => 1]);
+            }
+            if ($descriptor !== null) { $tx->putRecord($descriptor); $tx->set('node', 'descriptor', ['hash' => $descriptor->contentHash]); }
+        });
+        return $store->snapshot();
     }
 
     /**
@@ -222,15 +380,18 @@ final class SigningLedger
 
     /**
      * Replaces the ledger atomically: an owner-only temporary file in the key directory, flushed to disk,
-     * renamed over the ledger, then the directory flushed.
-     * @param array{checkpoint: array{int,string}|null, descriptor: array{int,string}|null} $ledger
+     * renamed over the ledger, then the directory flushed. Pending entries are written only while set.
+     * @param array{checkpoint: array{int,string}|null, descriptor: array{int,string}|null, pending: array{checkpoint: array{int,string}|null, descriptor: array{int,string}|null}} $ledger
      */
     private function write(string $publicKey, array $ledger): void
     {
         $parent = dirname($this->path);
         if (str_contains($this->path, '://') || is_link($parent) || !is_dir($parent) || (fileperms($parent) & 0022) !== 0 || is_link($this->path) || (file_exists($this->path) && !is_file($this->path))) { throw new StorageException('SIGNING_LEDGER_UNAVAILABLE'); }
         $entry = static fn (?array $value, string $field): ?array => $value === null ? null : [$field => $value[0], 'hash' => $value[1]];
-        $bytes = StorageJson::encode(['ledger_version' => 1, 'node_identity_public_key' => $publicKey, 'checkpoint' => $entry($ledger['checkpoint'], 'generation'), 'descriptor' => $entry($ledger['descriptor'], 'revision')]) . "\n";
+        $fields = ['ledger_version' => 1, 'node_identity_public_key' => $publicKey, 'checkpoint' => $entry($ledger['checkpoint'], 'generation'), 'descriptor' => $entry($ledger['descriptor'], 'revision')];
+        if ($ledger['pending']['checkpoint'] !== null) { $fields['pending_checkpoint'] = $entry($ledger['pending']['checkpoint'], 'generation'); }
+        if ($ledger['pending']['descriptor'] !== null) { $fields['pending_descriptor'] = $entry($ledger['pending']['descriptor'], 'revision'); }
+        $bytes = StorageJson::encode($fields) . "\n";
         $temporary = $this->path . '.tmp-' . bin2hex(random_bytes(8));
         $previousMask = umask(0077);
         try { $stream = @fopen($temporary, 'xb'); } finally { umask($previousMask); }

@@ -35,8 +35,9 @@ final readonly class SnapshotProducer
     {
         if ($now < 0 || $now > 253402300799) { throw new ProtocolException('CLOCK_INVALID'); }
         $state = $this->store->snapshot(); $all = [];
-        // A store older than what this key signed (a restored backup) must not be signed onward.
-        $this->ledger?->reconcile($this->signer->publicKey(), $this->store, $this->verifier, $state);
+        // A store older than what this key signed (a restored backup) must not be signed onward; a pending checkpoint
+        // whose commit was lost is adopted first.
+        $state = $this->ledger?->reconcile($this->signer->publicKey(), $this->store, $this->verifier, $state, $this->blobs) ?? $state;
         foreach (array_chunk(array_keys($state['records']), 256) as $batch) {
             foreach ($this->store->readRecords($batch) as $hash => $wire) {
                 $record = $this->verifier->verifyWire($wire);
@@ -76,6 +77,8 @@ final readonly class SnapshotProducer
             'record_count' => $count, 'cursor' => (string) $publicCursor, 'chunks' => $chunks,
         ]));
         $this->blobs->put($descriptor->contentHash, $descriptor->canonicalWire);
+        // Pending in the ledger before the commit: a crash after the commit then never lets this generation be signed again.
+        $this->ledger?->prepare($this->signer->publicKey(), 'checkpoint', $generation, $descriptor->contentHash);
         $serviceBuckets = [];
         foreach ($hashes as $hash) {
             $doc = $byHash[$hash]->document();
@@ -119,7 +122,7 @@ final readonly class SnapshotProducer
         // The public index names this Node's own retained checkpoints, never a peer's.
         $ownCheckpoints = [];
         foreach ($all as $record) { if ($record->type === 'snapshot_descriptor' && $record->document()->node_identity_public_key === $this->signer->publicKey()) { $ownCheckpoints[] = $record->contentHash; } }
-        $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor, $hashes, $serviceIndexes, $searchIndex, $ownCheckpoints): void {
+        try { $this->store->transaction(static function (StorageTransaction $tx) use ($state, $descriptor, $generation, $chunks, $publicCursor, $hashes, $serviceIndexes, $searchIndex, $ownCheckpoints): void {
             // The snapshot derives only from the signed records (new ones raise last_sequence, pruned ones raise
             // pruned_records) and the Node rows; queue leases, peer state and maintenance counters written meanwhile
             // do not invalidate it.
@@ -133,8 +136,10 @@ final readonly class SnapshotProducer
             if ($searchIndex !== null) { $tx->set('node', 'server-search-index', ['format_version' => \OnionServiceDiscovery\Search\SearchIndex::FORMAT_VERSION, 'hash' => $searchIndex]); }
             else { $tx->deleteOperational('node', 'server-search-index'); }
             $tx->set('node', 'published-snapshot', ['hash' => $descriptor->contentHash, 'root_hash' => SnapshotFormat::rootHash($chunks), 'generation' => $generation, 'cursor' => (string) $publicCursor, 'service_index_version' => 2]);
-        });
-        // Only a committed, so published, checkpoint enters the ledger; a crash before this line is raised by the next run.
+        }); }
+        // Refused before anything was written: never published. Any other failure keeps it pending (adopted by the next run).
+        catch (ProtocolException $error) { if ($error->getMessage() === 'EVIDENCE_CHANGED_RETRY') { $this->ledger?->cancel($this->signer->publicKey(), 'checkpoint', $descriptor->contentHash); } throw $error; }
+        // A committed, so published, checkpoint replaces the pending entry; a crash before this line leaves it pending.
         $this->ledger?->record($this->signer->publicKey(), 'checkpoint', $generation, $descriptor->contentHash);
         return ['status' => 'PUBLISHED', 'checkpoint_hash' => $descriptor->contentHash, 'record_count' => $count, 'chunks' => count($chunks)];
     }

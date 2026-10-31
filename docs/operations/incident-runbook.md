@@ -242,8 +242,8 @@ lost. Until then the Node serves in degraded mode, and `doctor` reports
    server or the timers, continue the published chain:
    `node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain`. Then run
    `doctor` (`signing_ledger` must be `CONSISTENT`) and start everything again.
-   Only if that fails with `SIGNED_CHAIN_UNRECOVERABLE` and no newer backup
-   exists, start a new Node identity (section 2) and carry the restored public
+   Only if that fails with `SIGNED_CHAIN_UNRECOVERABLE` or
+   `SIGNED_CHAIN_INCOMPLETE` (section 6) and no newer backup exists, start a new Node identity (section 2) and carry the restored public
    records over with `storage:export` from the staging path.
 
 ## 5. A passphrase file leaked
@@ -267,7 +267,8 @@ XChaCha20-Poly1305). Whoever holds both can sign with that key.
 ## 6. Signing ledger ahead of the store or damaged
 
 Every Node keeps `KEY_PATH.signed` beside its key: the newest checkpoint and Node
-descriptor the key signed and the store committed ([deployment and
+descriptor the key signed and the store committed, and while a commit is under
+way the one about to be committed (pending) ([deployment and
 recovery](deployment-and-recovery.md#restoring-an-older-store-the-signing-ledger)).
 It stops `node:init` and `node:snapshot` before they sign a number the key already
 used with other content, which peers would treat as equivocation for good.
@@ -275,20 +276,29 @@ used with other content, which peers would treat as equivocation for good.
 **`SIGNED_CHAIN_AHEAD_OF_STORE` or `SIGNED_DESCRIPTOR_AHEAD_OF_STORE`**
 (`doctor`: `SIGNING_LEDGER_AHEAD_OF_STORE`). The store is older than what the key
 signed: usually a restored backup, or a configuration pointing at an old store
-path. Nothing was signed.
+path. It is also reported, as `AHEAD_OF_STORE`, while the ledger holds a pending
+record the store lacks (a crash between the commit and the ledger write); the
+next `node:snapshot` adopts that one by itself when it directly follows the
+store. Nothing was signed.
 
 1. Stop the timers and the web server. Check that the configuration points at
    the store you mean; if a newer store exists, switch back to it.
 2. Otherwise run `node:snapshot CONFIG --passphrase-file FILE
    --adopt-signed-chain`. It continues from the checkpoint and descriptor the
-   ledger names, after checking that this key signed exactly those. The
-   generations in between stay absent; peers holding the newest one continue
-   normally.
+   ledger names, after checking that this key signed exactly those, and admits
+   the checkpoints between the store and that one from the export directory, so
+   every peer anchored on one of them continues normally.
 3. `SIGNED_CHAIN_UNRECOVERABLE`: the export directory no longer has the
    checkpoint, or the published-state copy no longer has the descriptor. Restore
    a newer store backup, or the export directory from the same backup set, and
    try again. If neither exists, this key cannot continue safely: start a new
    Node identity (section 2).
+4. `SIGNED_CHAIN_INCOMPLETE`: the signed checkpoint is there, but one of the 64
+   checkpoints below it is not (in the store or the export directory), so peers
+   anchored below it could not follow and would quarantine the Node. Nothing was
+   changed. Copy the missing `HASH.json` checkpoint files back into the export
+   directory from a backup of it, or restore a newer store backup, and run the
+   command again. If neither exists, start a new Node identity (section 2).
 
 **`SIGNING_LEDGER_INVALID`.** The ledger is not valid JSON of the expected shape,
 is a symlink, is open to group or others or names another key. It is never replaced

@@ -9,7 +9,7 @@ transport, 6 `doctor` warning, 8 internal error). HTTP routes return codes as `{
 appear in the source or operation status. See [troubleshooting](../getting-started/troubleshooting.md)
 for remedies.
 
-241 codes.
+242 codes.
 
 | Code | Raised by | CLI exit | Meaning |
 | --- | --- | --- | --- |
@@ -56,7 +56,7 @@ for remedies.
 | `DOCUMENT_TOO_LARGE` | CLI, JSON parsing, browser client, protocol | 3 | An input file exceeds the limit for its record type. |
 | `ENCODING_INVALID` | JSON parsing, browser client, encoding | 3 | JSON input was rejected for its encoding: a byte order mark, invalid UTF-8, a lone surrogate or a NUL character in a property name; save it as UTF-8 without a byte order mark. |
 | `ERROR_CODE_INVALID` | Node worker | 3 | An internal check failed: a candidate check ended with an error that is not a plain uppercase code, so the failure could not be recorded on the candidate. |
-| `EVIDENCE_CHANGED_RETRY` | Node worker | 3 | Other evidence was committed to the store while node:init, node:snapshot or node:work-one prepared its result, so that result was not saved (node:work-one backs off and retries the candidate); run node:init or node:snapshot again. |
+| `EVIDENCE_CHANGED_RETRY` | Node worker, storage | 3, 4 | Other evidence was committed to the store while node:init, node:snapshot or node:work-one prepared its result, so that result was not saved (node:work-one backs off and retries the candidate), or node:maintain kept pruning records while storage:backup, storage:export or storage:migrate-backend copied the store (three attempts); run the command again. |
 | `EVIDENCE_PATH_UNSAFE` | configuration and status | 3 | The saved status evidence file beside the configuration (NAME.discoverability.json) is a symlink, so --save-status and --if-due runs refused to write it; remove the symlink. |
 | `EVIDENCE_TOO_LARGE` | configuration and status | 3 | Saving this status evidence would make the evidence file beside the configuration larger than 16 KiB, so the update was not saved. |
 | `EVIDENCE_UNAVAILABLE` | browser client | – | The browser keeps no pair of conflicting signed records for this Node, so there is nothing to save. |
@@ -116,7 +116,7 @@ for remedies.
 | `NODE_KEY_ROTATION_UNSUPPORTED` | CLI | 3 | Protocol v1 cannot rotate a Node key; create a new Node identity and have peers pin it explicitly. |
 | `NODE_NOT_INITIALIZED` | CLI, doctor, web routes | 3, 6 | Run node:init before this command. |
 | `NODE_UNAVAILABLE` | front controller | – | The front controller answered 503 because the request failed, for example with a missing or invalid configuration, an unreadable export directory, a store that cannot be read without a last published snapshot to serve in its place, or a relayed Node that could not be fetched; operators run doctor. |
-| `NOT_FOUND` | front controller, web routes | 3 | The route or record does not exist on this installation. |
+| `NOT_FOUND` | Node worker, front controller, web routes | 3, 4 | The route or record does not exist on this installation. |
 | `ONION_BINDING_MISMATCH` | browser client, protocol, signing | 3 | The signed Manifest belongs to a different Onion than the one it was fetched from or installed for. |
 | `ONION_UNREACHABLE` | Tor transport | 5 | Tor answered with a SOCKS error: it could not reach the Onion (still bootstrapping, Service offline or descriptor not published). |
 | `OUTPUT_DIRECTORY_UNAVAILABLE` | CLI | 3 | The --output-dir given to manifest:rotate or manifest:migrate is a URL, a symlink, missing or not writable; create a writable directory first. |
@@ -173,6 +173,7 @@ for remedies.
 | `SERVICE_INDEX_NOT_READY` | web routes | – | This Node has not yet published a snapshot with the current (version 2) service lookup index, so service lookups answer 503; the operator runs node:snapshot. |
 | `SIGNATURE_INVALID` | browser client, protocol | 3 | The signature does not verify; the record was changed after signing or signed by another key. |
 | `SIGNED_CHAIN_AHEAD_OF_STORE` | Node worker | 4 | This Node key already signed a newer snapshot checkpoint than the store holds (typically a restored older backup), so signing stops instead of publishing a conflicting generation that peers would quarantine; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain. |
+| `SIGNED_CHAIN_INCOMPLETE` | Node worker | 4 | node:snapshot --adopt-signed-chain found the checkpoint the signing ledger names, but not all of the newest 64 checkpoints of the chain below it (store or export directory), so peers anchored on one of them could not follow, and changed nothing; restore those checkpoint files into the export directory, or restore a newer backup of the store. |
 | `SIGNED_CHAIN_UNRECOVERABLE` | Node worker | 4 | node:snapshot --adopt-signed-chain cannot find the checkpoint or Node descriptor the signing ledger names in the export directory, or it is not exactly what this key signed; restore a newer backup of the store instead. |
 | `SIGNED_DESCRIPTOR_AHEAD_OF_STORE` | Node worker | 4 | This Node key already signed a newer Node descriptor revision than the store holds (typically a restored older backup), so signing stops; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain. |
 | `SIGNER_BINDING_MISMATCH` | Node worker | 3 | The last published snapshot was signed by another Node key than the one unlocked, so node:snapshot refused to publish; use the Node key that signed this store’s snapshots. |

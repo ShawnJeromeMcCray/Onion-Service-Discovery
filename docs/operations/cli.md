@@ -66,7 +66,14 @@ signer or outbound transport capability. Filesystem format 2 uses the journal CO
 Read-only opening refuses unresolved recovery rather than repairing it.
 
 `storage:check` is a separate explicit integrity/recovery command; it completes
-an interrupted write. `storage:verify BACKEND PATH` (also `db:verify` and
+an interrupted write. On a filesystem store it also deletes object files that no
+checkpoint file names any more (left by a crash during a `node:maintain` prune)
+and reports them as `integrity.orphaned_objects_removed`. `storage:backup`,
+`storage:export` and `storage:migrate-backend` start again (three attempts) when
+`node:maintain` prunes a record they were copying, then fail with
+`EVIDENCE_CHANGED_RETRY`; at the store's byte budget a pruning transaction still
+commits, and `storage_usage` in `doctor` and `node:status` includes
+`store_bytes` and `max_store_bytes` (WARN from 80 %). `storage:verify BACKEND PATH` (also `db:verify` and
 `restore:verify`) opens the store read-only and never repairs, migrates or
 changes the SQLite journal mode: a pending recovery is reported as
 `STORAGE_RECOVERY_REQUIRED` with exit 6.
@@ -366,10 +373,13 @@ never replaced.
 the checkpoint the ledger names from the export directory and, if the ledger's
 descriptor revision is ahead, the Node descriptor from the published-state copy,
 verifies that this key signed exactly those, points the store at them and
-publishes: the new checkpoint is the ledger's generation plus one. The output adds
-`adopted_signed_chain` (`ADOPTED` or `CURRENT` for `checkpoint` and
-`descriptor`). A record that is gone fails with `SIGNED_CHAIN_UNRECOVERABLE`;
-restore a newer backup then. It combines with `--rebuild-derived`. See
+publishes: the new checkpoint is the ledger's generation plus one. The own
+checkpoints between the store's generation and the ledger's are admitted from the
+export directory too, so peers anchored on any of them follow; one of the newest
+64 that is gone fails with `SIGNED_CHAIN_INCOMPLETE` and changes nothing. The
+output adds `adopted_signed_chain` (`ADOPTED` or `CURRENT` for `checkpoint` and
+`descriptor`). A signed record that is gone fails with
+`SIGNED_CHAIN_UNRECOVERABLE`; restore a newer backup then. It combines with `--rebuild-derived`. See
 [deployment and recovery](deployment-and-recovery.md#restoring-an-older-store-the-signing-ledger).
 
 `sync:peer-step` may return `PROGRESS` with phase `CHECKPOINT_CHAIN` after a long

@@ -393,12 +393,14 @@
   },
   "EVIDENCE_CHANGED_RETRY": {
    "cli_exit": [
-    "3"
+    "3",
+    "4"
    ],
    "components": [
-    "Node worker"
+    "Node worker",
+    "storage"
    ],
-   "meaning": "Other evidence was committed to the store while node:init, node:snapshot or node:work-one prepared its result, so that result was not saved (node:work-one backs off and retries the candidate); run node:init or node:snapshot again."
+   "meaning": "Other evidence was committed to the store while node:init, node:snapshot or node:work-one prepared its result, so that result was not saved (node:work-one backs off and retries the candidate), or node:maintain kept pruning records while storage:backup, storage:export or storage:migrate-backend copied the store (three attempts); run the command again."
   },
   "EVIDENCE_PATH_UNSAFE": {
    "cli_exit": [
@@ -943,9 +945,11 @@
   },
   "NOT_FOUND": {
    "cli_exit": [
-    "3"
+    "3",
+    "4"
    ],
    "components": [
+    "Node worker",
     "front controller",
     "web routes"
    ],
@@ -1466,6 +1470,15 @@
     "Node worker"
    ],
    "meaning": "This Node key already signed a newer snapshot checkpoint than the store holds (typically a restored older backup), so signing stops instead of publishing a conflicting generation that peers would quarantine; run node:snapshot CONFIG --passphrase-file FILE --adopt-signed-chain."
+  },
+  "SIGNED_CHAIN_INCOMPLETE": {
+   "cli_exit": [
+    "4"
+   ],
+   "components": [
+    "Node worker"
+   ],
+   "meaning": "node:snapshot --adopt-signed-chain found the checkpoint the signing ledger names, but not all of the newest 64 checkpoints of the chain below it (store or export directory), so peers anchored on one of them could not follow, and changed nothing; restore those checkpoint files into the export directory, or restore a newer backup of the store."
   },
   "SIGNED_CHAIN_UNRECOVERABLE": {
    "cli_exit": [

@@ -101,7 +101,7 @@ final class Diagnostics
                 $store = $config->store(readOnly: true); $state = $store->snapshot(); $store->integrityCheck(); $checks['storage_integrity'] = 'PASS';
                 if ($store instanceof \OnionServiceDiscovery\Storage\FilesystemStore && $store->formatVersion() === 1) { $warnings[] = 'FILESYSTEM_FORMAT_MIGRATION_REQUIRED'; }
                 // Record and state budgets: at the limit admission stops with STORAGE_BUDGET_EXHAUSTED.
-                $storageUsage = \OnionServiceDiscovery\Storage\StorageTransaction::usage($state, new \OnionServiceDiscovery\Storage\StorageLimits()) + ['record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED'];
+                $storageUsage = \OnionServiceDiscovery\Storage\StorageTransaction::usage($state, new \OnionServiceDiscovery\Storage\StorageLimits(), $store) + ['record_pruning' => $store->supportsPruning() ? 'ENABLED' : 'MIGRATION_REQUIRED'];
                 $checks['storage_budget'] = $storageUsage['state'];
                 if ($storageUsage['state'] === 'WARN') { $warnings[] = 'STORAGE_BUDGET_NEARLY_EXHAUSTED'; }
                 if (!$store->supportsPruning()) { $warnings[] = 'STORAGE_PRUNING_MIGRATION_REQUIRED'; }
