@@ -34,5 +34,27 @@
    "public_key": "ed25519:yAwAa41iMGKigQ_aS7edhqgt--1dgGUR89NVCvlS2YU",
    "fingerprint": "WGX6X-HX6MI-M4OSX-7VWAO-ZVWOG-7C526"
   }
+ ],
+ "rejected": [
+  {
+   "id": "identity",
+   "public_key": "ed25519:AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "error": "PUBLIC_KEY_INVALID"
+  },
+  {
+   "id": "order-four",
+   "public_key": "ed25519:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "error": "PUBLIC_KEY_INVALID"
+  },
+  {
+   "id": "order-two",
+   "public_key": "ed25519:7P_______________________________________38",
+   "error": "PUBLIC_KEY_INVALID"
+  },
+  {
+   "id": "noncanonical-y",
+   "public_key": "ed25519:7f_______________________________________38",
+   "error": "PUBLIC_KEY_INVALID"
+  }
  ]
 }

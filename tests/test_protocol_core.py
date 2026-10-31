@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'validator-python'))
 from canonical_json import canonical_json
 from record_format import message, payload
-from record_verifier import verify_wire
+from record_verifier import _ecma_pattern, verify_wire
 from strict_json import parse_strict_json
 
 
@@ -29,6 +29,12 @@ class ProtocolCoreTests(unittest.TestCase):
                     record = parse_strict_json(data, 65536)
                     self.assertEqual(fixture['expected_message_hex'], message(record).hex())
                     self.assertEqual(fixture['expected_payload_hex'], canonical_json(payload(record)).encode().hex())
+
+    def test_schema_pattern_end_anchor_rejects_final_line_feed(self):
+        self.assertIsNone(_ecma_pattern('^[a-z]+$').search('abc\n'))
+        self.assertIsNotNone(_ecma_pattern('^[a-z]+$').search('abc'))
+        self.assertIsNotNone(_ecma_pattern(r'^a\$[$]$').search('a$$'))
+        self.assertIsNone(_ecma_pattern('^(?:a|b$)$').search('b\n'))
 
     def test_canonical_bytes(self):
         fixtures = json.loads((ROOT / 'protocol/test-vectors/canonical-json.json').read_text())

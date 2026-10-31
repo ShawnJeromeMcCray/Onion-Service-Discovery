@@ -48,9 +48,15 @@ def keys() -> list[str]:
     return sorted(found)[:12]
 
 
+def rejected() -> list[dict[str, str]]:
+    # Encodings that are not strict Ed25519 public points have no fingerprint (PUBLIC_KEY_INVALID), as in record verification.
+    weak = [('identity', b'\x01' + bytes(31)), ('order-four', bytes(32)), ('order-two', b'\xec' + b'\xff' * 30 + b'\x7f'), ('noncanonical-y', b'\xed' + b'\xff' * 30 + b'\x7f')]
+    return [{'id': ident, 'public_key': 'ed25519:' + base64.urlsafe_b64encode(raw).decode().rstrip('='), 'error': 'PUBLIC_KEY_INVALID'} for ident, raw in weak]
+
+
 def render() -> str:
     cases = [{'public_key': key, 'fingerprint': fingerprint(key)} for key in keys()]
-    return json.dumps({'format_version': 1, 'definition': DEFINITION, 'cases': cases}, indent=1, ensure_ascii=False) + '\n'
+    return json.dumps({'format_version': 1, 'definition': DEFINITION, 'cases': cases, 'rejected': rejected()}, indent=1, ensure_ascii=False) + '\n'
 
 
 def main() -> int:

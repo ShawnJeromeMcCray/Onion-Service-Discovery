@@ -123,6 +123,10 @@ final class RecordVerifier
                 OnionAddress::parse($onion);
             }
         }
+        // protocol/limits.json clearnet_url_bytes: the schema maxLength counts code points, the limit is UTF-8 bytes.
+        foreach ($record->links->clearnet ?? [] as $url) {
+            if (strlen($url) > 2048) { throw new ProtocolException('SCHEMA_INVALID'); }
+        }
         foreach (['capabilities', 'supported_protocol_versions'] as $field) {
             if (isset($record->{$field})) {
                 $sets[] = $record->{$field};
@@ -131,8 +135,10 @@ final class RecordVerifier
         foreach ($sets as $set) {
             $sorted = $set;
             sort($sorted, is_int($set[0] ?? null) ? SORT_NUMERIC : SORT_STRING);
-            if ($set !== $sorted || count(array_unique($set, SORT_REGULAR)) !== count($set)) {
-                throw new ProtocolException('SCHEMA_INVALID');
+            if ($set !== $sorted) { throw new ProtocolException('SCHEMA_INVALID'); }
+            // Strict adjacent comparison: array_unique would treat numeric strings such as "1" and "1.0" as equal.
+            for ($index = 1, $count = count($set); $index < $count; ++$index) {
+                if ($set[$index - 1] === $set[$index]) { throw new ProtocolException('SCHEMA_INVALID'); }
             }
         }
         if ($record->record_type === 'snapshot_descriptor') {

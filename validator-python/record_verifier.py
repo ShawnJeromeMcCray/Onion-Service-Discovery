@@ -1,13 +1,16 @@
 from language_tag import validate_language_tag
 """Independent read-only record verifier using local schemas and mature Ed25519."""
 from datetime import datetime
+from functools import lru_cache
 import json
+import re
 from pathlib import Path
 
 from nacl.bindings import crypto_core_ed25519_is_valid_point
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, validators
+from jsonschema.exceptions import ValidationError
 
 from canonical_json import canonical_json
 from snapshot_format import root_hash
@@ -17,6 +20,36 @@ from record_format import FORMATS, record_type, message, content_hash, decode_by
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = {}
+
+
+@lru_cache(maxsize=None)
+def _ecma_pattern(pattern: str):
+    """Compile a schema pattern with ECMAScript/PCRE-D end anchoring: `$` outside a class becomes `\\Z`.
+
+    Python's `$` also matches before one final LF, which Ajv (u) and Opis (uD) reject."""
+    out, index, in_class = [], 0, False
+    while index < len(pattern):
+        char = pattern[index]
+        if char == '\\':
+            out.append(pattern[index:index + 2]); index += 2; continue
+        if in_class:
+            in_class = char != ']'
+        elif char == '[':
+            in_class = True
+            if pattern[index + 1:index + 2] == ']' or pattern[index + 1:index + 3] == '^]':  # empty classes differ from ECMAScript
+                raise ValueError('SCHEMA_PATTERN_UNSUPPORTED')
+        elif char == '$':
+            char = r'\Z'
+        out.append(char); index += 1
+    return re.compile(''.join(out))
+
+
+def _pattern(validator, pattern, instance, schema):
+    if validator.is_type(instance, 'string') and not _ecma_pattern(pattern).search(instance):
+        yield ValidationError(f'{instance!r} does not match {pattern!r}')
+
+
+StrictValidator = validators.extend(Draft202012Validator, {'pattern': _pattern})
 
 
 def verify_wire(wire: bytes, expected_onion=None):
@@ -35,7 +68,7 @@ def verify_record(record, expected_onion=None):
     if kind not in SCHEMAS:
         schema = json.loads((ROOT / 'protocol/schemas' / (kind + '.json')).read_text())
         Draft202012Validator.check_schema(schema)
-        SCHEMAS[kind] = Draft202012Validator(schema)
+        SCHEMAS[kind] = StrictValidator(schema)
     if not SCHEMAS[kind].is_valid(record):
         raise ValueError('SCHEMA_INVALID')
     for field in ('onion', 'node_onion', 'from_onion', 'to_onion'):
@@ -65,6 +98,9 @@ def verify_record(record, expected_onion=None):
         sets.append(related)
         for onion in related:
             validate_onion_address(onion)
+    # protocol/limits.json clearnet_url_bytes: the schema maxLength counts code points, the limit is UTF-8 bytes.
+    if any(len(url.encode('utf-8')) > 2048 for url in record.get('links', {}).get('clearnet', [])):
+        raise ValueError('SCHEMA_INVALID')
     for field in ('capabilities', 'supported_protocol_versions'):
         if field in record:
             sets.append(record[field])

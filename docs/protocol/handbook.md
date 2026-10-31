@@ -189,12 +189,37 @@ provenance. See [release gates](../release-gates.json).
 
 ## Interoperability and non-claims
 
-The black-box suite runs 248 cases per PHP/TypeScript/Python in CI (the latest
+The black-box suite runs 261 cases per PHP/TypeScript/Python in CI (the latest
 committed report recorded 226, before the PCP-004 history cases), with bounded
 malformed-input smoke fuzzing and finite formal safety evidence. These do not
 certify all CORE-V1/API/SYNC profiles or prove unbounded/liveness properties.
 Controlled Chromium is not Tor Browser desktop/Android. S1000 local benchmarks
 are not live multi-Node Tor capacity or mobile suitability.
+
+Accept/reject is normative; the error code is normative only for inputs with
+one violation. For strict JSON with several violations the implementations may
+report different codes: PHP and TypeScript scan in document order, while the
+Python validator checks in phases (nesting depth pre-scan, then duplicate keys
+while decoding, then size and content limits), so for example a duplicate key
+followed by excessive nesting gives `JSON_DEPTH_EXCEEDED` in Python and
+`JSON_DUPLICATE_KEY` in PHP and TypeScript. Shared vectors keep one primary
+violation per input.
+
+Schema patterns are evaluated with ECMAScript end anchoring in all three
+implementations: `$` never matches before a final line feed (the Python validator
+translates `$` to `\Z`). Signed `links.clearnet` URLs are limited to 2048 UTF-8
+bytes (`clearnet_url_bytes`) in addition to the schema's 2048 code points.
+
+Open owner decision (schema change, not made here): the `links.clearnet`
+pattern `^https://[^/@\s]+(?:/[^\s]*)?$` relies on `\s`, whose meaning differs by
+regex engine. ECMAScript (Ajv) treats U+FEFF as whitespace; Python treats
+U+001C–U+001F and U+0085 as whitespace; PCRE (Opis) treats U+0085 but not U+FEFF
+or U+001C–U+001F as whitespace. A URL containing one of these characters can be
+accepted by one implementation and rejected by another. Proposed v1 erratum: replace
+`\s` with an explicit class that excludes all C0/C1 controls, space, U+00A0,
+U+1680, U+2000–U+200A, U+2028, U+2029, U+202F, U+205F, U+3000 and U+FEFF, e.g.
+`[^/@\u0000-\u0020\u007f-\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]`
+for the host and the same class without `/@` for the path.
 
 Valid signatures do not establish content safety, honesty, legal/human identity,
 name ownership, global completeness, global deletion, immediate freshness or

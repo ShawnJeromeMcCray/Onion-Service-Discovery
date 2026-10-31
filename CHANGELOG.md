@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Cross-implementation record validation fixes: the Python validator now anchors
+  schema patterns like Ajv and Opis, so a single trailing line feed in a
+  pattern-constrained string (service name, description, clearnet URL, software
+  name, capability, snapshot cursor) is `SCHEMA_INVALID` everywhere; PHP no longer
+  treats numeric-looking capabilities such as `1` and `1.0` as duplicates; all three
+  verifiers enforce the 2048-byte UTF-8 limit on `links.clearnet` URLs
+  (`clearnet_url_bytes`), not only 2048 code points; TypeScript strict JSON reports a
+  NUL member name after the `:` check, as PHP and Python do; the TypeScript key
+  fingerprint rejects keys that are not strict Ed25519 points with
+  `PUBLIC_KEY_INVALID`, as PHP does. 13 new shared signed-record vectors (261 per
+  implementation) and rejected point encodings in `key-fingerprint-v1.json`. The
+  handbook notes that error codes for multiply-invalid JSON may differ and records
+  the engine-dependent `\s` in the clearnet URL pattern as an open owner decision.
 - Owner decisions of 2026-10-22: D-003 (current Tor Browser desktop and Android at
   Standard and Safer), D-026 (default source list stays empty until Nodes pass the
   drafted admission process in `docs/governance/source-node-admission.md`), D-028,
