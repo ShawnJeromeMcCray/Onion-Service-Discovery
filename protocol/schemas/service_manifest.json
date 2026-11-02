@@ -166,7 +166,7 @@
             "type": "string",
             "minLength": 8,
             "maxLength": 2048,
-            "pattern": "^https://[^/@\\s]+(?:/[^\\s]*)?$"
+            "pattern": "^https://[^/@\u0000- \u007f-\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+(?:/[^\u0000- \u007f-\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]*)?$"
           },
           "maxItems": 8,
           "uniqueItems": true

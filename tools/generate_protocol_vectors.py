@@ -88,6 +88,10 @@ for ident,capabilities in [('zero',['0','0.0']),('one',['1','1.','1.0']),('expon
 # links.clearnet is limited to 2048 UTF-8 bytes (protocol/limits.json clearnet_url_bytes), not 2048 code points.
 for ident,count,error in [('2048-bytes',1015,None),('over-2048-bytes',1100,'SCHEMA_INVALID')]:
  mut=copy.deepcopy(genesis);mut['links']['clearnet']=['https://a.example/'+'\u00e9'*count];add('clearnet-url-'+ident,signed(mut,service),error)
+# links.clearnet excludes an explicit character set that PCRE, ECMAScript and Python read alike (owner decision 2026-11-02).
+for ident,char,error in [('bom','\ufeff','SCHEMA_INVALID'),('information-separator','\u001c','SCHEMA_INVALID'),('next-line','\u0085','SCHEMA_INVALID'),('no-break-space','\u00a0','SCHEMA_INVALID'),('ideographic-space','\u3000','SCHEMA_INVALID'),('zero-width-space','\u200b',None)]:
+ for where,url in [('host','https://a'+char+'.example'),('path','https://a.example/x'+char+'y')]:
+  mut=copy.deepcopy(genesis);mut['links']['clearnet']=[url];add('clearnet-url-'+ident+'-in-'+where,signed(mut,service),error)
 (ROOT/'protocol/test-vectors/signed-records.json').write_text(json.dumps({'format_version':1,'status':'DRAFT_CRYPTO_CORE','warning':'ALL SEEDS ARE PUBLIC TEST ONLY. Not a protocol freeze approval.','test_seed_labels':['service-1','service-2','node-1'],'cases':cases,'stories':{'genesis':genesis,'successor':revision,'rotation':rotation,'rotated':rotated,'migration':migration,'migrated':migrated}},indent=2,ensure_ascii=False)+'\n')
 canonical_cases=[
  ('ordering','{"z":0,"a":1}','{"a":1,"z":0}'),

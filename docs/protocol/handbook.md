@@ -189,7 +189,7 @@ provenance. See [release gates](../release-gates.json).
 
 ## Interoperability and non-claims
 
-The black-box suite runs 261 cases per PHP/TypeScript/Python in CI (the latest
+The black-box suite runs 273 cases per PHP/TypeScript/Python in CI (the latest
 committed report recorded 226, before the PCP-004 history cases), with bounded
 malformed-input smoke fuzzing and finite formal safety evidence. These do not
 certify all CORE-V1/API/SYNC profiles or prove unbounded/liveness properties.
@@ -210,16 +210,15 @@ implementations: `$` never matches before a final line feed (the Python validato
 translates `$` to `\Z`). Signed `links.clearnet` URLs are limited to 2048 UTF-8
 bytes (`clearnet_url_bytes`) in addition to the schema's 2048 code points.
 
-Open owner decision (schema change, not made here): the `links.clearnet`
-pattern `^https://[^/@\s]+(?:/[^\s]*)?$` relies on `\s`, whose meaning differs by
-regex engine. ECMAScript (Ajv) treats U+FEFF as whitespace; Python treats
-U+001C–U+001F and U+0085 as whitespace; PCRE (Opis) treats U+0085 but not U+FEFF
-or U+001C–U+001F as whitespace. A URL containing one of these characters can be
-accepted by one implementation and rejected by another. Proposed v1 erratum: replace
-`\s` with an explicit class that excludes all C0/C1 controls, space, U+00A0,
-U+1680, U+2000–U+200A, U+2028, U+2029, U+202F, U+205F, U+3000 and U+FEFF, e.g.
-`[^/@\u0000-\u0020\u007f-\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]`
-for the host and the same class without `/@` for the path.
+v1 erratum (owner decision 2026-11-02): the `links.clearnet` pattern no longer uses
+`\s`, whose meaning differed by regex engine (ECMAScript treated U+FEFF as
+whitespace; Python U+001C–U+001F and U+0085; PCRE U+0085 but not U+FEFF or
+U+001C–U+001F), so one implementation could accept a URL another rejected. Host
+and path now exclude one explicit set: C0 controls and space, DEL, C1 controls
+and U+00A0, U+1680, U+2000–U+200A, U+2028, U+2029, U+202F, U+205F, U+3000 and
+U+FEFF; the host also excludes `/` and `@`. URLs containing these characters were
+never valid in all three implementations; shared vectors
+(`clearnet-url-*-in-host`, `clearnet-url-*-in-path`) now pin the result.
 
 Valid signatures do not establish content safety, honesty, legal/human identity,
 name ownership, global completeness, global deletion, immediate freshness or

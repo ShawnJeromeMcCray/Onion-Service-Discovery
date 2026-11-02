@@ -23,7 +23,10 @@ TIME=string(20,20,r'^[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z
 FLAGS=obj({name:{'type':'boolean'} for name in ['publish_service','mirror_directory','discover_services','sync_with_peers']})
 TEXT='^[^\u0000-\u001f\u007f-\u009f]*$'
 SERVICE=obj({'name':string(F['service_name_scalars'],0,TEXT),'description':string(F['description_scalars'],0,TEXT),'languages':array(string(F['language_tag_ascii'],2,r'^[a-z]{2,8}(?:-[a-z0-9]{1,8})*$'),F['languages']),'categories':array(string(F['category_ascii'],1,r'^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$'),F['categories'])},['name','languages','categories'])
-LINKS=obj({'related_onion_services':array(ONION,F['related_onions']),'clearnet':array(string(F['clearnet_url_bytes'],8,r'^https://[^/@\s]+(?:/[^\s]*)?$'),F['clearnet_links'])},[])
+# Explicit excluded set instead of \s, whose meaning differs between PCRE, ECMAScript and Python:
+# C0 controls and space, DEL, C1 controls and no-break space, and every Unicode White_Space or BOM character.
+URL_EXCLUDED='\u0000-\u0020\u007f-\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff'
+LINKS=obj({'related_onion_services':array(ONION,F['related_onions']),'clearnet':array(string(F['clearnet_url_bytes'],8,'^https://[^/@'+URL_EXCLUDED+']+(?:/[^'+URL_EXCLUDED+']*)?$'),F['clearnet_links'])},[])
 SERVICE['properties']['categories']=array({'type':'string','enum':CATEGORY_IDS},F['categories'])
 SERVICE['properties']['languages']=array(string(F['language_tag_ascii'],2,'^(?:'+json.loads((ROOT/'protocol/registries/language-tags-v1.json').read_text())['pattern']+')$'),F['languages'])
 NULL_HASH={'anyOf':[HASH,{'type':'null'}]}
