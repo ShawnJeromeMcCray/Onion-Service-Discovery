@@ -37,7 +37,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-029 | Server Packaging | OWNER-APPROVED (2026-10-14) | Project owner / reviewer | YES | Development runtime package (vendor/ and built client) per merge to main, with CI provenance, marked unsigned development preview; signed stable releases still need D-030/D-031. |
 | D-030 | Release Signing Mechanism | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | YES | Keyless Sigstore signing through GitHub Actions OIDC: GitHub build-provenance and SBOM attestations in the public transparency log, verified with `gh attestation verify ARTIFACT --repo ShawnJeromeMcCray/Onion-Service-Discovery`. No long-lived release key; trust rests on the repository's GitHub identity and workflow. |
 | D-031 | Provenance Infrastructure | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | GitHub artifact attestations (build provenance and CycloneDX SBOM) from the digest-pinned workflow; no SLSA level is claimed beyond what the attestation states. |
-| D-032 | CycloneDX Version/Tool | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
+| D-032 | CycloneDX Version/Tool | OWNER-APPROVED (2026-11-02) | Project owner / reviewer | CONDITIONAL / REVIEW | As implemented: CycloneDX 1.6 from the deterministic project generator (`tools/build_release_candidate.py`), validated with the CycloneDX JSON schema in CI and attested with GitHub/Sigstore (D-031). |
 | D-033 | OWASP ASVS Applicability Level/Matrix | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-034 | Logging Defaults | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | YES | No logs by default: job output and web errors are discarded (systemd output to null, FPM `log_errors` off, no access logs for OSD routes). Failures surface through `doctor`, `status`, the status page and saved publisher evidence. Operators who enable logging do so locally and keep queries, onion addresses, IP addresses and keys out of it. |
 | D-035 | Direct Observation Publication | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
@@ -49,7 +49,7 @@ D-001: CC0-1.0 selected under the owner’s explicit instruction to allow unrest
 | D-041 | Rate Limit and Work Budget Defaults | OWNER-APPROVED AS DEVELOPMENT DEFAULT (2026-10-22) / BENCHMARKS OPEN | Project owner / reviewer | YES (final values) | The current values ([candidate budgets](../operations/candidate-budgets.md), request budget burst 20 at 2 per second, relay and visitor-relay budgets) apply until load tests with real Tor hosts confirm or change them. |
 | D-042 | Tor Stream Isolation Strategy | OWNER-APPROVED (2026-10-22) / TOR-REVIEW-OPEN | Project owner / reviewer | YES (independent Tor review) | As implemented: Tor SOCKS extended format 0 with a fresh random isolation value per request, so no two requests share a circuit ([ADR 005](../adr/005-tor-socks-format-zero.md)). |
 | D-043 | HTTP Compression | OWNER-APPROVED (2026-10-22) | Project owner / reviewer | YES | As implemented: verification paths request and accept only `identity`; any other `Content-Encoding` is refused (`CONTENT_ENCODING_REJECTED`) in the PHP transport and the browser client. |
-| D-044 | API CORS Model | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
+| D-044 | API CORS Model | OWNER-APPROVED (2026-11-02) | Project owner / reviewer | CONDITIONAL / REVIEW | As implemented: the reference deployment is same-origin through the Client Host relay and needs no CORS; a Node sends CORS only for origins its operator lists in `allowed_client_origins` (default empty), only on read-only GET/HEAD data routes and without credentials. |
 | D-045 | Public Health/Metrics | OWNER-APPROVED (2026-10-15) | Project owner / reviewer | CONDITIONAL / REVIEW | Minimal public health, detailed diagnostics local only. A Node whose store cannot be read keeps serving its last published signed snapshot (node, state, checkpoint and chunks from `.published-state.json` and the export blobs, re-verified on every read); the status page shows DEGRADED; store-backed routes and announcements answer 503 `NODE_DEGRADED_READ_ONLY`; server search pauses. |
 | D-046 | Container Support | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
 | D-047 | Project Branding/Logo | UNRESOLVED | Project owner / reviewer | CONDITIONAL / REVIEW | See source decision |
@@ -175,3 +175,14 @@ option the owner chose:
 - **D-026:** "Aufnahmeprozess festlegen": the default source list stays empty until
   Nodes pass the admission process. The process text itself (D-027) is a draft
   awaiting the owner's confirmation.
+
+## Owner decisions on 2026-11-02
+
+Recorded from the owner's answers to explicit questions in the continuation
+conversation; the quoted text is the option the owner chose:
+
+- **`links.clearnet` pattern (v1 erratum):** "Schema angleichen": an explicit
+  excluded character set replaces `\s`, so PHP, TypeScript and Python accept the
+  same URLs (see the [protocol handbook](../protocol/handbook.md)).
+- **D-032:** "Wie umgesetzt freigeben".
+- **D-044:** "Wie umgesetzt freigeben".

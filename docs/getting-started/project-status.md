@@ -24,7 +24,7 @@ and a normal operator completing external onboarding. Some evidence has advanced
 
 | Assessment item | Current implementation/evidence | Still open |
 | --- | --- | --- |
-| Core black-box cases | [Expanded report](../conformance/production-completion-core-report.json): 226 exact-output cases per language, including membership cases; CI now runs 248 per language, including the PCP-004 history cases | Full revised-spec conformance and independent review |
+| Core black-box cases | [Expanded report](../conformance/production-completion-core-report.json): 226 exact-output cases per language, including membership cases; CI now runs 273 per language, including the PCP-004 history cases | Full revised-spec conformance and independent review |
 | Tor tests only local/offline | [Real private-Tor application](../conformance/private-tor-onion-report.json) and [actual Tor Browser on a private Onion](../conformance/tor-browser-private-onion-report.json) | Public Tor, Android, desktop Standard/Safer/Safest, slow-network matrix |
 | Restricted JavaScript unsupported | [JavaScript-disabled actual-browser check](../conformance/tor-browser-nojs-report.json), private-Onion NoJS form tests, [optional server-search contract](../operations/server-search.md) | Full security-level/platform certification and accessibility review |
 | Snapshot membership | Exact-current-state verification in PHP/TypeScript/Python; wrong key, stale state, omissions, forks and corrupt chunks reject | Frozen active-index checkpoint type and automated fresh multi-Node workflow |

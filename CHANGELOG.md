@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- v1 erratum (owner decision 2026-11-02): the `links.clearnet` schema pattern
+  excludes an explicit character set instead of `\s`, which PCRE, ECMAScript and
+  Python read differently; 12 shared vectors pin the result (273 cases per
+  implementation). D-032 (CycloneDX 1.6, project generator) and D-044 (CORS closed
+  by default, explicit origins only) are recorded as approved.
 - Licences and SBOMs: the full MIT texts of the npm code bundled into the browser
   client (`@noble/curves`, `@noble/hashes`, the inlined `ajv` runtime helper) ship
   in `third-party/` with the repository, the runtime package and the static client
